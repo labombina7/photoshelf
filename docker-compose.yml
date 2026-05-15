@@ -1,0 +1,21 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      APP_PASSWORD: ${APP_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+      PHOTOS_PATH: /photos
+      CACHE_PATH: /data/.cache
+      DB_PATH: /data/photoshelf.db
+      # Ollama corre en el Mac, no en el NAS.
+      # Pon la IP local de tu Mac (compruébala con: ip addr / ifconfig)
+      OLLAMA_URL: ${OLLAMA_URL:-http://192.168.1.100:11434}
+    volumes:
+      - /volume1/photos:/photos:ro   # ← ajusta a tu ruta real en el NAS
+      - photoshelf_data:/data
+
+volumes:
+  photoshelf_data:
