@@ -1,6 +1,6 @@
 services:
   app:
-    build: .
+    image: photoshelf-app:latest
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -10,11 +10,9 @@ services:
       PHOTOS_PATH: /photos
       CACHE_PATH: /data/.cache
       DB_PATH: /data/photoshelf.db
-      # Ollama corre en el Mac, no en el NAS.
-      # Pon la IP local de tu Mac (compruébala con: ip addr / ifconfig)
-      OLLAMA_URL: ${OLLAMA_URL:-http://192.168.1.100:11434}
+      OLLAMA_URL: ${OLLAMA_URL:-http://192.168.1.135:11434}
     volumes:
-      - /volume1/photos:/photos:ro   # ← ajusta a tu ruta real en el NAS
+      - /volume1/homes/javi/Photos:/photos:ro
       - photoshelf_data:/data
 
 volumes:
