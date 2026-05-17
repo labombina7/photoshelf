@@ -101,9 +101,17 @@ export default async function PhotoDetailPage({
           <div className="detail-photo-area">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/photos/${photo.id}/original`}
+              src={`/api/photos/${photo.id}/thumbnail?size=1920`}
               alt={photo.filename}
             />
+            <a
+              href={`/api/photos/${photo.id}/original`}
+              download={photo.filename}
+              className="download-original-btn"
+              title="Descargar original"
+            >
+              ↓ Original
+            </a>
           </div>
 
           <DetailPanel photo={photo} allThemes={allThemes} />

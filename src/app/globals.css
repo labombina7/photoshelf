@@ -366,8 +366,15 @@ body {
 .detail-body { flex: 1; display: flex; overflow: hidden; }
 .detail-photo-area {
   flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 32px; background: #1a1917;
+  padding: 32px; background: #1a1917; position: relative;
 }
+.download-original-btn {
+  position: absolute; bottom: 16px; right: 16px;
+  background: rgba(0,0,0,0.5); color: #fff; border-radius: var(--radius-sm);
+  padding: 5px 12px; font-size: 12px; text-decoration: none;
+  backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.2s;
+}
+.detail-photo-area:hover .download-original-btn { opacity: 1; }
 .detail-photo-area img {
   max-width: 100%; max-height: calc(100vh - 130px);
   object-fit: contain; border-radius: 4px;
