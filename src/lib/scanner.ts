@@ -21,7 +21,6 @@ interface ScannedPhoto {
 
 export async function scanLibrary(photosRoot: string): Promise<{ added: number; total: number }> {
   const db = getDb();
-  const photos = await walkPhotos(photosRoot);
 
   const upsert = db.prepare(`
     INSERT INTO photos
@@ -42,28 +41,32 @@ export async function scanLibrary(photosRoot: string): Promise<{ added: number; 
       gps_lon    = COALESCE(photos.gps_lon, excluded.gps_lon)
   `);
 
-  const countBefore: number = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
-
-  const insert = db.transaction((items: ScannedPhoto[]) => {
+  const insertBatch = db.transaction((items: ScannedPhoto[]) => {
     for (const p of items) upsert.run(p);
   });
-  insert(photos);
+
+  const countBefore: number = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
+
+  await walkPhotosPerYear(photosRoot, insertBatch);
 
   const total: number = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
   return { added: total - countBefore, total };
 }
 
-async function walkPhotos(photosRoot: string): Promise<ScannedPhoto[]> {
-  const results: ScannedPhoto[] = [];
-
-  let years: string[];
+async function walkPhotosPerYear(
+  photosRoot: string,
+  commit: (items: ScannedPhoto[]) => void
+): Promise<void> {
+  let yearDirs: string[];
   try {
-    years = await fs.readdir(photosRoot);
+    yearDirs = await fs.readdir(photosRoot);
   } catch {
-    return results;
+    return;
   }
 
-  for (const yearDir of years) {
+  yearDirs.sort();
+
+  for (const yearDir of yearDirs) {
     const year = parseInt(yearDir, 10);
     if (isNaN(year)) continue;
 
@@ -71,7 +74,9 @@ async function walkPhotos(photosRoot: string): Promise<ScannedPhoto[]> {
     const yearStat = await fs.stat(yearPath).catch(() => null);
     if (!yearStat?.isDirectory()) continue;
 
+    const yearPhotos: ScannedPhoto[] = [];
     const events = await fs.readdir(yearPath).catch(() => [] as string[]);
+
     for (const eventDir of events) {
       const eventPath = path.join(yearPath, eventDir);
       const eventStat = await fs.stat(eventPath).catch(() => null);
@@ -89,7 +94,7 @@ async function walkPhotos(photosRoot: string): Promise<ScannedPhoto[]> {
         const relativePath = path.join(yearDir, eventDir, file);
         const exifData = await extractExif(absPath);
 
-        results.push({
+        yearPhotos.push({
           path: relativePath,
           filename: file,
           year,
@@ -99,9 +104,9 @@ async function walkPhotos(photosRoot: string): Promise<ScannedPhoto[]> {
         });
       }
     }
-  }
 
-  return results;
+    if (yearPhotos.length > 0) commit(yearPhotos);
+  }
 }
 
 async function extractExif(filePath: string): Promise<{
