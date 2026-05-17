@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build && echo "Build OK" && ls .next/standalone
+RUN npm run build && echo "=== .next contents ===" && ls -la .next/
 
 FROM node:20-alpine AS runner
 WORKDIR /app
