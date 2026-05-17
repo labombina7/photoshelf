@@ -1,6 +1,6 @@
 services:
   app:
-    image: photoshelf-app:latest
+    image: ghcr.io/labombina7/photoshelf:latest
     restart: unless-stopped
     ports:
       - "3000:3000"
