@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     const placeholders = tags.map(() => '?').join(',');
     let sql = `
-      SELECT DISTINCT p.id, p.path, p.filename, p.year, p.event, p.taken_at, p.is_favorite
+      SELECT p.id, p.path, p.filename, p.year, p.event, p.taken_at, p.is_favorite
       FROM photos p
       JOIN photo_tags pt ON pt.photo_id = p.id
       JOIN tags t ON t.id = pt.tag_id
@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
     `;
     const params: (string | number)[] = [...tags];
     if (year) { sql += ' AND p.year = ?'; params.push(year); }
-    sql += ' GROUP BY p.id ORDER BY p.year DESC, p.event ASC, p.filename ASC LIMIT 200';
+    sql += ` GROUP BY p.id HAVING COUNT(DISTINCT t.name) = ${tags.length}`;
+    sql += ' ORDER BY p.year DESC, p.event ASC, p.filename ASC LIMIT 200';
 
     const photos = db.prepare(sql).all(...params);
     return NextResponse.json({ photos, concept, year, mode: 'quick', total: (photos as unknown[]).length });
