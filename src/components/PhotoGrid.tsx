@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { IconChevronDown, IconChevronUp } from '@/components/Icons';
 import type { Photo, Tag } from '@/lib/types';
 
 interface PhotoWithTags extends Photo {
@@ -16,9 +17,11 @@ interface EventGroup {
 
 interface PhotoGridProps {
   groups: EventGroup[];
+  collapsed: Set<string>;
+  onToggle: (key: string) => void;
 }
 
-export default function PhotoGrid({ groups }: PhotoGridProps) {
+export default function PhotoGrid({ groups, collapsed, onToggle }: PhotoGridProps) {
   const searchParams = useSearchParams();
   const currentParams = searchParams.toString();
 
@@ -37,45 +40,54 @@ export default function PhotoGrid({ groups }: PhotoGridProps) {
 
   return (
     <>
-      {groups.map((group) => (
-        <div key={`${group.year}-${group.event}`} className="event-block">
-          <div className="event-label">
-            <span className="event-name">{group.event}</span>
-            <span className="event-count">· {group.photos.length} fotos</span>
+      {groups.map((group) => {
+        const key = `${group.year}-${group.event}`;
+        const isCollapsed = collapsed.has(key);
+        return (
+          <div key={key} className="event-block">
+            <div className="event-label" onClick={() => onToggle(key)} style={{ cursor: 'pointer', userSelect: 'none' }}>
+              <span className="event-name">{group.event}</span>
+              <span className="event-count">· {group.photos.length} fotos</span>
+              <span style={{ marginLeft: 'auto', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center' }}>
+                {isCollapsed ? <IconChevronDown /> : <IconChevronUp />}
+              </span>
+            </div>
+            {!isCollapsed && (
+              <div className="photo-grid">
+                {group.photos.map((photo) => {
+                  const previewTags = photo.tags.slice(0, 2);
+                  return (
+                    <Link
+                      key={photo.id}
+                      href={`/library/${photo.id}${currentParams ? `?${currentParams}` : ''}`}
+                      className="photo-item"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/api/photos/${photo.id}/thumbnail`}
+                        alt={photo.filename}
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                      {previewTags.length > 0 && (
+                        <div className="photo-overlay">
+                          {previewTags.map((tag) => (
+                            <span key={tag.name} className={`photo-tag-chip ${tag.source === 'ai' ? 'auto' : ''}`}>
+                              {tag.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
-          <div className="photo-grid">
-            {group.photos.map((photo) => {
-              const previewTags = photo.tags.slice(0, 2);
-              return (
-                <Link
-                  key={photo.id}
-                  href={`/library/${photo.id}${currentParams ? `?${currentParams}` : ''}`}
-                  className="photo-item"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/api/photos/${photo.id}/thumbnail`}
-                    alt={photo.filename}
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                  {previewTags.length > 0 && (
-                    <div className="photo-overlay">
-                      {previewTags.map((tag) => (
-                        <span key={tag.name} className={`photo-tag-chip ${tag.source === 'ai' ? 'auto' : ''}`}>
-                          {tag.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </>
   );
 }

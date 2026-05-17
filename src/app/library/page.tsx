@@ -39,6 +39,9 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
     params.push(like, like, like);
   }
 
+  const countSql = sql.replace('SELECT DISTINCT p.*', 'SELECT COUNT(DISTINCT p.id) as c');
+  const filteredTotal = (db.prepare(countSql).get(...params) as { c: number }).c;
+
   sql += ' ORDER BY p.year DESC, p.event ASC, p.taken_at DESC, p.filename ASC LIMIT 500';
 
   const photos = db.prepare(sql).all(...params) as Record<string, unknown>[];
@@ -66,6 +69,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
     <LibraryClient
       photos={withTags as Parameters<typeof LibraryClient>[0]['photos']}
       total={total}
+      filteredTotal={filteredTotal}
       years={years}
       themes={themes}
       favoriteCount={favoriteCount}

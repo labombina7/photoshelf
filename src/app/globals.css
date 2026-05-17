@@ -203,7 +203,10 @@ body {
 .content { flex: 1; padding: 28px; overflow-y: auto; }
 
 /* ── Year tabs ── */
-.year-tabs { display: flex; gap: 6px; margin-bottom: 24px; flex-wrap: wrap; }
+.collapse-controls { display: flex; gap: 8px; margin-bottom: 16px; margin-top: -8px; }
+.collapse-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px 10px; font-size: 12px; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+.collapse-btn:hover { border-color: var(--text); color: var(--text); }
+.year-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
 .year-tab {
   padding: 6px 14px; border-radius: 20px;
   font-size: 13px; font-weight: 500;

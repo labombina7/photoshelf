@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useCallback } from 'react';
+import { useState, useTransition, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
@@ -30,6 +30,7 @@ interface PhotoWithTags {
 interface LibraryClientProps {
   photos: PhotoWithTags[];
   total: number;
+  filteredTotal: number;
   years: number[];
   themes: Theme[];
   favoriteCount: number;
@@ -40,6 +41,7 @@ interface LibraryClientProps {
 export default function LibraryClient({
   photos,
   total,
+  filteredTotal,
   years,
   themes,
   favoriteCount,
@@ -52,6 +54,7 @@ export default function LibraryClient({
   const [toast, setToast] = useState('');
   const [_isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -89,15 +92,33 @@ export default function LibraryClient({
   }, [query, router, searchParams]);
 
   // Group photos by event
-  const groups: { year: number; event: string; photos: PhotoWithTags[] }[] = [];
-  for (const photo of photos) {
-    const last = groups[groups.length - 1];
-    if (last && last.year === photo.year && last.event === photo.event) {
-      last.photos.push(photo);
-    } else {
-      groups.push({ year: photo.year, event: photo.event, photos: [photo] });
+  const groups = useMemo(() => {
+    const result: { year: number; event: string; photos: PhotoWithTags[] }[] = [];
+    for (const photo of photos) {
+      const last = result[result.length - 1];
+      if (last && last.year === photo.year && last.event === photo.event) {
+        last.photos.push(photo);
+      } else {
+        result.push({ year: photo.year, event: photo.event, photos: [photo] });
+      }
     }
+    return result;
+  }, [photos]);
+
+  const allKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
+  const allCollapsed = collapsed.size === allKeys.length;
+
+  function toggleGroup(key: string) {
+    setCollapsed(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
   }
+
+  function collapseAll() { setCollapsed(new Set(allKeys)); }
+  function expandAll() { setCollapsed(new Set()); }
 
   const titleParts: string[] = [];
   const themeId = searchParams.get('theme');
@@ -124,7 +145,7 @@ export default function LibraryClient({
           <div>
             <div className="topbar-title">{titleParts[0]}</div>
           </div>
-          <span className="topbar-sub">{photos.length.toLocaleString('es')} fotos</span>
+          <span className="topbar-sub">{filteredTotal.toLocaleString('es')} fotos</span>
           <div className="topbar-spacer" />
           <form onSubmit={handleSearch}>
             <div className="search-box">
@@ -139,7 +160,6 @@ export default function LibraryClient({
         </div>
 
         <div className="content">
-          {/* Year tabs */}
           {years.length > 1 && (
             <div className="year-tabs">
               <button
@@ -160,7 +180,15 @@ export default function LibraryClient({
             </div>
           )}
 
-          <PhotoGrid groups={groups} />
+          {groups.length > 1 && (
+            <div className="collapse-controls">
+              <button className="collapse-btn" onClick={allCollapsed ? expandAll : collapseAll}>
+                {allCollapsed ? 'Expandir todo' : 'Colapsar todo'}
+              </button>
+            </div>
+          )}
+
+          <PhotoGrid groups={groups} collapsed={collapsed} onToggle={toggleGroup} />
         </div>
       </div>
 
