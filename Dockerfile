@@ -1,19 +1,23 @@
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
 
-RUN apk add --no-cache python3 make g++ vips-dev
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ libvips-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build && echo "=== .next contents ===" && ls -la .next/
+RUN npm run build && ls .next/standalone
 
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-RUN apk add --no-cache vips
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libvips \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
