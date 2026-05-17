@@ -4,13 +4,24 @@ import { useState, useTransition, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
-import { IconSearch, IconSparkle } from '@/components/Icons';
+import FolderGrid from '@/components/FolderGrid';
+import { IconSearch, IconSparkle, IconViewList, IconViewGrid } from '@/components/Icons';
 import type { Theme } from '@/lib/types';
 
 interface EventGroup {
   year: number;
   event: string;
   count: number;
+  thumbnail_id: number;
+}
+
+interface ActiveFilters {
+  year?: string;
+  event?: string;
+  theme?: string;
+  favorite?: string;
+  untagged?: string;
+  q?: string;
 }
 
 interface LibraryClientProps {
@@ -22,7 +33,7 @@ interface LibraryClientProps {
   favoriteCount: number;
   untaggedCount: number;
   activeYear: string | null;
-  activeFilters: { year?: string; theme?: string; favorite?: string; untagged?: string; q?: string };
+  activeFilters: ActiveFilters;
 }
 
 export default function LibraryClient({
@@ -45,6 +56,10 @@ export default function LibraryClient({
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [classifyingYear, setClassifyingYear] = useState(false);
   const [yearProgress, setYearProgress] = useState<{ done: number; total: number } | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'folders'>('list');
+
+  // If navigated to a specific event, always use list mode
+  const effectiveViewMode = activeFilters.event ? 'list' : viewMode;
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -78,6 +93,7 @@ export default function LibraryClient({
     const params = new URLSearchParams(searchParams.toString());
     if (query.trim()) params.set('q', query.trim());
     else params.delete('q');
+    params.delete('event');
     router.push(`/library?${params.toString()}`);
   }, [query, router, searchParams]);
 
@@ -124,9 +140,11 @@ export default function LibraryClient({
   let title = 'Todas las fotos';
   if (fav) title = 'Favoritos';
   else if (activeThemeName) title = activeThemeName;
+  else if (activeFilters.event) title = activeFilters.event;
   else if (activeYear) title = activeYear;
 
-  const showClassifyYear = !!activeYear && !fav && !themeId;
+  const showClassifyYear = !!activeYear && !activeFilters.event && !fav && !themeId;
+  const canToggleView = !activeFilters.event && !fav;
 
   return (
     <div className="app-shell">
@@ -141,9 +159,42 @@ export default function LibraryClient({
 
       <div className="main">
         <div className="topbar">
-          <div className="topbar-title">{title}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {activeFilters.event && (
+              <button
+                className="back-btn"
+                onClick={() => {
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.delete('event');
+                  router.push(`/library?${params.toString()}`);
+                }}
+                title="Volver a carpetas"
+              >
+                ←
+              </button>
+            )}
+            <div className="topbar-title">{title}</div>
+          </div>
           <span className="topbar-sub">{filteredTotal.toLocaleString('es')} fotos</span>
           <div className="topbar-spacer" />
+          {canToggleView && (
+            <div className="view-toggle">
+              <button
+                className={`view-toggle-btn ${effectiveViewMode === 'list' ? 'active' : ''}`}
+                onClick={() => setViewMode('list')}
+                title="Vista lista"
+              >
+                <IconViewList />
+              </button>
+              <button
+                className={`view-toggle-btn ${effectiveViewMode === 'folders' ? 'active' : ''}`}
+                onClick={() => setViewMode('folders')}
+                title="Vista carpetas"
+              >
+                <IconViewGrid />
+              </button>
+            </div>
+          )}
           <form onSubmit={handleSearch}>
             <div className="search-box">
               <IconSearch />
@@ -174,36 +225,40 @@ export default function LibraryClient({
             </div>
           )}
 
-          {(groups.length > 1 || showClassifyYear) && (
-            <div className="collapse-controls">
-              {groups.length > 1 && (
-                <button className="collapse-btn" onClick={allCollapsed ? expandAll : collapseAll}>
-                  {allCollapsed ? 'Expandir todo' : 'Colapsar todo'}
-                </button>
+          {effectiveViewMode === 'folders' ? (
+            <FolderGrid groups={groups} showYear={!activeYear} />
+          ) : (
+            <>
+              {(groups.length > 1 || showClassifyYear) && (
+                <div className="collapse-controls">
+                  {groups.length > 1 && (
+                    <button className="collapse-btn" onClick={allCollapsed ? expandAll : collapseAll}>
+                      {allCollapsed ? 'Expandir todo' : 'Colapsar todo'}
+                    </button>
+                  )}
+                  {showClassifyYear && (
+                    <button
+                      className="collapse-btn classify-year-btn"
+                      onClick={handleClassifyYear}
+                      disabled={classifyingYear}
+                    >
+                      <IconSparkle size={11} />
+                      {classifyingYear
+                        ? `Clasificando… (${yearProgress?.done}/${yearProgress?.total} carpetas)`
+                        : `Clasificar año ${activeYear}`}
+                    </button>
+                  )}
+                </div>
               )}
-              {showClassifyYear && (
-                <button
-                  className="collapse-btn classify-year-btn"
-                  onClick={handleClassifyYear}
-                  disabled={classifyingYear}
-                  title="Clasificar todas las carpetas de este año con IA"
-                >
-                  <IconSparkle size={11} />
-                  {classifyingYear
-                    ? `Clasificando… (${yearProgress?.done}/${yearProgress?.total} carpetas)`
-                    : `Clasificar año ${activeYear}`}
-                </button>
-              )}
-            </div>
+              <PhotoGrid
+                groups={groups}
+                collapsed={collapsed}
+                onToggle={toggleGroup}
+                activeFilters={activeFilters}
+                showYear={!activeYear && !activeFilters.event}
+              />
+            </>
           )}
-
-          <PhotoGrid
-            groups={groups}
-            collapsed={collapsed}
-            onToggle={toggleGroup}
-            activeFilters={activeFilters}
-            showYear={!activeYear}
-          />
         </div>
       </div>
 

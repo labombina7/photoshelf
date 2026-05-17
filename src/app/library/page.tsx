@@ -5,6 +5,7 @@ import LibraryClient from './LibraryClient';
 
 interface SearchParams {
   year?: string;
+  event?: string;
   theme?: string;
   favorite?: string;
   untagged?: string;
@@ -18,9 +19,8 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const sp = await searchParams;
   const db = getDb();
 
-  // Load groups (year/event/count) — no photo data, no limit
   let groupSql = `
-    SELECT p.year, p.event, COUNT(DISTINCT p.id) as count
+    SELECT p.year, p.event, COUNT(DISTINCT p.id) as count, MIN(p.id) as thumbnail_id
     FROM photos p
     ${sp.theme ? 'JOIN photo_themes pth ON pth.photo_id = p.id AND pth.theme_id = ?' : ''}
     ${sp.untagged ? 'LEFT JOIN photo_tags ptg ON ptg.photo_id = p.id' : ''}
@@ -31,6 +31,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
 
   if (sp.theme) params.push(parseInt(sp.theme, 10));
   if (sp.year) { groupSql += ' AND p.year = ?'; params.push(parseInt(sp.year, 10)); }
+  if (sp.event) { groupSql += ' AND p.event = ?'; params.push(sp.event); }
   if (sp.favorite) { groupSql += ' AND p.is_favorite = 1'; }
   if (sp.untagged) { groupSql += ' AND ptg.photo_id IS NULL'; }
   if (sp.q) {
@@ -41,10 +42,9 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
 
   groupSql += ' GROUP BY p.year, p.event ORDER BY p.year DESC, p.event ASC';
 
-  const groups = db.prepare(groupSql).all(...params) as { year: number; event: string; count: number }[];
+  const groups = db.prepare(groupSql).all(...params) as { year: number; event: string; count: number; thumbnail_id: number }[];
   const filteredTotal = groups.reduce((sum, g) => sum + g.count, 0);
 
-  // Meta
   const total = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
   const years = (db.prepare('SELECT DISTINCT year FROM photos ORDER BY year DESC').all() as { year: number }[]).map(r => r.year);
   const favoriteCount = (db.prepare('SELECT COUNT(*) as c FROM photos WHERE is_favorite = 1').get() as { c: number }).c;
@@ -67,7 +67,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       favoriteCount={favoriteCount}
       untaggedCount={untaggedCount}
       activeYear={sp.year ?? null}
-      activeFilters={{ year: sp.year, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q }}
+      activeFilters={{ year: sp.year, event: sp.event, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q }}
     />
   );
 }
