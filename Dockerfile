@@ -4,7 +4,7 @@ WORKDIR /app
 RUN apk add --no-cache python3 make g++ vips-dev
 
 COPY package*.json ./
-RUN npm install -g node-addon-api && npm ci
+RUN npm ci
 
 COPY . .
 RUN npm run build && echo "=== .next contents ===" && ls -la .next/
