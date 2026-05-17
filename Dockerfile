@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+RUN npm run build && echo "Build OK" && ls .next/standalone
 
 FROM node:20-alpine AS runner
 WORKDIR /app
