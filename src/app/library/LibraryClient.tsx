@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
 import { IconSearch, IconSparkle, IconViewList, IconViewGrid } from '@/components/Icons';
+import AISearchPanel from '@/components/AISearchPanel';
 import type { Theme } from '@/lib/types';
 
 interface EventGroup {
@@ -177,6 +178,7 @@ export default function LibraryClient({
           </div>
           <span className="topbar-sub">{filteredTotal.toLocaleString('es')} fotos</span>
           <div className="topbar-spacer" />
+          <AISearchPanel />
           {canToggleView && (
             <div className="view-toggle">
               <button
