@@ -105,6 +105,7 @@ async function walkPhotosPerYear(
       }
     }
 
+    console.log(`[scan] ${yearDir}: ${yearPhotos.length} photos`);
     if (yearPhotos.length > 0) commit(yearPhotos);
   }
 }
