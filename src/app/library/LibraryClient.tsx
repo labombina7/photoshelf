@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
-import { IconSearch, IconSparkle, IconViewList, IconViewGrid } from '@/components/Icons';
+import { IconSearch, IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
 import AISearchPanel from '@/components/AISearchPanel';
 import type { Theme } from '@/lib/types';
 
@@ -58,6 +58,7 @@ export default function LibraryClient({
   const [classifyingYear, setClassifyingYear] = useState(false);
   const [yearProgress, setYearProgress] = useState<{ done: number; total: number } | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'folders'>('list');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // If navigated to a specific event, always use list mode
   const effectiveViewMode = activeFilters.event ? 'list' : viewMode;
@@ -156,11 +157,16 @@ export default function LibraryClient({
         untaggedCount={untaggedCount}
         onScan={handleScan}
         scanning={scanning}
+        mobileOpen={mobileSidebarOpen}
+        onMobileClose={() => setMobileSidebarOpen(false)}
       />
 
       <div className="main">
         <div className="topbar">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
+              <IconMenu size={20} />
+            </button>
             {activeFilters.event && (
               <button
                 className="back-btn"

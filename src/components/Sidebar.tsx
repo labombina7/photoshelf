@@ -13,6 +13,8 @@ interface SidebarProps {
   untaggedCount?: number;
   onScan?: () => void;
   scanning?: boolean;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export default function Sidebar({
@@ -22,6 +24,8 @@ export default function Sidebar({
   untaggedCount = 0,
   onScan,
   scanning = false,
+  mobileOpen = false,
+  onMobileClose,
 }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -78,8 +82,14 @@ export default function Sidebar({
     else router.refresh();
   }
 
+  function handleNavClick() {
+    onMobileClose?.();
+  }
+
   return (
-    <aside className="sidebar">
+    <>
+      {mobileOpen && <div className="sidebar-overlay" onClick={onMobileClose} />}
+    <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`}>
       <div className="sidebar-logo">
         <IconPhoto size={18} />
         <span className="sidebar-logo-name">photoshelf</span>
@@ -90,6 +100,7 @@ export default function Sidebar({
 
         <Link
           href="/library"
+          onClick={handleNavClick}
           className={`sidebar-item ${pathname === '/library' && !activeTheme && !activeFav ? 'active' : ''}`}
         >
           <IconGrid />
@@ -99,6 +110,7 @@ export default function Sidebar({
 
         <Link
           href="/library?favorite=1"
+          onClick={handleNavClick}
           className={`sidebar-item ${activeFav ? 'active' : ''}`}
         >
           <IconStar />
@@ -109,6 +121,7 @@ export default function Sidebar({
         {untaggedCount > 0 && (
           <Link
             href="/library?untagged=1"
+            onClick={handleNavClick}
             className={`sidebar-item ${searchParams.get('untagged') ? 'active' : ''}`}
           >
             <IconSearch />
@@ -159,6 +172,7 @@ export default function Sidebar({
             >
               <Link
                 href={`/library?theme=${theme.id}`}
+                onClick={handleNavClick}
                 className={`sidebar-item ${activeTheme === String(theme.id) ? 'active' : ''}`}
                 style={{ flex: 1, minWidth: 0 }}
               >
@@ -264,5 +278,6 @@ export default function Sidebar({
         </button>
       </div>
     </aside>
+    </>
   );
 }
