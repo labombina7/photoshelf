@@ -13,13 +13,13 @@ export async function classifyPhoto(relativePath: string, photosRoot: string): P
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       model: 'llama3.2-vision:11b',
-      prompt: `Analyze this photo and respond with ONLY a comma-separated list of descriptive tags in English.
-Focus on: subjects (people, animals, objects), setting (beach, city, forest, restaurant, indoors),
-mood or event (celebration, peaceful, action, portrait), and any notable elements.
-Maximum 8 short tags. No explanations, no numbering, no bullets.
-Example: travel, architecture, Japan, temple, cherry blossoms, spring`,
+      prompt: `Look at this photo and reply with ONLY 3 to 5 comma-separated tags in English.
+Choose the most important: main subject, setting, and mood or activity.
+No explanations, no numbering, no extra words.
+Example: portrait, indoors, natural light`,
       images: [base64],
       stream: false,
+      options: { temperature: 0 },
     }),
     signal: AbortSignal.timeout(120_000),
   });
@@ -35,5 +35,5 @@ Example: travel, architecture, Japan, temple, cherry blossoms, spring`,
     .split(',')
     .map((t: string) => t.trim().toLowerCase().replace(/[^a-z0-9 áéíóúñüàèìòùâêîôûäëïöü\-]/g, ''))
     .filter((t: string) => t.length > 0 && t.length < 50)
-    .slice(0, 8);
+    .slice(0, 5);
 }
