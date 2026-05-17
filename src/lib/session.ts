@@ -9,7 +9,7 @@ const sessionOptions = {
   password: process.env.SESSION_SECRET ?? 'default-dev-secret-change-in-production!!',
   cookieName: 'photoshelf_session',
   cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     httpOnly: true,
     maxAge: 60 * 60 * 24 * 30,
   },
