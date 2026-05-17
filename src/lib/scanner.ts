@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { getDb } from './db';
 
-const PHOTO_EXTS = new Set(['.jpg', '.jpeg', '.png', '.heic', '.webp']);
+const PHOTO_EXTS = new Set(['.jpg', '.jpeg', '.png', '.heic', '.webp', '.tif', '.tiff']);
 
 interface ScannedPhoto {
   path: string;      // relative to photosRoot
