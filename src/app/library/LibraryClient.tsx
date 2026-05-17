@@ -4,7 +4,7 @@ import { useState, useTransition, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
-import { IconSearch } from '@/components/Icons';
+import { IconSearch, IconSparkle } from '@/components/Icons';
 import type { Theme } from '@/lib/types';
 
 interface EventGroup {
@@ -43,10 +43,12 @@ export default function LibraryClient({
   const [_isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [classifyingYear, setClassifyingYear] = useState(false);
+  const [yearProgress, setYearProgress] = useState<{ done: number; total: number } | null>(null);
 
   const showToast = (msg: string) => {
     setToast(msg);
-    setTimeout(() => setToast(''), 3500);
+    setTimeout(() => setToast(''), 4000);
   };
 
   async function handleScan() {
@@ -79,6 +81,28 @@ export default function LibraryClient({
     router.push(`/library?${params.toString()}`);
   }, [query, router, searchParams]);
 
+  async function handleClassifyYear() {
+    if (!activeYear) return;
+    setClassifyingYear(true);
+    setYearProgress({ done: 0, total: groups.length });
+    let done = 0;
+    for (const group of groups) {
+      try {
+        await fetch('/api/ai/classify/batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ year: activeYear, event: group.event }),
+        });
+      } catch { /* continue */ }
+      done++;
+      setYearProgress({ done, total: groups.length });
+    }
+    setClassifyingYear(false);
+    setYearProgress(null);
+    showToast(`Clasificación del año ${activeYear} completada`);
+    startTransition(() => router.refresh());
+  }
+
   const allKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
   const allCollapsed = collapsed.size === allKeys.length;
 
@@ -101,6 +125,8 @@ export default function LibraryClient({
   if (fav) title = 'Favoritos';
   else if (activeThemeName) title = activeThemeName;
   else if (activeYear) title = activeYear;
+
+  const showClassifyYear = !!activeYear && !fav && !themeId;
 
   return (
     <div className="app-shell">
@@ -148,15 +174,36 @@ export default function LibraryClient({
             </div>
           )}
 
-          {groups.length > 1 && (
+          {(groups.length > 1 || showClassifyYear) && (
             <div className="collapse-controls">
-              <button className="collapse-btn" onClick={allCollapsed ? expandAll : collapseAll}>
-                {allCollapsed ? 'Expandir todo' : 'Colapsar todo'}
-              </button>
+              {groups.length > 1 && (
+                <button className="collapse-btn" onClick={allCollapsed ? expandAll : collapseAll}>
+                  {allCollapsed ? 'Expandir todo' : 'Colapsar todo'}
+                </button>
+              )}
+              {showClassifyYear && (
+                <button
+                  className="collapse-btn classify-year-btn"
+                  onClick={handleClassifyYear}
+                  disabled={classifyingYear}
+                  title="Clasificar todas las carpetas de este año con IA"
+                >
+                  <IconSparkle size={11} />
+                  {classifyingYear
+                    ? `Clasificando… (${yearProgress?.done}/${yearProgress?.total} carpetas)`
+                    : `Clasificar año ${activeYear}`}
+                </button>
+              )}
             </div>
           )}
 
-          <PhotoGrid groups={groups} collapsed={collapsed} onToggle={toggleGroup} activeFilters={activeFilters} />
+          <PhotoGrid
+            groups={groups}
+            collapsed={collapsed}
+            onToggle={toggleGroup}
+            activeFilters={activeFilters}
+            showYear={!activeYear}
+          />
         </div>
       </div>
 

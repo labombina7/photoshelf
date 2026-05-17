@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { IconChevronDown, IconChevronUp } from '@/components/Icons';
+import { IconChevronDown, IconChevronUp, IconSparkle } from '@/components/Icons';
 import type { Photo, Tag } from '@/lib/types';
 
 interface PhotoWithTags extends Photo {
@@ -29,6 +29,7 @@ interface PhotoGridProps {
   collapsed: Set<string>;
   onToggle: (key: string) => void;
   activeFilters: ActiveFilters;
+  showYear?: boolean;
 }
 
 function EventGroupBlock({
@@ -37,15 +38,19 @@ function EventGroupBlock({
   onToggle,
   activeFilters,
   currentParams,
+  showYear,
 }: {
   group: EventGroup;
   isCollapsed: boolean;
   onToggle: () => void;
   activeFilters: ActiveFilters;
   currentParams: string;
+  showYear: boolean;
 }) {
   const [photos, setPhotos] = useState<PhotoWithTags[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [classifying, setClassifying] = useState(false);
+  const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number } | null>(null);
 
   useEffect(() => {
     if (isCollapsed || photos !== null) return;
@@ -65,14 +70,45 @@ function EventGroupBlock({
       .catch(() => setLoading(false));
   }, [isCollapsed, photos, group, activeFilters]);
 
-  const key = `${group.year}-${group.event}`;
+  async function handleClassify(e: React.MouseEvent) {
+    e.stopPropagation();
+    setClassifying(true);
+    setClassifyResult(null);
+    try {
+      const res = await fetch('/api/ai/classify/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year: group.year, event: group.event }),
+      });
+      const data = await res.json();
+      setClassifyResult(data);
+      setPhotos(null); // reload photos to show new tags
+    } finally {
+      setClassifying(false);
+    }
+  }
 
   return (
     <div className="event-block">
       <div className="event-label" onClick={onToggle} style={{ cursor: 'pointer', userSelect: 'none' }}>
+        {showYear && <span className="event-year">{group.year}</span>}
         <span className="event-name">{group.event}</span>
         <span className="event-count">· {group.count} fotos</span>
-        <span style={{ marginLeft: 'auto', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center' }}>
+        {classifyResult && (
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 4 }}>
+            ✓ {classifyResult.processed} clasificadas
+          </span>
+        )}
+        <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button
+            onClick={handleClassify}
+            disabled={classifying}
+            className="classify-btn"
+            title="Clasificar fotos de esta carpeta con IA"
+          >
+            <IconSparkle size={11} />
+            {classifying ? 'Clasificando…' : 'Clasificar'}
+          </button>
           {isCollapsed ? <IconChevronDown /> : <IconChevronUp />}
         </span>
       </div>
@@ -116,7 +152,7 @@ function EventGroupBlock({
   );
 }
 
-export default function PhotoGrid({ groups, collapsed, onToggle, activeFilters }: PhotoGridProps) {
+export default function PhotoGrid({ groups, collapsed, onToggle, activeFilters, showYear = false }: PhotoGridProps) {
   const searchParams = useSearchParams();
   const currentParams = searchParams.toString();
 
@@ -145,6 +181,7 @@ export default function PhotoGrid({ groups, collapsed, onToggle, activeFilters }
             onToggle={() => onToggle(key)}
             activeFilters={activeFilters}
             currentParams={currentParams}
+            showYear={showYear}
           />
         );
       })}

@@ -204,8 +204,14 @@ body {
 
 /* ── Year tabs ── */
 .collapse-controls { display: flex; gap: 8px; margin-bottom: 16px; margin-top: -8px; }
-.collapse-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px 10px; font-size: 12px; color: var(--text-secondary); cursor: pointer; font-family: inherit; }
+.collapse-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 3px 10px; font-size: 12px; color: var(--text-secondary); cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 5px; }
 .collapse-btn:hover { border-color: var(--text); color: var(--text); }
+.collapse-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.classify-year-btn { border-color: #c7d9ff; color: var(--tag-auto-color); }
+.classify-year-btn:hover:not(:disabled) { background: var(--tag-auto-bg); border-color: var(--tag-auto-color); }
+.classify-btn { background: none; border: 1px solid transparent; border-radius: var(--radius-sm); padding: 2px 8px; font-size: 11px; color: var(--text-tertiary); cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.classify-btn:hover:not(:disabled) { border-color: #c7d9ff; color: var(--tag-auto-color); background: var(--tag-auto-bg); }
+.classify-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .year-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
 .year-tab {
   padding: 6px 14px; border-radius: 20px;
