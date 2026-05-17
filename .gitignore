@@ -27,6 +27,10 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+
+# Data (DB and cache live in Docker volumes)
+data/
 
 # vercel
 .vercel
