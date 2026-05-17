@@ -7,28 +7,14 @@ import PhotoGrid from '@/components/PhotoGrid';
 import { IconSearch } from '@/components/Icons';
 import type { Theme } from '@/lib/types';
 
-interface PhotoWithTags {
-  id: number;
-  path: string;
-  filename: string;
+interface EventGroup {
   year: number;
   event: string;
-  is_favorite: number;
-  size_bytes: number | null;
-  width: number | null;
-  height: number | null;
-  taken_at: string | null;
-  camera: string | null;
-  exposure: string | null;
-  gps_lat: number | null;
-  gps_lon: number | null;
-  created_at: string;
-  scanned_at: string;
-  tags: { name: string; source: 'manual' | 'ai'; id: number }[];
+  count: number;
 }
 
 interface LibraryClientProps {
-  photos: PhotoWithTags[];
+  groups: EventGroup[];
   total: number;
   filteredTotal: number;
   years: number[];
@@ -36,10 +22,11 @@ interface LibraryClientProps {
   favoriteCount: number;
   untaggedCount: number;
   activeYear: string | null;
+  activeFilters: { year?: string; theme?: string; favorite?: string; untagged?: string; q?: string };
 }
 
 export default function LibraryClient({
-  photos,
+  groups,
   total,
   filteredTotal,
   years,
@@ -47,6 +34,7 @@ export default function LibraryClient({
   favoriteCount,
   untaggedCount,
   activeYear,
+  activeFilters,
 }: LibraryClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,20 +79,6 @@ export default function LibraryClient({
     router.push(`/library?${params.toString()}`);
   }, [query, router, searchParams]);
 
-  // Group photos by event
-  const groups = useMemo(() => {
-    const result: { year: number; event: string; photos: PhotoWithTags[] }[] = [];
-    for (const photo of photos) {
-      const last = result[result.length - 1];
-      if (last && last.year === photo.year && last.event === photo.event) {
-        last.photos.push(photo);
-      } else {
-        result.push({ year: photo.year, event: photo.event, photos: [photo] });
-      }
-    }
-    return result;
-  }, [photos]);
-
   const allKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
   const allCollapsed = collapsed.size === allKeys.length;
 
@@ -120,14 +94,13 @@ export default function LibraryClient({
   function collapseAll() { setCollapsed(new Set(allKeys)); }
   function expandAll() { setCollapsed(new Set()); }
 
-  const titleParts: string[] = [];
   const themeId = searchParams.get('theme');
   const fav = searchParams.get('favorite');
   const activeThemeName = themes.find(t => String(t.id) === themeId)?.name;
-  if (fav) titleParts.push('Favoritos');
-  else if (activeThemeName) titleParts.push(activeThemeName);
-  else if (activeYear) titleParts.push(activeYear);
-  else titleParts.push('Todas las fotos');
+  let title = 'Todas las fotos';
+  if (fav) title = 'Favoritos';
+  else if (activeThemeName) title = activeThemeName;
+  else if (activeYear) title = activeYear;
 
   return (
     <div className="app-shell">
@@ -142,9 +115,7 @@ export default function LibraryClient({
 
       <div className="main">
         <div className="topbar">
-          <div>
-            <div className="topbar-title">{titleParts[0]}</div>
-          </div>
+          <div className="topbar-title">{title}</div>
           <span className="topbar-sub">{filteredTotal.toLocaleString('es')} fotos</span>
           <div className="topbar-spacer" />
           <form onSubmit={handleSearch}>
@@ -162,10 +133,7 @@ export default function LibraryClient({
         <div className="content">
           {years.length > 1 && (
             <div className="year-tabs">
-              <button
-                className={`year-tab ${!activeYear ? 'active' : ''}`}
-                onClick={() => setYear(null)}
-              >
+              <button className={`year-tab ${!activeYear ? 'active' : ''}`} onClick={() => setYear(null)}>
                 Todos
               </button>
               {years.map((y) => (
@@ -188,7 +156,7 @@ export default function LibraryClient({
             </div>
           )}
 
-          <PhotoGrid groups={groups} collapsed={collapsed} onToggle={toggleGroup} />
+          <PhotoGrid groups={groups} collapsed={collapsed} onToggle={toggleGroup} activeFilters={activeFilters} />
         </div>
       </div>
 
