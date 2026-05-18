@@ -7,6 +7,7 @@ import {
   IconCamera, IconMap, IconFile, IconAperture,
 } from './Icons';
 import type { PhotoDetail, Theme } from '@/lib/types';
+import type { PhotoReview } from '@/lib/ollama';
 
 interface DetailPanelProps {
   photo: PhotoDetail;
@@ -22,6 +23,8 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   const [newTag, setNewTag] = useState('');
   const [classifying, setClassifying] = useState(false);
   const [isFavorite, setIsFavorite] = useState(photo.is_favorite === 1);
+  const [reviewing, setReviewing] = useState(false);
+  const [review, setReview] = useState<PhotoReview | null>(null);
 
   async function addTag() {
     const name = newTag.trim().toLowerCase();
@@ -66,6 +69,20 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
       // silently fail
     } finally {
       setClassifying(false);
+    }
+  }
+
+  async function requestReview() {
+    setReviewing(true);
+    setReview(null);
+    try {
+      const res = await fetch(`/api/ai/review/${photo.id}`, { method: 'POST' });
+      const data: PhotoReview = await res.json();
+      setReview(data);
+    } catch {
+      // silently fail
+    } finally {
+      setReviewing(false);
     }
   }
 
@@ -199,6 +216,66 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
             </>
           )}
         </button>
+      </div>
+
+      {/* AI review */}
+      <div>
+        <button className="ai-classify-btn" onClick={requestReview} disabled={reviewing}>
+          {reviewing ? (
+            <>
+              <span className="spinner dark" />
+              Analizando…
+            </>
+          ) : (
+            <>
+              <IconSparkle />
+              Revisar con IA
+            </>
+          )}
+        </button>
+
+        {review && (
+          <div className="review-block">
+            {review.score > 0 && (
+              <div className="review-score">
+                <span className="review-score-num">{review.score}</span>
+                <span className="review-score-label">/10</span>
+                <div className="review-score-bar">
+                  <div className="review-score-fill" style={{ width: `${review.score * 10}%` }} />
+                </div>
+              </div>
+            )}
+            {review.summary && <p className="review-summary">{review.summary}</p>}
+            {review.composition && (
+              <div className="review-row">
+                <span className="review-row-label">Composición</span>
+                <span className="review-row-value">{review.composition}</span>
+              </div>
+            )}
+            {review.light && (
+              <div className="review-row">
+                <span className="review-row-label">Luz</span>
+                <span className="review-row-value">{review.light}</span>
+              </div>
+            )}
+            {review.strengths.length > 0 && (
+              <div className="review-row">
+                <span className="review-row-label">Puntos fuertes</span>
+                <ul className="review-list review-list--positive">
+                  {review.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                </ul>
+              </div>
+            )}
+            {review.weaknesses.length > 0 && (
+              <div className="review-row">
+                <span className="review-row-label">Mejoras</span>
+                <ul className="review-list review-list--negative">
+                  {review.weaknesses.map((w, i) => <li key={i}>{w}</li>)}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Themes */}

@@ -89,6 +89,51 @@ JSON:`
   }
 }
 
+export interface PhotoReview {
+  composition: string;
+  light: string;
+  strengths: string[];
+  weaknesses: string[];
+  score: number;
+  summary: string;
+}
+
+export async function reviewPhoto(relativePath: string, photosRoot: string): Promise<PhotoReview> {
+  const absPath = path.join(photosRoot, relativePath);
+  const buffer = await fs.readFile(absPath);
+  const base64 = buffer.toString('base64');
+
+  const raw = await ollamaVision(
+    `You are an expert photography critic. Analyze this photo and reply ONLY with a JSON object, no extra text.
+JSON format:
+{
+  "composition": "one sentence about framing, rule of thirds, leading lines, balance",
+  "light": "one sentence about lighting quality, direction, contrast, mood",
+  "strengths": ["strength 1", "strength 2"],
+  "weaknesses": ["weakness 1", "weakness 2"],
+  "score": <integer 1-10>,
+  "summary": "one sentence overall verdict"
+}
+Be concise, specific, and honest. Reply in Spanish.`,
+    base64
+  );
+
+  try {
+    const json = raw.match(/\{[\s\S]*\}/)?.[0] ?? '{}';
+    const parsed = JSON.parse(json);
+    return {
+      composition: parsed.composition ?? '',
+      light: parsed.light ?? '',
+      strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 3) : [],
+      weaknesses: Array.isArray(parsed.weaknesses) ? parsed.weaknesses.slice(0, 3) : [],
+      score: typeof parsed.score === 'number' ? Math.min(10, Math.max(1, Math.round(parsed.score))) : 0,
+      summary: parsed.summary ?? '',
+    };
+  } catch {
+    return { composition: '', light: '', strengths: [], weaknesses: [], score: 0, summary: raw.trim().slice(0, 300) };
+  }
+}
+
 export async function photoMatchesConcept(
   relativePath: string,
   photosRoot: string,
