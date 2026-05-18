@@ -101,7 +101,7 @@ export default async function PhotoDetailPage({
           <div className="detail-photo-area">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/api/photos/${photo.id}/thumbnail?size=1920`}
+              src={`/api/photos/${photo.id}/thumbnail?size=1920&fit=inside`}
               alt={photo.filename}
             />
             <a

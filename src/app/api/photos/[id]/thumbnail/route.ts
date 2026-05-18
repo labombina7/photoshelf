@@ -15,9 +15,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const size = parseInt(req.nextUrl.searchParams.get('size') ?? '400', 10);
+  const fit = req.nextUrl.searchParams.get('fit') === 'inside' ? 'inside' : 'cover';
 
   try {
-    const { buffer, contentType } = await getThumbnail(photo.path, PHOTOS_PATH, size);
+    const { buffer, contentType } = await getThumbnail(photo.path, PHOTOS_PATH, size, fit);
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': contentType,

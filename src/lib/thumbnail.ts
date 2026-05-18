@@ -8,11 +8,12 @@ const DEFAULT_SIZE = 400;
 export async function getThumbnail(
   relativePath: string,
   photosRoot: string,
-  size = DEFAULT_SIZE
+  size = DEFAULT_SIZE,
+  fit: 'cover' | 'inside' = 'cover'
 ): Promise<{ buffer: Buffer; contentType: string }> {
   const cacheKey = crypto
     .createHash('md5')
-    .update(`${relativePath}:${size}`)
+    .update(`${relativePath}:${size}:${fit}`)
     .digest('hex');
   const cachePath = path.join(CACHE_PATH, `${cacheKey}.webp`);
 
@@ -40,8 +41,13 @@ export async function getThumbnail(
   }
 
   const sharp = (await import('sharp')).default;
+  const resizeOptions = fit === 'inside'
+    ? { width: size, height: size, fit: 'inside' as const }
+    : { width: size, height: size, fit: 'cover' as const, position: 'attention' as const };
+
   const buffer = await sharp(inputBuffer)
-    .resize(size, size, { fit: 'cover', position: 'attention' })
+    .rotate() // honour EXIF orientation
+    .resize(resizeOptions)
     .webp({ quality: 80 })
     .toBuffer();
 
