@@ -11,23 +11,9 @@ interface Candidate {
 }
 
 function smartSample(all: Candidate[], max: number): Candidate[] {
-  // 1. Detect dominant tone (b&w vs color) among tagged photos
-  const tagged = all.filter(c => c.tags.length > 0);
-  const bwCount = tagged.filter(c => c.tags.includes('b&w')).length;
-  const colorCount = tagged.filter(c => c.tags.includes('color')).length;
-  const dominantTone = bwCount >= colorCount ? 'b&w' : 'color';
-
-  // 2. Filter to dominant tone (only if meaningful — >20% of tagged have tone tags)
-  const hasTone = bwCount + colorCount > tagged.length * 0.2;
-  const toneFiltered = hasTone
-    ? all.filter(c => c.tags.includes(dominantTone) || c.tags.length === 0)
-    : all;
-
-  const pool = toneFiltered.length >= max / 2 ? toneFiltered : all;
-
-  // 3. Stratified sample: take proportionally from each event
+  // Stratified sample: take proportionally from each event
   const byEvent = new Map<string, Candidate[]>();
-  for (const c of pool) {
+  for (const c of all) {
     const key = `${c.year}|${c.event}`;
     if (!byEvent.has(key)) byEvent.set(key, []);
     byEvent.get(key)!.push(c);
@@ -39,7 +25,7 @@ function smartSample(all: Candidate[], max: number): Candidate[] {
 
   // Proportional allocation per event, tagged photos first within each
   events.forEach(([, photos], i) => {
-    const share = Math.max(1, Math.round((photos.length / pool.length) * max));
+    const share = Math.max(1, Math.round((photos.length / all.length) * max));
     const quota = i === events.length - 1 ? remaining : Math.min(share, remaining);
     // Shuffle first so ties in tag count don't favour filename order
     const shuffled = [...photos].sort(() => Math.random() - 0.5);

@@ -125,10 +125,10 @@ IMPORTANT: Read the ENTIRE list before making any selection. Do NOT pick photos 
 
 Rules — follow ALL of them:
 1. SCAN FIRST: Go through all ${shuffled.length} photos before deciding. The best photos may be anywhere in the list.
-2. TONE: pick either all b&w or all color (whichever gives stronger results). Do not mix.
+2. QUALITY: Strongly prefer photos with more specific tags (e.g. "portrait, editorial, studio, woman") over untagged ones or those with only generic tags.
 3. DIVERSITY: Do not pick more than ${maxPerEvent} photos from the same event folder. Spread across different events and years.
 4. VARIETY: If two photos share the same event and similar tags, pick only one — the one with richer or more specific tags.
-5. QUALITY: Strongly prefer photos with more specific tags (e.g. "portrait, editorial, studio, woman") over untagged ones or those with only generic tags.
+5. TONE: b&w and color photos can be mixed if it strengthens the narrative. Avoid mixing only when it looks inconsistent.
 6. NARRATIVE ARC: Order the final selectedIds to tell a visual story — opening image, development, climax, closing.
 
 Photos (ID | year/event | tags):
