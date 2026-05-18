@@ -111,22 +111,30 @@ export async function generateProject(
     .map(p => `ID:${p.id} | ${p.year}/${p.event} | tags: ${p.tags.join(', ') || 'none'}`)
     .join('\n');
 
-  const raw = await ollamaText(
-    `You are a photography curator. Select the best ${count} photos from this list to create a coherent photographic project.
-Prioritize visual coherence: consistent tone (all b&w or all color), complementary styles, a narrative arc.
-Reply ONLY with a JSON object, no extra text.
+  const maxPerEvent = Math.max(2, Math.ceil(count / 4));
 
-Photos:
+  const raw = await ollamaText(
+    `You are an experienced photography curator selecting images for a gallery exhibition.
+
+Task: choose exactly ${count} photos from the list below to form a cohesive photographic project.
+
+Rules — follow ALL of them:
+1. TONE: pick either all b&w or all color (whichever dominates). Do not mix.
+2. DIVERSITY: avoid repetition. Do not pick more than ${maxPerEvent} photos from the same event folder. Spread the selection across different events and moments.
+3. VARIETY: if two photos share the same event and similar tags, pick only one of them.
+4. NARRATIVE ARC: order the selected IDs so they tell a story — opening image, development, climax, closing.
+5. QUALITY: prefer photos with more tags over untagged ones.
+
+Photos (ID | year/event | tags):
 ${photoList}
 
-JSON format:
+Reply ONLY with this JSON, no explanation, no markdown:
 {
-  "title": "short evocative project title (in Spanish)",
-  "statement": "2-3 sentence artistic statement about the project (in Spanish)",
-  "selectedIds": [array of exactly ${count} photo IDs from the list above, ordered narratively]
-}
-JSON:`,
-    180_000  // 3 min — large prompt needs more time
+  "title": "short evocative title in Spanish (3-6 words)",
+  "statement": "2-3 sentences on the project theme and emotional intent, in Spanish",
+  "selectedIds": [exactly ${count} photo IDs ordered narratively]
+}`,
+    180_000
   );
 
   try {
