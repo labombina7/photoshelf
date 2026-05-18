@@ -4,6 +4,49 @@ import { getDb } from '@/lib/db';
 import { generateProject } from '@/lib/ollama';
 import type { ProjectCandidate } from '@/lib/ollama';
 
+interface Candidate {
+  id: number; filename: string; year: number; event: string; tags: string[];
+}
+
+function smartSample(all: Candidate[], max: number): Candidate[] {
+  // 1. Detect dominant tone (b&w vs color) among tagged photos
+  const tagged = all.filter(c => c.tags.length > 0);
+  const bwCount = tagged.filter(c => c.tags.includes('b&w')).length;
+  const colorCount = tagged.filter(c => c.tags.includes('color')).length;
+  const dominantTone = bwCount >= colorCount ? 'b&w' : 'color';
+
+  // 2. Filter to dominant tone (only if meaningful — >20% of tagged have tone tags)
+  const hasTone = bwCount + colorCount > tagged.length * 0.2;
+  const toneFiltered = hasTone
+    ? all.filter(c => c.tags.includes(dominantTone) || c.tags.length === 0)
+    : all;
+
+  const pool = toneFiltered.length >= max / 2 ? toneFiltered : all;
+
+  // 3. Stratified sample: take proportionally from each event
+  const byEvent = new Map<string, Candidate[]>();
+  for (const c of pool) {
+    const key = `${c.year}|${c.event}`;
+    if (!byEvent.has(key)) byEvent.set(key, []);
+    byEvent.get(key)!.push(c);
+  }
+
+  const events = Array.from(byEvent.entries());
+  const result: Candidate[] = [];
+  let remaining = max;
+
+  // Proportional allocation per event, tagged photos first within each
+  events.forEach(([, photos], i) => {
+    const share = Math.max(1, Math.round((photos.length / pool.length) * max));
+    const quota = i === events.length - 1 ? remaining : Math.min(share, remaining);
+    const sorted = [...photos].sort((a, b) => b.tags.length - a.tags.length);
+    result.push(...sorted.slice(0, quota));
+    remaining -= Math.min(quota, sorted.length);
+  });
+
+  return result.slice(0, max);
+}
+
 interface GenerateBody {
   scopeType: 'year' | 'event' | 'theme' | 'all';
   scopeValue?: string;
@@ -49,7 +92,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not enough photos in scope' }, { status: 400 });
   }
 
-  // Prefer tagged photos, then sample to keep prompt manageable
   const MAX_CANDIDATES = 150;
   const allCandidates = rows.map(r => ({
     id: r.id,
@@ -59,12 +101,9 @@ export async function POST(req: NextRequest) {
     tags: r.tag_list ? r.tag_list.split(',').filter(Boolean) : [],
   }));
 
-  const tagged = allCandidates.filter(c => c.tags.length > 0);
-  const untagged = allCandidates.filter(c => c.tags.length === 0);
-
-  // Fill up to MAX_CANDIDATES preferring tagged, then supplement with untagged
-  const pool = [...tagged, ...untagged].slice(0, MAX_CANDIDATES);
-  const candidates: ProjectCandidate[] = pool;
+  const candidates: ProjectCandidate[] = allCandidates.length <= MAX_CANDIDATES
+    ? allCandidates
+    : smartSample(allCandidates, MAX_CANDIDATES);
 
   const actualCount = Math.min(count, candidates.length);
   const { title, statement, selectedIds } = await generateProject(candidates, actualCount);
