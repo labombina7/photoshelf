@@ -41,7 +41,9 @@ function smartSample(all: Candidate[], max: number): Candidate[] {
   events.forEach(([, photos], i) => {
     const share = Math.max(1, Math.round((photos.length / pool.length) * max));
     const quota = i === events.length - 1 ? remaining : Math.min(share, remaining);
-    const sorted = [...photos].sort((a, b) => b.tags.length - a.tags.length);
+    // Shuffle first so ties in tag count don't favour filename order
+    const shuffled = [...photos].sort(() => Math.random() - 0.5);
+    const sorted = shuffled.sort((a, b) => b.tags.length - a.tags.length);
     result.push(...sorted.slice(0, quota));
     remaining -= Math.min(quota, sorted.length);
   });
