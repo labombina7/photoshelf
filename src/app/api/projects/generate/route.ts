@@ -49,13 +49,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Not enough photos in scope' }, { status: 400 });
   }
 
-  const candidates: ProjectCandidate[] = rows.map(r => ({
+  // Prefer tagged photos, then sample to keep prompt manageable
+  const MAX_CANDIDATES = 150;
+  const allCandidates = rows.map(r => ({
     id: r.id,
     filename: r.filename,
     year: r.year,
     event: r.event,
     tags: r.tag_list ? r.tag_list.split(',').filter(Boolean) : [],
   }));
+
+  const tagged = allCandidates.filter(c => c.tags.length > 0);
+  const untagged = allCandidates.filter(c => c.tags.length === 0);
+
+  // Fill up to MAX_CANDIDATES preferring tagged, then supplement with untagged
+  const pool = [...tagged, ...untagged].slice(0, MAX_CANDIDATES);
+  const candidates: ProjectCandidate[] = pool;
 
   const actualCount = Math.min(count, candidates.length);
   const { title, statement, selectedIds } = await generateProject(candidates, actualCount);
