@@ -4,6 +4,8 @@ import { getDb } from '@/lib/db';
 import { generateProject } from '@/lib/ollama';
 import type { ProjectCandidate } from '@/lib/ollama';
 
+export const maxDuration = 300; // 5 min — Ollama needs time with large prompts
+
 interface Candidate {
   id: number; filename: string; year: number; event: string; tags: string[];
 }

@@ -3,7 +3,7 @@ import path from 'path';
 
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
 
-async function ollamaText(prompt: string): Promise<string> {
+async function ollamaText(prompt: string, timeoutMs = 30_000): Promise<string> {
   const res = await fetch(`${OLLAMA_URL}/api/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -13,7 +13,7 @@ async function ollamaText(prompt: string): Promise<string> {
       stream: false,
       options: { temperature: 0 },
     }),
-    signal: AbortSignal.timeout(30_000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) throw new Error(`Ollama error: ${res.status}`);
   const data = await res.json();
@@ -125,7 +125,8 @@ JSON format:
   "statement": "2-3 sentence artistic statement about the project (in Spanish)",
   "selectedIds": [array of exactly ${count} photo IDs from the list above, ordered narratively]
 }
-JSON:`
+JSON:`,
+    180_000  // 3 min — large prompt needs more time
   );
 
   try {

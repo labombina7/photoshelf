@@ -77,8 +77,13 @@ export default function ProjectsClient({ projects: initial, themes, years, event
       if (!res.ok) { setError(data.error ?? 'Error generando proyecto'); return; }
       setShowNew(false);
       router.push(`/projects/${data.id}`);
-    } catch {
-      setError('Error de conexión. Comprueba que Ollama está activo.');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('timeout') || msg.includes('AbortError')) {
+        setError('Timeout: Ollama tardó demasiado. Prueba con un scope más pequeño o menos fotos.');
+      } else {
+        setError('Error de conexión. Comprueba que Ollama está activo en el Mac.');
+      }
     } finally {
       setGenerating(false);
     }
