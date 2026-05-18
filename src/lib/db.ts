@@ -70,5 +70,23 @@ function initSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_photo_tags     ON photo_tags(photo_id);
     CREATE INDEX IF NOT EXISTS idx_photo_themes_p ON photo_themes(photo_id);
     CREATE INDEX IF NOT EXISTS idx_photo_themes_t ON photo_themes(theme_id);
+
+    CREATE TABLE IF NOT EXISTS projects (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      title       TEXT NOT NULL,
+      statement   TEXT NOT NULL DEFAULT '',
+      scope_type  TEXT NOT NULL CHECK(scope_type IN ('year','event','theme','all')),
+      scope_value TEXT,
+      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS project_photos (
+      project_id  INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+      photo_id    INTEGER NOT NULL REFERENCES photos(id) ON DELETE CASCADE,
+      position    INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (project_id, photo_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_project_photos_p ON project_photos(project_id);
   `);
 }

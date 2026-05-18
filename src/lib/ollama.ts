@@ -89,6 +89,64 @@ JSON:`
   }
 }
 
+export interface ProjectCandidate {
+  id: number;
+  filename: string;
+  year: number;
+  event: string;
+  tags: string[];
+}
+
+export interface GeneratedProject {
+  title: string;
+  statement: string;
+  selectedIds: number[];
+}
+
+export async function generateProject(
+  candidates: ProjectCandidate[],
+  count: number
+): Promise<GeneratedProject> {
+  const photoList = candidates
+    .map(p => `ID:${p.id} | ${p.year}/${p.event} | tags: ${p.tags.join(', ') || 'none'}`)
+    .join('\n');
+
+  const raw = await ollamaText(
+    `You are a photography curator. Select the best ${count} photos from this list to create a coherent photographic project.
+Prioritize visual coherence: consistent tone (all b&w or all color), complementary styles, a narrative arc.
+Reply ONLY with a JSON object, no extra text.
+
+Photos:
+${photoList}
+
+JSON format:
+{
+  "title": "short evocative project title (in Spanish)",
+  "statement": "2-3 sentence artistic statement about the project (in Spanish)",
+  "selectedIds": [array of exactly ${count} photo IDs from the list above, ordered narratively]
+}
+JSON:`
+  );
+
+  try {
+    const json = raw.match(/\{[\s\S]*\}/)?.[0] ?? '{}';
+    const parsed = JSON.parse(json);
+    const selectedIds: number[] = Array.isArray(parsed.selectedIds)
+      ? parsed.selectedIds
+          .map((id: unknown) => Number(id))
+          .filter((id: number) => candidates.some(c => c.id === id))
+          .slice(0, count)
+      : [];
+    return {
+      title: parsed.title ?? 'Proyecto sin título',
+      statement: parsed.statement ?? '',
+      selectedIds,
+    };
+  } catch {
+    return { title: 'Proyecto sin título', statement: '', selectedIds: [] };
+  }
+}
+
 export interface PhotoReview {
   composition: string;
   light: string;

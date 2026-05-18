@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash } from './Icons';
+import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder } from './Icons';
 import type { Theme } from '@/lib/types';
 
 interface SidebarProps {
@@ -129,6 +129,18 @@ export default function Sidebar({
             <span className="sidebar-count">{untaggedCount}</span>
           </Link>
         )}
+      </div>
+
+      <div className="sidebar-section">
+        <div className="sidebar-section-label">Portfolio</div>
+        <Link
+          href="/projects"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname.startsWith('/projects') ? 'active' : ''}`}
+        >
+          <IconFolder />
+          Proyectos
+        </Link>
       </div>
 
       <div className="sidebar-section">
