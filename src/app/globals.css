@@ -565,12 +565,12 @@ body {
 .project-statement-input { width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; font-family: inherit; font-size: 14px; color: #fff; resize: none; outline: none; }
 .project-meta { font-size: 13px; color: rgba(255,255,255,0.5); }
 
-/* ── Project sequence ── */
-.project-sequence { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
-.project-seq-item { position: relative; cursor: zoom-in; border-radius: var(--radius-sm); overflow: hidden; background: var(--border-light); }
+/* ── Project sequence — masonry via CSS columns ── */
+.project-sequence { columns: 4 220px; column-gap: 14px; }
+.project-seq-item { position: relative; cursor: zoom-in; border-radius: var(--radius-sm); overflow: hidden; background: var(--border-light); break-inside: avoid; margin-bottom: 14px; display: block; }
 .project-seq-item:hover .project-seq-remove { opacity: 1; }
 .project-seq-num { position: absolute; top: 10px; left: 10px; font-size: 11px; font-weight: 700; color: #fff; background: rgba(0,0,0,0.5); padding: 2px 7px; border-radius: 10px; z-index: 1; backdrop-filter: blur(4px); }
-.project-seq-img { width: 100%; display: block; object-fit: cover; }
+.project-seq-img { width: 100%; height: auto; display: block; }
 .project-seq-remove { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.15s; z-index: 2; }
 
 /* ── Lightbox ── */
@@ -629,6 +629,9 @@ body {
 
   /* Folder grid — 2 columns on mobile */
   .folder-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+
+  /* Project masonry — 2 columns on mobile */
+  .project-sequence { columns: 2; }
 
   /* Detail view — stack vertically */
   .detail-body { flex-direction: column; overflow: visible; }
