@@ -188,7 +188,7 @@ export default function ProjectDetailClient({ project: initial, themes, projects
                   <div className="project-seq-num">{String(idx + 1).padStart(2, '0')}</div>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`/api/photos/${photo.id}/thumbnail?size=600`}
+                    src={`/api/photos/${photo.id}/thumbnail?size=600&fit=inside`}
                     alt={photo.filename}
                     className="project-seq-img"
                   />
