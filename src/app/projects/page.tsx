@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
-import { getDb } from '@/lib/db';
+import { getDb, getSidebarProjects } from '@/lib/db';
 import ProjectsClient from './ProjectsClient';
 import type { Theme } from '@/lib/types';
 
@@ -37,10 +37,12 @@ export default async function ProjectsPage() {
   const years = (db.prepare('SELECT DISTINCT year FROM photos ORDER BY year DESC').all() as { year: number }[]).map(r => r.year);
 
   const events = db.prepare('SELECT DISTINCT year, event FROM photos ORDER BY year DESC, event ASC').all() as { year: number; event: string }[];
+  const sidebarProjects = getSidebarProjects(db);
 
   return (
     <ProjectsClient
       projects={projects}
+      sidebarProjects={sidebarProjects}
       themes={themes}
       years={years}
       events={events}

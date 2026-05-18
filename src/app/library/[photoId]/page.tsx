@@ -1,7 +1,7 @@
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getSession } from '@/lib/session';
-import { getDb } from '@/lib/db';
+import { getDb, getSidebarProjects } from '@/lib/db';
 import Sidebar from '@/components/Sidebar';
 import DetailPanel from '@/components/DetailPanel';
 import { IconChevronLeft, IconChevronRight } from '@/components/Icons';
@@ -48,6 +48,7 @@ export default async function PhotoDetailPage({
   const favoriteCount = (db.prepare('SELECT COUNT(*) as c FROM photos WHERE is_favorite = 1').get() as { c: number }).c;
   const untaggedCount = (db.prepare('SELECT COUNT(*) as c FROM photos p WHERE NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id)').get() as { c: number }).c;
   const years = (db.prepare('SELECT DISTINCT year FROM photos ORDER BY year DESC').all() as { year: number }[]).map(r => r.year);
+  const sidebarProjects = getSidebarProjects(db);
 
   // Prev / next within the same event
   const siblings = db.prepare(
@@ -65,6 +66,7 @@ export default async function PhotoDetailPage({
     <div className="app-shell">
       <Sidebar
         themes={allThemes}
+        projects={sidebarProjects}
         totalPhotos={total}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

@@ -1,6 +1,6 @@
 import { redirect, notFound } from 'next/navigation';
 import { getSession } from '@/lib/session';
-import { getDb } from '@/lib/db';
+import { getDb, getSidebarProjects } from '@/lib/db';
 import ProjectDetailClient from './ProjectDetailClient';
 import type { Theme } from '@/lib/types';
 
@@ -34,10 +34,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     GROUP BY th.id ORDER BY th.name ASC
   `).all() as Theme[];
 
+  const sidebarProjects = getSidebarProjects(db);
+
   return (
     <ProjectDetailClient
       project={{ ...project, photos }}
       themes={themes}
+      projects={sidebarProjects}
       totalPhotos={total}
       favoriteCount={favoriteCount}
       untaggedCount={untaggedCount}

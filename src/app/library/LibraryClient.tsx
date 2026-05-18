@@ -31,6 +31,7 @@ interface LibraryClientProps {
   filteredTotal: number;
   years: number[];
   themes: Theme[];
+  projects?: { id: number; title: string }[];
   favoriteCount: number;
   untaggedCount: number;
   activeYear: string | null;
@@ -43,6 +44,7 @@ export default function LibraryClient({
   filteredTotal,
   years,
   themes,
+  projects = [],
   favoriteCount,
   untaggedCount,
   activeYear,
@@ -152,6 +154,7 @@ export default function LibraryClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
+        projects={projects}
         totalPhotos={total}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

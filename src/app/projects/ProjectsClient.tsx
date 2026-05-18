@@ -26,6 +26,7 @@ interface ScopeOption {
 
 interface Props {
   projects: Project[];
+  sidebarProjects: { id: number; title: string }[];
   themes: Theme[];
   years: number[];
   events: { year: number; event: string }[];
@@ -34,7 +35,7 @@ interface Props {
   untaggedCount: number;
 }
 
-export default function ProjectsClient({ projects: initial, themes, years, events, totalPhotos, favoriteCount, untaggedCount }: Props) {
+export default function ProjectsClient({ projects: initial, sidebarProjects, themes, years, events, totalPhotos, favoriteCount, untaggedCount }: Props) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [projects, setProjects] = useState(initial);
@@ -99,6 +100,7 @@ export default function ProjectsClient({ projects: initial, themes, years, event
     <div className="app-shell">
       <Sidebar
         themes={themes}
+        projects={sidebarProjects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

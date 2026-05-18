@@ -6,6 +6,10 @@ const DB_PATH = process.env.DB_PATH ?? path.join(process.cwd(), 'data', 'photosh
 
 let _db: Database.Database | null = null;
 
+export function getSidebarProjects(db: Database.Database): { id: number; title: string }[] {
+  return db.prepare('SELECT id, title FROM projects ORDER BY created_at DESC').all() as { id: number; title: string }[];
+}
+
 export function getDb(): Database.Database {
   if (_db) return _db;
 

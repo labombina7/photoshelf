@@ -29,12 +29,13 @@ interface Project {
 interface Props {
   project: Project;
   themes: Theme[];
+  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
 }
 
-export default function ProjectDetailClient({ project: initial, themes, totalPhotos, favoriteCount, untaggedCount }: Props) {
+export default function ProjectDetailClient({ project: initial, themes, projects, totalPhotos, favoriteCount, untaggedCount }: Props) {
   const router = useRouter();
   const [project, setProject] = useState(initial);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -98,6 +99,7 @@ export default function ProjectDetailClient({ project: initial, themes, totalPho
     <div className="app-shell">
       <Sidebar
         themes={themes}
+        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

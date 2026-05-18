@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
-import { getDb } from '@/lib/db';
+import { getDb, getSidebarProjects } from '@/lib/db';
 import LibraryClient from './LibraryClient';
 
 interface SearchParams {
@@ -57,6 +57,8 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
     GROUP BY th.id ORDER BY th.name ASC
   `).all() as { id: number; name: string; color: string; photo_count: number }[];
 
+  const projects = getSidebarProjects(db);
+
   return (
     <LibraryClient
       groups={groups}
@@ -68,6 +70,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       untaggedCount={untaggedCount}
       activeYear={sp.year ?? null}
       activeFilters={{ year: sp.year, event: sp.event, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q }}
+      projects={projects}
     />
   );
 }

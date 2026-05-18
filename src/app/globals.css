@@ -63,7 +63,13 @@ body {
   text-transform: uppercase;
   color: var(--text-tertiary);
   margin-bottom: 6px;
+  display: block;
 }
+.sidebar-section-label--link {
+  cursor: pointer;
+  transition: color 0.12s;
+}
+.sidebar-section-label--link:hover { color: var(--text-secondary); }
 .sidebar-item {
   display: flex;
   align-items: center;

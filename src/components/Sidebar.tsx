@@ -8,6 +8,7 @@ import type { Theme } from '@/lib/types';
 
 interface SidebarProps {
   themes: Theme[];
+  projects?: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount?: number;
   untaggedCount?: number;
@@ -19,6 +20,7 @@ interface SidebarProps {
 
 export default function Sidebar({
   themes,
+  projects = [],
   totalPhotos,
   favoriteCount = 0,
   untaggedCount = 0,
@@ -132,15 +134,32 @@ export default function Sidebar({
       </div>
 
       <div className="sidebar-section">
-        <div className="sidebar-section-label">Portfolio</div>
         <Link
           href="/projects"
           onClick={handleNavClick}
-          className={`sidebar-item ${pathname.startsWith('/projects') ? 'active' : ''}`}
+          className="sidebar-section-label sidebar-section-label--link"
         >
-          <IconFolder />
-          Proyectos
+          Portfolio
         </Link>
+        {projects.map(p => (
+          <Link
+            key={p.id}
+            href={`/projects/${p.id}`}
+            onClick={handleNavClick}
+            className={`sidebar-item ${pathname === `/projects/${p.id}` ? 'active' : ''}`}
+          >
+            <IconFolder size={14} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+          </Link>
+        ))}
+        {projects.length === 0 && (
+          <div className="sidebar-item" style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }} onClick={() => { handleNavClick(); }}>
+            <Link href="/projects" onClick={handleNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
+              <IconPlus size={13} />
+              Nuevo proyecto
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="sidebar-section">
