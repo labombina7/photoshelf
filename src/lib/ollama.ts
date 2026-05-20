@@ -123,19 +123,26 @@ export async function generateProject(
 
   const maxPerEvent = Math.max(2, Math.ceil(count / 4));
 
-  const hasFilters = !!(filters?.tone || filters?.styles?.length || filters?.tags?.length);
+  const hasFilters = !!(filters?.tone || filters?.tags?.length);
 
-  const hardConstraints = hasFilters ? `
+  const toneOrTagConstraints = !!(filters?.tone || filters?.tags?.length);
+  const hardConstraints = toneOrTagConstraints ? `
 ==== HARD CONSTRAINTS — NON-NEGOTIABLE ====
 ${filters?.tone ? `TONE: You MUST select ONLY ${filters.tone} photos. Any photo without the tag "${filters.tone}" in its tag list is FORBIDDEN. Do not select it under any circumstance.` : ''}
-${filters?.styles?.length ? `STYLE: Every selected photo MUST include at least one of these styles in its tags: ${filters.styles.join(', ')}.` : ''}
 ${filters?.tags?.length ? `TAGS: Every selected photo MUST include ALL of these tags: ${filters.tags.join(', ')}.` : ''}
 ===========================================
 ` : '';
 
+  const aestheticDirection = filters?.styles?.length ? `
+==== AESTHETIC DIRECTION ====
+The curator wants a project in the style of: ${filters.styles.join(', ')}.
+Use this as creative guidance when choosing between equally good photos — prefer images whose tags suggest this aesthetic. It is NOT a hard filter; you may include photos that fit the overall vision even if they lack an exact style tag match.
+=============================
+` : '';
+
   const raw = await ollamaText(
     `You are an experienced photography curator selecting images for a gallery exhibition.
-${hardConstraints}
+${hardConstraints}${aestheticDirection}
 Task: choose exactly ${count} photos from the list below to form a cohesive photographic project.
 
 IMPORTANT: Read the ENTIRE list before making any selection. Do NOT pick photos just because they appear near the top — position in this list is random and meaningless.
@@ -170,9 +177,8 @@ Reply ONLY with this JSON, no explanation, no markdown:
           .filter((id: number) => {
             const c = candidateSet.get(id);
             if (!c) return false;
-            // Guard: reject any photo that violates hard constraints
+            // Guard: reject any photo that violates hard constraints (tone and tags only)
             if (filters?.tone && !c.tags.includes(filters.tone)) return false;
-            if (filters?.styles?.length && !filters.styles.some(s => c.tags.includes(s))) return false;
             if (filters?.tags?.length && !filters.tags.every(t => c.tags.includes(t))) return false;
             return true;
           })
