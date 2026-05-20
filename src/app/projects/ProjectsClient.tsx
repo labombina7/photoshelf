@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useModal } from '@/components/ModalProvider';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconSparkle, IconTrash, IconPlus, IconX } from '@/components/Icons';
@@ -41,10 +42,9 @@ interface Props {
 
 export default function ProjectsClient({ projects: initial, sidebarProjects, themes, years, events, topTags, allTags, totalPhotos, favoriteCount, untaggedCount }: Props) {
   const router = useRouter();
-  const [, startTransition] = useTransition();
+  const { confirm } = useModal();
   const [projects, setProjects] = useState(initial);
   const [showNew, setShowNew] = useState(false);
-  const [scanning, setScanning] = useState(false);
 
   const scopes: ScopeOption[] = [
     { label: 'Todas las fotos', scopeType: 'all' },
@@ -81,16 +81,6 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
     setShowTagSuggestions(false);
   }
 
-  async function handleScan() {
-    setScanning(true);
-    try {
-      await fetch('/api/scan', { method: 'POST' });
-      startTransition(() => router.refresh());
-    } finally {
-      setScanning(false);
-    }
-  }
-
   async function generate() {
     const scope = scopes[selectedScopeIdx];
     setGenerating(true);
@@ -125,7 +115,8 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
   }
 
   async function deleteProject(id: number) {
-    if (!confirm('¿Eliminar este proyecto?')) return;
+    const ok = await confirm('¿Eliminar este proyecto?', { title: 'Eliminar proyecto', confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     await fetch(`/api/projects/${id}`, { method: 'DELETE' });
     setProjects(prev => prev.filter(p => p.id !== id));
   }
@@ -138,8 +129,7 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}
-        onScan={handleScan}
-        scanning={scanning}
+
       />
 
       <div className="main">

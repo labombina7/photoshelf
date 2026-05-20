@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { ModalProvider } from '@/components/ModalProvider';
+import { ScanProvider } from '@/components/ScanProvider';
 
 export const metadata: Metadata = {
   title: 'photoshelf',
@@ -17,7 +19,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <ModalProvider>
+          <ScanProvider>
+            {children}
+          </ScanProvider>
+        </ModalProvider>
+      </body>
     </html>
   );
 }

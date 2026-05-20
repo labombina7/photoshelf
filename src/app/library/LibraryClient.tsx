@@ -52,7 +52,6 @@ export default function LibraryClient({
 }: LibraryClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [scanning, setScanning] = useState(false);
   const [toast, setToast] = useState('');
   const [_isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
@@ -69,20 +68,6 @@ export default function LibraryClient({
     setToast(msg);
     setTimeout(() => setToast(''), 4000);
   };
-
-  async function handleScan() {
-    setScanning(true);
-    try {
-      const res = await fetch('/api/scan', { method: 'POST' });
-      const data = await res.json();
-      showToast(`Escaneo completado: ${data.added} fotos nuevas (total: ${data.total})`);
-      startTransition(() => router.refresh());
-    } catch {
-      showToast('Error al escanear la biblioteca');
-    } finally {
-      setScanning(false);
-    }
-  }
 
   function setYear(year: string | null) {
     const params = new URLSearchParams(searchParams.toString());
@@ -158,8 +143,6 @@ export default function LibraryClient({
         totalPhotos={total}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}
-        onScan={handleScan}
-        scanning={scanning}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
       />

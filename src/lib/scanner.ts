@@ -19,7 +19,12 @@ interface ScannedPhoto {
   gps_lon: number | null;
 }
 
-export async function scanLibrary(photosRoot: string): Promise<{ added: number; total: number }> {
+type ProgressCallback = (event: string, done: number, total: number) => void;
+
+export async function scanLibrary(
+  photosRoot: string,
+  onProgress?: ProgressCallback
+): Promise<{ added: number; total: number }> {
   const db = getDb();
 
   const upsert = db.prepare(`
@@ -47,15 +52,35 @@ export async function scanLibrary(photosRoot: string): Promise<{ added: number; 
 
   const countBefore: number = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
 
-  await walkPhotosPerYear(photosRoot, insertBatch);
+  const totalEvents = await countEvents(photosRoot);
+  await walkPhotosPerYear(photosRoot, insertBatch, totalEvents, onProgress);
 
   const total: number = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
   return { added: total - countBefore, total };
 }
 
+async function countEvents(photosRoot: string): Promise<number> {
+  let count = 0;
+  const yearDirs = await fs.readdir(photosRoot).catch(() => [] as string[]);
+  for (const yearDir of yearDirs) {
+    if (isNaN(parseInt(yearDir, 10))) continue;
+    const yearPath = path.join(photosRoot, yearDir);
+    const stat = await fs.stat(yearPath).catch(() => null);
+    if (!stat?.isDirectory()) continue;
+    const events = await fs.readdir(yearPath).catch(() => [] as string[]);
+    for (const ev of events) {
+      const evStat = await fs.stat(path.join(yearPath, ev)).catch(() => null);
+      if (evStat?.isDirectory()) count++;
+    }
+  }
+  return count;
+}
+
 async function walkPhotosPerYear(
   photosRoot: string,
-  commit: (items: ScannedPhoto[]) => void
+  commit: (items: ScannedPhoto[]) => void,
+  totalEvents: number,
+  onProgress?: ProgressCallback
 ): Promise<void> {
   let yearDirs: string[];
   try {
@@ -65,6 +90,7 @@ async function walkPhotosPerYear(
   }
 
   yearDirs.sort();
+  let done = 0;
 
   for (const yearDir of yearDirs) {
     const year = parseInt(yearDir, 10);
@@ -74,7 +100,6 @@ async function walkPhotosPerYear(
     const yearStat = await fs.stat(yearPath).catch(() => null);
     if (!yearStat?.isDirectory()) continue;
 
-    const yearPhotos: ScannedPhoto[] = [];
     const events = await fs.readdir(yearPath).catch(() => [] as string[]);
 
     for (const eventDir of events) {
@@ -82,6 +107,9 @@ async function walkPhotosPerYear(
       const eventStat = await fs.stat(eventPath).catch(() => null);
       if (!eventStat?.isDirectory()) continue;
 
+      onProgress?.(eventDir, done, totalEvents);
+
+      const eventPhotos: ScannedPhoto[] = [];
       const files = await fs.readdir(eventPath).catch(() => [] as string[]);
       for (const file of files) {
         const ext = path.extname(file).toLowerCase();
@@ -94,7 +122,7 @@ async function walkPhotosPerYear(
         const relativePath = path.join(yearDir, eventDir, file);
         const exifData = await extractExif(absPath);
 
-        yearPhotos.push({
+        eventPhotos.push({
           path: relativePath,
           filename: file,
           year,
@@ -103,10 +131,12 @@ async function walkPhotosPerYear(
           ...exifData,
         });
       }
-    }
 
-    console.log(`[scan] ${yearDir}: ${yearPhotos.length} photos`);
-    if (yearPhotos.length > 0) commit(yearPhotos);
+      if (eventPhotos.length > 0) commit(eventPhotos);
+      done++;
+      onProgress?.(eventDir, done, totalEvents);
+      console.log(`[scan] ${yearDir}/${eventDir}: ${eventPhotos.length} photos`);
+    }
   }
 }
 
