@@ -96,11 +96,12 @@ export async function POST(req: NextRequest) {
 
   // Apply user filters strictly — when the user sets explicit constraints, honour them
   // regardless of how many photos remain. Never fall back to the unfiltered pool.
-  const hasUserFilters = !!(tone || styles?.length || filterTags?.length);
+  // Only tone and tags are hard pre-filters (they have binary tag matches).
+  // Styles are creative direction passed to the prompt, not a candidate filter.
+  const hasUserFilters = !!(tone || filterTags?.length);
   if (hasUserFilters) {
     allCandidates = allCandidates.filter(c => {
       if (tone && !c.tags.includes(tone)) return false;
-      if (styles?.length && !styles.some(s => c.tags.includes(s))) return false;
       if (filterTags?.length && !filterTags.every(t => c.tags.includes(t))) return false;
       return true;
     });

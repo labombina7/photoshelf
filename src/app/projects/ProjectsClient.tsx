@@ -71,14 +71,17 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
 
   function toggleStyle(s: string) {
     setSelectedStyles(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+    setError('');
   }
   function toggleTag(t: string) {
     setSelectedTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
+    setError('');
   }
   function addTagFromInput(t: string) {
     if (!selectedTags.includes(t)) setSelectedTags(prev => [...prev, t]);
     setTagInput('');
     setShowTagSuggestions(false);
+    setError('');
   }
 
   async function generate() {
@@ -201,7 +204,7 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
                 <select
                   className="scope-select"
                   value={selectedScopeIdx}
-                  onChange={e => setSelectedScopeIdx(parseInt(e.target.value, 10))}
+                  onChange={e => { setSelectedScopeIdx(parseInt(e.target.value, 10)); setError(''); }}
                   disabled={generating}
                 >
                   {scopes.map((s, i) => <option key={i} value={i}>{s.label}</option>)}
@@ -227,7 +230,7 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
                     <button
                       key={t}
                       className={`tone-btn${tone === t ? ' tone-btn--active' : ''}`}
-                      onClick={() => setTone(t)}
+                      onClick={() => { setTone(t); setError(''); }}
                       disabled={generating}
                     >
                       {t === 'all' ? 'Todas' : t === 'color' ? 'Color' : 'B&W'}
