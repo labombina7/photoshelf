@@ -668,8 +668,18 @@ body {
   z-index: 30; backdrop-filter: blur(1px);
 }
 
+/* ── Load more button ── */
+.load-more-btn {
+  display: block; width: 100%; margin: 12px 0 4px;
+  padding: 10px; border: 1px dashed var(--border);
+  border-radius: var(--radius-sm); background: none;
+  font-family: inherit; font-size: 12px; color: var(--text-tertiary);
+  cursor: pointer; text-align: center; transition: background 0.15s;
+}
+.load-more-btn:hover { background: var(--bg); color: var(--text); }
+
 @media (max-width: 768px) {
-  /* Sidebar becomes a fixed drawer */
+  /* ── Sidebar drawer ── */
   .sidebar {
     position: fixed; top: 0; left: 0; height: 100vh;
     z-index: 40; transform: translateX(-100%);
@@ -679,45 +689,85 @@ body {
   .sidebar.mobile-open { transform: translateX(0); }
   .sidebar-overlay { display: block; }
 
-  /* App shell no longer reserves sidebar space */
+  /* ── App shell ── */
   .app-shell { display: block; }
   .main { min-height: 100vh; }
 
-  /* Topbar */
+  /* ── Topbar ── */
   .hamburger { display: flex; align-items: center; }
-  .topbar { padding: 0 14px; gap: 8px; }
+  .topbar { padding: 0 12px; gap: 6px; min-height: 52px; }
+  .topbar-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
   .topbar-sub { display: none; }
-  .search-box { width: 150px; }
   .view-toggle { display: none; }
+  /* Search box collapses to icon-only on mobile — expanded on focus */
+  .search-box { width: 36px; overflow: hidden; transition: width 0.2s ease; border-radius: 20px; }
+  .search-box:focus-within { width: 160px; }
+  .search-box input { min-width: 0; }
 
-  /* Content */
-  .content { padding: 16px; }
-  .year-tabs { gap: 4px; }
+  /* ── Content padding ── */
+  .content { padding: 12px; }
+
+  /* ── Year tabs ── */
+  .year-tabs { gap: 4px; padding-bottom: 2px; }
   .year-tab { padding: 5px 10px; font-size: 12px; }
 
-  /* Photo grid — 3 columns on mobile */
-  .photo-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 4px; }
+  /* ── Collapse controls ── */
+  .collapse-controls { flex-wrap: wrap; gap: 6px; }
+  .classify-year-btn { font-size: 11px; }
 
-  /* Folder grid — 2 columns on mobile */
-  .folder-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  /* ── Event label ── */
+  .event-label { gap: 4px; }
+  .event-name { max-width: 45vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .event-count { flex-shrink: 0; }
+  /* Classify button: icon only on mobile */
+  .classify-btn span:last-child { display: none; }
+  .classify-btn { padding: 3px 6px; min-width: 0; }
 
-  /* Project masonry — 2 columns on mobile */
+  /* ── Photo grid — 3 cols ── */
+  .photo-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
+
+  /* ── Folder grid — 2 cols ── */
+  .folder-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+  /* ── Project masonry — 2 cols ── */
   .project-sequence { columns: 2; }
+  .project-hero { height: 45vh; min-height: 260px; }
+  .project-hero-content { padding: 24px 16px; }
+  .project-title { font-size: 22px; }
 
-  /* Detail view — stack vertically */
-  .detail-body { flex-direction: column; overflow: visible; }
-  .detail-photo-area {
-    flex: none; height: 50vh; padding: 16px;
+  /* ── Projects grid — 1 col ── */
+  .projects-grid { grid-template-columns: 1fr; gap: 16px; }
+
+  /* ── New project modal — full-screen on mobile ── */
+  .new-project-modal {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%; max-height: 100vh; border-radius: 0;
+    transform: none; border: none;
   }
-  .detail-photo-area img { max-height: calc(50vh - 32px); }
+
+  /* ── Detail view — stack vertically ── */
+  .detail-body { flex-direction: column; overflow: visible; }
+  .detail-photo-area { flex: none; height: 45vh; padding: 12px; }
+  .detail-photo-area img { max-height: calc(45vh - 24px); }
   .detail-panel {
     width: 100%; border-left: none; border-top: 1px solid var(--border);
     overflow-y: visible;
   }
 
-  /* AI panel — full width */
-  .ai-panel { width: 100%; }
+  /* ── AI panel — full width ── */
+  .ai-panel { width: 100%; left: 0; right: 0; border-radius: 0; }
 
-  /* Toast */
-  .toast { bottom: 16px; right: 16px; left: 16px; text-align: center; }
+  /* ── Filter chips in new-project modal ── */
+  .filter-chips { gap: 5px; }
+  .filter-chip { padding: 4px 8px; font-size: 11px; }
+
+  /* ── Toasts — bottom full width ── */
+  .scan-toast { bottom: 16px; left: 12px; right: 12px; width: auto; }
+  .toast { bottom: 16px; right: 12px; left: 12px; text-align: center; }
+
+  /* ── Dialog modal ── */
+  .dialog-modal { width: calc(100vw - 32px); }
+
+  /* ── AI photo grid in search ── */
+  .ai-photo-grid { grid-template-columns: repeat(3, 1fr); }
 }

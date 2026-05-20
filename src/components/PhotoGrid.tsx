@@ -47,7 +47,9 @@ function EventGroupBlock({
   currentParams: string;
   showYear: boolean;
 }) {
+  const PAGE_SIZE = 60;
   const [photos, setPhotos] = useState<PhotoWithTags[] | null>(null);
+  const [visible, setVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
   const [classifying, setClassifying] = useState(false);
   const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number } | null>(null);
@@ -55,6 +57,7 @@ function EventGroupBlock({
   useEffect(() => {
     if (isCollapsed || photos !== null) return;
     setLoading(true);
+    setVisible(PAGE_SIZE);
     const params = new URLSearchParams();
     params.set('year', String(group.year));
     params.set('event', group.event);
@@ -113,40 +116,51 @@ function EventGroupBlock({
         </span>
       </div>
       {!isCollapsed && (
-        <div className="photo-grid">
-          {loading && (
-            <div style={{ gridColumn: '1/-1', padding: '20px', color: 'var(--text-tertiary)', fontSize: 13 }}>
-              Cargando fotos…
-            </div>
+        <>
+          <div className="photo-grid">
+            {loading && (
+              <div style={{ gridColumn: '1/-1', padding: '20px', color: 'var(--text-tertiary)', fontSize: 13 }}>
+                Cargando fotos…
+              </div>
+            )}
+            {photos?.slice(0, visible).map((photo) => {
+              const previewTags = photo.tags.slice(0, 2);
+              return (
+                <Link
+                  key={photo.id}
+                  href={`/library/${photo.id}${currentParams ? `?${currentParams}` : ''}`}
+                  className="photo-item"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/api/photos/${photo.id}/thumbnail?size=300`}
+                    alt={photo.filename}
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  {previewTags.length > 0 && (
+                    <div className="photo-overlay">
+                      {previewTags.map((tag) => (
+                        <span key={tag.name} className={`photo-tag-chip ${tag.source === 'ai' ? 'auto' : ''}`}>
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+          {photos && visible < photos.length && (
+            <button
+              className="load-more-btn"
+              onClick={() => setVisible(v => v + PAGE_SIZE)}
+            >
+              Ver {Math.min(PAGE_SIZE, photos.length - visible)} fotos más ({photos.length - visible} restantes)
+            </button>
           )}
-          {photos?.map((photo) => {
-            const previewTags = photo.tags.slice(0, 2);
-            return (
-              <Link
-                key={photo.id}
-                href={`/library/${photo.id}${currentParams ? `?${currentParams}` : ''}`}
-                className="photo-item"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`/api/photos/${photo.id}/thumbnail`}
-                  alt={photo.filename}
-                  loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                />
-                {previewTags.length > 0 && (
-                  <div className="photo-overlay">
-                    {previewTags.map((tag) => (
-                      <span key={tag.name} className={`photo-tag-chip ${tag.source === 'ai' ? 'auto' : ''}`}>
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </Link>
-            );
-          })}
-        </div>
+        </>
       )}
     </div>
   );

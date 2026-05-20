@@ -57,7 +57,8 @@ export default function LibraryClient({
   const [toast, setToast] = useState('');
   const [_isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  // Start with all groups collapsed — prevents loading thousands of thumbnails at once
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set(groups.map(g => `${g.year}-${g.event}`)));
   const [viewMode, setViewMode] = useState<'list' | 'folders'>('list');
   const { running: classifyingYear, startClassify } = useClassify();
   const { alert } = useModal();
