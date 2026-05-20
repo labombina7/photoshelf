@@ -37,6 +37,19 @@ export default async function ProjectsPage() {
   const years = (db.prepare('SELECT DISTINCT year FROM photos ORDER BY year DESC').all() as { year: number }[]).map(r => r.year);
 
   const events = db.prepare('SELECT DISTINCT year, event FROM photos ORDER BY year DESC, event ASC').all() as { year: number; event: string }[];
+
+  const topTags = (db.prepare(`
+    SELECT t.name, COUNT(pt.photo_id) as c
+    FROM tags t JOIN photo_tags pt ON pt.tag_id = t.id
+    GROUP BY t.id ORDER BY c DESC LIMIT 5
+  `).all() as { name: string; c: number }[]).map(r => r.name);
+
+  const allTags = (db.prepare(`
+    SELECT DISTINCT t.name FROM tags t
+    JOIN photo_tags pt ON pt.tag_id = t.id
+    ORDER BY t.name ASC
+  `).all() as { name: string }[]).map(r => r.name);
+
   const sidebarProjects = getSidebarProjects(db);
 
   return (
@@ -46,6 +59,8 @@ export default async function ProjectsPage() {
       themes={themes}
       years={years}
       events={events}
+      topTags={topTags}
+      allTags={allTags}
       totalPhotos={total}
       favoriteCount={favoriteCount}
       untaggedCount={untaggedCount}

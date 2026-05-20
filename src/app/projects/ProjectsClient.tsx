@@ -24,18 +24,22 @@ interface ScopeOption {
   scopeValue?: string;
 }
 
+const STYLES = ['portrait', 'landscape', 'street', 'fashion', 'editorial', 'architecture', 'documentary', 'wildlife', 'travel', 'sport', 'abstract', 'macro', 'product'];
+
 interface Props {
   projects: Project[];
   sidebarProjects: { id: number; title: string }[];
   themes: Theme[];
   years: number[];
   events: { year: number; event: string }[];
+  topTags: string[];
+  allTags: string[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
 }
 
-export default function ProjectsClient({ projects: initial, sidebarProjects, themes, years, events, totalPhotos, favoriteCount, untaggedCount }: Props) {
+export default function ProjectsClient({ projects: initial, sidebarProjects, themes, years, events, topTags, allTags, totalPhotos, favoriteCount, untaggedCount }: Props) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const [projects, setProjects] = useState(initial);
@@ -53,6 +57,29 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
   const [count, setCount] = useState(15);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
+
+  // Filters
+  const [tone, setTone] = useState<'all' | 'b&w' | 'color'>('all');
+  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [showTagSuggestions, setShowTagSuggestions] = useState(false);
+
+  const tagSuggestions = tagInput.length > 0
+    ? allTags.filter(t => t.includes(tagInput.toLowerCase()) && !selectedTags.includes(t)).slice(0, 6)
+    : [];
+
+  function toggleStyle(s: string) {
+    setSelectedStyles(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+  }
+  function toggleTag(t: string) {
+    setSelectedTags(prev => prev.includes(t) ? prev.filter(x => x !== t) : [...prev, t]);
+  }
+  function addTagFromInput(t: string) {
+    if (!selectedTags.includes(t)) setSelectedTags(prev => [...prev, t]);
+    setTagInput('');
+    setShowTagSuggestions(false);
+  }
 
   async function handleScan() {
     setScanning(true);
@@ -72,7 +99,14 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
       const res = await fetch('/api/projects/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scopeType: scope.scopeType, scopeValue: scope.scopeValue, count }),
+        body: JSON.stringify({
+          scopeType: scope.scopeType,
+          scopeValue: scope.scopeValue,
+          count,
+          tone: tone === 'all' ? undefined : tone,
+          styles: selectedStyles.length > 0 ? selectedStyles : undefined,
+          tags: selectedTags.length > 0 ? selectedTags : undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? 'Error generando proyecto'); return; }
@@ -170,7 +204,8 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
                 <IconX size={14} />
               </button>
             </div>
-            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {/* Scope */}
               <div>
                 <label className="field-label">Origen de las fotos</label>
                 <select
@@ -182,6 +217,8 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
                   {scopes.map((s, i) => <option key={i} value={i}>{s.label}</option>)}
                 </select>
               </div>
+
+              {/* Count */}
               <div>
                 <label className="field-label">Número de fotos — {count}</label>
                 <input
@@ -191,6 +228,85 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
                   disabled={generating}
                 />
               </div>
+
+              {/* Tone */}
+              <div>
+                <label className="field-label">Tono</label>
+                <div className="tone-toggle">
+                  {(['all', 'color', 'b&w'] as const).map(t => (
+                    <button
+                      key={t}
+                      className={`tone-btn${tone === t ? ' tone-btn--active' : ''}`}
+                      onClick={() => setTone(t)}
+                      disabled={generating}
+                    >
+                      {t === 'all' ? 'Todas' : t === 'color' ? 'Color' : 'B&W'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Styles */}
+              <div>
+                <label className="field-label">Estilo fotográfico</label>
+                <div className="filter-chips">
+                  {STYLES.map(s => (
+                    <button
+                      key={s}
+                      className={`filter-chip${selectedStyles.includes(s) ? ' filter-chip--active' : ''}`}
+                      onClick={() => toggleStyle(s)}
+                      disabled={generating}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="field-label">Tags</label>
+                <div className="filter-chips" style={{ marginBottom: 8 }}>
+                  {topTags.map(t => (
+                    <button
+                      key={t}
+                      className={`filter-chip${selectedTags.includes(t) ? ' filter-chip--active' : ''}`}
+                      onClick={() => toggleTag(t)}
+                      disabled={generating}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    className="tag-search-input"
+                    placeholder="Buscar más tags…"
+                    value={tagInput}
+                    onChange={e => { setTagInput(e.target.value); setShowTagSuggestions(true); }}
+                    onFocus={() => setShowTagSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowTagSuggestions(false), 150)}
+                    disabled={generating}
+                  />
+                  {showTagSuggestions && tagSuggestions.length > 0 && (
+                    <div className="tag-suggestions">
+                      {tagSuggestions.map(t => (
+                        <button key={t} className="tag-suggestion-item" onMouseDown={() => addTagFromInput(t)}>{t}</button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {selectedTags.length > 0 && (
+                  <div className="filter-chips" style={{ marginTop: 8 }}>
+                    {selectedTags.map(t => (
+                      <button key={t} className="filter-chip filter-chip--active" onClick={() => toggleTag(t)} disabled={generating}>
+                        {t} ×
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {error && <p style={{ fontSize: 13, color: '#c0392b' }}>{error}</p>}
               <button
                 className="btn-primary"

@@ -552,6 +552,24 @@ body {
 .scope-select { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; color: var(--text); background: var(--bg); outline: none; }
 .scope-select:focus { border-color: var(--text); }
 
+/* New project modal — filters */
+.new-project-modal { max-height: 90vh; overflow-y: auto; }
+.tone-toggle { display: flex; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.tone-btn { flex: 1; padding: 7px 0; font-size: 12px; font-weight: 500; background: var(--bg); border: none; color: var(--text-secondary); cursor: pointer; transition: background 0.15s, color 0.15s; }
+.tone-btn:not(:last-child) { border-right: 1px solid var(--border); }
+.tone-btn--active { background: var(--text); color: #fff; }
+.tone-btn:hover:not(.tone-btn--active):not(:disabled) { background: var(--border-light); }
+.filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter-chip { padding: 4px 10px; font-size: 12px; border: 1px solid var(--border); border-radius: 20px; background: var(--bg); color: var(--text-secondary); cursor: pointer; transition: all 0.15s; }
+.filter-chip:hover:not(:disabled) { border-color: var(--text-secondary); color: var(--text); }
+.filter-chip--active { background: var(--text); color: #fff; border-color: var(--text); }
+.filter-chip:disabled { opacity: 0.5; cursor: default; }
+.tag-search-input { width: 100%; padding: 8px 11px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; color: var(--text); background: var(--bg); outline: none; }
+.tag-search-input:focus { border-color: var(--text); }
+.tag-suggestions { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: 0 4px 16px rgba(0,0,0,0.1); z-index: 10; overflow: hidden; }
+.tag-suggestion-item { display: block; width: 100%; text-align: left; padding: 8px 12px; font-size: 13px; border: none; background: none; color: var(--text); cursor: pointer; }
+.tag-suggestion-item:hover { background: var(--bg); }
+
 /* ── Project detail ── */
 .project-detail-header { display: flex; align-items: center; padding: 14px 24px; background: var(--surface); border-bottom: 1px solid var(--border); gap: 12px; position: sticky; top: 0; z-index: 10; }
 .project-hero { position: relative; height: 70vh; min-height: 400px; overflow: hidden; background: #111; }

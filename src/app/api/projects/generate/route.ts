@@ -41,13 +41,16 @@ interface GenerateBody {
   scopeType: 'year' | 'event' | 'theme' | 'all';
   scopeValue?: string;
   count: number;
+  tone?: 'b&w' | 'color';
+  styles?: string[];
+  tags?: string[];
 }
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { scopeType, scopeValue, count = 15 }: GenerateBody = await req.json();
+  const { scopeType, scopeValue, count = 15, tone, styles, tags: filterTags }: GenerateBody = await req.json();
   const db = getDb();
 
   // Build candidate query based on scope
@@ -83,7 +86,7 @@ export async function POST(req: NextRequest) {
   }
 
   const MAX_CANDIDATES = 150;
-  const allCandidates = rows.map(r => ({
+  let allCandidates = rows.map(r => ({
     id: r.id,
     filename: r.filename,
     year: r.year,
@@ -91,12 +94,22 @@ export async function POST(req: NextRequest) {
     tags: r.tag_list ? r.tag_list.split(',').filter(Boolean) : [],
   }));
 
+  // Apply user filters — keep untagged photos only if the pool would become too small
+  const filtered = allCandidates.filter(c => {
+    if (tone && !c.tags.includes(tone)) return false;
+    if (styles?.length && !styles.some(s => c.tags.includes(s))) return false;
+    if (filterTags?.length && !filterTags.every(t => c.tags.includes(t))) return false;
+    return true;
+  });
+  if (filtered.length >= 3) allCandidates = filtered;
+
   const candidates: ProjectCandidate[] = allCandidates.length <= MAX_CANDIDATES
     ? allCandidates
     : smartSample(allCandidates, MAX_CANDIDATES);
 
   const actualCount = Math.min(count, candidates.length);
-  const { title, statement, selectedIds } = await generateProject(candidates, actualCount);
+  const filters = { tone, styles, tags: filterTags };
+  const { title, statement, selectedIds } = await generateProject(candidates, actualCount, filters);
 
   if (selectedIds.length === 0) {
     return NextResponse.json({ error: 'AI could not select photos' }, { status: 500 });
