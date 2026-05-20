@@ -103,9 +103,16 @@ export interface GeneratedProject {
   selectedIds: number[];
 }
 
+export interface ProjectFilters {
+  tone?: string;
+  styles?: string[];
+  tags?: string[];
+}
+
 export async function generateProject(
   candidates: ProjectCandidate[],
-  count: number
+  count: number,
+  filters?: ProjectFilters
 ): Promise<GeneratedProject> {
   // Shuffle so LLM doesn't pick by list position (primacy bias)
   const shuffled = [...candidates].sort(() => Math.random() - 0.5);
@@ -122,13 +129,16 @@ export async function generateProject(
 Task: choose exactly ${count} photos from the list below to form a cohesive photographic project.
 
 IMPORTANT: Read the ENTIRE list before making any selection. Do NOT pick photos just because they appear near the top — position in this list is random and meaningless. Your selection must be based solely on quality and fit.
+${filters && (filters.tone || filters.styles?.length || filters.tags?.length) ? `
+User preferences — respect these strictly:${filters.tone ? `\n- Tone: ${filters.tone} photos only` : ''}${filters.styles?.length ? `\n- Photographic styles required: ${filters.styles.join(', ')}` : ''}${filters.tags?.length ? `\n- Must relate to: ${filters.tags.join(', ')}` : ''}
+` : ''}
 
 Rules — follow ALL of them:
 1. SCAN FIRST: Go through all ${shuffled.length} photos before deciding. The best photos may be anywhere in the list.
 2. QUALITY: Strongly prefer photos with more specific tags (e.g. "portrait, editorial, studio, woman") over untagged ones or those with only generic tags.
 3. DIVERSITY: Do not pick more than ${maxPerEvent} photos from the same event folder. Spread across different events and years.
 4. VARIETY: If two photos share the same event and similar tags, pick only one — the one with richer or more specific tags.
-5. TONE: b&w and color photos can be mixed if it strengthens the narrative. Avoid mixing only when it looks inconsistent.
+5. TONE: ${filters?.tone ? `User selected ${filters.tone} — pick only ${filters.tone} photos.` : 'b&w and color photos can be mixed if it strengthens the narrative. Avoid mixing only when it looks inconsistent.'}
 6. NARRATIVE ARC: Order the final selectedIds to tell a visual story — opening image, development, climax, closing.
 
 Photos (ID | year/event | tags):
