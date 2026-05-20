@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { ModalProvider } from '@/components/ModalProvider';
 import { ScanProvider } from '@/components/ScanProvider';
+import { ClassifyProvider } from '@/components/ClassifyProvider';
 
 export const metadata: Metadata = {
   title: 'photoshelf',
@@ -22,7 +23,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ModalProvider>
           <ScanProvider>
-            {children}
+            <ClassifyProvider>
+              {children}
+            </ClassifyProvider>
           </ScanProvider>
         </ModalProvider>
       </body>

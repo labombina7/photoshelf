@@ -7,6 +7,8 @@ import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
 import { IconSearch, IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
 import AISearchPanel from '@/components/AISearchPanel';
+import { useClassify } from '@/components/ClassifyProvider';
+import { useModal } from '@/components/ModalProvider';
 import type { Theme } from '@/lib/types';
 
 interface EventGroup {
@@ -56,9 +58,9 @@ export default function LibraryClient({
   const [_isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
-  const [classifyingYear, setClassifyingYear] = useState(false);
-  const [yearProgress, setYearProgress] = useState<{ done: number; total: number } | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'folders'>('list');
+  const { running: classifyingYear, startClassify } = useClassify();
+  const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // If navigated to a specific event, always use list mode
@@ -88,24 +90,13 @@ export default function LibraryClient({
 
   async function handleClassifyYear() {
     if (!activeYear) return;
-    setClassifyingYear(true);
-    setYearProgress({ done: 0, total: groups.length });
-    let done = 0;
-    for (const group of groups) {
-      try {
-        await fetch('/api/ai/classify/batch', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ year: activeYear, event: group.event }),
-        });
-      } catch { /* continue */ }
-      done++;
-      setYearProgress({ done, total: groups.length });
+    try {
+      await startClassify(parseInt(activeYear, 10));
+    } catch (err) {
+      await alert(err instanceof Error ? err.message : 'Error al iniciar la clasificación', {
+        title: 'Clasificación en curso',
+      });
     }
-    setClassifyingYear(false);
-    setYearProgress(null);
-    showToast(`Clasificación del año ${activeYear} completada`);
-    startTransition(() => router.refresh());
   }
 
   const allKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
@@ -238,7 +229,7 @@ export default function LibraryClient({
                     >
                       <IconSparkle size={11} />
                       {classifyingYear
-                        ? `Clasificando… (${yearProgress?.done}/${yearProgress?.total} carpetas)`
+                        ? 'Clasificando…'
                         : `Clasificar año ${activeYear}`}
                     </button>
                   )}
