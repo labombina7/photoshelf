@@ -94,14 +94,23 @@ export async function POST(req: NextRequest) {
     tags: r.tag_list ? r.tag_list.split(',').filter(Boolean) : [],
   }));
 
-  // Apply user filters — keep untagged photos only if the pool would become too small
-  const filtered = allCandidates.filter(c => {
-    if (tone && !c.tags.includes(tone)) return false;
-    if (styles?.length && !styles.some(s => c.tags.includes(s))) return false;
-    if (filterTags?.length && !filterTags.every(t => c.tags.includes(t))) return false;
-    return true;
-  });
-  if (filtered.length >= 3) allCandidates = filtered;
+  // Apply user filters strictly — when the user sets explicit constraints, honour them
+  // regardless of how many photos remain. Never fall back to the unfiltered pool.
+  const hasUserFilters = !!(tone || styles?.length || filterTags?.length);
+  if (hasUserFilters) {
+    allCandidates = allCandidates.filter(c => {
+      if (tone && !c.tags.includes(tone)) return false;
+      if (styles?.length && !styles.some(s => c.tags.includes(s))) return false;
+      if (filterTags?.length && !filterTags.every(t => c.tags.includes(t))) return false;
+      return true;
+    });
+    if (allCandidates.length < 3) {
+      return NextResponse.json(
+        { error: `Solo ${allCandidates.length} foto(s) cumplen los filtros seleccionados. Prueba con un criterio menos restrictivo o un origen más amplio.` },
+        { status: 400 }
+      );
+    }
+  }
 
   const candidates: ProjectCandidate[] = allCandidates.length <= MAX_CANDIDATES
     ? allCandidates

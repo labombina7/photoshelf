@@ -123,22 +123,29 @@ export async function generateProject(
 
   const maxPerEvent = Math.max(2, Math.ceil(count / 4));
 
+  const hasFilters = !!(filters?.tone || filters?.styles?.length || filters?.tags?.length);
+
+  const hardConstraints = hasFilters ? `
+==== HARD CONSTRAINTS — NON-NEGOTIABLE ====
+${filters?.tone ? `TONE: You MUST select ONLY ${filters.tone} photos. Any photo without the tag "${filters.tone}" in its tag list is FORBIDDEN. Do not select it under any circumstance.` : ''}
+${filters?.styles?.length ? `STYLE: Every selected photo MUST include at least one of these styles in its tags: ${filters.styles.join(', ')}.` : ''}
+${filters?.tags?.length ? `TAGS: Every selected photo MUST include ALL of these tags: ${filters.tags.join(', ')}.` : ''}
+===========================================
+` : '';
+
   const raw = await ollamaText(
     `You are an experienced photography curator selecting images for a gallery exhibition.
-
+${hardConstraints}
 Task: choose exactly ${count} photos from the list below to form a cohesive photographic project.
 
-IMPORTANT: Read the ENTIRE list before making any selection. Do NOT pick photos just because they appear near the top — position in this list is random and meaningless. Your selection must be based solely on quality and fit.
-${filters && (filters.tone || filters.styles?.length || filters.tags?.length) ? `
-User preferences — respect these strictly:${filters.tone ? `\n- Tone: ${filters.tone} photos only` : ''}${filters.styles?.length ? `\n- Photographic styles required: ${filters.styles.join(', ')}` : ''}${filters.tags?.length ? `\n- Must relate to: ${filters.tags.join(', ')}` : ''}
-` : ''}
+IMPORTANT: Read the ENTIRE list before making any selection. Do NOT pick photos just because they appear near the top — position in this list is random and meaningless.
 
 Rules — follow ALL of them:
 1. SCAN FIRST: Go through all ${shuffled.length} photos before deciding. The best photos may be anywhere in the list.
 2. QUALITY: Strongly prefer photos with more specific tags (e.g. "portrait, editorial, studio, woman") over untagged ones or those with only generic tags.
 3. DIVERSITY: Do not pick more than ${maxPerEvent} photos from the same event folder. Spread across different events and years.
 4. VARIETY: If two photos share the same event and similar tags, pick only one — the one with richer or more specific tags.
-5. TONE: ${filters?.tone ? `User selected ${filters.tone} — pick only ${filters.tone} photos.` : 'b&w and color photos can be mixed if it strengthens the narrative. Avoid mixing only when it looks inconsistent.'}
+5. TONE: ${filters?.tone ? `ONLY ${filters.tone} photos — this is a hard constraint already stated above. Reject any photo without the "${filters.tone}" tag.` : 'b&w and color photos can be mixed if it strengthens the narrative.'}
 6. NARRATIVE ARC: Order the final selectedIds to tell a visual story — opening image, development, climax, closing.
 
 Photos (ID | year/event | tags):
@@ -156,10 +163,19 @@ Reply ONLY with this JSON, no explanation, no markdown:
   try {
     const json = raw.match(/\{[\s\S]*\}/)?.[0] ?? '{}';
     const parsed = JSON.parse(json);
+    const candidateSet = new Map(candidates.map(c => [c.id, c]));
     const selectedIds: number[] = Array.isArray(parsed.selectedIds)
       ? parsed.selectedIds
           .map((id: unknown) => Number(id))
-          .filter((id: number) => candidates.some(c => c.id === id))
+          .filter((id: number) => {
+            const c = candidateSet.get(id);
+            if (!c) return false;
+            // Guard: reject any photo that violates hard constraints
+            if (filters?.tone && !c.tags.includes(filters.tone)) return false;
+            if (filters?.styles?.length && !filters.styles.some(s => c.tags.includes(s))) return false;
+            if (filters?.tags?.length && !filters.tags.every(t => c.tags.includes(t))) return false;
+            return true;
+          })
           .slice(0, count)
       : [];
     return {
