@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useModal } from '@/components/ModalProvider';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconChevronLeft, IconTrash, IconX, IconCheck, IconEdit } from '@/components/Icons';
@@ -37,6 +38,7 @@ interface Props {
 
 export default function ProjectDetailClient({ project: initial, themes, projects, totalPhotos, favoriteCount, untaggedCount }: Props) {
   const router = useRouter();
+  const { confirm } = useModal();
   const [project, setProject] = useState(initial);
   const [editingTitle, setEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState('');
@@ -88,7 +90,8 @@ export default function ProjectDetailClient({ project: initial, themes, projects
   }
 
   async function deleteProject() {
-    if (!confirm('¿Eliminar este proyecto?')) return;
+    const ok = await confirm('¿Eliminar este proyecto?', { title: 'Eliminar proyecto', confirmLabel: 'Eliminar', danger: true });
+    if (!ok) return;
     await fetch(`/api/projects/${project.id}`, { method: 'DELETE' });
     router.push('/projects');
   }

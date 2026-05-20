@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder } from './Icons';
+import { useScan } from './ScanProvider';
+import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
 
 interface SidebarProps {
@@ -12,8 +14,6 @@ interface SidebarProps {
   totalPhotos: number;
   favoriteCount?: number;
   untaggedCount?: number;
-  onScan?: () => void;
-  scanning?: boolean;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
 }
@@ -24,14 +24,14 @@ export default function Sidebar({
   totalPhotos,
   favoriteCount = 0,
   untaggedCount = 0,
-  onScan,
-  scanning = false,
   mobileOpen = false,
   onMobileClose,
 }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { running, startScan } = useScan();
+  const { confirm, alert } = useModal();
   const [showNewTheme, setShowNewTheme] = useState(false);
   const [newThemeName, setNewThemeName] = useState('');
   const [newThemeColor, setNewThemeColor] = useState('#e8a45a');
@@ -77,8 +77,23 @@ export default function Sidebar({
     router.refresh();
   }
 
+  async function handleScan() {
+    try {
+      await startScan();
+    } catch (err) {
+      await alert(err instanceof Error ? err.message : 'Error al iniciar el análisis', {
+        title: 'Análisis en curso',
+      });
+    }
+  }
+
   async function deleteTheme(id: number, name: string) {
-    if (!confirm(`¿Eliminar la temática "${name}"? Se eliminará de todas las fotos.`)) return;
+    const ok = await confirm(`¿Eliminar la temática "${name}"? Se eliminará de todas las fotos.`, {
+      title: 'Eliminar temática',
+      confirmLabel: 'Eliminar',
+      danger: true,
+    });
+    if (!ok) return;
     await fetch(`/api/themes/${id}`, { method: 'DELETE' });
     if (activeTheme === String(id)) router.push('/library');
     else router.refresh();
@@ -276,18 +291,18 @@ export default function Sidebar({
 
       <div style={{ padding: '0 18px 12px' }}>
         <button
-          onClick={onScan}
-          disabled={scanning}
+          onClick={handleScan}
+          disabled={running}
           style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: 7,
             padding: '7px 10px', border: '1px solid var(--border)',
             borderRadius: 'var(--radius-sm)', background: 'transparent',
             fontFamily: 'inherit', fontSize: 13, color: 'var(--text-secondary)',
-            cursor: scanning ? 'not-allowed' : 'pointer', opacity: scanning ? 0.6 : 1,
+            cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.6 : 1,
           }}
         >
           <IconRefresh />
-          {scanning ? 'Escaneando…' : 'Reescanear biblioteca'}
+          {running ? 'Escaneando…' : 'Reescanear biblioteca'}
         </button>
       </div>
 
