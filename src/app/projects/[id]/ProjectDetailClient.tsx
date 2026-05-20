@@ -132,6 +132,7 @@ export default function ProjectDetailClient({ project: initial, themes, projects
                 className="project-hero-img"
                 src={`/api/photos/${project.photos[0].id}/thumbnail?size=1920&fit=inside`}
                 alt={project.title}
+                decoding="async"
                 onClick={() => setLightboxIdx(0)}
               />
             )}
@@ -194,6 +195,8 @@ export default function ProjectDetailClient({ project: initial, themes, projects
                     src={`/api/photos/${photo.id}/thumbnail?size=600&fit=inside`}
                     alt={photo.filename}
                     className="project-seq-img"
+                    loading="lazy"
+                    decoding="async"
                   />
                   <button
                     className="project-seq-remove"
@@ -223,6 +226,7 @@ export default function ProjectDetailClient({ project: initial, themes, projects
             src={`/api/photos/${currentPhoto.id}/thumbnail?size=1920&fit=inside`}
             alt={currentPhoto.filename}
             className="lightbox-img"
+            decoding="async"
             onClick={e => e.stopPropagation()}
           />
           <button

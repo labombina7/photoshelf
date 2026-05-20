@@ -164,7 +164,7 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
                   <Link href={`/projects/${p.id}`} className="project-card-cover">
                     {p.cover_photo_id ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={`/api/photos/${p.cover_photo_id}/thumbnail?size=600`} alt={p.title} />
+                      <img src={`/api/photos/${p.cover_photo_id}/thumbnail?size=600`} alt={p.title} loading="lazy" decoding="async" />
                     ) : (
                       <div className="project-card-cover-empty"><IconSparkle size={24} /></div>
                     )}

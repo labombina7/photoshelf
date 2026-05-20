@@ -105,6 +105,7 @@ export default async function PhotoDetailPage({
             <img
               src={`/api/photos/${photo.id}/thumbnail?size=1920&fit=inside`}
               alt={photo.filename}
+              decoding="async"
             />
             <a
               href={`/api/photos/${photo.id}/original`}
