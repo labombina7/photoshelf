@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const PAGE_SIZE = 48;
@@ -21,6 +21,21 @@ export default function FolderGrid({ groups, showYear }: FolderGridProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const loadMore = useCallback(() => {
+    if (visible < groups.length) setVisible(v => v + PAGE_SIZE);
+  }, [visible, groups.length]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) loadMore();
+    }, { rootMargin: '300px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   function openFolder(group: EventGroup) {
     const params = new URLSearchParams(searchParams.toString());
@@ -71,14 +86,7 @@ export default function FolderGrid({ groups, showYear }: FolderGridProps) {
           </div>
         ))}
       </div>
-      {remaining > 0 && (
-        <button
-          className="load-more-btn"
-          onClick={() => setVisible(v => v + PAGE_SIZE)}
-        >
-          Ver {Math.min(PAGE_SIZE, remaining)} carpetas más ({remaining} restantes)
-        </button>
-      )}
+      {remaining > 0 && <div ref={sentinelRef} style={{ height: 1 }} />}
     </>
   );
 }

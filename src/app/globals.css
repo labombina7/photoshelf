@@ -218,6 +218,9 @@ body {
 .classify-btn { background: none; border: 1px solid transparent; border-radius: var(--radius-sm); padding: 2px 8px; font-size: 11px; color: var(--text-tertiary); cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .classify-btn:hover:not(:disabled) { border-color: #c7d9ff; color: var(--tag-auto-color); background: var(--tag-auto-bg); }
 .classify-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+/* Desktop: show classify button inline; hide 3-dots menu */
+.classify-btn--desktop { display: inline-flex; }
+.event-menu--mobile { display: none; }
 .year-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
 .year-tab {
   padding: 6px 14px; border-radius: 20px;
@@ -760,6 +763,9 @@ body {
   .event-label { gap: 4px; }
   .event-name { max-width: 45vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .event-count { flex-shrink: 0; }
+  /* Mobile: hide inline classify, show 3-dots menu */
+  .classify-btn--desktop { display: none; }
+  .event-menu--mobile { display: block; }
 
   /* ── Photo grid — 3 cols ── */
   .photo-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
