@@ -65,8 +65,8 @@ export default function FolderGrid({ groups, showYear }: FolderGridProps) {
           <div
             key={`${group.year}-${group.event}`}
             className="folder-card"
-            onDoubleClick={() => openFolder(group)}
-            title={`Doble clic para abrir "${group.event}"`}
+            onClick={() => openFolder(group)}
+            title={`Abrir "${group.event}"`}
           >
             <div className="folder-card-thumb">
               {/* eslint-disable-next-line @next/next/no-img-element */}

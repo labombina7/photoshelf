@@ -61,6 +61,8 @@ export default function LibraryClient({
   // detail preserves which groups were open. Falls back to all-collapsed on first visit.
   const allGroupKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+    // When viewing a specific event (arrived from folder click), always expand it
+    if (activeFilters.event) return new Set<string>();
     try {
       const stored = sessionStorage.getItem('photoshelf_collapsed');
       if (stored) return new Set<string>(JSON.parse(stored) as string[]);
