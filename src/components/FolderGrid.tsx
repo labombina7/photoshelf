@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { IconSparkle } from '@/components/Icons';
 
 const PAGE_SIZE = 48;
 
@@ -16,99 +15,6 @@ interface EventGroup {
 interface FolderGridProps {
   groups: EventGroup[];
   showYear: boolean;
-}
-
-function FolderCard({ group, showYear, onOpen }: { group: EventGroup; showYear: boolean; onOpen: () => void }) {
-  const [classifying, setClassifying] = useState(false);
-  const [classified, setClassified] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  // Close menu on outside click
-  useEffect(() => {
-    if (!menuOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [menuOpen]);
-
-  async function handleClassify(e: React.MouseEvent) {
-    e.stopPropagation();
-    setMenuOpen(false);
-    setClassifying(true);
-    try {
-      await fetch('/api/ai/classify/batch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year: group.year, event: group.event }),
-      });
-      setClassified(true);
-    } finally {
-      setClassifying(false);
-    }
-  }
-
-  return (
-    <div
-      className="folder-card"
-      onDoubleClick={onOpen}
-      title={`Doble clic para abrir "${group.event}"`}
-    >
-      <div className="folder-card-thumb">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={`/api/photos/${group.thumbnail_id}/thumbnail?size=200`}
-          alt={group.event}
-          loading="lazy"
-          decoding="async"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-        />
-      </div>
-      <div className="folder-card-info">
-        <div className="folder-card-meta">
-          {showYear && <span className="folder-card-year">{group.year}</span>}
-          <span className="folder-card-name">{group.event}</span>
-          <span className="folder-card-count">{group.count} fotos{classified ? ' · ✓' : ''}</span>
-        </div>
-        <div className="folder-card-actions">
-          {/* Desktop: classify button inline */}
-          <button
-            className="classify-btn classify-btn--desktop"
-            onClick={handleClassify}
-            disabled={classifying}
-            title="Clasificar con IA"
-          >
-            <IconSparkle size={11} />
-            <span>{classifying ? 'Clasificando…' : 'Clasificar'}</span>
-          </button>
-          {/* Mobile: 3-dots menu */}
-          <div ref={menuRef} className="event-menu-wrap event-menu--mobile">
-            <button
-              className="event-menu-btn"
-              title="Más opciones"
-              onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
-            >
-              ···
-            </button>
-            {menuOpen && (
-              <div className="event-menu-dropdown">
-                <button
-                  className="event-menu-item"
-                  onClick={handleClassify}
-                  disabled={classifying}
-                >
-                  <IconSparkle size={11} />
-                  {classifying ? 'Clasificando…' : 'Clasificar con IA'}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 export default function FolderGrid({ groups, showYear }: FolderGridProps) {
@@ -156,12 +62,28 @@ export default function FolderGrid({ groups, showYear }: FolderGridProps) {
     <>
       <div className="folder-grid">
         {shown.map((group) => (
-          <FolderCard
+          <div
             key={`${group.year}-${group.event}`}
-            group={group}
-            showYear={showYear}
-            onOpen={() => openFolder(group)}
-          />
+            className="folder-card"
+            onDoubleClick={() => openFolder(group)}
+            title={`Doble clic para abrir "${group.event}"`}
+          >
+            <div className="folder-card-thumb">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`/api/photos/${group.thumbnail_id}/thumbnail?size=200`}
+                alt={group.event}
+                loading="lazy"
+                decoding="async"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            </div>
+            <div className="folder-card-info">
+              {showYear && <span className="folder-card-year">{group.year}</span>}
+              <span className="folder-card-name">{group.event}</span>
+              <span className="folder-card-count">{group.count} fotos</span>
+            </div>
+          </div>
         ))}
       </div>
       {remaining > 0 && <div ref={sentinelRef} style={{ height: 1 }} />}
