@@ -19,6 +19,15 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const sp = await searchParams;
   const db = getDb();
 
+  // If no year/event/filter is active, default to the current year (if photos exist for it)
+  if (!sp.year && !sp.event && !sp.theme && !sp.favorite && !sp.untagged && !sp.q) {
+    const currentYear = new Date().getFullYear();
+    const hasCurrentYear = db.prepare('SELECT 1 FROM photos WHERE year = ? LIMIT 1').get(currentYear);
+    if (hasCurrentYear) {
+      redirect(`/library?year=${currentYear}`);
+    }
+  }
+
   let groupSql = `
     SELECT p.year, p.event, COUNT(DISTINCT p.id) as count, MIN(p.id) as thumbnail_id
     FROM photos p

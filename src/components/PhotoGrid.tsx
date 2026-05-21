@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconSparkle } from '@/components/Icons';
@@ -53,6 +53,18 @@ function EventGroupBlock({
   const [loading, setLoading] = useState(false);
   const [classifying, setClassifying] = useState(false);
   const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
 
   useEffect(() => {
     if (isCollapsed || photos !== null) return;
@@ -74,7 +86,7 @@ function EventGroupBlock({
   }, [isCollapsed, photos, group, activeFilters]);
 
   async function handleClassify(e: React.MouseEvent) {
-    e.stopPropagation();
+    e.stopPropagation?.();
     setClassifying(true);
     setClassifyResult(null);
     try {
@@ -103,15 +115,27 @@ function EventGroupBlock({
           </span>
         )}
         <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <button
-            onClick={handleClassify}
-            disabled={classifying}
-            className="classify-btn"
-            title="Clasificar fotos de esta carpeta con IA"
-          >
-            <IconSparkle size={11} />
-            {classifying ? 'Clasificando…' : 'Clasificar'}
-          </button>
+          <div ref={menuRef} className="event-menu-wrap">
+            <button
+              className="event-menu-btn"
+              title="Más opciones"
+              onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
+            >
+              ···
+            </button>
+            {menuOpen && (
+              <div className="event-menu-dropdown">
+                <button
+                  className="event-menu-item"
+                  onClick={(e) => { e.stopPropagation(); setMenuOpen(false); handleClassify(e); }}
+                  disabled={classifying}
+                >
+                  <IconSparkle size={11} />
+                  {classifying ? 'Clasificando…' : 'Clasificar con IA'}
+                </button>
+              </div>
+            )}
+          </div>
           {isCollapsed ? <IconChevronDown /> : <IconChevronUp />}
         </span>
       </div>
