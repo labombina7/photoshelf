@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useModal } from '@/components/ModalProvider';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
-import { IconChevronLeft, IconTrash, IconX, IconCheck, IconEdit } from '@/components/Icons';
+import { IconChevronLeft, IconTrash, IconX, IconCheck, IconEdit, IconMenu } from '@/components/Icons';
 import type { Theme } from '@/lib/types';
 
 interface ProjectPhoto {
@@ -45,6 +45,7 @@ export default function ProjectDetailClient({ project: initial, themes, projects
   const [editingStatement, setEditingStatement] = useState(false);
   const [editStatement, setEditStatement] = useState('');
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const handleKey = useCallback((e: KeyboardEvent) => {
     if (lightboxIdx === null) return;
@@ -106,11 +107,16 @@ export default function ProjectDetailClient({ project: initial, themes, projects
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}
+        mobileOpen={mobileSidebarOpen}
+        onMobileClose={() => setMobileSidebarOpen(false)}
       />
 
       <div className="main">
         {/* Topbar */}
         <div className="topbar">
+          <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
+            <IconMenu size={20} />
+          </button>
           <Link href="/projects" className="back-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <IconChevronLeft size={14} />
             Proyectos

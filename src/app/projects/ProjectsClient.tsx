@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useModal } from '@/components/ModalProvider';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
-import { IconSparkle, IconTrash, IconPlus, IconX } from '@/components/Icons';
+import { IconSparkle, IconTrash, IconPlus, IconX, IconMenu } from '@/components/Icons';
 import type { Theme } from '@/lib/types';
 
 interface Project {
@@ -57,6 +57,7 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
   const [count, setCount] = useState(15);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState('');
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Filters
   const [tone, setTone] = useState<'all' | 'b&w' | 'color'>('all');
@@ -132,11 +133,15 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}
-
+        mobileOpen={mobileSidebarOpen}
+        onMobileClose={() => setMobileSidebarOpen(false)}
       />
 
       <div className="main">
         <div className="topbar">
+          <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
+            <IconMenu size={20} />
+          </button>
           <div className="topbar-title">Proyectos</div>
           <span className="topbar-sub">{projects.length} proyecto{projects.length !== 1 ? 's' : ''}</span>
           <div className="topbar-spacer" />
