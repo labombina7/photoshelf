@@ -4,7 +4,7 @@ import { getDb, getSidebarProjects } from '@/lib/db';
 import LibraryClient from './LibraryClient';
 
 interface SearchParams {
-  year?: string;
+  year?: string;   // absent = redirect to current year; 'all' = show every year explicitly
   event?: string;
   theme?: string;
   favorite?: string;
@@ -19,7 +19,8 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const sp = await searchParams;
   const db = getDb();
 
-  // If no year/event/filter is active, default to the current year (if photos exist for it)
+  // 'year=all' means the user explicitly chose "Todos los años" — skip redirect.
+  // No year param at all (fresh entry) → redirect to current year if photos exist for it.
   if (!sp.year && !sp.event && !sp.theme && !sp.favorite && !sp.untagged && !sp.q) {
     const currentYear = new Date().getFullYear();
     const hasCurrentYear = db.prepare('SELECT 1 FROM photos WHERE year = ? LIMIT 1').get(currentYear);
@@ -27,6 +28,9 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       redirect(`/library?year=${currentYear}`);
     }
   }
+
+  // Treat 'all' sentinel as no year filter
+  const effectiveYear = sp.year && sp.year !== 'all' ? sp.year : undefined;
 
   let groupSql = `
     SELECT p.year, p.event, COUNT(DISTINCT p.id) as count, MIN(p.id) as thumbnail_id
@@ -39,7 +43,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const params: (string | number)[] = [];
 
   if (sp.theme) params.push(parseInt(sp.theme, 10));
-  if (sp.year) { groupSql += ' AND p.year = ?'; params.push(parseInt(sp.year, 10)); }
+  if (effectiveYear) { groupSql += ' AND p.year = ?'; params.push(parseInt(effectiveYear, 10)); }
   if (sp.event) { groupSql += ' AND p.event = ?'; params.push(sp.event); }
   if (sp.favorite) { groupSql += ' AND p.is_favorite = 1'; }
   if (sp.untagged) { groupSql += ' AND ptg.photo_id IS NULL'; }
@@ -77,8 +81,8 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       themes={themes}
       favoriteCount={favoriteCount}
       untaggedCount={untaggedCount}
-      activeYear={sp.year ?? null}
-      activeFilters={{ year: sp.year, event: sp.event, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q }}
+      activeYear={effectiveYear ?? null}
+      activeFilters={{ year: effectiveYear, event: sp.event, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q }}
       projects={projects}
     />
   );

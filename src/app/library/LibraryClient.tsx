@@ -74,8 +74,8 @@ export default function LibraryClient({
 
   function setYear(year: string | null) {
     const params = new URLSearchParams(searchParams.toString());
-    if (year) params.set('year', year);
-    else params.delete('year');
+    // Use 'all' sentinel so the server doesn't redirect back to current year
+    params.set('year', year ?? 'all');
     params.delete('event');
     router.push(`/library?${params.toString()}`);
   }
