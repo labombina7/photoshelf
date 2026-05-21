@@ -240,29 +240,31 @@ export default function LibraryClient({
             </>
           )}
 
+          {/* Classify-year button is shown in both views */}
+          {showClassifyYear && (
+            <div className="collapse-controls">
+              <button
+                className="collapse-btn classify-year-btn"
+                onClick={handleClassifyYear}
+                disabled={classifyingYear}
+              >
+                <IconSparkle size={11} />
+                {classifyingYear
+                  ? 'Clasificando…'
+                  : `Clasificar año ${activeYear}`}
+              </button>
+            </div>
+          )}
+
           {effectiveViewMode === 'folders' ? (
             <FolderGrid groups={groups} showYear={!activeYear} />
           ) : (
             <>
-              {(groups.length > 1 || showClassifyYear) && (
+              {groups.length > 1 && (
                 <div className="collapse-controls">
-                  {groups.length > 1 && (
-                    <button className="collapse-btn" onClick={allCollapsed ? expandAll : collapseAll}>
-                      {allCollapsed ? 'Expandir todo' : 'Colapsar todo'}
-                    </button>
-                  )}
-                  {showClassifyYear && (
-                    <button
-                      className="collapse-btn classify-year-btn"
-                      onClick={handleClassifyYear}
-                      disabled={classifyingYear}
-                    >
-                      <IconSparkle size={11} />
-                      {classifyingYear
-                        ? 'Clasificando…'
-                        : `Clasificar año ${activeYear}`}
-                    </button>
-                  )}
+                  <button className="collapse-btn" onClick={allCollapsed ? expandAll : collapseAll}>
+                    {allCollapsed ? 'Expandir todo' : 'Colapsar todo'}
+                  </button>
                 </div>
               )}
               <PhotoGrid

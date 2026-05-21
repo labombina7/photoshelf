@@ -290,12 +290,10 @@ body {
 .folder-card:active { transform: translateY(0); }
 .folder-card-thumb { aspect-ratio: 4/3; overflow: hidden; background: var(--bg); position: relative; }
 .folder-card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.folder-card-info { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-.folder-card-meta { min-width: 0; flex: 1; }
+.folder-card-info { padding: 10px 12px; }
 .folder-card-year { font-size: 11px; color: var(--text-tertiary); display: block; margin-bottom: 2px; }
-.folder-card-name { font-size: 12.5px; font-weight: 500; color: var(--text); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
+.folder-card-name { font-size: 12.5px; font-weight: 500; color: var(--text); display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 3px; }
 .folder-card-count { font-size: 11px; color: var(--text-tertiary); }
-.folder-card-actions { flex-shrink: 0; }
 
 /* ── Event blocks ── */
 .event-block { margin-bottom: 36px; }
