@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconSparkle } from '@/components/Icons';
@@ -55,6 +55,7 @@ function EventGroupBlock({
   const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -65,6 +66,21 @@ function EventGroupBlock({
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
+
+  // Infinite scroll: load more photos when sentinel enters viewport
+  const loadMore = useCallback(() => {
+    if (photos && visible < photos.length) setVisible(v => v + PAGE_SIZE);
+  }, [photos, visible]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) loadMore();
+    }, { rootMargin: '300px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   useEffect(() => {
     if (isCollapsed || photos !== null) return;
@@ -115,7 +131,18 @@ function EventGroupBlock({
           </span>
         )}
         <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div ref={menuRef} className="event-menu-wrap">
+          {/* Desktop: classify button visible inline */}
+          <button
+            onClick={handleClassify}
+            disabled={classifying}
+            className="classify-btn classify-btn--desktop"
+            title="Clasificar fotos de esta carpeta con IA"
+          >
+            <IconSparkle size={11} />
+            <span>{classifying ? 'Clasificando…' : 'Clasificar'}</span>
+          </button>
+          {/* Mobile: 3-dots menu */}
+          <div ref={menuRef} className="event-menu-wrap event-menu--mobile">
             <button
               className="event-menu-btn"
               title="Más opciones"
@@ -176,13 +203,9 @@ function EventGroupBlock({
               );
             })}
           </div>
+          {/* Sentinel: triggers infinite scroll when it enters the viewport */}
           {photos && visible < photos.length && (
-            <button
-              className="load-more-btn"
-              onClick={() => setVisible(v => v + PAGE_SIZE)}
-            >
-              Ver {Math.min(PAGE_SIZE, photos.length - visible)} fotos más ({photos.length - visible} restantes)
-            </button>
+            <div ref={sentinelRef} style={{ height: 1 }} />
           )}
         </>
       )}

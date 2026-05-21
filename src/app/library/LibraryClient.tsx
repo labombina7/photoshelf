@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useCallback, useMemo } from 'react';
+import { useState, useTransition, useCallback, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
@@ -57,8 +57,21 @@ export default function LibraryClient({
   const [toast, setToast] = useState('');
   const [_isPending, startTransition] = useTransition();
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
-  // Start with all groups collapsed — prevents loading thousands of thumbnails at once
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set(groups.map(g => `${g.year}-${g.event}`)));
+  // Restore collapsed state from sessionStorage so that navigating back from a photo
+  // detail preserves which groups were open. Falls back to all-collapsed on first visit.
+  const allGroupKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+    try {
+      const stored = sessionStorage.getItem('photoshelf_collapsed');
+      if (stored) return new Set<string>(JSON.parse(stored) as string[]);
+    } catch {}
+    return new Set(allGroupKeys);
+  });
+
+  // Keep sessionStorage in sync whenever collapsed changes
+  useEffect(() => {
+    try { sessionStorage.setItem('photoshelf_collapsed', JSON.stringify(Array.from(collapsed))); } catch {}
+  }, [collapsed]);
   const [viewMode, setViewMode] = useState<'list' | 'folders'>('folders');
   const { running: classifyingYear, startClassify } = useClassify();
   const { alert } = useModal();
@@ -100,7 +113,7 @@ export default function LibraryClient({
     }
   }
 
-  const allKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
+  const allKeys = allGroupKeys;
   const allCollapsed = collapsed.size === allKeys.length;
 
   function toggleGroup(key: string) {
