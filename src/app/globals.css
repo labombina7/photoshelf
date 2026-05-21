@@ -229,6 +229,47 @@ body {
 .year-tab:hover { border-color: var(--text); color: var(--text); }
 .year-tab.active { background: var(--text); border-color: var(--text); color: #fff; }
 
+/* Mobile year select */
+.year-select-wrap { margin-bottom: 16px; }
+.year-select {
+  appearance: none; -webkit-appearance: none;
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23706e6a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 7px 32px 7px 14px; font-size: 13px; font-weight: 500;
+  color: var(--text); cursor: pointer; font-family: inherit;
+  min-width: 160px;
+}
+.year-select:focus { outline: none; border-color: var(--text); }
+
+/* Show/hide by breakpoint */
+.year-tabs--desktop { display: flex; }
+.year-tabs--mobile { display: none; }
+
+/* ── Event 3-dots menu ── */
+.event-menu-wrap { position: relative; }
+.event-menu-btn {
+  background: none; border: 1px solid transparent; border-radius: var(--radius-sm);
+  padding: 2px 6px; font-size: 14px; line-height: 1; color: var(--text-tertiary);
+  cursor: pointer; font-family: inherit; letter-spacing: 1px;
+  display: inline-flex; align-items: center;
+}
+.event-menu-btn:hover { border-color: var(--border); color: var(--text); background: var(--bg); }
+.event-menu-dropdown {
+  position: absolute; right: 0; top: calc(100% + 4px);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  min-width: 160px; z-index: 20; overflow: hidden;
+}
+.event-menu-item {
+  width: 100%; background: none; border: none; padding: 9px 12px;
+  text-align: left; font-size: 13px; color: var(--text-secondary);
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 6px;
+  white-space: nowrap;
+}
+.event-menu-item:hover:not(:disabled) { background: var(--bg); color: var(--text); }
+.event-menu-item:disabled { opacity: 0.5; cursor: not-allowed; }
+
 /* ── View toggle ── */
 .view-toggle { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
 .view-toggle-btn { background: none; border: none; padding: 5px 8px; cursor: pointer; color: var(--text-tertiary); display: flex; align-items: center; }
@@ -707,9 +748,9 @@ body {
   /* ── Content padding ── */
   .content { padding: 12px; }
 
-  /* ── Year tabs ── */
-  .year-tabs { gap: 4px; padding-bottom: 2px; }
-  .year-tab { padding: 5px 10px; font-size: 12px; }
+  /* ── Year tabs: hide chips, show select ── */
+  .year-tabs--desktop { display: none; }
+  .year-tabs--mobile { display: block; }
 
   /* ── Collapse controls ── */
   .collapse-controls { flex-wrap: wrap; gap: 6px; }
@@ -719,9 +760,6 @@ body {
   .event-label { gap: 4px; }
   .event-name { max-width: 45vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .event-count { flex-shrink: 0; }
-  /* Classify button: icon only on mobile */
-  .classify-btn span:last-child { display: none; }
-  .classify-btn { padding: 3px 6px; min-width: 0; }
 
   /* ── Photo grid — 3 cols ── */
   .photo-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }

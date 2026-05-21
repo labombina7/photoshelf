@@ -59,7 +59,7 @@ export default function LibraryClient({
   const [query, setQuery] = useState(searchParams.get('q') ?? '');
   // Start with all groups collapsed — prevents loading thousands of thumbnails at once
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set(groups.map(g => `${g.year}-${g.event}`)));
-  const [viewMode, setViewMode] = useState<'list' | 'folders'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'folders'>('folders');
   const { running: classifyingYear, startClassify } = useClassify();
   const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -195,20 +195,36 @@ export default function LibraryClient({
 
         <div className="content">
           {years.length > 1 && (
-            <div className="year-tabs">
-              <button className={`year-tab ${!activeYear ? 'active' : ''}`} onClick={() => setYear(null)}>
-                Todos
-              </button>
-              {years.map((y) => (
-                <button
-                  key={y}
-                  className={`year-tab ${activeYear === String(y) ? 'active' : ''}`}
-                  onClick={() => setYear(String(y))}
-                >
-                  {y}
+            <>
+              {/* Desktop: chip tabs */}
+              <div className="year-tabs year-tabs--desktop">
+                <button className={`year-tab ${!activeYear ? 'active' : ''}`} onClick={() => setYear(null)}>
+                  Todos
                 </button>
-              ))}
-            </div>
+                {years.map((y) => (
+                  <button
+                    key={y}
+                    className={`year-tab ${activeYear === String(y) ? 'active' : ''}`}
+                    onClick={() => setYear(String(y))}
+                  >
+                    {y}
+                  </button>
+                ))}
+              </div>
+              {/* Mobile: native select */}
+              <div className="year-select-wrap year-tabs--mobile">
+                <select
+                  className="year-select"
+                  value={activeYear ?? ''}
+                  onChange={(e) => setYear(e.target.value || null)}
+                >
+                  <option value="">Todos los años</option>
+                  {years.map((y) => (
+                    <option key={y} value={String(y)}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            </>
           )}
 
           {effectiveViewMode === 'folders' ? (
