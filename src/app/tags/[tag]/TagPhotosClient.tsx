@@ -1,22 +1,22 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
-import PhotoGrid from '@/components/PhotoGrid';
 import { IconMenu } from '@/components/Icons';
 import type { Theme } from '@/lib/types';
 
-interface EventGroup {
-  year: number;
-  event: string;
-  count: number;
-  thumbnail_id: number;
+const PAGE_SIZE = 60;
+
+interface Photo {
+  id: number;
+  filename: string;
+  tags: { name: string; source: string }[];
 }
 
 interface Props {
   tagName: string;
-  groups: EventGroup[];
   total: number;
   themes: Theme[];
   projects: { id: number; title: string }[];
@@ -25,26 +25,49 @@ interface Props {
   untaggedCount: number;
 }
 
-export default function TagPhotosClient({ tagName, groups, total, themes, projects, totalPhotos, favoriteCount, untaggedCount }: Props) {
+export default function TagPhotosClient({ tagName, total, themes, projects, totalPhotos, favoriteCount, untaggedCount }: Props) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [photos, setPhotos] = useState<Photo[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const allGroupKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
-  // Start all collapsed; user expands individually
-  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set(allGroupKeys));
+  const fetchPage = useCallback(async (p: number) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ tag: tagName, limit: String(PAGE_SIZE), page: String(p) });
+      const res = await fetch(`/api/photos?${params}`);
+      const data = await res.json();
+      const incoming: Photo[] = data.photos ?? [];
+      setPhotos(prev => p === 1 ? incoming : [...prev, ...incoming]);
+      setHasMore(incoming.length === PAGE_SIZE);
+    } finally {
+      setLoading(false);
+    }
+  }, [tagName]);
 
-  function toggleGroup(key: string) {
-    setCollapsed(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  }
+  // Load first page on mount
+  useEffect(() => { fetchPage(1); }, [fetchPage]);
 
-  const allCollapsed = collapsed.size === allGroupKeys.length;
-  function collapseAll() { setCollapsed(new Set(allGroupKeys)); }
-  function expandAll() { setCollapsed(new Set()); }
+  // Infinite scroll
+  const loadMore = useCallback(() => {
+    if (!hasMore || loading) return;
+    const next = page + 1;
+    setPage(next);
+    fetchPage(next);
+  }, [hasMore, loading, page, fetchPage]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) loadMore();
+    }, { rootMargin: '300px' });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loadMore]);
 
   return (
     <div className="app-shell">
@@ -74,20 +97,47 @@ export default function TagPhotosClient({ tagName, groups, total, themes, projec
         </div>
 
         <div className="content">
-          {groups.length > 1 && (
-            <div className="collapse-controls">
-              <button className="collapse-btn" onClick={allCollapsed ? expandAll : collapseAll}>
-                {allCollapsed ? 'Expandir todo' : 'Colapsar todo'}
-              </button>
-            </div>
+          {photos.length === 0 && loading && (
+            <div style={{ padding: 24, color: 'var(--text-tertiary)', fontSize: 13 }}>Cargando fotos…</div>
           )}
-          <PhotoGrid
-            groups={groups}
-            collapsed={collapsed}
-            onToggle={toggleGroup}
-            activeFilters={{ tag: tagName }}
-            showYear
-          />
+
+          <div className="photo-grid">
+            {photos.map(photo => {
+              const previewTags = photo.tags.slice(0, 2);
+              return (
+                <Link
+                  key={photo.id}
+                  href={`/library/${photo.id}`}
+                  className="photo-item"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/api/photos/${photo.id}/thumbnail?size=300`}
+                    alt={photo.filename}
+                    loading="lazy"
+                    decoding="async"
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  {previewTags.length > 0 && (
+                    <div className="photo-overlay">
+                      {previewTags.map(tag => (
+                        <span key={tag.name} className={`photo-tag-chip ${tag.source === 'ai' ? 'auto' : ''}`}>
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          {hasMore && <div ref={sentinelRef} style={{ height: 1 }} />}
+          {!hasMore && photos.length > 0 && (
+            <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-tertiary)', padding: '16px 0' }}>
+              {photos.length} fotos con el tag «{tagName}»
+            </p>
+          )}
         </div>
       </div>
     </div>

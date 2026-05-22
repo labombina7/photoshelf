@@ -12,21 +12,12 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
 
   const db = getDb();
 
-  // Verify tag exists
   const tagRow = db.prepare('SELECT id FROM tags WHERE name = ? COLLATE NOCASE').get(tagName) as { id: number } | undefined;
   if (!tagRow) notFound();
 
-  // Groups (year/event) that have at least one photo with this tag
-  const groups = db.prepare(`
-    SELECT p.year, p.event, COUNT(DISTINCT p.id) AS count, MIN(p.id) AS thumbnail_id
-    FROM photos p
-    JOIN photo_tags pt ON pt.photo_id = p.id
-    WHERE pt.tag_id = ?
-    GROUP BY p.year, p.event
-    ORDER BY p.year DESC, p.event ASC
-  `).all(tagRow.id) as { year: number; event: string; count: number; thumbnail_id: number }[];
-
-  const total = groups.reduce((s, g) => s + g.count, 0);
+  const { count } = db.prepare(
+    'SELECT COUNT(DISTINCT photo_id) AS count FROM photo_tags WHERE tag_id = ?'
+  ).get(tagRow.id) as { count: number };
 
   const sidebarTotal = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
   const favoriteCount = (db.prepare('SELECT COUNT(*) as c FROM photos WHERE is_favorite = 1').get() as { c: number }).c;
@@ -43,8 +34,7 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
   return (
     <TagPhotosClient
       tagName={tagName}
-      groups={groups}
-      total={total}
+      total={count}
       themes={themes}
       projects={projects}
       totalPhotos={sidebarTotal}
