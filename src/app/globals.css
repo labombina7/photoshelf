@@ -329,11 +329,11 @@ body {
 .timeline-grid--z4 { grid-template-columns: repeat(3, 1fr); }
 .timeline-grid--z5 { grid-template-columns: repeat(2, 1fr); }
 @media (max-width: 768px) {
-  .timeline-grid--z1 { grid-template-columns: repeat(6, 1fr); }
-  .timeline-grid--z2 { grid-template-columns: repeat(4, 1fr); }
-  .timeline-grid--z3 { grid-template-columns: repeat(3, 1fr); }
-  .timeline-grid--z4 { grid-template-columns: repeat(2, 1fr); }
-  .timeline-grid--z5 { grid-template-columns: repeat(1, 1fr); }
+  .timeline-grid--z1 { grid-template-columns: repeat(7, 1fr); }
+  .timeline-grid--z2 { grid-template-columns: repeat(5, 1fr); }
+  .timeline-grid--z3 { grid-template-columns: repeat(5, 1fr); }
+  .timeline-grid--z4 { grid-template-columns: repeat(3, 1fr); }
+  .timeline-grid--z5 { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* Zoom controls in topbar */
