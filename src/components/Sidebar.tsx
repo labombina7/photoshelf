@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag } from './Icons';
+import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -123,6 +123,15 @@ export default function Sidebar({
           <IconGrid />
           Todas las fotos
           <span className="sidebar-count">{totalPhotos.toLocaleString('es')}</span>
+        </Link>
+
+        <Link
+          href="/timeline"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/timeline' ? 'active' : ''}`}
+        >
+          <IconTimeline />
+          Línea de tiempo
         </Link>
 
         <Link
