@@ -25,6 +25,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   const [isFavorite, setIsFavorite] = useState(photo.is_favorite === 1);
   const [reviewing, setReviewing] = useState(false);
   const [review, setReview] = useState<PhotoReview | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   async function addTag() {
     const name = newTag.trim().toLowerCase();
@@ -75,12 +76,18 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   async function requestReview() {
     setReviewing(true);
     setReview(null);
+    setReviewError(null);
     try {
       const res = await fetch(`/api/ai/review/${photo.id}`, { method: 'POST' });
-      const data: PhotoReview = await res.json();
-      setReview(data);
-    } catch {
-      // silently fail
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? `Error ${res.status}`);
+      const r = data as PhotoReview;
+      if (!r.score && !r.summary && !r.composition && !r.light) {
+        throw new Error('La IA no pudo generar un análisis. Comprueba que Ollama esté disponible e inténtalo de nuevo.');
+      }
+      setReview(r);
+    } catch (err) {
+      setReviewError(err instanceof Error ? err.message : 'Error al analizar la imagen');
     } finally {
       setReviewing(false);
     }
@@ -234,6 +241,26 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           )}
         </button>
       </div>
+
+      {/* Review error */}
+      {reviewError && (
+        <>
+          <div className="review-overlay" onClick={() => setReviewError(null)} />
+          <div className="review-modal">
+            <div className="review-modal-header">
+              <span style={{ fontWeight: 600, fontSize: 14 }}>Análisis de la imagen</span>
+              <button className="ai-panel-close" onClick={() => setReviewError(null)}>
+                <IconX size={14} />
+              </button>
+            </div>
+            <div className="review-modal-body">
+              <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                No se pudo analizar la imagen: <strong>{reviewError}</strong>
+              </p>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Review modal */}
       {review && (
