@@ -73,7 +73,7 @@ export default function MapClient({ total, withGps, themes, projects, totalPhoto
 
       for (const photo of photos) {
         const icon = L.divIcon({
-          html: `<div class="map-marker-thumb"><img src="/api/photos/${photo.id}/thumbnail?size=80" loading="lazy" /></div>`,
+          html: `<div class="map-marker-thumb"><img src="/api/photos/${photo.id}/thumbnail?size=80" /></div>`,
           className: '',
           iconSize: [44, 44],
           iconAnchor: [22, 22],
