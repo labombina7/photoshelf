@@ -42,7 +42,7 @@ const VISUAL_ZOOM_CONFIG = [
   { size: 420, limit: 24 },
 ] as const;
 
-const LEVEL_ZOOM: Record<Level, number> = { year: 1, month: 3, day: 5 };
+const LEVEL_ZOOM: Record<Level, number> = { year: 1, month: 3, day: 4 };
 
 function getPeriodKey(takenAt: string | null, level: Level): string {
   if (!takenAt) return 'nodate';
