@@ -1,5 +1,7 @@
 # Feature: Mapa de Fotos
 
+> **Estado: ✅ Desplegada** — merged en main el 2026-05-22
+
 ## Historia de usuario
 
 Como fotógrafo que viaja y toma fotos en distintas ubicaciones,
