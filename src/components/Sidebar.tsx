@@ -149,35 +149,6 @@ export default function Sidebar({
       </div>
 
       <div className="sidebar-section">
-        <Link
-          href="/projects"
-          onClick={handleNavClick}
-          className="sidebar-section-label sidebar-section-label--link"
-        >
-          Portfolio
-        </Link>
-        {projects.map(p => (
-          <Link
-            key={p.id}
-            href={`/projects/${p.id}`}
-            onClick={handleNavClick}
-            className={`sidebar-item ${pathname === `/projects/${p.id}` ? 'active' : ''}`}
-          >
-            <IconFolder size={14} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-          </Link>
-        ))}
-        {projects.length === 0 && (
-          <div className="sidebar-item" style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }} onClick={() => { handleNavClick(); }}>
-            <Link href="/projects" onClick={handleNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
-              <IconPlus size={13} />
-              Nuevo proyecto
-            </Link>
-          </div>
-        )}
-      </div>
-
-      <div className="sidebar-section">
         <div className="sidebar-section-label">Temáticas</div>
 
         {themes.map((theme) => {
@@ -283,6 +254,35 @@ export default function Sidebar({
           >
             <IconPlus />
             Nueva temática
+          </div>
+        )}
+      </div>
+
+      <div className="sidebar-section">
+        <Link
+          href="/projects"
+          onClick={handleNavClick}
+          className="sidebar-section-label sidebar-section-label--link"
+        >
+          Portfolio
+        </Link>
+        {projects.map(p => (
+          <Link
+            key={p.id}
+            href={`/projects/${p.id}`}
+            onClick={handleNavClick}
+            className={`sidebar-item ${pathname === `/projects/${p.id}` ? 'active' : ''}`}
+          >
+            <IconFolder size={14} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+          </Link>
+        ))}
+        {projects.length === 0 && (
+          <div className="sidebar-item" style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }}>
+            <Link href="/projects" onClick={handleNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
+              <IconPlus size={13} />
+              Nuevo proyecto
+            </Link>
           </div>
         )}
       </div>
