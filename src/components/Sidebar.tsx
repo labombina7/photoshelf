@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
@@ -18,7 +18,7 @@ interface SidebarProps {
   onMobileClose?: () => void;
 }
 
-export default function Sidebar({
+function SidebarInner({
   themes,
   projects = [],
   totalPhotos,
@@ -382,5 +382,13 @@ export default function Sidebar({
       </div>
     </aside>
     </>
+  );
+}
+
+export default function Sidebar(props: SidebarProps) {
+  return (
+    <Suspense>
+      <SidebarInner {...props} />
+    </Suspense>
   );
 }
