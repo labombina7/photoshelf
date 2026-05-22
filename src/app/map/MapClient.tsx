@@ -27,7 +27,8 @@ interface Props {
 
 export default function MapClient({ total, withGps, themes, projects, totalPhotos, favoriteCount, untaggedCount }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const leafletRef = useRef<{ map: L.Map; cluster: L.MarkerClusterGroup } | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const leafletRef = useRef<{ map: L.Map; cluster: any } | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<PhotoPoint[]>([]);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -54,8 +55,8 @@ export default function MapClient({ total, withGps, themes, projects, totalPhoto
         maxZoom: 19,
       }).addTo(map);
 
-      const cluster = (L as unknown as { markerClusterGroup: (opts: object) => L.MarkerClusterGroup })
-        .markerClusterGroup({ maxClusterRadius: 60, showCoverageOnHover: false });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cluster = (L as any).markerClusterGroup({ maxClusterRadius: 60, showCoverageOnHover: false });
 
       map.addLayer(cluster);
       leafletRef.current = { map, cluster };
