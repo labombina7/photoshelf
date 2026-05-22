@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder } from './Icons';
+import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -146,6 +146,15 @@ export default function Sidebar({
             <span className="sidebar-count">{untaggedCount}</span>
           </Link>
         )}
+
+        <Link
+          href="/tags"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/tags' || pathname.startsWith('/tags/') ? 'active' : ''}`}
+        >
+          <IconTag />
+          Tags
+        </Link>
       </div>
 
       <div className="sidebar-section">
