@@ -143,6 +143,16 @@ export default function TimelineClient({
       setAllPhotos(prev => [...prev, ...incoming]);
       setNextCursor(data.nextCursor ?? null);
       setHasMore(data.hasMore ?? false);
+      // Prefetch thumbnails del primer grupo de la nueva página
+      const currentVzConfig = VISUAL_ZOOM_CONFIG[visualZoom - 1];
+      const nextGroupPhotos = incoming.slice(0, Math.ceil(currentVzConfig.limit / 3));
+      nextGroupPhotos.forEach(photo => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.as = 'image';
+        link.href = `/api/photos/${photo.id}/thumbnail?size=${currentVzConfig.size}`;
+        document.head.appendChild(link);
+      });
     } finally {
       setLoading(false);
     }
@@ -154,7 +164,7 @@ export default function TimelineClient({
     if (!el) return;
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) fetchMore();
-    }, { rootMargin: '400px' });
+    }, { rootMargin: '800px' });
     observer.observe(el);
     return () => observer.disconnect();
   }, [fetchMore]);
@@ -247,6 +257,8 @@ export default function TimelineClient({
 
   const levelLabel: Record<Level, string> = { year: 'Año', month: 'Mes', day: 'Día' };
 
+  const priorityCount = vzConfig.limit / 3;
+
   return (
     <div className="app-shell">
       <Sidebar
@@ -310,14 +322,27 @@ export default function TimelineClient({
                     href={`/library/${photo.id}`}
                     className="photo-item"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`/api/photos/${photo.id}/thumbnail?size=${vzConfig.size}`}
-                      alt={photo.filename}
-                      loading="lazy"
-                      decoding="async"
-                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
+                    <div className="photo-item-wrapper">
+                      <div className="photo-skeleton" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/api/photos/${photo.id}/thumbnail?size=${vzConfig.size}`}
+                        alt={photo.filename}
+                        loading="lazy"
+                        decoding="async"
+                        // @ts-expect-error fetchPriority is valid HTML
+                        fetchPriority={allPhotos.indexOf(photo) < priorityCount ? 'high' : 'auto'}
+                        onLoad={e => { e.currentTarget.classList.add('loaded'); (e.currentTarget.previousElementSibling as HTMLElement).style.display = 'none'; }}
+                        onError={e => {
+                          const img = e.currentTarget;
+                          img.style.display = 'none';
+                          const broken = document.createElement('div');
+                          broken.className = 'photo-broken';
+                          broken.textContent = '🖼';
+                          img.parentElement?.appendChild(broken);
+                        }}
+                      />
+                    </div>
                   </Link>
                 ))}
               </div>
