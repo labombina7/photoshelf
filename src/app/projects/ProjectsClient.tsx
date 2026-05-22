@@ -160,7 +160,7 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
             <div className="empty-state">
               <IconSparkle size={32} />
               <p>Aún no hay proyectos.</p>
-              <p style={{ fontSize: 12 }}>Pulsa "Nuevo proyecto" para generar uno con IA.</p>
+              <p style={{ fontSize: 12 }}>Pulsa "Nuevo proyecto" para generar uno.</p>
             </div>
           ) : (
             <div className="projects-grid">
@@ -314,7 +314,7 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
               >
                 {generating
                   ? <><span className="spinner" />Generando…</>
-                  : <><IconSparkle size={14} />Generar con IA</>}
+                  : <><IconSparkle size={14} />Generar</>}
               </button>
               {generating && (
                 <p style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>

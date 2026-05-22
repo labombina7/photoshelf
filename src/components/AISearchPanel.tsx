@@ -99,10 +99,10 @@ export default function AISearchPanel() {
       <button
         className="ai-search-trigger"
         onClick={() => setOpen(true)}
-        title="Búsqueda inteligente con IA"
+        title="Búsqueda inteligente"
       >
         <IconSparkle size={14} />
-        Buscar con IA
+        Buscar
       </button>
 
       {open && (
@@ -113,7 +113,7 @@ export default function AISearchPanel() {
         <div className="ai-panel-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <IconSparkle size={14} />
-            <span style={{ fontWeight: 600, fontSize: 14 }}>Búsqueda con IA</span>
+            <span style={{ fontWeight: 600, fontSize: 14 }}>Búsqueda inteligente</span>
           </div>
           <button className="ai-panel-close" onClick={() => setOpen(false)}>
             <IconX size={14} />
