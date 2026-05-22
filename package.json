@@ -6,7 +6,10 @@
     "dev": "node node_modules/next/dist/bin/next dev",
     "build": "node node_modules/next/dist/bin/next build",
     "start": "node node_modules/next/dist/bin/next start",
-    "lint": "node node_modules/next/dist/bin/next lint"
+    "lint": "node node_modules/next/dist/bin/next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "better-sqlite3": "^12.10.0",
@@ -14,9 +17,9 @@
     "heic-convert": "^2.1.0",
     "iron-session": "^8.0.4",
     "next": "14.2.35",
+    "node-addon-api": "^8.3.1",
     "react": "^18",
     "react-dom": "^18",
-    "node-addon-api": "^8.3.1",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
@@ -24,6 +27,8 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "typescript": "^5"
+    "@vitest/coverage-v8": "^4.1.7",
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }
