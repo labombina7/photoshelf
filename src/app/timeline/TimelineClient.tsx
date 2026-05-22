@@ -42,6 +42,8 @@ const VISUAL_ZOOM_CONFIG = [
   { size: 420, limit: 24 },
 ] as const;
 
+const LEVEL_ZOOM: Record<Level, number> = { year: 1, month: 3, day: 5 };
+
 function getPeriodKey(takenAt: string | null, level: Level): string {
   if (!takenAt) return 'nodate';
   const d = new Date(takenAt);
@@ -102,13 +104,7 @@ export default function TimelineClient({
     }
     return 'month';
   });
-  const [visualZoom, setVisualZoom] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const n = parseInt(sessionStorage.getItem('timeline_zoom_visual') ?? '');
-      if (n >= 1 && n <= 5) return n;
-    }
-    return 3;
-  });
+  const visualZoom = LEVEL_ZOOM[level];
   const [allPhotos, setAllPhotos] = useState<PhotoRow[]>(initialRows);
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -123,9 +119,6 @@ export default function TimelineClient({
   useEffect(() => {
     try { sessionStorage.setItem('photoshelf_timeline_level', level); } catch {}
   }, [level]);
-  useEffect(() => {
-    try { sessionStorage.setItem('timeline_zoom_visual', String(visualZoom)); } catch {}
-  }, [visualZoom]);
 
   const vzConfig = VISUAL_ZOOM_CONFIG[visualZoom - 1];
 
@@ -153,7 +146,7 @@ export default function TimelineClient({
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, level, nextCursor, visualZoom]);
+  }, [loading, hasMore, level, nextCursor]);
 
   // Infinite scroll sentinel
   useEffect(() => {
@@ -220,16 +213,16 @@ export default function TimelineClient({
     return () => window.removeEventListener('wheel', handleWheel);
   }, []);
 
-  // +/- keys for visual zoom
+  // +/- keys to change temporal level
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       if (e.key === '+' || e.key === '=') {
         e.preventDefault();
-        setVisualZoom(prev => Math.min(5, prev + 1));
+        setLevel(prev => LEVELS[Math.min(LEVELS.length - 1, LEVELS.indexOf(prev) + 1)]);
       } else if (e.key === '-') {
         e.preventDefault();
-        setVisualZoom(prev => Math.max(1, prev - 1));
+        setLevel(prev => LEVELS[Math.max(0, LEVELS.indexOf(prev) - 1)]);
       }
     };
     window.addEventListener('keydown', handleKey);
@@ -281,14 +274,6 @@ export default function TimelineClient({
 
           {/* Temporal zoom controls */}
           <div className="timeline-zoom-controls">
-            <button
-              className="timeline-zoom-btn"
-              onClick={() => setLevel(prev => LEVELS[Math.max(0, LEVELS.indexOf(prev) - 1)])}
-              disabled={level === 'year'}
-              title="Menos detalle"
-            >
-              −
-            </button>
             {LEVELS.map(l => (
               <button
                 key={l}
@@ -298,45 +283,6 @@ export default function TimelineClient({
                 {levelLabel[l]}
               </button>
             ))}
-            <button
-              className="timeline-zoom-btn"
-              onClick={() => setLevel(prev => LEVELS[Math.min(LEVELS.length - 1, LEVELS.indexOf(prev) + 1)])}
-              disabled={level === 'day'}
-              title="Más detalle"
-            >
-              +
-            </button>
-          </div>
-
-          {/* Visual zoom controls */}
-          <div className="timeline-zoom-sep" />
-          <div className="timeline-vz-controls">
-            <button
-              className="timeline-zoom-btn"
-              onClick={() => setVisualZoom(prev => Math.max(1, prev - 1))}
-              disabled={visualZoom === 1}
-              title="Miniaturas más pequeñas (−)"
-            >
-              −
-            </button>
-            <div className="timeline-vz-dots" title={['XS','S','M','L','XL'][visualZoom - 1]}>
-              {[1, 2, 3, 4, 5].map(n => (
-                <button
-                  key={n}
-                  className={`timeline-vz-dot${visualZoom === n ? ' active' : ''}`}
-                  onClick={() => setVisualZoom(n)}
-                  title={['XS', 'S', 'M', 'L', 'XL'][n - 1]}
-                />
-              ))}
-            </div>
-            <button
-              className="timeline-zoom-btn"
-              onClick={() => setVisualZoom(prev => Math.min(5, prev + 1))}
-              disabled={visualZoom === 5}
-              title="Miniaturas más grandes (+)"
-            >
-              +
-            </button>
           </div>
         </div>
 
