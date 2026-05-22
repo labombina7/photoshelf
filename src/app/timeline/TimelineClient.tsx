@@ -330,7 +330,6 @@ export default function TimelineClient({
                         alt={photo.filename}
                         loading="lazy"
                         decoding="async"
-                        // @ts-expect-error fetchPriority is valid HTML
                         fetchPriority={allPhotos.indexOf(photo) < priorityCount ? 'high' : 'auto'}
                         onLoad={e => { e.currentTarget.classList.add('loaded'); (e.currentTarget.previousElementSibling as HTMLElement).style.display = 'none'; }}
                         onError={e => {
