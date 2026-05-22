@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder } from './Icons';
+import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -146,35 +146,15 @@ export default function Sidebar({
             <span className="sidebar-count">{untaggedCount}</span>
           </Link>
         )}
-      </div>
 
-      <div className="sidebar-section">
         <Link
-          href="/projects"
+          href="/tags"
           onClick={handleNavClick}
-          className="sidebar-section-label sidebar-section-label--link"
+          className={`sidebar-item ${pathname === '/tags' || pathname.startsWith('/tags/') ? 'active' : ''}`}
         >
-          Portfolio
+          <IconTag />
+          Tags
         </Link>
-        {projects.map(p => (
-          <Link
-            key={p.id}
-            href={`/projects/${p.id}`}
-            onClick={handleNavClick}
-            className={`sidebar-item ${pathname === `/projects/${p.id}` ? 'active' : ''}`}
-          >
-            <IconFolder size={14} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-          </Link>
-        ))}
-        {projects.length === 0 && (
-          <div className="sidebar-item" style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }} onClick={() => { handleNavClick(); }}>
-            <Link href="/projects" onClick={handleNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
-              <IconPlus size={13} />
-              Nuevo proyecto
-            </Link>
-          </div>
-        )}
       </div>
 
       <div className="sidebar-section">
@@ -283,6 +263,35 @@ export default function Sidebar({
           >
             <IconPlus />
             Nueva temática
+          </div>
+        )}
+      </div>
+
+      <div className="sidebar-section">
+        <Link
+          href="/projects"
+          onClick={handleNavClick}
+          className="sidebar-section-label sidebar-section-label--link"
+        >
+          Portfolio
+        </Link>
+        {projects.map(p => (
+          <Link
+            key={p.id}
+            href={`/projects/${p.id}`}
+            onClick={handleNavClick}
+            className={`sidebar-item ${pathname === `/projects/${p.id}` ? 'active' : ''}`}
+          >
+            <IconFolder size={14} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
+          </Link>
+        ))}
+        {projects.length === 0 && (
+          <div className="sidebar-item" style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }}>
+            <Link href="/projects" onClick={handleNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
+              <IconPlus size={13} />
+              Nuevo proyecto
+            </Link>
           </div>
         )}
       </div>

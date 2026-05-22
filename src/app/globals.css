@@ -713,6 +713,28 @@ body {
 }
 
 /* ── Load more button ── */
+/* ── Tag cloud ── */
+.tag-cloud {
+  display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 8px 0;
+}
+.tag-cloud-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border); border-radius: 20px;
+  background: var(--surface); color: var(--text-secondary);
+  cursor: pointer; font-family: inherit; font-weight: 500;
+  transition: all 0.12s; white-space: nowrap;
+}
+.tag-cloud-chip:hover { border-color: var(--text); color: var(--text); background: var(--bg); }
+.tag-cloud-chip--lg { font-size: 15px; padding: 6px 14px; }
+.tag-cloud-chip--md { font-size: 13px; padding: 5px 12px; }
+.tag-cloud-chip--sm { font-size: 11px; padding: 4px 10px; }
+.tag-cloud-count {
+  font-size: 11px; font-weight: 400;
+  color: var(--text-tertiary); background: var(--bg);
+  border-radius: 10px; padding: 1px 6px;
+}
+
 .load-more-btn {
   display: block; width: 100%; margin: 12px 0 4px;
   padding: 10px; border: 1px dashed var(--border);

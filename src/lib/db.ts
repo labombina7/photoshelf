@@ -72,6 +72,8 @@ function initSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_photos_event   ON photos(year, event);
     CREATE INDEX IF NOT EXISTS idx_photos_fav     ON photos(is_favorite);
     CREATE INDEX IF NOT EXISTS idx_photo_tags     ON photo_tags(photo_id);
+    CREATE INDEX IF NOT EXISTS idx_photo_tags_tag ON photo_tags(tag_id);
+    CREATE INDEX IF NOT EXISTS idx_tags_name      ON tags(name);
     CREATE INDEX IF NOT EXISTS idx_photo_themes_p ON photo_themes(photo_id);
     CREATE INDEX IF NOT EXISTS idx_photo_themes_t ON photo_themes(theme_id);
 

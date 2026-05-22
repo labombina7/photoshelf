@@ -90,7 +90,7 @@ export function ClassifyProvider({ children }: { children: React.ReactNode }) {
           <div className="scan-toast-header">
             <span className="scan-toast-title">
               {state.running
-                ? `Clasificando${state.year ? ` ${state.year}` : ''} con IA`
+                ? `Clasificando${state.year ? ` ${state.year}` : ''}`
                 : state.error ? 'Error en la clasificación' : '✓ Clasificación completada'}
             </span>
             {state.running && state.total > 0 && (

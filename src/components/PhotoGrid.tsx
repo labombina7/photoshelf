@@ -19,6 +19,7 @@ interface EventGroup {
 interface ActiveFilters {
   year?: string;
   theme?: string;
+  tag?: string;
   favorite?: string;
   untagged?: string;
   q?: string;
@@ -90,6 +91,7 @@ function EventGroupBlock({
     params.set('year', String(group.year));
     params.set('event', group.event);
     if (activeFilters.theme) params.set('theme', activeFilters.theme);
+    if (activeFilters.tag) params.set('tag', activeFilters.tag);
     if (activeFilters.favorite) params.set('favorite', activeFilters.favorite);
     if (activeFilters.untagged) params.set('untagged', activeFilters.untagged);
     if (activeFilters.q) params.set('q', activeFilters.q);
@@ -136,7 +138,7 @@ function EventGroupBlock({
             onClick={handleClassify}
             disabled={classifying}
             className="classify-btn classify-btn--desktop"
-            title="Clasificar fotos de esta carpeta con IA"
+            title="Clasificar fotos de esta carpeta"
           >
             <IconSparkle size={11} />
             <span>{classifying ? 'Clasificando…' : 'Clasificar'}</span>
@@ -158,7 +160,7 @@ function EventGroupBlock({
                   disabled={classifying}
                 >
                   <IconSparkle size={11} />
-                  {classifying ? 'Clasificando…' : 'Clasificar con IA'}
+                  {classifying ? 'Clasificando…' : 'Clasificar'}
                 </button>
               </div>
             )}

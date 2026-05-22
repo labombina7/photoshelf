@@ -212,7 +212,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           ) : (
             <>
               <IconSparkle />
-              Clasificar con IA (Ollama)
+              Clasificar
             </>
           )}
         </button>
@@ -229,7 +229,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           ) : (
             <>
               <IconSparkle />
-              Revisar con IA
+              Evaluar imagen
             </>
           )}
         </button>
