@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
-import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats } from './Icons';
+import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -132,6 +132,15 @@ function SidebarInner({
         >
           <IconTimeline />
           Línea de tiempo
+        </Link>
+
+        <Link
+          href="/map"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/map' ? 'active' : ''}`}
+        >
+          <IconMap size={14} />
+          Mapa
         </Link>
 
         <Link

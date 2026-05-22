@@ -995,3 +995,46 @@ body {
   font-size: 20px;
 }
 .stats-year-select:focus { border-color: var(--text); }
+
+/* ── Map ── */
+.map-marker-thumb {
+  width: 44px; height: 44px; border-radius: 50%;
+  overflow: hidden; border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  background: var(--bg-secondary);
+}
+.map-marker-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.map-panel {
+  position: absolute; top: 0; right: 0; bottom: 0; width: 300px;
+  background: var(--bg); border-left: 1px solid var(--border);
+  z-index: 400; display: flex; flex-direction: column;
+  box-shadow: -2px 0 12px rgba(0,0,0,0.08);
+}
+.map-panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.map-panel-title { font-size: 13px; font-weight: 600; color: var(--text); }
+.map-panel-close {
+  background: none; border: none; cursor: pointer; font-size: 20px; line-height: 1;
+  color: var(--text-tertiary); padding: 0 2px; margin-left: 8px;
+}
+.map-panel-close:hover { color: var(--text); }
+.map-panel-list { overflow-y: auto; flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.map-panel-item {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px; border-radius: var(--radius-sm); text-decoration: none;
+  transition: background 0.1s;
+}
+.map-panel-item:hover { background: var(--surface); }
+.map-panel-thumb { width: 64px; height: 64px; object-fit: cover; border-radius: var(--radius-sm); flex-shrink: 0; }
+.map-panel-info { flex: 1; min-width: 0; }
+.map-panel-filename { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+.map-panel-date { font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; }
+.map-panel-event { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+.map-panel-link { font-size: 11px; color: var(--accent, #3b62d4); font-weight: 500; }
+
+@media (max-width: 768px) {
+  .map-panel { width: 100%; top: auto; height: 55%; border-left: none; border-top: 1px solid var(--border); }
+}
