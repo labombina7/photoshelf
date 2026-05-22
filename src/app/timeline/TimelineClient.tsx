@@ -34,6 +34,14 @@ interface Props {
 
 const LEVELS: Level[] = ['year', 'month', 'day'];
 
+const VISUAL_ZOOM_CONFIG = [
+  { size: 100, limit: 120 },
+  { size: 150, limit: 84 },
+  { size: 200, limit: 60 },
+  { size: 300, limit: 36 },
+  { size: 420, limit: 24 },
+] as const;
+
 function getPeriodKey(takenAt: string | null, level: Level): string {
   if (!takenAt) return 'nodate';
   const d = new Date(takenAt);
@@ -94,6 +102,13 @@ export default function TimelineClient({
     }
     return 'month';
   });
+  const [visualZoom, setVisualZoom] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const n = parseInt(sessionStorage.getItem('timeline_zoom_visual') ?? '');
+      if (n >= 1 && n <= 5) return n;
+    }
+    return 3;
+  });
   const [allPhotos, setAllPhotos] = useState<PhotoRow[]>(initialRows);
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -104,10 +119,15 @@ export default function TimelineClient({
   const groupRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Persist level choice
+  // Persist level choices
   useEffect(() => {
     try { sessionStorage.setItem('photoshelf_timeline_level', level); } catch {}
   }, [level]);
+  useEffect(() => {
+    try { sessionStorage.setItem('timeline_zoom_visual', String(visualZoom)); } catch {}
+  }, [visualZoom]);
+
+  const vzConfig = VISUAL_ZOOM_CONFIG[visualZoom - 1];
 
   const groups = useMemo(() => groupPhotos(allPhotos, level), [allPhotos, level]);
 
@@ -121,7 +141,8 @@ export default function TimelineClient({
     if (loading || !hasMore) return;
     setLoading(true);
     try {
-      const params = new URLSearchParams({ level, limit: '60' });
+      const limit = VISUAL_ZOOM_CONFIG[visualZoom - 1].limit;
+      const params = new URLSearchParams({ level, limit: String(limit) });
       if (nextCursor) params.set('cursor', nextCursor);
       const res = await fetch(`/api/timeline?${params}`);
       const data = await res.json();
@@ -132,7 +153,7 @@ export default function TimelineClient({
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, level, nextCursor]);
+  }, [loading, hasMore, level, nextCursor, visualZoom]);
 
   // Infinite scroll sentinel
   useEffect(() => {
@@ -199,6 +220,22 @@ export default function TimelineClient({
     return () => window.removeEventListener('wheel', handleWheel);
   }, []);
 
+  // +/- keys for visual zoom
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        setVisualZoom(prev => Math.min(5, prev + 1));
+      } else if (e.key === '-') {
+        e.preventDefault();
+        setVisualZoom(prev => Math.max(1, prev - 1));
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
+
   // Double-tap on mobile to toggle between month and day
   useEffect(() => {
     let lastTap = 0;
@@ -242,7 +279,7 @@ export default function TimelineClient({
 
           <div className="topbar-spacer" />
 
-          {/* Zoom level controls */}
+          {/* Temporal zoom controls */}
           <div className="timeline-zoom-controls">
             <button
               className="timeline-zoom-btn"
@@ -270,6 +307,37 @@ export default function TimelineClient({
               +
             </button>
           </div>
+
+          {/* Visual zoom controls */}
+          <div className="timeline-zoom-sep" />
+          <div className="timeline-vz-controls">
+            <button
+              className="timeline-zoom-btn"
+              onClick={() => setVisualZoom(prev => Math.max(1, prev - 1))}
+              disabled={visualZoom === 1}
+              title="Miniaturas más pequeñas (−)"
+            >
+              −
+            </button>
+            <div className="timeline-vz-dots" title={['XS','S','M','L','XL'][visualZoom - 1]}>
+              {[1, 2, 3, 4, 5].map(n => (
+                <button
+                  key={n}
+                  className={`timeline-vz-dot${visualZoom === n ? ' active' : ''}`}
+                  onClick={() => setVisualZoom(n)}
+                  title={['XS', 'S', 'M', 'L', 'XL'][n - 1]}
+                />
+              ))}
+            </div>
+            <button
+              className="timeline-zoom-btn"
+              onClick={() => setVisualZoom(prev => Math.min(5, prev + 1))}
+              disabled={visualZoom === 5}
+              title="Miniaturas más grandes (+)"
+            >
+              +
+            </button>
+          </div>
         </div>
 
         <div className="content timeline-content" ref={contentRef}>
@@ -289,7 +357,7 @@ export default function TimelineClient({
                 )}
               </div>
 
-              <div className="timeline-grid">
+              <div className={`timeline-grid timeline-grid--z${visualZoom}`}>
                 {group.photos.map(photo => (
                   <Link
                     key={photo.id}
@@ -298,7 +366,7 @@ export default function TimelineClient({
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={`/api/photos/${photo.id}/thumbnail?size=200`}
+                      src={`/api/photos/${photo.id}/thumbnail?size=${vzConfig.size}`}
                       alt={photo.filename}
                       loading="lazy"
                       decoding="async"

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
-import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline } from './Icons';
+import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -30,7 +30,7 @@ export default function Sidebar({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { running, startScan } = useScan();
+  const { running, startScan, watcher, toggleWatcher } = useScan();
   const { confirm, alert } = useModal();
   const [showNewTheme, setShowNewTheme] = useState(false);
   const [newThemeName, setNewThemeName] = useState('');
@@ -305,9 +305,48 @@ export default function Sidebar({
         )}
       </div>
 
+      <div className="sidebar-section">
+        <div className="sidebar-section-label">Herramientas</div>
+        <Link
+          href="/stats"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/stats' ? 'active' : ''}`}
+        >
+          <IconStats size={14} />
+          Estadísticas
+        </Link>
+      </div>
+
       <div className="sidebar-spacer" />
 
-      <div style={{ padding: '0 18px 12px' }}>
+      <div style={{ padding: '0 18px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {/* Watcher toggle */}
+        {watcher.watching && (
+          <button
+            onClick={toggleWatcher}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: 7,
+              padding: '6px 10px', border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)', background: 'transparent',
+              fontFamily: 'inherit', fontSize: 12, cursor: 'pointer',
+              color: watcher.enabled ? 'var(--tag-auto-color)' : 'var(--text-tertiary)',
+              borderColor: watcher.enabled ? 'var(--tag-auto-border)' : 'var(--border)',
+            }}
+            title={watcher.enabled ? 'Desactivar escaneo automático' : 'Activar escaneo automático'}
+          >
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+              background: watcher.enabled ? 'var(--tag-auto-color)' : 'var(--text-tertiary)',
+              boxShadow: watcher.enabled ? '0 0 0 3px rgba(59,98,212,0.15)' : 'none',
+            }} />
+            {watcher.classifying
+              ? `Clasificando ${watcher.classifyDone}/${watcher.classifyTotal}…`
+              : watcher.enabled
+                ? 'Vigilando carpetas'
+                : 'Vigilancia desactivada'}
+          </button>
+        )}
+
         <button
           onClick={handleScan}
           disabled={running}
