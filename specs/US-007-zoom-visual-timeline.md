@@ -1,5 +1,8 @@
 # Feature: Zoom Visual en la Línea de Tiempo
 
+> **Estado: ✅ Desplegada** — merged en main el 2026-05-22
+> **Nota:** será reemplazada por US-009 (zoom unificado) cuando se implemente
+
 ## Historia de usuario
 
 Como fotógrafo que navega su biblioteca en la línea de tiempo,

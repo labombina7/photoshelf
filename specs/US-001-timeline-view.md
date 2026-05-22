@@ -1,5 +1,7 @@
 # Feature: Timeline View
 
+> **Estado: ✅ Desplegada** — merged en main el 2026-05-22
+
 ## Historia de usuario
 
 Como fotógrafo que gestiona una biblioteca grande,

@@ -1,5 +1,7 @@
 # Feature: Panel de Estadísticas
 
+> **Estado: ✅ Desplegada** — merged en main el 2026-05-22
+
 ## Historia de usuario
 
 Como fotógrafo que quiere entender sus hábitos y su biblioteca,
