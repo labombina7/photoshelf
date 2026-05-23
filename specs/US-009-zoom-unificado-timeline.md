@@ -1,5 +1,8 @@
 # Feature: Zoom unificado en la vista Timeline
 
+> **Estado: ✅ Desplegada** — merged en main el 2026-05-22 (PR #25)
+> **Nota:** reemplaza el zoom visual independiente de US-007
+
 ## Historia de usuario
 
 Como fotógrafo navegando mi biblioteca por el timeline,
