@@ -8,7 +8,7 @@ import { IconChevronLeft, IconChevronRight } from '@/components/Icons';
 import type { PhotoDetail, Theme } from '@/lib/types';
 
 interface Params { photoId: string }
-interface SearchParams { year?: string; theme?: string; favorite?: string; q?: string }
+interface SearchParams { year?: string; theme?: string; favorite?: string; q?: string; back?: string }
 
 export default async function PhotoDetailPage({
   params,
@@ -58,9 +58,29 @@ export default async function PhotoDetailPage({
   const prevId = idx > 0 ? siblings[idx - 1].id : null;
   const nextId = idx < siblings.length - 1 ? siblings[idx + 1].id : null;
 
-  const backParams = new URLSearchParams(sp as Record<string, string>).toString();
-  const backHref = `/library${backParams ? `?${backParams}` : ''}`;
-  const navParams = backParams ? `?${backParams}` : '';
+  // `back` param carries an explicit return URL (e.g. /tags/portrait, /library?q=...)
+  // set by any view that links to a photo detail so the back button returns there.
+  const { back: backOverride, ...libSp } = sp;
+  const libParams = new URLSearchParams(libSp as Record<string, string>).toString();
+  const backHref = backOverride ?? `/library${libParams ? `?${libParams}` : ''}`;
+
+  // Back button label: infer from backOverride path or fall back to event name
+  let backLabel = photo.event;
+  if (backOverride) {
+    try {
+      const decoded = decodeURIComponent(backOverride);
+      if (decoded.startsWith('/tags/')) {
+        backLabel = decodeURIComponent(decoded.replace('/tags/', ''));
+      } else if (decoded.startsWith('/library')) {
+        backLabel = photo.event;
+      }
+    } catch { /* keep default */ }
+  }
+
+  // Propagate back param in prev/next links so the chain remains intact
+  const navSearch = backOverride
+    ? `?back=${encodeURIComponent(backOverride)}`
+    : libParams ? `?${libParams}` : '';
 
   return (
     <div className="app-shell">
@@ -76,21 +96,21 @@ export default async function PhotoDetailPage({
         <div className="detail-topbar">
           <Link href={backHref} className="btn-back">
             <IconChevronLeft />
-            {photo.event}
+            {backLabel}
           </Link>
           <span style={{ color: 'var(--text-tertiary)' }}>/</span>
           <span className="detail-filename">{photo.filename}</span>
 
           <div className="detail-nav">
             {prevId ? (
-              <Link href={`/library/${prevId}${navParams}`} className="btn-icon">
+              <Link href={`/library/${prevId}${navSearch}`} className="btn-icon">
                 <IconChevronLeft />
               </Link>
             ) : (
               <button className="btn-icon" disabled style={{ opacity: 0.3 }}><IconChevronLeft /></button>
             )}
             {nextId ? (
-              <Link href={`/library/${nextId}${navParams}`} className="btn-icon">
+              <Link href={`/library/${nextId}${navSearch}`} className="btn-icon">
                 <IconChevronRight />
               </Link>
             ) : (

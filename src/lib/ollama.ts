@@ -1,7 +1,21 @@
-import fs from 'fs/promises';
 import path from 'path';
+import sharp from 'sharp';
 
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
+
+/**
+ * Read any photo format and return a JPEG base64 string ≤512px.
+ * sharp handles JPEG, PNG, WEBP, HEIC, TIFF — all formats the scanner accepts.
+ * Resizing to 512px reduces payload size (and speeds up Ollama significantly).
+ */
+async function readPhotoAsJpegBase64(relativePath: string, photosRoot: string): Promise<string> {
+  const absPath = path.join(photosRoot, relativePath);
+  const jpegBuffer = await sharp(absPath)
+    .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: 82 })
+    .toBuffer();
+  return jpegBuffer.toString('base64');
+}
 
 async function ollamaText(prompt: string, timeoutMs = 30_000): Promise<string> {
   const res = await fetch(`${OLLAMA_URL}/api/generate`, {
@@ -39,9 +53,7 @@ async function ollamaVision(prompt: string, base64: string): Promise<string> {
 }
 
 export async function classifyPhoto(relativePath: string, photosRoot: string): Promise<string[]> {
-  const absPath = path.join(photosRoot, relativePath);
-  const buffer = await fs.readFile(absPath);
-  const base64 = buffer.toString('base64');
+  const base64 = await readPhotoAsJpegBase64(relativePath, photosRoot);
 
   const raw = await ollamaVision(
     `Analyze this photo and reply with ONLY comma-separated tags in this exact order:
@@ -204,9 +216,7 @@ export interface PhotoReview {
 }
 
 export async function reviewPhoto(relativePath: string, photosRoot: string): Promise<PhotoReview> {
-  const absPath = path.join(photosRoot, relativePath);
-  const buffer = await fs.readFile(absPath);
-  const base64 = buffer.toString('base64');
+  const base64 = await readPhotoAsJpegBase64(relativePath, photosRoot);
 
   const raw = await ollamaVision(
     `You are an expert photography critic. Analyze this photo and reply ONLY with a JSON object, no extra text.
@@ -244,9 +254,7 @@ export async function photoMatchesConcept(
   photosRoot: string,
   concept: string
 ): Promise<{ matches: boolean; tags: string[] }> {
-  const absPath = path.join(photosRoot, relativePath);
-  const buffer = await fs.readFile(absPath);
-  const base64 = buffer.toString('base64');
+  const base64 = await readPhotoAsJpegBase64(relativePath, photosRoot);
 
   const raw = await ollamaVision(
     `Does this photo show or relate to: "${concept}"?

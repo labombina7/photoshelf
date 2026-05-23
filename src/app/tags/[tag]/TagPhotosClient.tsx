@@ -107,7 +107,7 @@ export default function TagPhotosClient({ tagName, total, themes, projects, tota
               return (
                 <Link
                   key={photo.id}
-                  href={`/library/${photo.id}`}
+                  href={`/library/${photo.id}?back=${encodeURIComponent('/tags/' + encodeURIComponent(tagName))}`}
                   className="photo-item"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
