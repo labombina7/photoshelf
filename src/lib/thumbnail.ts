@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
+import { resolvePhotoPath } from './config';
 
 const CACHE_PATH = process.env.CACHE_PATH ?? path.join(process.cwd(), 'data', '.cache');
 const DEFAULT_SIZE = 400;
@@ -26,7 +27,8 @@ export async function getThumbnail(
   // Generate thumbnail
   await fs.mkdir(CACHE_PATH, { recursive: true });
 
-  const absPath = path.join(photosRoot, relativePath);
+  // Validate path is within photosRoot (path traversal protection)
+  const absPath = resolvePhotoPath(relativePath, photosRoot);
   const ext = path.extname(relativePath).toLowerCase();
 
   let inputBuffer: Buffer;

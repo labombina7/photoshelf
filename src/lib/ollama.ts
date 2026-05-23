@@ -1,7 +1,18 @@
 import path from 'path';
 import sharp from 'sharp';
+import { resolvePhotoPath } from './config';
 
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
+
+/** Escapes user-controlled strings before embedding them in Ollama prompts. */
+function escapeXml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
 
 /**
  * Read any photo format and return a JPEG base64 string ≤512px.
@@ -9,7 +20,7 @@ const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
  * Resizing to 512px reduces payload size (and speeds up Ollama significantly).
  */
 async function readPhotoAsJpegBase64(relativePath: string, photosRoot: string): Promise<string> {
-  const absPath = path.join(photosRoot, relativePath);
+  const absPath = resolvePhotoPath(relativePath, photosRoot);
   const jpegBuffer = await sharp(absPath)
     .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
     .jpeg({ quality: 82 })
@@ -79,7 +90,7 @@ export async function parseSearchQuery(prompt: string): Promise<{ year: number |
     `Extract photo search parameters from this query. Reply with JSON only, no explanation.
 Tags must only come from these exact values: "b&w", "color", portrait, landscape, street, fashion, editorial, architecture, macro, product, documentary, wildlife, travel, sport, abstract, personal, work, event, nature.
 Only include tags that are explicitly required by the query — do NOT add broad style tags unless specifically mentioned.
-Query: "${prompt}"
+Query: <user_query>${escapeXml(prompt)}</user_query>
 JSON format: {"year": null or number, "concept": "english concept", "tags": ["tag1", "tag2"]}
 Example for "fotos de naturaleza": {"year": null, "concept": "nature", "tags": ["nature"]}
 Example for "retratos en blanco y negro": {"year": null, "concept": "black and white portrait", "tags": ["b&w", "portrait"]}
@@ -257,7 +268,7 @@ export async function photoMatchesConcept(
   const base64 = await readPhotoAsJpegBase64(relativePath, photosRoot);
 
   const raw = await ollamaVision(
-    `Does this photo show or relate to: "${concept}"?
+    `Does this photo show or relate to: <user_query>${escapeXml(concept)}</user_query>?
 First line: YES or NO
 Second line: comma-separated tags (b&w or color, up to 2 styles from: portrait landscape street fashion editorial architecture macro product documentary wildlife travel sport abstract, one genre from: personal work travel event nature, 1-2 subject tags)
 Example:
