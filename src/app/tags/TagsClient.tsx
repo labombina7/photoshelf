@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
+import EmptyState from '@/components/EmptyState';
 import { IconMenu } from '@/components/Icons';
 import type { Theme } from '@/lib/types';
 
@@ -52,7 +53,7 @@ export default function TagsClient({ tags, themes, projects, totalPhotos, favori
 
       <div className="main">
         <div className="topbar">
-          <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
+          <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú" aria-label="Abrir menú de navegación">
             <IconMenu size={20} />
           </button>
           <div className="topbar-title">Tags</div>
@@ -72,9 +73,25 @@ export default function TagsClient({ tags, themes, projects, totalPhotos, favori
 
         <div className="content">
           {filtered.length === 0 ? (
-            <div className="empty-state">
-              <p>No hay tags todavía. Clasifica algunas fotos para empezar.</p>
-            </div>
+            tags.length === 0 ? (
+              <EmptyState
+                icon={
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                    <line x1="7" y1="7" x2="7.01" y2="7" strokeWidth="2.5" />
+                  </svg>
+                }
+                title="Aún no hay etiquetas"
+                subtitle="Los tags se generan automáticamente al clasificar fotos con IA, o puedes añadirlos manualmente desde el detalle de cada foto."
+                action={{ label: 'Ir a la biblioteca', href: '/library' }}
+              />
+            ) : (
+              <EmptyState
+                title={`Sin resultados para "${search}"`}
+                subtitle="Prueba con otro término de búsqueda."
+                action={{ label: 'Limpiar búsqueda', onClick: () => setSearch('') }}
+              />
+            )
           ) : (
             <div className="tag-cloud">
               {filtered.map(tag => (

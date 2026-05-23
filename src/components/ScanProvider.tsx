@@ -90,7 +90,7 @@ export function ScanProvider({ children }: { children: React.ReactNode }) {
     }
 
     poll();
-    const interval = setInterval(poll, 2000);
+    const interval = setInterval(poll, 5000);
     return () => { active = false; clearInterval(interval); };
   }, [router]);
 

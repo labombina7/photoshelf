@@ -43,16 +43,33 @@ export async function GET(req: NextRequest) {
   sql += ' ORDER BY p.taken_at DESC, p.filename ASC LIMIT ? OFFSET ?';
   params.push(limit, offset);
 
-  const photos = db.prepare(sql).all(...params);
+  const photos = db.prepare(sql).all(...params) as Record<string, unknown>[];
 
-  // Attach tags to each photo
-  const tagStmt = db.prepare(
-    'SELECT t.name, pt.source FROM photo_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.photo_id = ?'
-  );
-  const withTags = (photos as Record<string, unknown>[]).map((p) => ({
-    ...p,
-    tags: tagStmt.all(p.id as number),
-  }));
+  // Attach tags — single batch query instead of N+1
+  let withTags: Record<string, unknown>[];
+  if (photos.length === 0) {
+    withTags = [];
+  } else {
+    const ids = photos.map((p) => p.id as number);
+    const placeholders = ids.map(() => '?').join(',');
+    const tagRows = db.prepare(
+      `SELECT pt.photo_id, t.name, pt.source
+       FROM photo_tags pt JOIN tags t ON t.id = pt.tag_id
+       WHERE pt.photo_id IN (${placeholders})`
+    ).all(...ids) as { photo_id: number; name: string; source: string }[];
+
+    const tagMap = new Map<number, { name: string; source: string }[]>();
+    for (const row of tagRows) {
+      const arr = tagMap.get(row.photo_id);
+      if (arr) arr.push({ name: row.name, source: row.source });
+      else tagMap.set(row.photo_id, [{ name: row.name, source: row.source }]);
+    }
+
+    withTags = photos.map((p) => ({
+      ...p,
+      tags: tagMap.get(p.id as number) ?? [],
+    }));
+  }
 
   // Stats
   const total = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;

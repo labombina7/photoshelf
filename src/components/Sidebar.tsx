@@ -106,7 +106,7 @@ function SidebarInner({
   return (
     <>
       {mobileOpen && <div className="sidebar-overlay" onClick={onMobileClose} />}
-    <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`}>
+    <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`} role="navigation" aria-label="Navegación principal">
       <div className="sidebar-logo">
         <IconPhoto size={18} />
         <span className="sidebar-logo-name">photoshelf</span>
@@ -274,14 +274,15 @@ function SidebarInner({
             </div>
           </div>
         ) : (
-          <div
+          <button
             className="sidebar-item"
-            style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }}
+            style={{ color: 'var(--text-tertiary)', fontSize: '12.5px', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}
             onClick={() => setShowNewTheme(true)}
+            aria-label="Crear nueva temática"
           >
             <IconPlus />
             Nueva temática
-          </div>
+          </button>
         )}
       </div>
 
@@ -385,6 +386,7 @@ function SidebarInner({
             color: 'var(--text-tertiary)', marginLeft: 'auto', padding: 4,
           }}
           title="Cerrar sesión"
+          aria-label="Cerrar sesión"
         >
           <IconLogout />
         </button>

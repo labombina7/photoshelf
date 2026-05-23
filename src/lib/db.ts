@@ -94,5 +94,7 @@ function initSchema(db: Database.Database) {
     );
 
     CREATE INDEX IF NOT EXISTS idx_project_photos_p ON project_photos(project_id);
+
+    CREATE INDEX IF NOT EXISTS idx_photos_gps ON photos(gps_lat, gps_lon);
   `);
 }
