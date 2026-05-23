@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconSparkle } from '@/components/Icons';
+import EmptyState from '@/components/EmptyState';
 import type { Photo, Tag } from '@/lib/types';
 
 interface PhotoWithTags extends Photo {
@@ -53,7 +54,7 @@ function EventGroupBlock({
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
   const [classifying, setClassifying] = useState(false);
-  const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number } | null>(null);
+  const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number; errors?: number } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -128,8 +129,10 @@ function EventGroupBlock({
         <span className="event-name">{group.event}</span>
         <span className="event-count">· {group.count} fotos</span>
         {classifyResult && (
-          <span style={{ fontSize: 11, color: 'var(--text-tertiary)', marginLeft: 4 }}>
-            ✓ {classifyResult.processed} clasificadas
+          <span style={{ fontSize: 11, color: classifyResult.errors && classifyResult.errors > 0 ? '#b91c1c' : 'var(--text-tertiary)', marginLeft: 4 }}>
+            {classifyResult.errors && classifyResult.errors > 0
+              ? `⚠ ${classifyResult.processed}/${classifyResult.total} — Ollama no disponible`
+              : `✓ ${classifyResult.processed} clasificadas`}
           </span>
         )}
         <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -221,14 +224,18 @@ export default function PhotoGrid({ groups, collapsed, onToggle, activeFilters, 
 
   if (groups.length === 0) {
     return (
-      <div className="empty-state">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" style={{ opacity: 0.3 }}>
-          <rect x="3" y="3" width="18" height="18" rx="3" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <path d="M21 15l-5-5L5 21" />
-        </svg>
-        <p>No hay fotos. Haz clic en &ldquo;Reescanear biblioteca&rdquo; para comenzar.</p>
-      </div>
+      <EmptyState
+        icon={
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="M21 15l-5-5L5 21" />
+          </svg>
+        }
+        title="Tu biblioteca está vacía"
+        subtitle="Ejecuta el escáner para indexar las fotos de tu NAS y empezar a explorarlas."
+        action={{ label: 'Reescanear biblioteca', href: '/library' }}
+      />
     );
   }
 

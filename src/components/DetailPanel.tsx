@@ -22,6 +22,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   );
   const [newTag, setNewTag] = useState('');
   const [classifying, setClassifying] = useState(false);
+  const [classifyError, setClassifyError] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(photo.is_favorite === 1);
   const [reviewing, setReviewing] = useState(false);
   const [review, setReview] = useState<PhotoReview | null>(null);
@@ -53,10 +54,14 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
 
   async function classify() {
     setClassifying(true);
+    setClassifyError(null);
     try {
       const res = await fetch(`/api/ai/classify/${photo.id}`, { method: 'POST' });
       const data = await res.json();
-      if (data.tags) {
+      if (!res.ok) throw new Error(data?.error ?? `Error ${res.status}`);
+      if (data.tags?.length === 0) {
+        setClassifyError('La IA no generó ningún tag. Comprueba que Ollama esté disponible.');
+      } else if (data.tags) {
         // Merge AI tags without overwriting manual ones
         setTags((prev) => {
           const existing = new Set(prev.map((t) => t.name));
@@ -66,8 +71,8 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           return [...prev, ...newAi];
         });
       }
-    } catch {
-      // silently fail
+    } catch (err) {
+      setClassifyError(err instanceof Error ? err.message : 'Error al clasificar la imagen');
     } finally {
       setClassifying(false);
     }
@@ -190,7 +195,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
             <div key={tag.name} className={`tag ${tag.source === 'ai' ? 'auto' : ''}`}>
               {tag.name}
               {tag.source === 'ai' && <span className="tag-ai-badge">IA</span>}
-              <button className="tag-remove" onClick={() => removeTag(tag.name)}>
+              <button className="tag-remove" onClick={() => removeTag(tag.name)} aria-label={`Eliminar etiqueta ${tag.name}`}>
                 <IconX />
               </button>
             </div>
@@ -210,7 +215,8 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
 
       {/* AI classify */}
       <div>
-        <button className="ai-classify-btn" onClick={classify} disabled={classifying}>
+        <button className="ai-classify-btn" onClick={classify} disabled={classifying}
+          aria-label={classifying ? 'Clasificando foto con IA…' : 'Clasificar foto con IA'}>
           {classifying ? (
             <>
               <span className="spinner dark" />
@@ -223,6 +229,15 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
             </>
           )}
         </button>
+        {classifyError && (
+          <div style={{
+            marginTop: 6, padding: '6px 8px', borderRadius: 'var(--radius-sm)',
+            background: '#fff3f3', border: '1px solid #fca5a5',
+            fontSize: 12, color: '#b91c1c', lineHeight: 1.4,
+          }}>
+            {classifyError}
+          </div>
+        )}
       </div>
 
       {/* AI review */}
@@ -249,7 +264,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           <div className="review-modal">
             <div className="review-modal-header">
               <span style={{ fontWeight: 600, fontSize: 14 }}>Análisis de la imagen</span>
-              <button className="ai-panel-close" onClick={() => setReviewError(null)}>
+              <button className="ai-panel-close" onClick={() => setReviewError(null)} aria-label="Cerrar">
                 <IconX size={14} />
               </button>
             </div>
@@ -269,7 +284,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           <div className="review-modal">
             <div className="review-modal-header">
               <span style={{ fontWeight: 600, fontSize: 14 }}>Análisis de la imagen</span>
-              <button className="ai-panel-close" onClick={() => setReview(null)}>
+              <button className="ai-panel-close" onClick={() => setReview(null)} aria-label="Cerrar">
                 <IconX size={14} />
               </button>
             </div>
@@ -322,17 +337,22 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
         <div>
           <div className="panel-section-title">Temáticas</div>
           <div className="theme-list">
-            {allThemes.map((theme) => (
-              <div
-                key={theme.id}
-                className={`theme-item ${assignedThemeIds.has(theme.id) ? 'assigned' : ''}`}
-                onClick={() => toggleTheme(theme.id)}
-              >
-                <span className="theme-dot" style={{ background: theme.color }} />
-                <span className="theme-item-name">{theme.name}</span>
-                <span className="theme-check"><IconCheck /></span>
-              </div>
-            ))}
+            {allThemes.map((theme) => {
+              const assigned = assignedThemeIds.has(theme.id);
+              return (
+                <button
+                  key={theme.id}
+                  className={`theme-item ${assigned ? 'assigned' : ''}`}
+                  onClick={() => toggleTheme(theme.id)}
+                  aria-pressed={assigned}
+                  aria-label={`${assigned ? 'Quitar temática' : 'Asignar temática'} "${theme.name}"`}
+                >
+                  <span className="theme-dot" style={{ background: theme.color }} />
+                  <span className="theme-item-name">{theme.name}</span>
+                  <span className="theme-check"><IconCheck /></span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
