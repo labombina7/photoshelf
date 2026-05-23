@@ -10,8 +10,10 @@ export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { prompt, mode, offset = 0 } = await req.json();
-  if (!prompt?.trim()) return NextResponse.json({ error: 'Prompt required' }, { status: 400 });
+  const { prompt: rawPrompt, mode, offset = 0 } = await req.json();
+  if (!rawPrompt?.trim()) return NextResponse.json({ error: 'Prompt required' }, { status: 400 });
+  // Sanitize: limit length to prevent prompt injection payloads
+  const prompt = String(rawPrompt).trim().slice(0, 200);
 
   const db = getDb();
   const { year, concept, tags } = await parseSearchQuery(prompt);

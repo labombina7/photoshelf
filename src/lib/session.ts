@@ -1,23 +1,30 @@
 import { getIronSession, IronSession } from 'iron-session';
 import { cookies } from 'next/headers';
+import crypto from 'crypto';
 
 export interface SessionData {
   isLoggedIn: boolean;
 }
 
-const sessionOptions = {
-  password: process.env.SESSION_SECRET ?? 'default-dev-secret-change-in-production!!',
-  cookieName: 'photoshelf_session',
-  cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 60 * 60 * 24 * 30,
-  },
-};
+function getSessionOptions() {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret && process.env.NODE_ENV !== 'test') {
+    throw new Error('SESSION_SECRET environment variable must be set to a secure random string');
+  }
+  return {
+    password: secret ?? 'test-secret-for-testing-only',
+    cookieName: 'photoshelf_session',
+    cookieOptions: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 30,
+    },
+  };
+}
 
 export async function getSession(): Promise<IronSession<SessionData>> {
   const cookieStore = await cookies();
-  return getIronSession<SessionData>(cookieStore, sessionOptions);
+  return getIronSession<SessionData>(cookieStore, getSessionOptions());
 }
 
 export function checkPassword(input: string): boolean {
@@ -28,11 +35,11 @@ export function checkPassword(input: string): boolean {
     try {
       const a = Buffer.from(input.padEnd(dummy.length, '\0'));
       const b = Buffer.from(dummy.padEnd(input.length, '\0'));
-      require('crypto').timingSafeEqual(a, b);
+      crypto.timingSafeEqual(a, b);
     } catch {}
     return false;
   }
   const a = Buffer.from(input);
   const b = Buffer.from(expected);
-  return require('crypto').timingSafeEqual(a, b);
+  return crypto.timingSafeEqual(a, b);
 }

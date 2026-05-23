@@ -26,6 +26,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       },
     });
   } catch (err) {
+    if (err instanceof Error && err.message === 'Path traversal detected') {
+      console.error('[security] Path traversal attempt blocked for photo id:', id);
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
     console.error('Thumbnail error:', err);
     return NextResponse.json({ error: 'Failed to generate thumbnail' }, { status: 500 });
   }
