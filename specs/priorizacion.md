@@ -4,31 +4,24 @@
 
 ---
 
-## 🔴 Crítico — resolver antes del próximo release
+## ✅ Desplegado
 
-| ID | Feature | Por qué es urgente | Esfuerzo |
-|----|---------|-------------------|---------|
-| **US-014** | Hardening autenticación | `SESSION_SECRET` hardcodeado = cualquiera puede forjar sesión. Sin rate limiting = fuerza bruta libre. La app está en internet. | S |
-| **US-015** | Protección path traversal | Un bug de inserción en la DB podría leer archivos del sistema del NAS. | S |
-
----
-
-## 🟠 Alta prioridad — impacto alto, esfuerzo bajo (quick wins)
-
-| ID | Feature | Por qué ahora | Esfuerzo |
-|----|---------|---------------|---------|
-| **US-011** | Feedback errores IA | El flujo de clasificación falla en silencio. Usuarios creen que nada pasa. | S |
-| **US-010** | Accesibilidad global | `aria-label`, `:focus-visible`, divs → buttons. Una sola pasada arregla todo. | S |
-| **US-012** | Empty states con CTA | Onboarding roto: pantalla vacía sin saber qué hacer. | S |
-| **US-018** | Optimización queries y polling | N+1 tags, polling cada 2s, sin índice GPS → carga innecesaria en el NAS 24/7. | M |
+| ID | Feature | PR | Fecha |
+|----|---------|----|-------|
+| **US-014** | Hardening autenticación | #34 | 2026-05-23 |
+| **US-015** | Protección path traversal | #34 | 2026-05-23 |
+| **US-010** | Accesibilidad global | #35 | 2026-05-23 |
+| **US-011** | Feedback errores IA | #35 | 2026-05-23 |
+| **US-012** | Empty states con CTA | #35 | 2026-05-23 |
+| **US-018** | Optimización queries y polling | #35 | 2026-05-23 |
 
 ---
 
-## 🔵 Fundamentos técnicos — prerequisitos para trabajo futuro
+## 🔵 Fundamentos técnicos — siguiente bloque (prerequisitos)
 
 | ID | Feature | Por qué importa | Esfuerzo | Bloquea |
 |----|---------|-----------------|---------|---------|
-| **US-016** | Centralización código duplicado | `insertTag` × 5, `buildPhotoQuery` × 4, `PHOTOS_PATH` × 7. Cada feature nueva multiplica la deuda. | M | US-022 |
+| **US-016** | Centralización código duplicado | `upsertPhotoTags` × 5, `buildPhotoQuery` × 4, `PHOTOS_PATH` × 7. Cada feature nueva multiplica la deuda. | M | US-022 |
 | **US-022** | Capa de repositorio | Prerequisito de todo EPIC-002 (API iOS). Sin esto, los endpoints v1 duplican lógica. | M | US-023, 024, 025 |
 | **US-023** | Contratos API estándar | Envelope, errores, versionado. Sin esto, el cliente iOS no puede escribirse de forma robusta. | M | US-024, 025 |
 | **US-020** | Actualización Next.js 15 | Versión actual tiene CVEs conocidos. Migración más sencilla ahora que más adelante. | M | — |
@@ -70,12 +63,16 @@
 ## Orden de ataque recomendado
 
 ```
-Semana 1:  US-014 + US-015       (seguridad, bloqueante)
-Semana 2:  US-011 + US-012 + US-010  (UX quick wins, en paralelo)
-Semana 3:  US-018 + US-016       (rendimiento + refactor base)
-Semana 4:  US-020                (Next.js 15, en rama separada)
-Luego:     US-022 → US-023 → US-024 + US-025  (EPIC-002 iOS)
-Luego:     EPIC-001              (múltiples catálogos)
+✅ Semana 1:  US-014 + US-015           (seguridad)          → HECHO
+✅ Semana 2:  US-010 + US-011 + US-012  (UX quick wins)      → HECHO
+✅ Semana 3a: US-018                    (rendimiento)         → HECHO
+
+▶ Semana 3b: US-016                    (centralizar código duplicado)
+  Semana 4:  US-022 → US-023           (capa repo + contratos API)
+  Semana 5:  US-024 + US-025           (endpoints iOS)
+  Semana 6:  US-020                    (Next.js 15, rama separada)
+  Luego:     US-017 + US-013           (hardening técnico + mobile)
+  Luego:     EPIC-001                  (múltiples catálogos)
 ```
 
 ---
