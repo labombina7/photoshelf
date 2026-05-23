@@ -189,9 +189,8 @@ export default function AISearchPanel() {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={`/api/photos/${photo.id}/thumbnail`}
+                      src={`/api/photos/${photo.id}/thumbnail?size=150`}
                       alt={photo.filename}
-                      loading="lazy"
                       onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
                   </a>

@@ -997,11 +997,22 @@ body {
 .stats-year-select:focus { border-color: var(--text); }
 
 /* ── Map ── */
+/* Lightweight dot marker — avoids loading a thumbnail per marker */
+.map-marker-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent, #6c63ff);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.45);
+  transition: transform 0.1s;
+}
+.map-marker-dot:hover { transform: scale(1.3); }
+
+/* Thumbnail used in the click panel (not in markers) */
 .map-marker-thumb {
   width: 44px; height: 44px; border-radius: 50%;
   overflow: hidden; border: 2px solid #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-  background: var(--bg-secondary);
+  background: var(--surface2);
 }
 .map-marker-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 

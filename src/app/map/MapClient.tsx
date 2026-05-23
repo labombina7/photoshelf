@@ -56,7 +56,11 @@ export default function MapClient({ total, withGps, themes, projects, totalPhoto
       }).addTo(map);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const cluster = (L as any).markerClusterGroup({ maxClusterRadius: 60, showCoverageOnHover: false });
+      const cluster = (L as any).markerClusterGroup({
+        maxClusterRadius: 60,
+        showCoverageOnHover: false,
+        // Cluster icons are rendered by the plugin — no custom thumbnail needed
+      });
 
       map.addLayer(cluster);
       leafletRef.current = { map, cluster };
@@ -72,11 +76,13 @@ export default function MapClient({ total, withGps, themes, projects, totalPhoto
       const bounds: [number, number][] = [];
 
       for (const photo of photos) {
+        // Use a lightweight CSS dot — no img request per marker.
+        // Thumbnails load on demand in the side panel when a marker is clicked.
         const icon = L.divIcon({
-          html: `<div class="map-marker-thumb"><img src="/api/photos/${photo.id}/thumbnail?size=80" /></div>`,
+          html: `<div class="map-marker-dot"></div>`,
           className: '',
-          iconSize: [44, 44],
-          iconAnchor: [22, 22],
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
         });
 
         const marker = L.marker([photo.gps_lat, photo.gps_lon], { icon });
