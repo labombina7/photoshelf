@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
 import { getSidebarData } from '@/lib/queries/sidebar';
 import { getStatsOverview, getPhotosByYear, getPhotosByMonth, getTopCameras, getTopTags, getPhotosByHour } from '@/lib/queries/stats';
+import { getActiveCatalogId } from '@/lib/catalog-context';
 import StatsClient from './StatsClient';
 
 export interface StatsData {
@@ -32,21 +33,22 @@ export default async function StatsPage({
   const session = await getSession();
   if (!session.isLoggedIn) redirect('/login');
 
+  const catalogId = await getActiveCatalogId();
   const sp = await searchParams;
   const currentYear = new Date().getFullYear();
   const selectedYear = sp.year ? parseInt(sp.year, 10) : currentYear;
 
-  const sidebar  = getSidebarData();
-  const overview = getStatsOverview();
+  const sidebar  = getSidebarData(catalogId);
+  const overview = getStatsOverview(catalogId);
 
   const stats: StatsData = {
     overview,
-    byYear:       getPhotosByYear(),
-    byMonth:      getPhotosByMonth(selectedYear),
+    byYear:       getPhotosByYear(catalogId),
+    byMonth:      getPhotosByMonth(selectedYear, catalogId),
     selectedYear,
-    cameras:      getTopCameras(6),
-    tags:         getTopTags(20),
-    byHour:       getPhotosByHour(),
+    cameras:      getTopCameras(6, catalogId),
+    tags:         getTopTags(20, catalogId),
+    byHour:       getPhotosByHour(catalogId),
   };
 
   return (
@@ -57,6 +59,8 @@ export default async function StatsPage({
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}
+      catalogs={sidebar.catalogs}
+      activeCatalogId={catalogId}
     />
   );
 }

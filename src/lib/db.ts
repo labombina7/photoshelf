@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import { PHOTOS_PATH } from './config';
 
 const DB_PATH = process.env.DB_PATH ?? path.join(process.cwd(), 'data', 'photoshelf.db');
 
@@ -97,4 +98,37 @@ function initSchema(db: Database.Database) {
 
     CREATE INDEX IF NOT EXISTS idx_photos_gps ON photos(gps_lat, gps_lon);
   `);
+
+  // ── EPIC-001 migration: catalogs table + catalog_id column ────────────────
+  migrateEpic001(db);
+}
+
+function migrateEpic001(db: Database.Database) {
+  // 1. Create catalogs table (idempotent)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS catalogs (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      name       TEXT NOT NULL,
+      path       TEXT NOT NULL UNIQUE,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+  `);
+
+  // 2. Insert default catalog (id=1) if it doesn't exist
+  db.prepare(`
+    INSERT OR IGNORE INTO catalogs (id, name, path) VALUES (1, 'Principal', ?)
+  `).run(PHOTOS_PATH);
+
+  // 3. Add catalog_id column to photos (idempotent via try/catch — SQLite has no IF NOT EXISTS for columns)
+  try {
+    db.exec(`ALTER TABLE photos ADD COLUMN catalog_id INTEGER REFERENCES catalogs(id) DEFAULT 1`);
+  } catch {
+    // Column already exists — safe to ignore
+  }
+
+  // 4. Assign all unassigned photos to catalog 1
+  db.exec(`UPDATE photos SET catalog_id = 1 WHERE catalog_id IS NULL`);
+
+  // 5. Index on catalog_id for efficient filtering
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_photos_catalog ON photos(catalog_id)`);
 }

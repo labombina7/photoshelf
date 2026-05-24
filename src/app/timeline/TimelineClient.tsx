@@ -30,6 +30,8 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
+  catalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  activeCatalogId?: number;
 }
 
 const LEVELS: Level[] = ['year', 'month', 'day'];
@@ -95,6 +97,8 @@ export default function TimelineClient({
   totalPhotos,
   favoriteCount,
   untaggedCount,
+  catalogs = [],
+  activeCatalogId = 1,
 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [level, setLevel] = useState<Level>(() => {
@@ -269,6 +273,8 @@ export default function TimelineClient({
         untaggedCount={untaggedCount}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
+        catalogs={catalogs}
+        activeCatalogId={activeCatalogId}
       />
 
       <div className="main">

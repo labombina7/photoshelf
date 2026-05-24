@@ -28,6 +28,8 @@ export interface PhotoFilters {
   favorite?: string | null;
   untagged?: string | null;
   q?: string | null;
+  /** EPIC-001: filter by catalog. Defaults to 1 (Principal) if not specified. */
+  catalogId?: number | null;
 }
 
 /**
@@ -51,7 +53,7 @@ export interface PhotoFilterResult {
 }
 
 export function buildPhotoFilter(filters: PhotoFilters): PhotoFilterResult {
-  const { year, event, theme, tag, favorite, untagged, q } = filters;
+  const { year, event, theme, tag, favorite, untagged, q, catalogId } = filters;
 
   const joinParts: string[] = [];
   const joinParams: (string | number)[] = [];
@@ -86,6 +88,10 @@ export function buildPhotoFilter(filters: PhotoFilters): PhotoFilterResult {
   }
 
   // ── WHERE conditions ──────────────────────────────────────────────────────
+
+  // catalog_id filter — always applied (defaults to 1 if not specified)
+  whereParts.push('p.catalog_id = ?');
+  whereParams.push(catalogId ?? 1);
 
   if (year)     { whereParts.push('p.year = ?');       whereParams.push(parseInt(year, 10)); }
   if (event)    { whereParts.push('p.event = ?');      whereParams.push(event); }

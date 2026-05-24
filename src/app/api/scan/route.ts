@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { scanLibrary } from '@/lib/scanner';
 import { getScanState, updateScanState } from '@/lib/scanState';
-import { PHOTOS_PATH } from '@/lib/config';
+import { getActiveCatalogId } from '@/lib/catalog-context';
+import { getCatalogById } from '@/lib/queries/catalogs';
 
 export const maxDuration = 300;
 
@@ -19,12 +20,18 @@ export async function POST() {
     );
   }
 
+  const catalogId = await getActiveCatalogId();
+  const catalog = getCatalogById(catalogId);
+  if (!catalog) {
+    return NextResponse.json({ error: 'Catálogo no encontrado' }, { status: 404 });
+  }
+
   updateScanState({ running: true, done: 0, total: 0, currentEvent: 'Iniciando…', error: null, completedAt: null });
 
   // Fire and forget — scan runs in background, client polls /api/scan/status
-  scanLibrary(PHOTOS_PATH, (event, done, total) => {
+  scanLibrary(catalog.path, (event, done, total) => {
     updateScanState({ currentEvent: event, done, total });
-  }).then(() => {
+  }, catalogId).then(() => {
     updateScanState({ running: false, completedAt: Date.now() });
   }).catch((err: Error) => {
     updateScanState({ running: false, error: err.message, completedAt: Date.now() });

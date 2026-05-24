@@ -19,9 +19,11 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
+  catalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  activeCatalogId?: number;
 }
 
-export default function TagsClient({ tags, themes, projects, totalPhotos, favoriteCount, untaggedCount }: Props) {
+export default function TagsClient({ tags, themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs = [], activeCatalogId = 1 }: Props) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -49,6 +51,8 @@ export default function TagsClient({ tags, themes, projects, totalPhotos, favori
         untaggedCount={untaggedCount}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
+        catalogs={catalogs}
+        activeCatalogId={activeCatalogId}
       />
 
       <div className="main">

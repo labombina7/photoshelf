@@ -15,6 +15,8 @@ interface Props {
   untaggedCount: number;
   availableYears: number[];
   initialYear: number | null;
+  catalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  activeCatalogId?: number;
 }
 
 export default function MapWrapper(props: Props) {

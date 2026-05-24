@@ -25,11 +25,13 @@ interface Props {
   untaggedCount: number;
   availableYears: number[];
   initialYear: number | null;
+  catalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  activeCatalogId?: number;
 }
 
 export default function MapClient({
   total, themes, projects, totalPhotos, favoriteCount, untaggedCount,
-  availableYears, initialYear,
+  availableYears, initialYear, catalogs = [], activeCatalogId = 1,
 }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -152,6 +154,8 @@ export default function MapClient({
         untaggedCount={untaggedCount}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
+        catalogs={catalogs}
+        activeCatalogId={activeCatalogId}
       />
 
       <div className="main">

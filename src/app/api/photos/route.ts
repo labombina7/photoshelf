@@ -6,6 +6,8 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const catalogId = session.catalogId ?? 1;
+
   const sp       = req.nextUrl.searchParams;
   const year     = sp.get('year');
   const event    = sp.get('event');
@@ -19,7 +21,7 @@ export async function GET(req: NextRequest) {
   const offset   = (page - 1) * limit;
 
   const { photos, total, years } = listPhotos(
-    { year, event, theme, tag, favorite, untagged, q },
+    { year, event, theme, tag, favorite, untagged, q, catalogId },
     { limit, offset },
   );
 

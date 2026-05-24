@@ -4,6 +4,8 @@ import crypto from 'crypto';
 
 export interface SessionData {
   isLoggedIn: boolean;
+  /** ID del catálogo activo — default 1 (Principal) */
+  catalogId?: number;
 }
 
 function getSessionOptions() {
