@@ -1019,6 +1019,35 @@ body {
 .stats-year-select:focus { border-color: var(--text); }
 
 /* ── Map ── */
+.map-year-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 12px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.map-year-selector::-webkit-scrollbar { display: none; }
+
+.map-year-btn {
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms, color 120ms, border-color 120ms;
+}
+.map-year-btn:hover { background: var(--bg-secondary); color: var(--text); }
+.map-year-btn.active {
+  background: var(--accent, #3b62d4);
+  border-color: var(--accent, #3b62d4);
+  color: #fff;
+}
+
 /* Lightweight dot marker — avoids loading a thumbnail per marker */
 .map-marker-dot {
   width: 14px; height: 14px; border-radius: 50%;

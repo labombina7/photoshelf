@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu, IconMap } from '@/components/Icons';
@@ -23,20 +23,82 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
+  availableYears: number[];
+  initialYear: number | null;
 }
 
-export default function MapClient({ total, withGps, themes, projects, totalPhotos, favoriteCount, untaggedCount }: Props) {
+export default function MapClient({
+  total, themes, projects, totalPhotos, favoriteCount, untaggedCount,
+  availableYears, initialYear,
+}: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const leafletRef = useRef<{ map: L.Map; cluster: any } | null>(null);
+  const leafletRef = useRef<{ map: L.Map; cluster: any; L: typeof import('leaflet') } | null>(null);
+
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<PhotoPoint[]>([]);
   const [panelOpen, setPanelOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [initializing, setInitializing] = useState(true);
+  const [loadingYear, setLoadingYear] = useState(false);
+  const [activeYear, setActiveYear] = useState<number | null>(initialYear);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [limitReached, setLimitReached] = useState(false);
 
+  // Load markers for a given year (or all years if null). Reuses existing map instance.
+  const loadMarkers = useCallback(async (year: number | null) => {
+    const ref = leafletRef.current;
+    if (!ref) return;
+    const { map, cluster, L } = ref;
+
+    setLoadingYear(true);
+    setPanelOpen(false);
+
+    const url = year !== null ? `/api/photos/map?year=${year}` : '/api/photos/map';
+    const res = await fetch(url);
+    const data = await res.json();
+    const photos: PhotoPoint[] = data.photos ?? [];
+
+    cluster.clearLayers();
+
+    if (photos.length === 0) {
+      setVisibleCount(0);
+      setLimitReached(false);
+      setLoadingYear(false);
+      return;
+    }
+
+    const bounds: [number, number][] = [];
+
+    for (const photo of photos) {
+      const icon = L.divIcon({
+        html: `<div class="map-marker-dot"></div>`,
+        className: '',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+
+      const marker = L.marker([photo.gps_lat, photo.gps_lon], { icon });
+      (marker as unknown as { _photoData: PhotoPoint })._photoData = photo;
+
+      marker.on('click', () => {
+        const same = photos.filter(p => p.gps_lat === photo.gps_lat && p.gps_lon === photo.gps_lon);
+        setSelectedPhotos(same);
+        setPanelOpen(true);
+      });
+
+      cluster.addLayer(marker);
+      bounds.push([photo.gps_lat, photo.gps_lon]);
+    }
+
+    map.fitBounds(bounds as L.LatLngBoundsExpression, { padding: [40, 40], maxZoom: 14 });
+    setVisibleCount(photos.length);
+    setLimitReached(data.limitReached ?? false);
+    setLoadingYear(false);
+  }, []);
+
+  // Initialize Leaflet once
   useEffect(() => {
     if (!mapRef.current || leafletRef.current) return;
-
     let cancelled = false;
 
     async function init() {
@@ -56,58 +118,29 @@ export default function MapClient({ total, withGps, themes, projects, totalPhoto
       }).addTo(map);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const cluster = (L as any).markerClusterGroup({
-        maxClusterRadius: 60,
-        showCoverageOnHover: false,
-        // Cluster icons are rendered by the plugin — no custom thumbnail needed
-      });
-
+      const cluster = (L as any).markerClusterGroup({ maxClusterRadius: 60, showCoverageOnHover: false });
       map.addLayer(cluster);
-      leafletRef.current = { map, cluster };
+      leafletRef.current = { map, cluster, L };
 
-      // Fetch photo points
-      const res = await fetch('/api/photos/map');
-      if (cancelled) return;
-      const data = await res.json();
-      const photos: PhotoPoint[] = data.photos ?? [];
-
-      if (photos.length === 0) { setLoading(false); return; }
-
-      const bounds: [number, number][] = [];
-
-      for (const photo of photos) {
-        // Use a lightweight CSS dot — no img request per marker.
-        // Thumbnails load on demand in the side panel when a marker is clicked.
-        const icon = L.divIcon({
-          html: `<div class="map-marker-dot"></div>`,
-          className: '',
-          iconSize: [14, 14],
-          iconAnchor: [7, 7],
-        });
-
-        const marker = L.marker([photo.gps_lat, photo.gps_lon], { icon });
-        (marker as unknown as { _photoData: PhotoPoint })._photoData = photo;
-
-        marker.on('click', () => {
-          // Find all photos at this exact coordinate
-          const same = photos.filter(p => p.gps_lat === photo.gps_lat && p.gps_lon === photo.gps_lon);
-          setSelectedPhotos(same);
-          setPanelOpen(true);
-        });
-
-        cluster.addLayer(marker);
-        bounds.push([photo.gps_lat, photo.gps_lon]);
-      }
-
-      map.fitBounds(bounds as L.LatLngBoundsExpression, { padding: [40, 40], maxZoom: 14 });
-      setLoading(false);
+      setInitializing(false);
     }
 
     init().catch(console.error);
     return () => { cancelled = true; };
   }, []);
 
-  const withoutGps = total - withGps;
+  // Load markers whenever init finishes or activeYear changes
+  useEffect(() => {
+    if (initializing) return;
+    loadMarkers(activeYear);
+  }, [initializing, activeYear, loadMarkers]);
+
+  const handleYearChange = (year: number | null) => {
+    setActiveYear(year);
+  };
+
+  const withoutGps = total - visibleCount;
+  const showSelector = availableYears.length > 1;
 
   return (
     <div className="app-shell">
@@ -132,32 +165,76 @@ export default function MapClient({ total, withGps, themes, projects, totalPhoto
               Mapa
             </div>
           </div>
+
+          {showSelector && (
+            <div className="map-year-selector" role="group" aria-label="Filtrar por año">
+              <button
+                className={`map-year-btn${activeYear === null ? ' active' : ''}`}
+                onClick={() => handleYearChange(null)}
+              >
+                Todos
+              </button>
+              {availableYears.map(year => (
+                <button
+                  key={year}
+                  className={`map-year-btn${activeYear === year ? ' active' : ''}`}
+                  onClick={() => handleYearChange(year)}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="topbar-spacer" />
           <div style={{ fontSize: 12, color: 'var(--text-tertiary)', paddingRight: 4 }}>
-            {withGps.toLocaleString('es')} fotos en el mapa
-            {withoutGps > 0 && <> · <span style={{ color: 'var(--text-tertiary)' }}>{withoutGps.toLocaleString('es')} sin ubicación</span></>}
+            {loadingYear ? (
+              <span>Cargando…</span>
+            ) : (
+              <>
+                {visibleCount.toLocaleString('es')} fotos en el mapa
+                {limitReached && <span title="Se muestran las 5000 más recientes"> · límite alcanzado</span>}
+                {!limitReached && withoutGps > 0 && (
+                  <> · <span>{withoutGps.toLocaleString('es')} sin ubicación</span></>
+                )}
+              </>
+            )}
           </div>
         </div>
 
         <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
-          {loading && (
+          {(initializing || loadingYear) && (
             <div style={{
               position: 'absolute', inset: 0, zIndex: 1000,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'var(--bg)', color: 'var(--text-tertiary)', fontSize: 13,
             }}>
-              Cargando mapa…
+              {initializing ? 'Cargando mapa…' : 'Cargando marcadores…'}
             </div>
           )}
+
+          {!initializing && !loadingYear && visibleCount === 0 && (
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--text-tertiary)', fontSize: 13, pointerEvents: 'none',
+            }}>
+              No hay fotos con ubicación{activeYear !== null ? ` para ${activeYear}` : ''}
+            </div>
+          )}
+
           <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
 
-          {/* Side panel */}
           {panelOpen && selectedPhotos.length > 0 && (
             <div className="map-panel" onClick={e => e.stopPropagation()}>
               <div className="map-panel-header">
                 <span className="map-panel-title">
                   {selectedPhotos[0].event}
-                  {selectedPhotos.length > 1 && <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', marginLeft: 6 }}>({selectedPhotos.length})</span>}
+                  {selectedPhotos.length > 1 && (
+                    <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', marginLeft: 6 }}>
+                      ({selectedPhotos.length})
+                    </span>
+                  )}
                 </span>
                 <button className="map-panel-close" onClick={() => setPanelOpen(false)}>×</button>
               </div>
@@ -174,7 +251,9 @@ export default function MapClient({ total, withGps, themes, projects, totalPhoto
                       <div className="map-panel-filename">{photo.filename}</div>
                       {photo.taken_at && (
                         <div className="map-panel-date">
-                          {new Date(photo.taken_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+                          {new Date(photo.taken_at).toLocaleDateString('es-ES', {
+                            day: 'numeric', month: 'long', year: 'numeric',
+                          })}
                         </div>
                       )}
                       <div className="map-panel-event">{photo.event}</div>
@@ -188,7 +267,6 @@ export default function MapClient({ total, withGps, themes, projects, totalPhoto
         </div>
       </div>
 
-      {/* Close panel when clicking outside */}
       {panelOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 399 }} onClick={() => setPanelOpen(false)} />
       )}

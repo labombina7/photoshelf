@@ -113,7 +113,12 @@ export function countUntagged(): number {
   `).get() as { c: number }).c;
 }
 
-export function countWithGps(): number {
+export function countWithGps(year?: number): number {
+  if (year !== undefined) {
+    return (getDb().prepare(
+      'SELECT COUNT(*) as c FROM photos WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND year = ?'
+    ).get(year) as { c: number }).c;
+  }
   return (getDb().prepare(
     'SELECT COUNT(*) as c FROM photos WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL'
   ).get() as { c: number }).c;
@@ -146,12 +151,34 @@ export interface MapPhoto {
   gps_lon: number;
 }
 
-export function getMapPhotos(): MapPhoto[] {
-  return getDb().prepare(`
-    SELECT id, filename, taken_at, event, gps_lat, gps_lon
-    FROM photos
-    WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL
-    ORDER BY taken_at DESC NULLS LAST
-    LIMIT 10000
-  `).all() as MapPhoto[];
+const MAP_LIMIT = 5000;
+
+export function getMapYears(): number[] {
+  return (getDb().prepare(
+    'SELECT DISTINCT year FROM photos WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL ORDER BY year DESC'
+  ).all() as { year: number }[]).map(r => r.year);
+}
+
+export function getMapPhotos(year?: number): { photos: MapPhoto[]; limitReached: boolean } {
+  const db = getDb();
+  const rows = year !== undefined
+    ? db.prepare(`
+        SELECT id, filename, taken_at, event, gps_lat, gps_lon
+        FROM photos
+        WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND year = ?
+        ORDER BY taken_at ASC NULLS LAST
+      `).all(year) as MapPhoto[]
+    : db.prepare(`
+        SELECT id, filename, taken_at, event, gps_lat, gps_lon
+        FROM photos
+        WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL
+        ORDER BY taken_at DESC NULLS LAST
+        LIMIT ${MAP_LIMIT + 1}
+      `).all() as MapPhoto[];
+
+  if (year !== undefined) {
+    return { photos: rows, limitReached: false };
+  }
+  const limitReached = rows.length > MAP_LIMIT;
+  return { photos: limitReached ? rows.slice(0, MAP_LIMIT) : rows, limitReached };
 }

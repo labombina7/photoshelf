@@ -13,6 +13,8 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
+  availableYears: number[];
+  initialYear: number | null;
 }
 
 export default function MapWrapper(props: Props) {
