@@ -13,12 +13,15 @@ export function listAllTags(): { name: string }[] {
   return getDb().prepare('SELECT name FROM tags ORDER BY name ASC').all() as { name: string }[];
 }
 
-export function listTagsWithCounts(): TagWithCount[] {
+export function listTagsWithCounts(catalogId = 1): TagWithCount[] {
   return getDb().prepare(`
     SELECT t.name, COUNT(pt.photo_id) AS count
-    FROM tags t JOIN photo_tags pt ON pt.tag_id = t.id
+    FROM tags t
+    JOIN photo_tags pt ON pt.tag_id = t.id
+    JOIN photos p ON p.id = pt.photo_id
+    WHERE p.catalog_id = ?
     GROUP BY t.id ORDER BY count DESC, t.name ASC
-  `).all() as TagWithCount[];
+  `).all(catalogId) as TagWithCount[];
 }
 
 export function listPhotoTags(photoId: number): Tag[] {
@@ -31,10 +34,13 @@ export function getTagByName(name: string): { id: number } | null {
   return (getDb().prepare('SELECT id FROM tags WHERE name = ? COLLATE NOCASE').get(name) as { id: number } | undefined) ?? null;
 }
 
-export function countPhotosByTag(tagId: number): number {
-  return (getDb().prepare(
-    'SELECT COUNT(DISTINCT photo_id) AS count FROM photo_tags WHERE tag_id = ?'
-  ).get(tagId) as { count: number }).count;
+export function countPhotosByTag(tagId: number, catalogId = 1): number {
+  return (getDb().prepare(`
+    SELECT COUNT(DISTINCT pt.photo_id) AS count
+    FROM photo_tags pt
+    JOIN photos p ON p.id = pt.photo_id
+    WHERE pt.tag_id = ? AND p.catalog_id = ?
+  `).get(tagId, catalogId) as { count: number }).count;
 }
 
 // ── Write ─────────────────────────────────────────────────────────────────────

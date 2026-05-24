@@ -3,6 +3,7 @@ import { getSession } from '@/lib/session';
 import { getPhotoById, getYears, getPhotoSiblings } from '@/lib/queries/photos';
 import { listThemes } from '@/lib/queries/themes';
 import { getSidebarData } from '@/lib/queries/sidebar';
+import { getActiveCatalogId } from '@/lib/catalog-context';
 import PhotoDetailClient from './PhotoDetailClient';
 
 interface Params { photoId: string }
@@ -18,6 +19,7 @@ export default async function PhotoDetailPage({
   const session = await getSession();
   if (!session.isLoggedIn) redirect('/login');
 
+  const catalogId = await getActiveCatalogId();
   const { photoId } = await params;
   const sp = await searchParams;
   const id = parseInt(photoId, 10);
@@ -26,11 +28,11 @@ export default async function PhotoDetailPage({
   if (!photo) notFound();
 
   const allThemes      = listThemes();
-  const sidebar        = getSidebarData();
-  const years          = getYears();
+  const sidebar        = getSidebarData(catalogId);
+  const years          = getYears(catalogId);
 
   // Prev / next within the same event
-  const siblings = getPhotoSiblings(photo.year, photo.event);
+  const siblings = getPhotoSiblings(photo.year, photo.event, catalogId);
   const idx      = siblings.findIndex(s => s.id === id);
   const prevId   = idx > 0 ? siblings[idx - 1].id : null;
   const nextId   = idx < siblings.length - 1 ? siblings[idx + 1].id : null;
@@ -71,6 +73,8 @@ export default async function PhotoDetailPage({
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}
+      sidebarCatalogs={sidebar.catalogs}
+      activeCatalogId={catalogId}
     />
   );
 }

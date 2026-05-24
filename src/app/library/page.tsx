@@ -3,6 +3,7 @@ import { getSession } from '@/lib/session';
 import { hasPhotosForYear, getYears } from '@/lib/queries/photos';
 import { listGroups } from '@/lib/queries/groups';
 import { getSidebarData } from '@/lib/queries/sidebar';
+import { getActiveCatalogId } from '@/lib/catalog-context';
 import LibraryClient from './LibraryClient';
 
 interface SearchParams {
@@ -18,13 +19,14 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const session = await getSession();
   if (!session.isLoggedIn) redirect('/login');
 
+  const catalogId = await getActiveCatalogId();
   const sp = await searchParams;
 
   // 'year=all' means the user explicitly chose "Todos los años" — skip redirect.
   // No year param at all (fresh entry) → redirect to current year if photos exist for it.
   if (!sp.year && !sp.event && !sp.theme && !sp.favorite && !sp.untagged && !sp.q) {
     const currentYear = new Date().getFullYear();
-    if (hasPhotosForYear(currentYear)) {
+    if (hasPhotosForYear(currentYear, catalogId)) {
       redirect(`/library?year=${currentYear}`);
     }
   }
@@ -39,10 +41,10 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
     favorite: sp.favorite,
     untagged: sp.untagged,
     q:        sp.q,
-  });
+  }, catalogId);
 
-  const years   = getYears();
-  const sidebar = getSidebarData();
+  const years   = getYears(catalogId);
+  const sidebar = getSidebarData(catalogId);
 
   return (
     <LibraryClient
@@ -56,6 +58,8 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       activeYear={effectiveYear ?? null}
       activeFilters={{ year: effectiveYear, event: sp.event, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q }}
       projects={sidebar.projects}
+      catalogs={sidebar.catalogs}
+      activeCatalogId={catalogId}
     />
   );
 }

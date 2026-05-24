@@ -59,8 +59,9 @@ export function listPhotos(
     }));
   }
 
-  const total = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
-  const years = (db.prepare('SELECT DISTINCT year FROM photos ORDER BY year DESC').all() as { year: number }[]).map(r => r.year);
+  const catalogId = filters.catalogId ?? 1;
+  const total = (db.prepare('SELECT COUNT(*) as c FROM photos WHERE catalog_id = ?').get(catalogId) as { c: number }).c;
+  const years = (db.prepare('SELECT DISTINCT year FROM photos WHERE catalog_id = ? ORDER BY year DESC').all(catalogId) as { year: number }[]).map(r => r.year);
 
   return { photos, total, years };
 }
@@ -98,46 +99,47 @@ export function setFavorite(id: number, value: boolean): void {
 
 // ── Aggregate counts ──────────────────────────────────────────────────────────
 
-export function countPhotos(): number {
-  return (getDb().prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
+export function countPhotos(catalogId = 1): number {
+  return (getDb().prepare('SELECT COUNT(*) as c FROM photos WHERE catalog_id = ?').get(catalogId) as { c: number }).c;
 }
 
-export function countFavorites(): number {
-  return (getDb().prepare('SELECT COUNT(*) as c FROM photos WHERE is_favorite = 1').get() as { c: number }).c;
+export function countFavorites(catalogId = 1): number {
+  return (getDb().prepare('SELECT COUNT(*) as c FROM photos WHERE is_favorite = 1 AND catalog_id = ?').get(catalogId) as { c: number }).c;
 }
 
-export function countUntagged(): number {
+export function countUntagged(catalogId = 1): number {
   return (getDb().prepare(`
     SELECT COUNT(*) as c FROM photos p
-    WHERE NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id)
-  `).get() as { c: number }).c;
+    WHERE catalog_id = ?
+    AND NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id)
+  `).get(catalogId) as { c: number }).c;
 }
 
-export function countWithGps(year?: number): number {
+export function countWithGps(year?: number, catalogId = 1): number {
   if (year !== undefined) {
     return (getDb().prepare(
-      'SELECT COUNT(*) as c FROM photos WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND year = ?'
-    ).get(year) as { c: number }).c;
+      'SELECT COUNT(*) as c FROM photos WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND year = ? AND catalog_id = ?'
+    ).get(year, catalogId) as { c: number }).c;
   }
   return (getDb().prepare(
-    'SELECT COUNT(*) as c FROM photos WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL'
-  ).get() as { c: number }).c;
+    'SELECT COUNT(*) as c FROM photos WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND catalog_id = ?'
+  ).get(catalogId) as { c: number }).c;
 }
 
 // ── Years / navigation helpers ────────────────────────────────────────────────
 
-export function getYears(): number[] {
-  return (getDb().prepare('SELECT DISTINCT year FROM photos ORDER BY year DESC').all() as { year: number }[]).map(r => r.year);
+export function getYears(catalogId = 1): number[] {
+  return (getDb().prepare('SELECT DISTINCT year FROM photos WHERE catalog_id = ? ORDER BY year DESC').all(catalogId) as { year: number }[]).map(r => r.year);
 }
 
-export function hasPhotosForYear(year: number): boolean {
-  return !!getDb().prepare('SELECT 1 FROM photos WHERE year = ? LIMIT 1').get(year);
+export function hasPhotosForYear(year: number, catalogId = 1): boolean {
+  return !!getDb().prepare('SELECT 1 FROM photos WHERE year = ? AND catalog_id = ? LIMIT 1').get(year, catalogId);
 }
 
-export function getPhotoSiblings(year: number, event: string): { id: number }[] {
+export function getPhotoSiblings(year: number, event: string, catalogId = 1): { id: number }[] {
   return getDb().prepare(
-    'SELECT id FROM photos WHERE year = ? AND event = ? ORDER BY taken_at ASC, filename ASC'
-  ).all(year, event) as { id: number }[];
+    'SELECT id FROM photos WHERE year = ? AND event = ? AND catalog_id = ? ORDER BY taken_at ASC, filename ASC'
+  ).all(year, event, catalogId) as { id: number }[];
 }
 
 // ── Map ───────────────────────────────────────────────────────────────────────
@@ -153,28 +155,28 @@ export interface MapPhoto {
 
 const MAP_LIMIT = 5000;
 
-export function getMapYears(): number[] {
+export function getMapYears(catalogId = 1): number[] {
   return (getDb().prepare(
-    'SELECT DISTINCT year FROM photos WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL ORDER BY year DESC'
-  ).all() as { year: number }[]).map(r => r.year);
+    'SELECT DISTINCT year FROM photos WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND catalog_id = ? ORDER BY year DESC'
+  ).all(catalogId) as { year: number }[]).map(r => r.year);
 }
 
-export function getMapPhotos(year?: number): { photos: MapPhoto[]; limitReached: boolean } {
+export function getMapPhotos(year?: number, catalogId = 1): { photos: MapPhoto[]; limitReached: boolean } {
   const db = getDb();
   const rows = year !== undefined
     ? db.prepare(`
         SELECT id, filename, taken_at, event, gps_lat, gps_lon
         FROM photos
-        WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND year = ?
+        WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND year = ? AND catalog_id = ?
         ORDER BY taken_at ASC NULLS LAST
-      `).all(year) as MapPhoto[]
+      `).all(year, catalogId) as MapPhoto[]
     : db.prepare(`
         SELECT id, filename, taken_at, event, gps_lat, gps_lon
         FROM photos
-        WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL
+        WHERE gps_lat IS NOT NULL AND gps_lon IS NOT NULL AND catalog_id = ?
         ORDER BY taken_at DESC NULLS LAST
         LIMIT ${MAP_LIMIT + 1}
-      `).all() as MapPhoto[];
+      `).all(catalogId) as MapPhoto[];
 
   if (year !== undefined) {
     return { photos: rows, limitReached: false };

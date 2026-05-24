@@ -10,6 +10,7 @@ import AISearchPanel from '@/components/AISearchPanel';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
 import type { Theme } from '@/lib/types';
+import type { CatalogRow } from '@/lib/queries/catalogs';
 
 interface EventGroup {
   year: number;
@@ -38,6 +39,8 @@ interface LibraryClientProps {
   untaggedCount: number;
   activeYear: string | null;
   activeFilters: ActiveFilters;
+  catalogs?: CatalogRow[];
+  activeCatalogId?: number;
 }
 
 export default function LibraryClient({
@@ -51,6 +54,8 @@ export default function LibraryClient({
   untaggedCount,
   activeYear,
   activeFilters,
+  catalogs = [],
+  activeCatalogId = 1,
 }: LibraryClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -152,6 +157,8 @@ export default function LibraryClient({
         untaggedCount={untaggedCount}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
+        catalogs={catalogs}
+        activeCatalogId={activeCatalogId}
       />
 
       <div className="main">

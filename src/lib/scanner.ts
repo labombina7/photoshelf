@@ -17,24 +17,27 @@ interface ScannedPhoto {
   exposure: string | null;
   gps_lat: number | null;
   gps_lon: number | null;
+  catalog_id: number;
 }
 
 type ProgressCallback = (event: string, done: number, total: number) => void;
 
 export async function scanLibrary(
   photosRoot: string,
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
+  catalogId = 1,
 ): Promise<{ added: number; total: number }> {
   const db = getDb();
 
   const upsert = db.prepare(`
     INSERT INTO photos
       (path, filename, year, event, size_bytes, width, height,
-       taken_at, camera, exposure, gps_lat, gps_lon, scanned_at)
+       taken_at, camera, exposure, gps_lat, gps_lon, catalog_id, scanned_at)
     VALUES
       (@path, @filename, @year, @event, @size_bytes, @width, @height,
-       @taken_at, @camera, @exposure, @gps_lat, @gps_lon, datetime('now'))
+       @taken_at, @camera, @exposure, @gps_lat, @gps_lon, @catalog_id, datetime('now'))
     ON CONFLICT(path) DO UPDATE SET
+      catalog_id = excluded.catalog_id,
       scanned_at = excluded.scanned_at,
       size_bytes = excluded.size_bytes,
       width      = COALESCE(photos.width, excluded.width),
@@ -50,12 +53,12 @@ export async function scanLibrary(
     for (const p of items) upsert.run(p);
   });
 
-  const countBefore: number = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
+  const countBefore: number = (db.prepare('SELECT COUNT(*) as c FROM photos WHERE catalog_id = ?').get(catalogId) as { c: number }).c;
 
   const totalEvents = await countEvents(photosRoot);
-  await walkPhotosPerYear(photosRoot, insertBatch, totalEvents, onProgress);
+  await walkPhotosPerYear(photosRoot, insertBatch, totalEvents, onProgress, catalogId);
 
-  const total: number = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
+  const total: number = (db.prepare('SELECT COUNT(*) as c FROM photos WHERE catalog_id = ?').get(catalogId) as { c: number }).c;
   return { added: total - countBefore, total };
 }
 
@@ -80,7 +83,8 @@ async function walkPhotosPerYear(
   photosRoot: string,
   commit: (items: ScannedPhoto[]) => void,
   totalEvents: number,
-  onProgress?: ProgressCallback
+  onProgress?: ProgressCallback,
+  catalogId = 1,
 ): Promise<void> {
   let yearDirs: string[];
   try {
@@ -128,6 +132,7 @@ async function walkPhotosPerYear(
           year,
           event: eventDir,
           size_bytes: stat.size,
+          catalog_id: catalogId,
           ...exifData,
         });
       }

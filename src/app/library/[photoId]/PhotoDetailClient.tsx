@@ -22,6 +22,8 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
+  sidebarCatalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  activeCatalogId?: number;
 }
 
 export default function PhotoDetailClient({
@@ -37,6 +39,8 @@ export default function PhotoDetailClient({
   totalPhotos,
   favoriteCount,
   untaggedCount,
+  sidebarCatalogs = [],
+  activeCatalogId = 1,
 }: Props) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -116,6 +120,8 @@ export default function PhotoDetailClient({
         untaggedCount={untaggedCount}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
+        catalogs={sidebarCatalogs}
+        activeCatalogId={activeCatalogId}
       />
       {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (

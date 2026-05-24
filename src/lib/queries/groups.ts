@@ -17,9 +17,9 @@ export interface GroupListResult {
   total: number;
 }
 
-export function listGroups(filters: PhotoFilters): GroupListResult {
+export function listGroups(filters: PhotoFilters, catalogId = 1): GroupListResult {
   const db = getDb();
-  const { joinSql, whereSql, params: fp } = buildPhotoFilter(filters);
+  const { joinSql, whereSql, params: fp } = buildPhotoFilter({ ...filters, catalogId });
 
   const groups = db.prepare(`
     SELECT p.year, p.event, COUNT(DISTINCT p.id) as count, MIN(p.id) as thumbnail_id

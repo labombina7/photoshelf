@@ -6,7 +6,9 @@ import { Suspense, useState } from 'react';
 import { IconPhoto, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
+import CatalogSwitcher from './CatalogSwitcher';
 import type { Theme } from '@/lib/types';
+import type { CatalogRow } from '@/lib/queries/catalogs';
 
 interface SidebarProps {
   themes: Theme[];
@@ -16,6 +18,8 @@ interface SidebarProps {
   untaggedCount?: number;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  catalogs?: CatalogRow[];
+  activeCatalogId?: number;
 }
 
 function SidebarInner({
@@ -26,6 +30,8 @@ function SidebarInner({
   untaggedCount = 0,
   mobileOpen = false,
   onMobileClose,
+  catalogs = [],
+  activeCatalogId = 1,
 }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -330,6 +336,11 @@ function SidebarInner({
       <div className="sidebar-spacer" />
 
       <div style={{ padding: '0 18px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {/* Catalog switcher — only shown when multiple catalogs exist */}
+        {catalogs.length > 1 && (
+          <CatalogSwitcher catalogs={catalogs} activeCatalogId={activeCatalogId} />
+        )}
+
         {/* Watcher toggle */}
         {watcher.watching && (
           <button
