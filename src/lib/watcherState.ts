@@ -8,20 +8,24 @@ export interface WatcherState {
   classifyTotal: number;
 }
 
-const state: WatcherState = {
-  enabled: true,
-  watching: false,
-  lastScanAt: null,
-  reason: null,
-  classifying: false,
-  classifyDone: 0,
-  classifyTotal: 0,
-};
+const g = globalThis as typeof globalThis & { __photoshelf_watcher?: WatcherState };
+
+if (!g.__photoshelf_watcher) {
+  g.__photoshelf_watcher = {
+    enabled: true,
+    watching: false,
+    lastScanAt: null,
+    reason: null,
+    classifying: false,
+    classifyDone: 0,
+    classifyTotal: 0,
+  };
+}
 
 export function getWatcherState(): Readonly<WatcherState> {
-  return { ...state };
+  return { ...g.__photoshelf_watcher! };
 }
 
 export function updateWatcherState(patch: Partial<WatcherState>): void {
-  Object.assign(state, patch);
+  Object.assign(g.__photoshelf_watcher!, patch);
 }

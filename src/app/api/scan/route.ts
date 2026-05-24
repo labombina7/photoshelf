@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { getSession } from '@/lib/session';
 import { scanLibrary } from '@/lib/scanner';
 import { getScanState, updateScanState } from '@/lib/scanState';
@@ -26,15 +26,23 @@ export async function POST() {
     return NextResponse.json({ error: 'Catálogo no encontrado' }, { status: 404 });
   }
 
+  console.log(`[scan] Iniciando escaneo — catálogo ${catalogId} "${catalog.name}" → ${catalog.path}`);
+
   updateScanState({ running: true, done: 0, total: 0, currentEvent: 'Iniciando…', error: null, completedAt: null });
 
-  // Fire and forget — scan runs in background, client polls /api/scan/status
-  scanLibrary(catalog.path, (event, done, total) => {
-    updateScanState({ currentEvent: event, done, total });
-  }, catalogId).then(() => {
-    updateScanState({ running: false, completedAt: Date.now() });
-  }).catch((err: Error) => {
-    updateScanState({ running: false, error: err.message, completedAt: Date.now() });
+  // after() keeps the execution context alive after the 202 response is sent,
+  // so the async scan is not aborted by the Next.js runtime.
+  after(async () => {
+    try {
+      const result = await scanLibrary(catalog.path, (event, done, total) => {
+        updateScanState({ currentEvent: event, done, total });
+      }, catalogId);
+      console.log(`[scan] Completado — añadidas: ${result.added}, total: ${result.total}`);
+      updateScanState({ running: false, completedAt: Date.now() });
+    } catch (err) {
+      console.error('[scan] Error:', err);
+      updateScanState({ running: false, error: (err as Error).message, completedAt: Date.now() });
+    }
   });
 
   return NextResponse.json({ ok: true }, { status: 202 });
