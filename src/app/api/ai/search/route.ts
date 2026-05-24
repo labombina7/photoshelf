@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
 import { parseSearchQuery, photoMatchesConcept } from '@/lib/ollama';
-
-const PHOTOS_PATH = process.env.PHOTOS_PATH ?? '/photos';
+import { PHOTOS_PATH } from '@/lib/config';
+import { upsertAiTags } from '@/lib/db-helpers';
 const DEEP_BATCH = 50;
 
 export async function POST(req: NextRequest) {
@@ -55,14 +55,6 @@ export async function POST(req: NextRequest) {
 
   const candidates = db.prepare(candidateSql).all(...candidateParams) as { id: number; path: string }[];
 
-  const insertTag = db.transaction((pid: number, tagNames: string[]) => {
-    for (const name of tagNames) {
-      db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)').run(name);
-      const tag = db.prepare('SELECT id FROM tags WHERE name = ?').get(name) as { id: number };
-      db.prepare('INSERT OR IGNORE INTO photo_tags (photo_id, tag_id, source) VALUES (?, ?, ?)').run(pid, tag.id, 'ai');
-    }
-  });
-
   const matchedIds: number[] = [];
 
   for (const candidate of candidates) {
@@ -74,7 +66,7 @@ export async function POST(req: NextRequest) {
       const { matches, tags: newTags } = await photoMatchesConcept(candidate.path, PHOTOS_PATH, concept);
 
       if (isUntagged && newTags.length > 0) {
-        insertTag(candidate.id, newTags);
+        upsertAiTags(db, candidate.id, newTags);
       }
       if (matches) matchedIds.push(candidate.id);
     } catch { /* skip on error */ }

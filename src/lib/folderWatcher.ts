@@ -5,8 +5,8 @@ import { getScanState, updateScanState } from './scanState';
 import { getClassifyState, updateClassifyState } from './classifyState';
 import { getWatcherState, updateWatcherState } from './watcherState';
 import { getDb } from './db';
-
-const PHOTOS_PATH = process.env.PHOTOS_PATH ?? '/photos';
+import { PHOTOS_PATH } from './config';
+import { upsertAiTags } from './db-helpers';
 const DEBOUNCE_MS = 5_000;
 const POLL_MS = 30_000;
 
@@ -107,19 +107,11 @@ async function runAutoClassify() {
     done: 0, total: photos.length, error: null, completedAt: null,
   });
 
-  const insertTag = db.transaction((pid: number, tags: string[]) => {
-    for (const name of tags) {
-      db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)').run(name);
-      const tag = db.prepare('SELECT id FROM tags WHERE name = ?').get(name) as { id: number };
-      db.prepare('INSERT OR IGNORE INTO photo_tags (photo_id, tag_id, source) VALUES (?, ?, ?)').run(pid, tag.id, 'ai');
-    }
-  });
-
   let done = 0;
   for (const photo of photos) {
     try {
       const tags = await classifyPhoto(photo.path, PHOTOS_PATH);
-      if (tags.length > 0) insertTag(photo.id, tags);
+      upsertAiTags(db, photo.id, tags);
     } catch { /* skip failed photo */ }
     done++;
     updateWatcherState({ classifyDone: done });

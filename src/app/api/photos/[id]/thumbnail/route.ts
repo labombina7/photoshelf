@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
 import { getThumbnail } from '@/lib/thumbnail';
-
-const PHOTOS_PATH = process.env.PHOTOS_PATH ?? '/photos';
+import { PHOTOS_PATH } from '@/lib/config';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();

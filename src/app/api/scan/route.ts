@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { scanLibrary } from '@/lib/scanner';
 import { getScanState, updateScanState } from '@/lib/scanState';
-
-const PHOTOS_PATH = process.env.PHOTOS_PATH ?? '/photos';
+import { PHOTOS_PATH } from '@/lib/config';
 
 export const maxDuration = 300;
 
