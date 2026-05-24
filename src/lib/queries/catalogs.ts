@@ -1,5 +1,4 @@
 import { getDb } from '@/lib/db';
-import fs from 'fs';
 
 export interface CatalogRow {
   id: number;
@@ -38,11 +37,6 @@ export interface CreateCatalogInput {
 
 export function createCatalog(input: CreateCatalogInput): CatalogRow {
   const { name, path } = input;
-
-  // Validate path exists on disk
-  if (!fs.existsSync(path)) {
-    throw new Error(`La ruta "${path}" no existe en el sistema de archivos`);
-  }
 
   // Validate no overlapping paths
   const existing = listCatalogs();
