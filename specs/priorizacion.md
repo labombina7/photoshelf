@@ -1,6 +1,6 @@
 # Backlog priorizado — photoshelf
 
-**Última actualización:** 2026-05-24 (US-026, US-027 añadidas)
+**Última actualización:** 2026-05-24 (US-026 desplegada, US-027 añadida)
 
 ---
 
@@ -17,6 +17,7 @@
 | **US-016** | Centralización código duplicado | #36 | 2026-05-24 |
 | **US-022** | Capa de repositorio | #37 | 2026-05-24 |
 | **US-020** | Actualización Next.js 15 | #38 | 2026-05-24 |
+| **US-026** | Personalidad visual (iconografía, micro-interacciones) | #42 | 2026-05-24 |
 
 ---
 
@@ -33,7 +34,6 @@
 | ID | Feature | Motivación | Esfuerzo |
 |----|---------|------------|---------|
 | **US-027** | Mapa — filtro por año | Con catálogos grandes el mapa se cuelga (10k+ marcadores). Filtrar por año reduce a ~500 puntos y hace el mapa usable. | S |
-| **US-026** | Personalidad visual (iconografía, micro-interacciones, copy) | La app funciona pero no tiene carácter. Iconos inconsistentes, tipografía plana, sin transiciones. | M |
 | **US-017** | Hardening técnico (errores/tipos) | Try/catch en rutas API, tipos TS unificados, MIME types. Mejora resiliencia. | M |
 | **US-013** | UX mobile (swipe, bottom sheet) | La web mobile es la alternativa a la app iOS mientras no existe. | M |
 | **US-019** | Cobertura de tests | Sin tests en scanner.ts ni thumbnail.ts. Cada refactor es una apuesta. | L |
@@ -74,6 +74,8 @@
 ✅ Semana 4:  US-022                     (capa de repositorio) → HECHO
 
 ✅ Semana 4b: US-020                    (Next.js 15) → HECHO
+
+✅ Semana 4c: US-026                    (personalidad visual) → HECHO
 
 ▶ Semana 5:  US-023                    (contratos API estándar)
   Semana 6:  US-024 + US-025           (endpoints iOS)
