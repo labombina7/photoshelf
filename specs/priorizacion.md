@@ -15,6 +15,7 @@
 | **US-012** | Empty states con CTA | #35 | 2026-05-23 |
 | **US-018** | Optimización queries y polling | #35 | 2026-05-23 |
 | **US-016** | Centralización código duplicado | #36 | 2026-05-24 |
+| **US-022** | Capa de repositorio | #37 | 2026-05-24 |
 
 ---
 
@@ -70,7 +71,9 @@
 
 ✅ Semana 3b: US-016                    (centralizar código duplicado) → HECHO
 
-▶ Semana 4:  US-022 → US-023           (capa repo + contratos API)
+✅ Semana 4:  US-022                     (capa de repositorio) → HECHO
+
+▶ Semana 4b: US-023                    (contratos API estándar)
   Semana 5:  US-024 + US-025           (endpoints iOS)
   Semana 6:  US-020                    (Next.js 15, rama separada)
   Luego:     US-017 + US-013           (hardening técnico + mobile)

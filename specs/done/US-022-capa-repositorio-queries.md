@@ -1,5 +1,7 @@
 # Feature: Capa de repositorio — eliminar SQL inline en Server Components
 
+> **Estado: ✅ Desplegada** — merged en main el 2026-05-24 (PR #37)
+
 ## Historia de usuario
 
 Como desarrollador de photoshelf,
