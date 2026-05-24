@@ -109,10 +109,8 @@ export default function CatalogsClient({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ catalogId: id }),
     });
-    startTransition(() => {
-      router.push('/library');
-      router.refresh();
-    });
+    // Hard navigation — bypasses Next.js router cache and re-reads session cookie
+    window.location.href = '/library';
   }
 
   return (

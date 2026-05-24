@@ -17,7 +17,9 @@ function getSessionOptions() {
     password: secret ?? 'test-secret-for-testing-only',
     cookieName: 'photoshelf_session',
     cookieOptions: {
-      secure: process.env.NODE_ENV === 'production',
+      // Default false — this app runs over HTTP on a private LAN.
+      // Set COOKIE_SECURE=true only if you've set up TLS in front of it.
+      secure: process.env.COOKIE_SECURE === 'true',
       httpOnly: true,
       maxAge: 60 * 60 * 24 * 30,
     },

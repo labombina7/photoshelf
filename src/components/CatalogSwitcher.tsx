@@ -1,7 +1,5 @@
 'use client';
 
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 
 interface CatalogSwitcherProps {
@@ -10,9 +8,6 @@ interface CatalogSwitcherProps {
 }
 
 export default function CatalogSwitcher({ catalogs, activeCatalogId }: CatalogSwitcherProps) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
   async function switchCatalog(id: number) {
     if (id === activeCatalogId) return;
     await fetch('/api/catalogs/switch', {
@@ -20,10 +15,8 @@ export default function CatalogSwitcher({ catalogs, activeCatalogId }: CatalogSw
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ catalogId: id }),
     });
-    startTransition(() => {
-      router.push('/library');
-      router.refresh();
-    });
+    // Hard navigation — bypasses Next.js router cache and re-reads session cookie
+    window.location.href = '/library';
   }
 
   // Single catalog — just show name + link to settings
@@ -55,7 +48,6 @@ export default function CatalogSwitcher({ catalogs, activeCatalogId }: CatalogSw
   return (
     <select
       value={activeCatalogId}
-      disabled={isPending}
       onChange={e => switchCatalog(Number(e.target.value))}
       style={{
         width: '100%',
@@ -66,7 +58,7 @@ export default function CatalogSwitcher({ catalogs, activeCatalogId }: CatalogSw
         fontFamily: 'inherit',
         fontSize: 12,
         color: 'var(--text-secondary)',
-        cursor: isPending ? 'not-allowed' : 'pointer',
+        cursor: 'pointer',
         appearance: 'auto',
       }}
       title="Cambiar catálogo activo"
