@@ -1,11 +1,12 @@
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getSession } from '@/lib/session';
-import { getDb, getSidebarProjects } from '@/lib/db';
+import { getPhotoById, getYears, getPhotoSiblings } from '@/lib/queries/photos';
+import { listThemes } from '@/lib/queries/themes';
+import { getSidebarData } from '@/lib/queries/sidebar';
 import Sidebar from '@/components/Sidebar';
 import DetailPanel from '@/components/DetailPanel';
 import { IconChevronLeft, IconChevronRight } from '@/components/Icons';
-import type { PhotoDetail, Theme } from '@/lib/types';
 
 interface Params { photoId: string }
 interface SearchParams { year?: string; theme?: string; favorite?: string; q?: string; back?: string }
@@ -22,74 +23,51 @@ export default async function PhotoDetailPage({
 
   const { photoId } = await params;
   const sp = await searchParams;
-  const db = getDb();
   const id = parseInt(photoId, 10);
 
-  const photo = db.prepare('SELECT * FROM photos WHERE id = ?').get(id) as PhotoDetail | undefined;
+  const photo = getPhotoById(id);
   if (!photo) notFound();
 
-  photo.tags = db.prepare(
-    'SELECT t.id, t.name, pt.source FROM photo_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.photo_id = ?'
-  ).all(id) as PhotoDetail['tags'];
-
-  photo.themes = db.prepare(
-    'SELECT th.id, th.name, th.color FROM photo_themes pt JOIN themes th ON th.id = pt.theme_id WHERE pt.photo_id = ?'
-  ).all(id) as Theme[];
-
-  const allThemes = db.prepare(`
-    SELECT th.id, th.name, th.color, COUNT(pt.photo_id) as photo_count
-    FROM themes th
-    LEFT JOIN photo_themes pt ON pt.theme_id = th.id
-    GROUP BY th.id ORDER BY th.name ASC
-  `).all() as Theme[];
-
-  // Sidebar data
-  const total = (db.prepare('SELECT COUNT(*) as c FROM photos').get() as { c: number }).c;
-  const favoriteCount = (db.prepare('SELECT COUNT(*) as c FROM photos WHERE is_favorite = 1').get() as { c: number }).c;
-  const untaggedCount = (db.prepare('SELECT COUNT(*) as c FROM photos p WHERE NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id)').get() as { c: number }).c;
-  const years = (db.prepare('SELECT DISTINCT year FROM photos ORDER BY year DESC').all() as { year: number }[]).map(r => r.year);
-  const sidebarProjects = getSidebarProjects(db);
+  const allThemes      = listThemes();
+  const sidebar        = getSidebarData();
+  const years          = getYears();
 
   // Prev / next within the same event
-  const siblings = db.prepare(
-    'SELECT id FROM photos WHERE year = ? AND event = ? ORDER BY taken_at ASC, filename ASC'
-  ).all(photo.year, photo.event) as { id: number }[];
-  const idx = siblings.findIndex((s) => s.id === id);
-  const prevId = idx > 0 ? siblings[idx - 1].id : null;
-  const nextId = idx < siblings.length - 1 ? siblings[idx + 1].id : null;
+  const siblings = getPhotoSiblings(photo.year, photo.event);
+  const idx      = siblings.findIndex(s => s.id === id);
+  const prevId   = idx > 0 ? siblings[idx - 1].id : null;
+  const nextId   = idx < siblings.length - 1 ? siblings[idx + 1].id : null;
 
   // `back` param carries an explicit return URL (e.g. /tags/portrait, /library?q=...)
-  // set by any view that links to a photo detail so the back button returns there.
   const { back: backOverride, ...libSp } = sp;
   const libParams = new URLSearchParams(libSp as Record<string, string>).toString();
-  const backHref = backOverride ?? `/library${libParams ? `?${libParams}` : ''}`;
+  const backHref  = backOverride ?? `/library${libParams ? `?${libParams}` : ''}`;
 
-  // Back button label: infer from backOverride path or fall back to event name
   let backLabel = photo.event;
   if (backOverride) {
     try {
       const decoded = decodeURIComponent(backOverride);
       if (decoded.startsWith('/tags/')) {
         backLabel = decodeURIComponent(decoded.replace('/tags/', ''));
-      } else if (decoded.startsWith('/library')) {
-        backLabel = photo.event;
       }
     } catch { /* keep default */ }
   }
 
-  // Propagate back param in prev/next links so the chain remains intact
   const navSearch = backOverride
     ? `?back=${encodeURIComponent(backOverride)}`
     : libParams ? `?${libParams}` : '';
+
+  // suppress unused var (years kept for Sidebar if needed in future)
+  void years;
 
   return (
     <div className="app-shell">
       <Sidebar
         themes={allThemes}
-        projects={sidebarProjects}
-        totalPhotos={total}
-        favoriteCount={favoriteCount}
-        untaggedCount={untaggedCount}
+        projects={sidebar.projects}
+        totalPhotos={sidebar.totalPhotos}
+        favoriteCount={sidebar.favoriteCount}
+        untaggedCount={sidebar.untaggedCount}
       />
 
       <div className="main">
