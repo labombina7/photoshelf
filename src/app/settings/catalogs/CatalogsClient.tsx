@@ -141,10 +141,7 @@ export default function CatalogsClient({
 
         <div style={{ padding: '24px 32px', maxWidth: 640 }}>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>
-            Cada catálogo apunta a una carpeta montada en el contenedor. Para añadir una nueva carpeta,
-            primero añade el volumen en tu <code style={{ fontSize: 12 }}>docker-compose.yml</code> (p.ej.&nbsp;
-            <code style={{ fontSize: 12 }}>/ruta/NAS:/photos2:ro</code>) y reinicia el contenedor.
-            Después crea el catálogo aquí con la ruta interna (<code style={{ fontSize: 12 }}>/photos2</code>).
+            Cada catálogo apunta a una carpeta de fotos independiente. Escribe la ruta completa tal como aparece en el NAS.
           </p>
 
           {/* Catalog list */}
@@ -241,7 +238,7 @@ export default function CatalogsClient({
               />
               <input
                 className="tag-input"
-                placeholder="Ruta dentro del contenedor (p.ej. /photos2)"
+                placeholder="Ruta de la carpeta (p.ej. /volume1/homes/javi/MobileBackup)"
                 value={newPath}
                 onChange={e => setNewPath(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') createCatalog(); }}

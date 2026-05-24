@@ -7,12 +7,12 @@ services:
     environment:
       APP_PASSWORD: ${APP_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
-      PHOTOS_PATH: /photos
+      PHOTOS_PATH: /volume1/homes/javi/Photos
       CACHE_PATH: /data/.cache
       DB_PATH: /data/photoshelf.db
       OLLAMA_URL: ${OLLAMA_URL:-http://192.168.1.135:11434}
     volumes:
-      - /volume1/homes/javi/Photos:/photos:ro
+      - /volume1:/volume1:ro          # NAS completo en solo lectura — permite múltiples catálogos sin re-configurar
       - photoshelf_data:/data
 
 volumes:
