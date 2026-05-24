@@ -1,6 +1,6 @@
 # Backlog priorizado — photoshelf
 
-**Última actualización:** 2026-05-23
+**Última actualización:** 2026-05-24
 
 ---
 
@@ -16,6 +16,7 @@
 | **US-018** | Optimización queries y polling | #35 | 2026-05-23 |
 | **US-016** | Centralización código duplicado | #36 | 2026-05-24 |
 | **US-022** | Capa de repositorio | #37 | 2026-05-24 |
+| **US-020** | Actualización Next.js 15 | #38 | 2026-05-24 |
 
 ---
 
@@ -23,10 +24,7 @@
 
 | ID | Feature | Por qué importa | Esfuerzo | Bloquea |
 |----|---------|-----------------|---------|---------|
-| **US-016** | Centralización código duplicado | `upsertPhotoTags` × 5, `buildPhotoQuery` × 4, `PHOTOS_PATH` × 7. Cada feature nueva multiplica la deuda. | M | US-022 |
-| **US-022** | Capa de repositorio | Prerequisito de todo EPIC-002 (API iOS). Sin esto, los endpoints v1 duplican lógica. | M | US-023, 024, 025 |
 | **US-023** | Contratos API estándar | Envelope, errores, versionado. Sin esto, el cliente iOS no puede escribirse de forma robusta. | M | US-024, 025 |
-| **US-020** | Actualización Next.js 15 | Versión actual tiene CVEs conocidos. Migración más sencilla ahora que más adelante. | M | — |
 
 ---
 
@@ -73,9 +71,10 @@
 
 ✅ Semana 4:  US-022                     (capa de repositorio) → HECHO
 
-▶ Semana 4b: US-023                    (contratos API estándar)
-  Semana 5:  US-024 + US-025           (endpoints iOS)
-  Semana 6:  US-020                    (Next.js 15, rama separada)
+✅ Semana 4b: US-020                    (Next.js 15) → HECHO
+
+▶ Semana 5:  US-023                    (contratos API estándar)
+  Semana 6:  US-024 + US-025           (endpoints iOS)
   Luego:     US-017 + US-013           (hardening técnico + mobile)
   Luego:     EPIC-001                  (múltiples catálogos)
 ```
