@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
-import { getDb } from '@/lib/db';
+import { addThemeToPhoto, setPhotoThemes } from '@/lib/queries/themes';
 
 // Add a single theme to a photo (used by AI search save)
 export async function POST(req: NextRequest, { params }: { params: Promise<{ photoId: string }> }) {
@@ -9,10 +9,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pho
 
   const { photoId } = await params;
   const { themeId }: { themeId: number } = await req.json();
-  const db = getDb();
-  const pid = parseInt(photoId, 10);
-
-  db.prepare('INSERT OR IGNORE INTO photo_themes (photo_id, theme_id) VALUES (?, ?)').run(pid, themeId);
+  addThemeToPhoto(parseInt(photoId, 10), themeId);
   return NextResponse.json({ ok: true });
 }
 
@@ -23,16 +20,6 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ phot
 
   const { photoId } = await params;
   const { themeIds }: { themeIds: number[] } = await req.json();
-  const db = getDb();
-  const pid = parseInt(photoId, 10);
-
-  const update = db.transaction(() => {
-    db.prepare('DELETE FROM photo_themes WHERE photo_id = ?').run(pid);
-    for (const tid of themeIds) {
-      db.prepare('INSERT OR IGNORE INTO photo_themes (photo_id, theme_id) VALUES (?, ?)').run(pid, tid);
-    }
-  });
-  update();
-
+  setPhotoThemes(parseInt(photoId, 10), themeIds);
   return NextResponse.json({ ok: true });
 }
