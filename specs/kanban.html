@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photoshelf — Kanban</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0d0f;
+      --surface:   #18181b;
+      --surface2:  #1f1f23;
+      --border:    #2e2e34;
+      --text:      #e4e4e7;
+      --muted:     #71717a;
+      --accent:    #a78bfa;
+
+      --col-ideas: #854d0e;
+      --col-todo:  #1d4ed8;
+      --col-done:  #166534;
+
+      --tag-epic:   #7c3aed;
+      --tag-us:     #0369a1;
+      --tag-next:   #dc2626;
+
+      --effort-s: #4ade80;
+      --effort-m: #facc15;
+      --effort-l: #fb923c;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 20px 28px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+    header .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-left: auto;
+    }
+    .logo {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      padding: 20px 24px 40px;
+      max-width: 1400px;
+    }
+
+    .column {
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .col-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
+    }
+    .col-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .col-header h2 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text);
+    }
+    .col-count {
+      margin-left: auto;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .col-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* ── Cards ─────────────────────────────────────────────── */
+    .card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: default;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .badge-epic  { background: var(--tag-epic); color: #fff; }
+    .badge-us    { background: var(--tag-us);   color: #fff; }
+    .badge-next  { background: var(--tag-next); color: #fff; animation: pulse 2s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.65; }
+    }
+
+    .effort {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+    .effort-s { color: var(--effort-s); border: 1px solid var(--effort-s); }
+    .effort-m { color: var(--effort-m); border: 1px solid var(--effort-m); }
+    .effort-l { color: var(--effort-l); border: 1px solid var(--effort-l); }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .card-summary {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card-footer {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .dep-badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .card-done .card-title { color: #86efac; }
+    .card-done { opacity: 0.75; }
+    .card-done:hover { opacity: 1; }
+
+    .pr-link {
+      margin-left: auto;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 11px;
+    }
+    .pr-link:hover { text-decoration: underline; }
+
+    .empty-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-size: 13px;
+      flex: 1;
+    }
+    .empty-icon { font-size: 32px; }
+
+    /* date badge on done cards */
+    .date-badge {
+      font-size: 10px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📷</div>
+  <h1>photoshelf — Kanban</h1>
+  <span class="subtitle">Actualizado: 2026-05-24</span>
+</header>
+
+<div class="board">
+
+  <!-- ═══════════════════ IDEAS ═══════════════════ -->
+  <div class="column">
+    <div class="col-header">
+      <div class="col-dot" style="background:#ca8a04"></div>
+      <h2>Ideas to Refine</h2>
+      <span class="col-count">0</span>
+    </div>
+    <div class="col-body">
+      <div class="empty-col">
+        <div class="empty-icon">💡</div>
+        <span>Las ideas llegan aquí via Claude Dispatch</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ TO DO ═══════════════════ -->
+  <div class="column">
+    <div class="col-header">
+      <div class="col-dot" style="background:#3b82f6"></div>
+      <h2>To Do</h2>
+      <span class="col-count">9</span>
+    </div>
+    <div class="col-body">
+
+      <!-- US-023 — NEXT UP -->
+      <div class="card">
+        <div class="card-top">
+          <span class="badge badge-us">US-023</span>
+          <span class="badge badge-next">▶ Siguiente</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Contratos API estándar</div>
+        <div class="card-summary">Envelope uniforme <code>{ data, meta, error }</code>, códigos de error consistentes y prefijo de versión <code>/api/v1/</code>. Prerequisito para el cliente iOS — sin esto la API es frágil.</div>
+        <div class="card-footer">
+          <span>Bloquea:</span>
+          <span class="dep-badge">US-024</span>
+          <span class="dep-badge">US-025</span>
+        </div>
+      </div>
+
+      <!-- US-024 -->
+      <div class="card">
+        <div class="card-top">
+          <span class="badge badge-us">US-024</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Endpoints iOS — browsing</div>
+        <div class="card-summary">Timeline paginado cursor-based, detalle completo de foto y navegación anterior/siguiente bajo <code>/api/v1/</code> para la app nativa iOS.</div>
+        <div class="card-footer">
+          <span>Depende de:</span>
+          <span class="dep-badge">US-023</span>
+        </div>
+      </div>
+
+      <!-- US-025 -->
+      <div class="card">
+        <div class="card-top">
+          <span class="badge badge-us">US-025</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Endpoints iOS — acciones</div>
+        <div class="card-summary">Búsqueda por texto e IA, navegación por tags, disparo de scan y autenticación con sesión persistente para la app nativa iOS.</div>
+        <div class="card-footer">
+          <span>Depende de:</span>
+          <span class="dep-badge">US-023</span>
+        </div>
+      </div>
+
+      <!-- EPIC-002 -->
+      <div class="card">
+        <div class="card-top">
+          <span class="badge badge-epic">EPIC-002</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">API pública iOS-ready</div>
+        <div class="card-summary">Épica contenedora: convierte los route handlers actuales en una API HTTP limpia con contratos estables, versionado y autenticación válida para clientes nativos.</div>
+        <div class="card-footer">
+          <span>US-023 → US-024 → US-025</span>
+        </div>
+      </div>
+
+      <!-- US-017 -->
+      <div class="card">
+        <div class="card-top">
+          <span class="badge badge-us">US-017</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Hardening técnico</div>
+        <div class="card-summary">Try/catch en todas las rutas API, tipos TypeScript unificados en interfaces compartidas y validación de MIME types en uploads. Elimina crashes silenciosos.</div>
+      </div>
+
+      <!-- US-021 -->
+      <div class="card">
+        <div class="card-top">
+          <span class="badge badge-us">US-021</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Proveedores LLM cloud</div>
+        <div class="card-summary">Desacopla la dependencia de Ollama local añadiendo soporte para OpenAI Vision y Anthropic Claude como proveedores alternativos de IA. Activa clasificación cuando Ollama no está disponible.</div>
+      </div>
+
+      <!-- US-004 -->
+      <div class="card">
+        <div class="card-top">
+          <span class="badge badge-us">US-004</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Operaciones en lote</div>
+        <div class="card-summary">Modo selección múltiple en la vista de biblioteca para aplicar acciones masivas: añadir tag, marcar favoritas, asignar tema o añadir a proyecto sobre decenas de fotos a la vez.</div>
+      </div>
+
+      <!-- US-003 -->
+      <div class="card">
+        <div class="card-top">
+          <span class="badge badge-us">US-003</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Detección de duplicados</div>
+        <div class="card-summary">Herramienta que detecta fotos idénticas (hash SHA-256) o casi-idénticas (dimensiones + tamaño). Presenta grupos de duplicados con UI de comparación para decidir cuál conservar.</div>
+      </div>
+
+      <!-- US-005 -->
+      <div class="card">
+        <div class="card-top">
+          <span class="badge badge-us">US-005</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Álbumes inteligentes</div>
+        <div class="card-summary">Colecciones virtuales definidas por reglas de filtrado que se evalúan en tiempo real: "todas las fotos de 2023 con tag 'viaje' que sean favoritas". Se actualizan solas al añadir fotos nuevas.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ DONE ═══════════════════ -->
+  <div class="column">
+    <div class="col-header">
+      <div class="col-dot" style="background:#22c55e"></div>
+      <h2>Done</h2>
+      <span class="col-count">15</span>
+    </div>
+    <div class="col-body">
+
+      <!-- EPIC-001 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-epic">EPIC-001</span>
+          <span class="date-badge">2026-05-24 · PR #43</span>
+        </div>
+        <div class="card-title">Múltiples catálogos</div>
+        <div class="card-summary">Soporte completo para gestionar varias bibliotecas de fotos independientes: migración BD, contexto servidor, filtrado de queries, escaneo, API de gestión y UI de selección.</div>
+      </div>
+
+      <!-- US-026 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-026</span>
+          <span class="date-badge">2026-05-24 · PR #42</span>
+        </div>
+        <div class="card-title">Personalidad visual</div>
+        <div class="card-summary">Iconografía coherente con Lucide, micro-interacciones en hover/click, paleta de color consistente y animaciones de transición que refuerzan la identidad de la app.</div>
+      </div>
+
+      <!-- US-027 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-027</span>
+          <span class="date-badge">2026-05-24</span>
+        </div>
+        <div class="card-title">Mapa — filtro por año</div>
+        <div class="card-summary">Selector de año en el mapa con carga progresiva. Evita pintar miles de marcadores de golpe en catálogos grandes, mejorando drásticamente el rendimiento.</div>
+      </div>
+
+      <!-- US-022 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-022</span>
+          <span class="date-badge">2026-05-24 · PR #37</span>
+        </div>
+        <div class="card-title">Capa de repositorio</div>
+        <div class="card-summary">Módulos en <code>src/lib/queries/</code> que centralizan todo el acceso a datos. Ningún Server Component importa <code>getDb()</code> directamente; la API también los usa.</div>
+      </div>
+
+      <!-- US-020 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-020</span>
+          <span class="date-badge">2026-05-24 · PR #38</span>
+        </div>
+        <div class="card-title">Next.js 15 + React 19</div>
+        <div class="card-summary">Actualización del framework principal. Adaptación de Server Actions, nuevas APIs de React 19 y resolución de breaking changes de la migración.</div>
+      </div>
+
+      <!-- US-019 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-019</span>
+          <span class="date-badge">2026-05-24 · PR #41</span>
+        </div>
+        <div class="card-title">Cobertura de tests</div>
+        <div class="card-summary">Tests unitarios para config, scanner, thumbnail y autenticación. Base de confianza para refactorizaciones futuras sin regresiones silenciosas.</div>
+      </div>
+
+      <!-- US-013 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-013</span>
+          <span class="date-badge">2026-05-24 · PR #40</span>
+        </div>
+        <div class="card-title">UX mobile — swipe y bottom sheet</div>
+        <div class="card-summary">Gestos swipe en la vista de detalle, bottom sheet nativo en móvil y adaptaciones del grid para pantallas pequeñas. La app es tan cómoda en móvil como en escritorio.</div>
+      </div>
+
+      <!-- US-016 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-016</span>
+          <span class="date-badge">2026-05-24 · PR #36</span>
+        </div>
+        <div class="card-title">Centralización código duplicado</div>
+        <div class="card-summary"><code>upsertAiTags</code>, <code>buildPhotoFilter</code> y <code>PHOTOS_PATH</code> extraídos a módulos compartidos. Elimina 5 copias inline y un antipatrón de importación circular.</div>
+      </div>
+
+      <!-- US-018 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-018</span>
+          <span class="date-badge">2026-05-23 · PR #35</span>
+        </div>
+        <div class="card-title">Optimización queries y polling</div>
+        <div class="card-summary">Queries SQL con índices, eliminación de N+1 en tags, intervalo de polling reducido y debounce en búsqueda. La app responde notablemente más rápida en bibliotecas grandes.</div>
+      </div>
+
+      <!-- US-014 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-014</span>
+          <span class="date-badge">2026-05-23 · PR #34</span>
+        </div>
+        <div class="card-title">Hardening autenticación</div>
+        <div class="card-summary">Protección de todas las rutas API con middleware de sesión, rotación de tokens, rate limiting en login y headers de seguridad HTTP.</div>
+      </div>
+
+      <!-- US-015 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-015</span>
+          <span class="date-badge">2026-05-23 · PR #34</span>
+        </div>
+        <div class="card-title">Protección path traversal</div>
+        <div class="card-summary">Validación de rutas de archivo en todos los endpoints que sirven o procesan imágenes. Previene acceso a ficheros fuera del directorio de fotos permitido.</div>
+      </div>
+
+      <!-- US-010 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-010</span>
+          <span class="date-badge">2026-05-23 · PR #35</span>
+        </div>
+        <div class="card-title">Accesibilidad global</div>
+        <div class="card-summary">Aria-labels en botones icon-only, navegación por teclado en todas las secciones clave, contraste WCAG AA y foco visible en todos los controles interactivos.</div>
+      </div>
+
+      <!-- US-011 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-011</span>
+          <span class="date-badge">2026-05-23 · PR #35</span>
+        </div>
+        <div class="card-title">Feedback errores IA</div>
+        <div class="card-summary">Mensajes de error comprensibles cuando la clasificación IA falla, con acción de reintento y distinción clara entre error de red, Ollama no disponible o imagen no procesable.</div>
+      </div>
+
+      <!-- US-012 -->
+      <div class="card card-done">
+        <div class="card-top">
+          <span class="badge badge-us">US-012</span>
+          <span class="date-badge">2026-05-23 · PR #35</span>
+        </div>
+        <div class="card-title">Empty states con CTA</div>
+        <div class="card-summary">Estados vacíos con ilustración, mensaje contextual y llamada a la acción principal. El usuario sabe exactamente qué hacer cuando no hay fotos, tags o proyectos.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
