@@ -3,8 +3,8 @@ import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
 import { classifyPhoto } from '@/lib/ollama';
 import { getClassifyState, updateClassifyState } from '@/lib/classifyState';
-
-const PHOTOS_PATH = process.env.PHOTOS_PATH ?? '/photos';
+import { PHOTOS_PATH } from '@/lib/config';
+import { upsertAiTags } from '@/lib/db-helpers';
 
 export const maxDuration = 300;
 
@@ -47,14 +47,6 @@ export async function POST(req: NextRequest) {
     completedAt: null,
   });
 
-  const insertTag = db.transaction((pid: number, tags: string[]) => {
-    for (const name of tags) {
-      db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)').run(name);
-      const tag = db.prepare('SELECT id FROM tags WHERE name = ?').get(name) as { id: number };
-      db.prepare('INSERT OR IGNORE INTO photo_tags (photo_id, tag_id, source) VALUES (?, ?, ?)').run(pid, tag.id, 'ai');
-    }
-  });
-
   // Fire and forget — classify in background
   (async () => {
     let done = 0;
@@ -62,7 +54,7 @@ export async function POST(req: NextRequest) {
       updateClassifyState({ currentEvent: photo.event, done });
       try {
         const tags = await classifyPhoto(photo.path, PHOTOS_PATH);
-        if (tags.length > 0) insertTag(photo.id, tags);
+        upsertAiTags(db, photo.id, tags);
       } catch { /* continue on per-photo errors */ }
       done++;
       updateClassifyState({ done });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
+import { buildPhotoFilter } from '@/lib/db-helpers';
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -8,42 +9,29 @@ export async function GET(req: NextRequest) {
 
   const db = getDb();
   const sp = req.nextUrl.searchParams;
-  const year = sp.get('year');
-  const event = sp.get('event');
-  const theme = sp.get('theme');
-  const tag = sp.get('tag');
+  const year     = sp.get('year');
+  const event    = sp.get('event');
+  const theme    = sp.get('theme');
+  const tag      = sp.get('tag');
   const favorite = sp.get('favorite');
-  const q = sp.get('q');
-  const page = parseInt(sp.get('page') ?? '1', 10);
-  const limit = parseInt(sp.get('limit') ?? '200', 10);
-  const offset = (page - 1) * limit;
+  const untagged = sp.get('untagged');
+  const q        = sp.get('q');
+  const page     = parseInt(sp.get('page') ?? '1', 10);
+  const limit    = parseInt(sp.get('limit') ?? '200', 10);
+  const offset   = (page - 1) * limit;
 
-  let sql = `
+  const { joinSql, whereSql, params: filterParams } = buildPhotoFilter({ year, event, theme, tag, favorite, untagged, q });
+
+  const sql = `
     SELECT DISTINCT p.*
     FROM photos p
-    ${theme ? 'JOIN photo_themes pt2 ON pt2.photo_id = p.id AND pt2.theme_id = ?' : ''}
-    ${tag ? 'JOIN photo_tags ptg ON ptg.photo_id = p.id JOIN tags tg ON tg.id = ptg.tag_id AND tg.name = ?' : ''}
-    ${q ? 'LEFT JOIN photo_tags ptq ON ptq.photo_id = p.id LEFT JOIN tags tq ON tq.id = ptq.tag_id' : ''}
+    ${joinSql}
     WHERE 1=1
+    ${whereSql}
+    ORDER BY p.taken_at DESC, p.filename ASC LIMIT ? OFFSET ?
   `;
-  const params: (string | number)[] = [];
 
-  if (theme) params.unshift(parseInt(theme, 10));
-  if (tag) params.push(tag);
-
-  if (year) { sql += ' AND p.year = ?'; params.push(parseInt(year, 10)); }
-  if (event) { sql += ' AND p.event = ?'; params.push(event); }
-  if (favorite) { sql += ' AND p.is_favorite = 1'; }
-  if (q) {
-    sql += ' AND (p.filename LIKE ? OR p.event LIKE ? OR tq.name LIKE ?)';
-    const like = `%${q}%`;
-    params.push(like, like, like);
-  }
-
-  sql += ' ORDER BY p.taken_at DESC, p.filename ASC LIMIT ? OFFSET ?';
-  params.push(limit, offset);
-
-  const photos = db.prepare(sql).all(...params) as Record<string, unknown>[];
+  const photos = db.prepare(sql).all(...filterParams, limit, offset) as Record<string, unknown>[];
 
   // Attach tags — single batch query instead of N+1
   let withTags: Record<string, unknown>[];

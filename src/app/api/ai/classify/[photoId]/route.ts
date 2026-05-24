@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
 import { classifyPhoto } from '@/lib/ollama';
-
-const PHOTOS_PATH = process.env.PHOTOS_PATH ?? '/photos';
+import { PHOTOS_PATH } from '@/lib/config';
+import { upsertAiTags } from '@/lib/db-helpers';
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ photoId: string }> }) {
   const session = await getSession();
@@ -17,16 +17,7 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ ph
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const tags = await classifyPhoto(photo.path, PHOTOS_PATH);
-
-  // Upsert AI tags
-  const insertTag = db.transaction(() => {
-    for (const name of tags) {
-      db.prepare('INSERT OR IGNORE INTO tags (name) VALUES (?)').run(name);
-      const tag = db.prepare('SELECT id FROM tags WHERE name = ?').get(name) as { id: number };
-      db.prepare('INSERT OR IGNORE INTO photo_tags (photo_id, tag_id, source) VALUES (?, ?, ?)').run(pid, tag.id, 'ai');
-    }
-  });
-  insertTag();
+  upsertAiTags(db, pid, tags);
 
   return NextResponse.json({ tags });
 }
