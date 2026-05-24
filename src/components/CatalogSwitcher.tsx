@@ -30,7 +30,29 @@ export default function CatalogSwitcher({ catalogs, activeCatalogId }: CatalogSw
     });
   }
 
-  if (catalogs.length <= 1) return null;
+  // Single catalog: show name as a static link to the settings page
+  if (catalogs.length <= 1) {
+    return (
+      <a
+        href="/settings/catalogs"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 7,
+          padding: '6px 10px',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)',
+          fontSize: 12, color: 'var(--text-secondary)',
+          textDecoration: 'none',
+        }}
+        title="Gestionar catálogos"
+      >
+        <span style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0, background: 'var(--accent)' }} />
+        <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {active?.name ?? 'Principal'}
+        </span>
+        <span style={{ color: 'var(--text-tertiary)', fontSize: 10 }}>+</span>
+      </a>
+    );
+  }
 
   return (
     <div style={{ position: 'relative' }}>

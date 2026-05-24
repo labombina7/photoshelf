@@ -331,13 +331,21 @@ function SidebarInner({
           <IconStats size={14} />
           Estadísticas
         </Link>
+        <Link
+          href="/settings/catalogs"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/settings/catalogs' ? 'active' : ''}`}
+        >
+          <IconFolder size={14} />
+          Catálogos
+        </Link>
       </div>
 
       <div className="sidebar-spacer" />
 
       <div style={{ padding: '0 18px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {/* Catalog switcher — only shown when multiple catalogs exist */}
-        {catalogs.length > 1 && (
+        {/* Catalog switcher — always shown so the user can see the active catalog */}
+        {catalogs.length > 0 && (
           <CatalogSwitcher catalogs={catalogs} activeCatalogId={activeCatalogId} />
         )}
 
