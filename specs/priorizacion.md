@@ -14,6 +14,7 @@
 | **US-011** | Feedback errores IA | #35 | 2026-05-23 |
 | **US-012** | Empty states con CTA | #35 | 2026-05-23 |
 | **US-018** | Optimización queries y polling | #35 | 2026-05-23 |
+| **US-016** | Centralización código duplicado | #36 | 2026-05-24 |
 
 ---
 
@@ -67,8 +68,9 @@
 ✅ Semana 2:  US-010 + US-011 + US-012  (UX quick wins)      → HECHO
 ✅ Semana 3a: US-018                    (rendimiento)         → HECHO
 
-▶ Semana 3b: US-016                    (centralizar código duplicado)
-  Semana 4:  US-022 → US-023           (capa repo + contratos API)
+✅ Semana 3b: US-016                    (centralizar código duplicado) → HECHO
+
+▶ Semana 4:  US-022 → US-023           (capa repo + contratos API)
   Semana 5:  US-024 + US-025           (endpoints iOS)
   Semana 6:  US-020                    (Next.js 15, rama separada)
   Luego:     US-017 + US-013           (hardening técnico + mobile)
