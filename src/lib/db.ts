@@ -154,7 +154,14 @@ function migrateUniquePath(db: Database.Database) {
 
   console.log('[db] Migrating UNIQUE(path) → UNIQUE(path, catalog_id) …');
 
-  db.exec(`
+  // IMPORTANT: disable FK enforcement during the table rebuild.
+  // With foreign_keys = ON, DROP TABLE fires ON DELETE CASCADE on photo_tags /
+  // photo_themes / project_photos — wiping all tag/theme/project associations.
+  // We restore FK enforcement (and verify integrity) right after.
+  db.pragma('foreign_keys = OFF');
+
+  try {
+    db.exec(`
     -- Rebuild photos without the old UNIQUE(path) constraint
     CREATE TABLE photos_new (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -190,6 +197,9 @@ function migrateUniquePath(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_photos_catalog  ON photos(catalog_id);
     CREATE UNIQUE INDEX idx_photos_path_catalog    ON photos(path, catalog_id);
   `);
+  } finally {
+    db.pragma('foreign_keys = ON');
+  }
 
   console.log('[db] Migration UNIQUE(path, catalog_id) complete.');
 }
