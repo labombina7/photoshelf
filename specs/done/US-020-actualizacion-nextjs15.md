@@ -1,5 +1,7 @@
 # Feature: Actualización de Next.js 14 → Next.js 15
 
+> Estado: ✅ Desplegada
+
 ## Historia de usuario
 
 Como administrador de photoshelf,
