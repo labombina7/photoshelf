@@ -1,5 +1,7 @@
 # Feature: Personalidad visual — micro-interacciones, iconografía y voz de la app
 
+> Estado: ✅ Desplegada — PR #42 · 2026-05-24
+
 ## Historia de usuario
 
 Como usuario de photoshelf,
