@@ -4,6 +4,7 @@ import { scanLibrary } from '@/lib/scanner';
 import { getScanState, updateScanState } from '@/lib/scanState';
 import { getActiveCatalogId } from '@/lib/catalog-context';
 import { getCatalogById } from '@/lib/queries/catalogs';
+import fs from 'fs/promises';
 
 export const maxDuration = 300;
 
@@ -24,6 +25,20 @@ export async function POST() {
   const catalog = getCatalogById(catalogId);
   if (!catalog) {
     return NextResponse.json({ error: 'Catálogo no encontrado' }, { status: 404 });
+  }
+
+  // Verify the path is accessible before starting — gives a clear error instead
+  // of silently finishing with 0 photos when the path doesn't exist inside the container.
+  try {
+    await fs.access(catalog.path);
+  } catch {
+    const hint = catalog.path.startsWith('/volume')
+      ? ''
+      : ` (en Docker la ruta debe empezar por /volume1/…)`;
+    return NextResponse.json(
+      { error: `La ruta "${catalog.path}" no es accesible desde el servidor${hint}` },
+      { status: 422 }
+    );
   }
 
   console.log(`[scan] Iniciando escaneo — catálogo ${catalogId} "${catalog.name}" → ${catalog.path}`);

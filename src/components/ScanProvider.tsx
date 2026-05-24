@@ -100,6 +100,11 @@ export function ScanProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       throw new Error(data.error ?? 'Error al iniciar el análisis');
     }
+    // Optimistically show the toast immediately — the server-side scan can
+    // finish in <5 s (e.g. empty catalog), before the next poll fires.
+    // Setting wasRunningRef here ensures we trigger showDone when it finishes.
+    setState(s => ({ ...s, running: true, currentEvent: 'Iniciando…' }));
+    wasRunningRef.current = true;
   }
 
   const toggleWatcher = useCallback(async () => {
