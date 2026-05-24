@@ -4,19 +4,17 @@
 
 ```
 src/app/
-├── layout.tsx              ← Root layout: providers globales + fuente Inter
+├── layout.tsx              ← Root layout: providers globales + fuente Geist
 ├── page.tsx                ← Redirect → /library
 ├── login/page.tsx          ← Página de login (formulario de contraseña)
 ├── library/
 │   ├── page.tsx            ← Server Component: carga fotos + sidebar data
 │   ├── LibraryClient.tsx   ← Client Component: grid/lista, filtros, paginación
 │   └── [photoId]/page.tsx  ← Detalle de foto (modal accesible por URL directa)
-├── timeline/
-│   ├── page.tsx            ← Server Component: layout + datos iniciales
-│   └── TimelineClient.tsx  ← Client Component: scroll infinito, zoom, grupos
 ├── map/
 │   ├── page.tsx            ← Server Component: dynamic import (ssr: false)
-│   └── MapClient.tsx       ← Client Component: Leaflet + markercluster
+│   ├── MapClient.tsx       ← Client Component: Leaflet + markercluster + filtro año
+│   └── MapWrapper.tsx      ← Wrapper de carga dinámica
 ├── stats/
 │   ├── page.tsx            ← Server Component
 │   └── StatsClient.tsx     ← Client Component: cards + gráficas de barras CSS
@@ -26,7 +24,12 @@ src/app/
 │   └── [id]/page.tsx       ← Detalle de un portfolio
 ├── tags/
 │   ├── page.tsx            ← Vista de tags
-│   └── TagsClient.tsx      ← Client Component: nube de tags + filtrado
+│   ├── TagsClient.tsx      ← Client Component: nube de tags + filtrado
+│   └── [tag]/page.tsx      ← Galería de fotos por tag
+├── settings/
+│   └── catalogs/
+│       ├── page.tsx        ← Server Component: lista de catálogos
+│       └── CatalogsClient.tsx ← Client Component: CRUD de catálogos
 └── api/                    ← API Routes (ver doc de API)
 ```
 
@@ -53,33 +56,30 @@ ModalProvider
 
 Barra lateral de navegación principal. Contiene:
 
+- `CatalogSwitcher` — selector del catálogo activo en la cabecera del sidebar
 - Links a todas las vistas (Biblioteca, Línea de tiempo, Mapa, Estadísticas, Favoritos, Tags, Portfolio)
 - CRUD de **Temáticas** (crear, editar, eliminar, cambiar color)
 - Lista de **Proyectos** guardados
 - Botón de escaneo manual con toast de progreso
 - Indicador del vigilante de carpetas (punto pulsante azul/gris)
+- Enlace a **Ajustes > Catálogos**
 - Botón de logout
 
-Se implementa en dos partes para cumplir la regla de Suspense de Next.js:
+### `CatalogSwitcher.tsx`
 
-```tsx
-function SidebarInner(props: SidebarProps) {
-  const searchParams = useSearchParams(); // requiere Suspense
-  // ...toda la lógica
-}
+Selector de catálogo activo integrado en el sidebar. Solo se muestra cuando hay más de un catálogo (si hay uno, se muestra como badge de nombre). Al pulsar sobre el nombre se despliega el listado de catálogos disponibles para cambiar el activo. El cambio llama a `POST /api/catalogs/switch` y recarga la página.
 
-export default function Sidebar(props: SidebarProps) {
-  return <Suspense><SidebarInner {...props} /></Suspense>;
-}
-```
+### `BottomSheet.tsx`
+
+Panel inferior deslizante para mobile (US-013). Reemplaza el panel lateral en pantallas pequeñas. Acepta `isOpen`, `onClose` y `children`. Incluye handle de drag y cierre con swipe hacia abajo.
 
 ### `Icons.tsx`
 
-Biblioteca de iconos SVG inline. Exporta: `IconPhoto`, `IconGrid`, `IconStar`, `IconSearch`, `IconRefresh`, `IconPlus`, `IconLogout`, `IconEdit`, `IconTrash`, `IconFolder`, `IconTag`, `IconTimeline`, `IconStats`, `IconMap`.
+Biblioteca de iconos SVG inline (US-026). Exporta: `IconPhoto`, `IconGrid`, `IconStar`, `IconSearch`, `IconRefresh`, `IconPlus`, `IconLogout`, `IconEdit`, `IconTrash`, `IconFolder`, `IconTag`, `IconTimeline`, `IconStats`, `IconMap`, `IconCatalog`, `IconSettings`.
 
 ### `DetailPanel.tsx`
 
-Panel lateral deslizante que muestra el detalle de una foto: miniatura grande, metadatos EXIF (cámara, exposición, GPS, fecha), tags (manual + IA), temáticas asignadas, y acciones (favorita, añadir tag, asignar temática).
+Panel lateral deslizante (desktop) / bottom sheet (mobile) que muestra el detalle de una foto: miniatura grande, metadatos EXIF (cámara, exposición, GPS, fecha), tags (manual + IA), temáticas asignadas, y acciones (favorita, añadir tag, asignar temática).
 
 ### `PhotoGrid.tsx`
 
@@ -92,6 +92,10 @@ Grid de grupos de eventos (vista de carpetas en Biblioteca). Muestra portada del
 ### `AISearchPanel.tsx`
 
 Panel de búsqueda con IA. Toggle entre modo rápido (tags) y modo profundo (visión). Muestra resultados inline con indicador de carga.
+
+### `EmptyState.tsx`
+
+Estado vacío genérico con icono, título, descripción y CTA opcional. Usado en Biblioteca, Tags y otras vistas cuando no hay datos (US-012).
 
 ### `ModalProvider.tsx`
 
@@ -126,25 +130,8 @@ Estado local:
 
 Flujo:
   URL params → filtros activos → fetch /api/photos → PhotoGrid / FolderGrid
-  Click foto → DetailPanel (desliza desde la derecha)
+  Click foto → DetailPanel (desliza desde la derecha en desktop, BottomSheet en mobile)
   Click carpeta → aplica filtro event=
-```
-
-### TimelineClient.tsx
-
-```
-Estado:
-  level: 'year' | 'month' | 'day'   ← persiste en localStorage
-  groups: TimelineGroup[]            ← cargados por cursor
-  cursor: string | null
-
-Derivados:
-  visualZoom = LEVEL_ZOOM[level]     ← { year:1, month:3, day:4 }
-  vzConfig = VISUAL_ZOOM_CONFIG[visualZoom - 1]
-
-IntersectionObserver → sentinel al final → carga siguiente página
-Prefetch: rootMargin 800px + <link rel="prefetch"> proactivo
-Skeleton: .photo-skeleton visible hasta onLoad del <img>
 ```
 
 ### MapClient.tsx
@@ -153,7 +140,8 @@ Skeleton: .photo-skeleton visible hasta onLoad del <img>
 Carga dinámica (ssr: false) para evitar errores de window en SSR.
 Leaflet inicializado en useEffect.
 markerClusterGroup con L.divIcon circular (foto de miniatura).
-Click en marker → panel lateral con info de foto y link a detalle.
+Filtro por año en la topbar — reduce marcadores de 10k+ a ~500 (US-027).
+Click en marker → panel lateral (desktop) / BottomSheet (mobile) con info de foto.
 ```
 
 ### StatsClient.tsx
@@ -164,4 +152,15 @@ Visualización:
   - Cards: total fotos, eventos, años activos, favoritas
   - Barra CSS: fotos por año, por mes, por hora, por cámara
   - Top tags: lista con conteo
+```
+
+### CatalogsClient.tsx
+
+```
+Gestión de catálogos (EPIC-001):
+  - Listado con nombre, ruta, conteo de fotos y badge de "activo"
+  - Crear catálogo: nombre + ruta del directorio
+  - Editar nombre o ruta
+  - Eliminar (con confirmación)
+  - Cambiar catálogo por defecto
 ```

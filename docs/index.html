@@ -358,16 +358,6 @@
       text-align: center;
     }
 
-    /* ── LOADING ── */
-    #loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 200px;
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
     /* scrollbars */
     ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
@@ -480,7 +470,6 @@
 
     <!-- Markdown rendered here -->
     <div id="markdown-view" style="display:none"></div>
-    <div id="loading" style="display:none">Cargando...</div>
   </div>
 </div>
 
@@ -504,20 +493,1037 @@
     }
   });
 
+  // ── EMBEDDED DOCS ─────────────────────────────────────────────────────────
+  // All markdown content is embedded here so the viewer works from file://
+  // without requiring a local HTTP server.
+  // To update: edit the .md files in docs/ and run `npm run build:docs`
+  // (or paste the updated content manually below).
+  const DOCS = {};
+
+  DOCS['funcional/01-introduccion.md'] = `# photoshelf — Introducción
+
+## ¿Qué es photoshelf?
+
+**photoshelf** es una aplicación web auto-hospedada para gestionar y explorar bibliotecas de fotografía personal. Está diseñada para fotógrafos que almacenan sus fotos en disco organizadas por año y evento, y que quieren una interfaz rica para explorarlas, etiquetarlas y presentarlas — sin depender de servicios en la nube de terceros.
+
+## Para quién está pensada
+
+- Fotógrafos que organizan su archivo en carpetas con estructura \`AÑO/EVENTO/fotos\`
+- Usuarios que quieren control total sobre sus datos (todo corre localmente o en su propio servidor)
+- Fotógrafos que quieren aprovechar IA local (Ollama) para tagging automático sin enviar fotos a terceros
+
+## Múltiples catálogos
+
+photoshelf permite gestionar varias bibliotecas de fotos independientes desde una única instancia. Cada **catálogo** apunta a un directorio diferente del servidor (fotos personales, trabajo, archivo, etc.) y se puede cambiar con un clic desde el selector en el sidebar.
+
+## Estructura de la biblioteca
+
+Dentro de cada catálogo, las fotos deben organizarse en el siguiente formato:
+
+\`\`\`
+/fotos-personales/
+  2023/
+    Boda-Julia-y-Marc/
+      DSC_0001.jpg
+    Viaje-Japón/
+      ...
+  2024/
+    Cumpleaños-mamá/
+      ...
+\`\`\`
+
+- **Año**: carpeta numérica (e.g. \`2023\`)
+- **Evento**: subcarpeta con nombre descriptivo
+- **Fotos**: archivos \`.jpg\`, \`.jpeg\`, \`.png\`, \`.heic\`, \`.webp\`, \`.tif\`, \`.tiff\`
+
+## Funcionalidades principales
+
+| Módulo | Descripción |
+|---|---|
+| Catálogos | Múltiples bibliotecas de fotos independientes |
+| Biblioteca | Vista de cuadrícula y lista por evento, con filtros |
+| Línea de tiempo | Exploración cronológica con zoom Año / Mes / Día |
+| Mapa | Mapa interactivo con fotos geolocalizadas y filtro por año |
+| Estadísticas | Dashboard con métricas de la colección |
+| Tags | Sistema de etiquetas manual y automático (IA) |
+| Temáticas | Colecciones personalizadas con color |
+| Portfolio | Proyectos fotográficos curados con IA |
+| Búsqueda IA | Búsqueda semántica por concepto visual |
+| Vigilancia | Escaneo automático al detectar carpetas nuevas |
+
+## Acceso
+
+La aplicación es accesible mediante un navegador web. Requiere una contraseña única configurada en el servidor. No hay sistema de usuarios múltiples — está concebida como herramienta personal.`;
+
+  DOCS['funcional/02-biblioteca.md'] = `# Biblioteca
+
+La vista **Biblioteca** (\`/library\`) es el punto de entrada principal de photoshelf. Muestra todas las fotos organizadas por carpeta de evento del catálogo activo.
+
+## Vista de carpetas
+
+Por defecto se muestra una cuadrícula de carpetas/eventos. Cada tarjeta muestra:
+- Miniatura de portada del evento
+- Nombre del evento
+- Año
+- Número de fotos
+
+Al hacer clic en una carpeta se accede a las fotos de ese evento.
+
+## Vista de fotos (cuadrícula y lista)
+
+Dentro de un evento hay dos modos de visualización:
+
+- **Cuadrícula**: miniaturas cuadradas en grid adaptable
+- **Lista**: filas con miniatura pequeña + metadatos (filename, fecha, cámara)
+
+## Filtros disponibles
+
+Desde el sidebar y la topbar se pueden aplicar los siguientes filtros:
+
+| Filtro | Descripción |
+|---|---|
+| **Favoritos** | Solo fotos marcadas con estrella |
+| **Sin clasificar** | Fotos sin ningún tag asignado |
+| **Temática** | Fotos asociadas a una temática concreta |
+| **Búsqueda** | Por nombre de archivo, evento o tag |
+
+## Detalle de foto
+
+Al pulsar cualquier foto se abre el visor de detalle (\`/library/[id]\`) con:
+
+- Imagen a tamaño completo (con opción de abrir original)
+- **Metadatos EXIF**: fecha, cámara, exposición (velocidad/apertura/ISO), dimensiones, tamaño de archivo
+- **Coordenadas GPS** si están disponibles
+- **Tags** asignados (manuales y de IA), con opción de añadir/eliminar
+- **Temáticas** asociadas
+- **Review de IA** (si Ollama está configurado): composición, luz, puntos fuertes/débiles, puntuación 1-10
+- Botón de favorito
+- Navegación anterior/siguiente
+
+## Escaneo de biblioteca
+
+El botón **"Reescanear biblioteca"** en la parte inferior del sidebar lanza un proceso de escaneo del catálogo activo que:
+
+1. Recorre toda la estructura \`AÑO/EVENTO/foto\`
+2. Extrae metadatos EXIF (fecha, cámara, exposición, GPS) de cada archivo
+3. Inserta o actualiza los registros en la base de datos
+4. Muestra un toast de progreso en tiempo real
+
+Los formatos soportados son: \`.jpg\`, \`.jpeg\`, \`.png\`, \`.heic\`, \`.webp\`, \`.tif\`, \`.tiff\`.`;
+
+  DOCS['funcional/03-timeline.md'] = `# Línea de tiempo
+
+La vista **Línea de tiempo** (\`/library\`) organiza todas las fotos del catálogo activo cronológicamente con scroll infinito y zoom temporal unificado.
+
+## Niveles de zoom
+
+El selector de nivel en la topbar controla simultáneamente la agrupación temporal y la densidad visual de las miniaturas:
+
+| Nivel | Agrupación | Columnas (desktop) | Tamaño thumbnail |
+|---|---|---|---|
+| **Año** | Grupos por año | 10 columnas | 100 px |
+| **Mes** | Grupos por mes | 5 columnas | 200 px |
+| **Día** | Grupos por día | 3 columnas | 300 px |
+
+## Navegación
+
+- **Clic en botón Año / Mes / Día**: cambia el nivel de zoom
+- **Ctrl + scroll**: cambia de nivel sin usar el ratón
+- **Teclas \`+\` / \`−\`**: avanza o retrocede un nivel
+- **Doble tap** (mobile): alterna entre Mes y Día
+
+## Scroll infinito
+
+Las fotos se cargan en páginas a medida que el usuario hace scroll hacia abajo. El número de fotos por página se adapta automáticamente al nivel de zoom activo (entre 24 y 120 fotos por carga).
+
+El sentinel del IntersectionObserver tiene un margen de anticipación de 800 px para precargar el siguiente bloque antes de que el usuario llegue al final.
+
+## Header flotante
+
+El nombre del período activo (año, mes o día) aparece fijado en la parte superior del área de scroll, actualizándose conforme el usuario avanza por la página.
+
+## Optimización de carga
+
+- **Skeleton shimmer**: cada celda muestra un placeholder animado hasta que la miniatura carga
+- **\`fetchPriority="high"\`**: las primeras imágenes visibles se descargan con prioridad para mejorar el LCP
+- **Fade-in**: las imágenes aparecen con una transición suave de opacidad
+- **Prefetch proactivo**: al cargar un nuevo bloque se anticipan los thumbnails del siguiente
+
+## Persistencia
+
+El nivel de zoom seleccionado se guarda en \`sessionStorage\` y se restaura al volver a la vista.`;
+
+  DOCS['funcional/04-mapa.md'] = `# Mapa
+
+La vista **Mapa** (\`/map\`) muestra en un mapa interactivo todas las fotos del catálogo activo que contienen coordenadas GPS en sus metadatos EXIF.
+
+## Funcionamiento
+
+- Al cargar la página se obtienen todas las fotos con GPS del endpoint \`/api/photos/map\`
+- Los marcadores se renderizan sobre un mapa de **OpenStreetMap** mediante **Leaflet.js**
+- El mapa ajusta automáticamente el encuadre (\`fitBounds\`) para mostrar toda la colección
+
+## Filtro por año
+
+La topbar incluye un selector de año que filtra los marcadores del mapa. Con catálogos grandes (10 000+ fotos geolocalizadas) el mapa puede saturarse; filtrar por año reduce los marcadores visibles a ~500 y mejora el rendimiento significativamente.
+
+## Clustering
+
+Las fotos cercanas se agrupan automáticamente en **clusters numerados** gracias al plugin \`leaflet.markercluster\`. Al hacer zoom, los clusters se dividen progresivamente hasta mostrar los marcadores individuales.
+
+## Marcadores
+
+Cada foto individual se representa con:
+- Un marcador circular de 44 px con la miniatura de la foto
+- Borde blanco y sombra para destacar sobre el mapa
+
+## Panel lateral
+
+Al pulsar un marcador se abre un **panel lateral** (desktop) o **bottom sheet** (mobile) con:
+- Miniatura de 64 px
+- Nombre de archivo
+- Fecha de toma
+- Nombre del evento
+- Enlace "Abrir foto →" que navega a \`/library/[id]\`
+
+Si varias fotos comparten exactamente las mismas coordenadas, todas se muestran en el panel.
+
+## Contador
+
+La topbar muestra: **"N fotos en el mapa · M sin ubicación"**, indicando cuántas fotos tienen GPS y cuántas no.
+
+## Privacidad y coste
+
+- Los tiles del mapa se sirven desde **OpenStreetMap** (gratuito, sin API key)
+- Las fotos nunca se envían al servidor de tiles — solo se muestran localmente en el navegador
+- La atribución requerida por OSM aparece en la esquina inferior derecha`;
+
+  DOCS['funcional/05-estadisticas.md'] = `# Estadísticas
+
+La vista **Estadísticas** (\`/stats\`) ofrece un dashboard con métricas del catálogo activo.
+
+## Tarjetas resumen
+
+En la parte superior aparecen cuatro tarjetas con cifras globales:
+
+| Tarjeta | Descripción |
+|---|---|
+| **Total fotos** | Número total de fotos en el catálogo activo |
+| **Peso total** | Suma del tamaño en disco de todas las fotos |
+| **Favoritos** | Número de fotos marcadas como favoritas |
+| **Sin clasificar** | Fotos que no tienen ningún tag asignado |
+
+## Gráficos
+
+### Fotos por año
+Gráfico de barras verticales. Cada barra es clicable y navega a la biblioteca filtrada por ese año.
+
+### Fotos por mes (año seleccionable)
+Mapa de calor de 12 celdas con la distribución mensual del año seleccionado. La altura de relleno es proporcional al número de fotos de ese mes.
+
+### Distribución horaria
+Histograma de 24 barras (0h–23h) con el número de fotos tomadas a cada hora del día. Útil para identificar patrones de trabajo.
+
+### Cámaras más usadas
+Barras horizontales con las 6 cámaras o combinaciones Make+Model más frecuentes en los metadatos EXIF.
+
+### Tags más frecuentes
+Lista de tags ordenada por uso, con desglose visual entre **IA** (generados automáticamente), **manual** (añadidos por el usuario) o **mixto** (ambos).
+
+## Implementación
+
+Todos los gráficos son SVG puros — sin ninguna librería de charting externa. Los datos se obtienen directamente de SQLite mediante queries agregadas en el servidor.`;
+
+  DOCS['funcional/06-tematicas.md'] = `# Temáticas
+
+Las **Temáticas** son colecciones personalizadas que el usuario puede crear para agrupar fotos por cualquier criterio subjetivo (proyectos, estilos, clientes, etc.).
+
+## Características
+
+- Cada temática tiene un **nombre** y un **color** de identificación
+- Se muestran en el sidebar con su color y el número de fotos asociadas
+- Filtrando por temática en la biblioteca se ven solo las fotos de esa colección
+
+## Gestión
+
+Desde el sidebar se pueden:
+- **Crear** una nueva temática (nombre + color con selector)
+- **Editar** el nombre o color de una temática existente (icono al pasar el ratón)
+- **Eliminar** una temática (con confirmación)
+
+## Asignar fotos
+
+Desde el detalle de cada foto se pueden añadir o quitar temáticas. Una foto puede pertenecer a múltiples temáticas simultáneamente.
+
+## Diferencia con Tags
+
+| | Tags | Temáticas |
+|---|---|---|
+| **Propósito** | Describir el contenido | Agrupar colecciones |
+| **Origen** | Manual o IA | Solo manual |
+| **Color** | No | Sí |
+| **Visibilidad** | Vista de Tags | Sidebar |`;
+
+  DOCS['funcional/07-tags.md'] = `# Tags
+
+El sistema de **Tags** permite etiquetar las fotos para facilitar su búsqueda y organización. Los tags pueden ser asignados manualmente o generados automáticamente por IA.
+
+## Vista de Tags (\`/tags\`)
+
+Nube de tags con todos los que existen en el catálogo activo. El tamaño de cada tag es proporcional a su frecuencia de uso. Al pulsar un tag se accede a la galería de fotos con ese tag.
+
+## Fuentes de tags
+
+| Fuente | Descripción |
+|---|---|
+| **Manual** | Añadidos directamente por el usuario en el detalle de la foto |
+| **IA** | Generados automáticamente por Ollama al clasificar la foto |
+
+En la interfaz los tags muestran una insignia distinta según su origen.
+
+## Tags generados por IA
+
+Cuando Ollama está configurado, la clasificación de una foto genera hasta 6 tags siguiendo esta taxonomía:
+
+1. **Tono**: \`b&w\` o \`color\`
+2. **Estilos** (hasta 2): \`portrait\`, \`landscape\`, \`street\`, \`fashion\`, \`editorial\`, \`architecture\`, \`macro\`, \`product\`, \`documentary\`, \`wildlife\`, \`travel\`, \`sport\`, \`abstract\`
+3. **Género**: \`personal\`, \`work\`, \`travel\`, \`event\`, \`nature\`
+4. **Sujeto/mood** (1-2): tags específicos del contenido
+
+## Clasificación manual vs automática
+
+- Desde el detalle de la foto se puede **clasificar con IA** individualmente
+- Desde la biblioteca por año se puede lanzar la **clasificación en batch** de todo un año
+- El **vigilante de carpetas** lanza la clasificación automáticamente tras detectar fotos nuevas
+
+## Sin clasificar
+
+Las fotos sin ningún tag aparecen en la sección **"Sin clasificar"** del sidebar, facilitando localizar el trabajo de etiquetado pendiente.`;
+
+  DOCS['funcional/08-portfolio.md'] = `# Portfolio
+
+La sección **Portfolio** (\`/projects\`) permite crear proyectos fotográficos curados — selecciones coherentes de fotos con un título y un statement artístico.
+
+## ¿Qué es un proyecto?
+
+Un proyecto es una selección ordenada de fotos que conforman una obra o presentación cohesionada. Cada proyecto tiene:
+- **Título**: nombre del proyecto
+- **Statement**: texto de 2-3 frases explicando la intención artística
+- **Selección**: fotos ordenadas narrativamente (apertura → desarrollo → climax → cierre)
+
+## Generación con IA
+
+photoshelf puede generar proyectos automáticamente usando Ollama como curador virtual. El proceso es:
+
+1. El usuario define el **alcance** (año, evento, temática o toda la biblioteca)
+2. Configura el **número de fotos** y filtros opcionales:
+   - **Tono**: solo color, solo b&w, o mezcla
+   - **Estilos** (orientación estética, no filtro estricto)
+   - **Tags requeridos** (filtros duros)
+3. Ollama actúa como curador experto:
+   - Lee la lista completa de candidatas con sus tags
+   - Aplica los filtros duros (tono, tags obligatorios)
+   - Selecciona las mejores fotos priorizando diversidad de eventos y riqueza de tags
+   - Ordena la selección con un arco narrativo visual
+   - Genera título y statement en español
+
+## Gestión de proyectos
+
+- Los proyectos aparecen listados en el sidebar para acceso rápido
+- Cada proyecto tiene su página de detalle con las fotos en orden
+- Se pueden reordenar fotos dentro del proyecto
+- Se puede eliminar el proyecto (las fotos no se ven afectadas)
+
+## Requisito
+
+La generación con IA requiere Ollama configurado (\`OLLAMA_URL\`). Los proyectos también pueden crearse manualmente seleccionando fotos sin usar la IA.`;
+
+  DOCS['funcional/09-busqueda-ia.md'] = `# Búsqueda con IA
+
+photoshelf incluye un panel de búsqueda inteligente que combina dos modos: búsqueda rápida por tags y búsqueda profunda por visión computacional.
+
+## Acceso
+
+El botón **"Buscar"** en la topbar de la biblioteca abre el panel de búsqueda con IA.
+
+## Modo rápido (búsqueda por tags)
+
+Interpreta la consulta en lenguaje natural y la convierte en filtros de tags:
+
+1. Ollama analiza el texto y extrae: año (opcional), concepto visual y tags relevantes
+2. Se buscan en la base de datos las fotos que tienen esos tags
+3. Los resultados aparecen al instante
+
+**Ejemplo**: "retratos en blanco y negro" → tags: \`[b&w, portrait]\`
+
+## Modo profundo (búsqueda por visión)
+
+Analiza visualmente cada foto de la colección:
+
+1. Ollama procesa la imagen con el modelo \`llama3.2-vision:11b\`
+2. Determina si la foto coincide con el concepto buscado
+3. Como efecto secundario, asigna tags a las fotos analizadas
+4. Devuelve solo las fotos que realmente muestran el concepto
+
+**Ejemplo**: "playa al atardecer" → analiza cada foto y devuelve solo las que visualmente corresponden
+
+> ⚠️ La búsqueda profunda es lenta (30-120 segundos por foto) y se recomienda acotar el alcance con filtros de año o tags previos.
+
+## Taxonomía de tags para búsqueda
+
+Los tags reconocidos por el sistema de IA son:
+
+- **Tono**: \`b&w\`, \`color\`
+- **Estilos**: \`portrait\`, \`landscape\`, \`street\`, \`fashion\`, \`editorial\`, \`architecture\`, \`macro\`, \`product\`, \`documentary\`, \`wildlife\`, \`travel\`, \`sport\`, \`abstract\`
+- **Género**: \`personal\`, \`work\`, \`travel\`, \`event\`, \`nature\`
+
+## Requisito
+
+Requiere Ollama configurado con el modelo \`llama3.2-vision:11b\`.`;
+
+  DOCS['funcional/10-vigilancia-auto.md'] = `# Vigilancia automática
+
+El **vigilante de carpetas** monitoriza el directorio del catálogo activo en tiempo real y lanza automáticamente un escaneo cuando detecta carpetas nuevas.
+
+## Funcionamiento
+
+Al arrancar el servidor, photoshelf inicia un vigilante que:
+
+1. **Registra** la estructura de directorios existente (\`AÑO/EVENTO\`)
+2. **Observa** cambios usando \`fs.watch\` con modo recursivo (macOS/Windows) o polling cada 30 segundos (Linux)
+3. Cuando detecta una **carpeta nueva** espera 5 segundos de debounce (por si llegan múltiples cambios a la vez) y lanza el escaneo
+4. Tras completar el escaneo, si Ollama está configurado, **clasifica automáticamente** con IA las fotos nuevas sin tags (hasta 200 por ciclo)
+
+## Indicador en el sidebar
+
+Cuando el vigilante está activo, aparece en la parte inferior del sidebar un botón con un **punto pulsante** que indica el estado:
+
+- **Vigilando carpetas** (punto azul activo): monitorización en curso
+- **Vigilancia desactivada** (punto gris): pausado por el usuario
+- **Clasificando N/M** (durante el proceso de IA): progreso de la clasificación automática
+
+Al pulsar el botón se activa/desactiva la vigilancia.
+
+## Toast de progreso
+
+Durante un escaneo automático aparece en la esquina el toast habitual con:
+- Indicador "⚡ Auto-escaneo"
+- Carpeta que lo disparó
+- Barra de progreso
+
+## Casos de uso
+
+- Importar fotos desde una cámara o tarjeta SD: basta con copiar la carpeta en la estructura correcta
+- El vigilante detecta la nueva carpeta \`AÑO/EVENTO\` y escanea + clasifica automáticamente
+- En cuestión de minutos las fotos están disponibles en la biblioteca con sus tags
+
+## Compatibilidad
+
+| Sistema | Mecanismo |
+|---|---|
+| macOS | \`fs.watch\` recursivo (nativo del SO) |
+| Windows | \`fs.watch\` recursivo (nativo del SO) |
+| Linux | Polling cada 30 segundos (fallback) |`;
+
+  DOCS['tecnico/01-arquitectura.md'] = `# Arquitectura del sistema
+
+## Visión general
+
+photoshelf es una aplicación web **monolítica** construida con Next.js 15 App Router (React 19). El servidor sirve tanto la interfaz de usuario (React Server Components + Client Components) como la API REST. No hay servicios separados — todo corre en un único proceso Node.js.
+
+## Capas de la aplicación
+
+### 1. Presentación (UI)
+
+- **Server Components**: renderizan HTML inicial con datos de SQLite (via \`queries/\`)
+- **Client Components**: interactividad (formularios, modales, zoom, mapa, swipe gestures)
+- **API Routes**: endpoints REST para operaciones desde el cliente
+
+### 2. Capa de repositorio (\`src/lib/queries/\`)
+
+Toda la lógica de acceso a datos vive aquí — ni los Server Components ni los route handlers escriben SQL directamente.
+
+| Módulo | Funciones |
+|---|---|
+| \`photos.ts\` | \`photoQueries.list\`, \`photoQueries.get\`, \`photoQueries.update\` |
+| \`catalogs.ts\` | \`catalogQueries.list\`, \`catalogQueries.create\`, \`catalogQueries.update\`, \`catalogQueries.delete\` |
+| \`catalog.ts\` | \`getActiveCatalog\`, \`switchCatalog\` |
+| \`timeline.ts\` | \`timelineQueries.periods\` |
+| \`tags.ts\` | \`tagQueries.list\`, \`tagQueries.forPhoto\` |
+| \`themes.ts\` | \`themeQueries.list\` |
+| \`stats.ts\` | \`statsQueries.summary\`, \`statsQueries.byYear\` |
+| \`groups.ts\` | \`groupQueries.list\` |
+| \`sidebar.ts\` | Datos agregados para el sidebar |
+
+### 3. Helpers de mutación (\`src/lib/db-helpers.ts\`)
+
+Centraliza las operaciones de escritura reutilizadas:
+
+- \`upsertAiTags(photoId, tags[])\` — DELETE + INSERT de tags IA
+- \`buildPhotoFilter(params)\` — construye la cláusula WHERE de fotos
+- \`PHOTOS_PATH\` — constante centralizada
+
+### 4. Lógica de negocio
+
+- **\`scanner.ts\`**: recorre el filesystem del catálogo activo, extrae EXIF y sincroniza la BD
+- **\`thumbnail.ts\`**: genera y cachea miniaturas WebP con sharp
+- **\`folderWatcher.ts\`**: monitorización de carpetas, debounce, auto-scan y auto-classify
+- **\`ollama.ts\`**: cliente para classify, review, search y generación de proyectos
+- **\`session.ts\`**: autenticación con iron-session
+- **\`catalog-context.ts\`**: resuelve el catálogo activo por request (desde cookie de sesión)
+
+### 5. Datos
+
+- **SQLite** (better-sqlite3): base de datos embebida, WAL mode, claves foráneas activadas
+- **Disco**: fotos originales en el directorio del catálogo activo, thumbnails en \`/data/.cache\`
+
+## Múltiples catálogos
+
+Antes, photoshelf gestionaba un único directorio configurado con \`PHOTOS_PATH\`. Ahora:
+
+1. La tabla \`catalogs\` almacena N bibliotecas (nombre + ruta).
+2. \`photos.catalog_id\` FK → \`catalogs.id\`.
+3. El componente \`CatalogSwitcher\` en el sidebar cambia el catálogo activo sin recargar.
+4. Las rutas \`/api/catalogs/\` gestionan CRUD y el switch.
+5. \`catalog-context.ts\` resuelve el catálogo activo por request.
+6. Todas las queries de \`src/lib/queries/\` filtran por \`catalog_id\`.
+
+## Flujo de datos
+
+\`\`\`
+Server Components / Route Handlers
+        ↓
+  src/lib/queries/       ← única capa que escribe SQL
+        ↓
+  src/lib/db-helpers.ts  ← helpers de mutación reutilizables
+        ↓
+  src/lib/db.ts          ← getDb() singleton SQLite
+\`\`\`
+
+## Gestión de estado del servidor
+
+Para operaciones asíncronas de larga duración, el servidor usa **módulos singleton**:
+
+\`\`\`
+scanState.ts      → { running, done, total, currentEvent, error }
+classifyState.ts  → { running, done, total, year, error }
+watcherState.ts   → { enabled, watching, classifying, classifyDone, classifyTotal }
+\`\`\`
+
+El cliente hace polling cada 2 segundos a \`/api/scan/status\` y \`/api/watcher/status\`.
+
+## Tests
+
+| Fichero | Qué cubre |
+|---|---|
+| \`src/lib/__tests__/config.test.ts\` | Lectura y validación de configuración |
+| \`src/lib/__tests__/scanner.test.ts\` | Lógica de escaneo de archivos |
+| \`src/lib/__tests__/thumbnail.test.ts\` | Generación de thumbnails |
+| \`src/app/api/auth/__tests__/login.test.ts\` | Flujo de autenticación |
+| \`src/__tests__/session.test.ts\` | Manejo de sesión |
+| \`src/__tests__/ollama.test.ts\` | Cliente Ollama |
+| \`src/__tests__/projectFilters.test.ts\` | Filtros de proyectos |
+
+## Startup
+
+\`src/instrumentation.ts\` (hook de Next.js) inicia el \`folderWatcher\` al arrancar el servidor, antes de servir cualquier petición.`;
+
+  DOCS['tecnico/02-base-de-datos.md'] = `# Base de datos
+
+photoshelf usa **SQLite** a través de \`better-sqlite3\`. La base de datos se crea automáticamente en \`data/photoshelf.db\` (o en la ruta configurada por \`DB_PATH\`).
+
+## Configuración
+
+- **WAL mode** (\`journal_mode = WAL\`): lecturas concurrentes sin bloquear escrituras
+- **Foreign keys** activadas (\`foreign_keys = ON\`)
+- El esquema se inicializa automáticamente con \`CREATE TABLE IF NOT EXISTS\` al arrancar
+
+## Tablas
+
+### \`catalogs\`
+Bibliotecas de fotos independientes.
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| \`id\` | INTEGER PK | Auto-incremental |
+| \`name\` | TEXT UNIQUE | Nombre del catálogo |
+| \`path\` | TEXT | Ruta del directorio de fotos en el host |
+| \`is_default\` | INTEGER | 0/1 — catálogo seleccionado por defecto |
+| \`created_at\` | TEXT | Fecha de creación |
+
+### \`photos\`
+Tabla principal. Cada fila es una foto escaneada, asociada a un catálogo.
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| \`id\` | INTEGER PK | Auto-incremental |
+| \`catalog_id\` | INTEGER FK → catalogs | Catálogo al que pertenece |
+| \`path\` | TEXT UNIQUE | Ruta relativa al directorio del catálogo |
+| \`filename\` | TEXT | Nombre del archivo |
+| \`year\` | INTEGER | Año extraído de la ruta |
+| \`event\` | TEXT | Nombre de la carpeta de evento |
+| \`size_bytes\` | INTEGER | Tamaño en bytes |
+| \`width\` / \`height\` | INTEGER | Dimensiones en píxeles (de EXIF) |
+| \`taken_at\` | TEXT | Fecha ISO de captura (de EXIF) |
+| \`camera\` | TEXT | Make + Model de la cámara (de EXIF) |
+| \`exposure\` | TEXT | Velocidad · apertura · ISO (de EXIF) |
+| \`gps_lat\` / \`gps_lon\` | REAL | Coordenadas GPS (de EXIF) |
+| \`is_favorite\` | INTEGER | 0/1 — favorita |
+| \`created_at\` | TEXT | Primera vez que se escaneó |
+| \`scanned_at\` | TEXT | Última vez escaneada |
+
+### \`tags\`
+Catálogo de tags normalizados.
+
+### \`photo_tags\`
+Relación N:M entre fotos y tags. \`source\`: \`'manual'\` o \`'ai'\`.
+
+### \`themes\`
+Colecciones personalizadas con color.
+
+### \`photo_themes\`
+Relación N:M entre fotos y temáticas.
+
+### \`projects\`
+Proyectos fotográficos curados.
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| \`id\` | INTEGER PK | |
+| \`title\` | TEXT | Título del proyecto |
+| \`statement\` | TEXT | Texto artístico |
+| \`scope_type\` | TEXT CHECK | \`'year'\`, \`'event'\`, \`'theme'\`, \`'all'\` |
+| \`scope_value\` | TEXT | Valor del alcance |
+
+### \`project_photos\`
+Fotos de un proyecto, con posición para el orden narrativo.
+
+## Índices
+
+\`\`\`sql
+idx_photos_catalog   ON photos(catalog_id)
+idx_photos_year      ON photos(year)
+idx_photos_event     ON photos(year, event)
+idx_photos_fav       ON photos(is_favorite)
+idx_photo_tags       ON photo_tags(photo_id)
+idx_photo_tags_tag   ON photo_tags(tag_id)
+idx_tags_name        ON tags(name)
+idx_photo_themes_p   ON photo_themes(photo_id)
+idx_photo_themes_t   ON photo_themes(theme_id)
+idx_project_photos_p ON project_photos(project_id)
+\`\`\`
+
+## Estrategia de upsert en el escaneo
+
+\`\`\`sql
+INSERT INTO photos (catalog_id, path, ...) VALUES (...)
+ON CONFLICT(path) DO UPDATE SET
+  scanned_at = excluded.scanned_at,
+  size_bytes  = excluded.size_bytes,
+  width       = COALESCE(photos.width, excluded.width),
+  ...
+\`\`\`
+
+Los campos EXIF solo se actualizan si estaban vacíos (\`COALESCE\`), preservando correcciones manuales.
+
+## Catálogo activo
+
+La selección del catálogo activo se gestiona mediante la cookie de sesión \`active_catalog_id\`. El módulo \`src/lib/catalog-context.ts\` la resuelve en cada request. Todas las queries reciben el \`catalogId\` como parámetro.`;
+
+  DOCS['tecnico/03-api.md'] = `# API Reference
+
+Todos los endpoints requieren sesión activa (cookie \`iron-session\`). Las respuestas son JSON salvo los endpoints de media (thumbnail, original).
+
+## Autenticación
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`POST\` | \`/api/auth/login\` | \`{ password }\` → establece sesión |
+| \`POST\` | \`/api/auth/logout\` | Destruye la sesión |
+
+## Catálogos
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`GET\` | \`/api/catalogs\` | Lista de catálogos con conteo de fotos |
+| \`POST\` | \`/api/catalogs\` | Crear catálogo \`{ name, path, isDefault? }\` |
+| \`PATCH\` | \`/api/catalogs/[id]\` | Actualizar nombre o path |
+| \`DELETE\` | \`/api/catalogs/[id]\` | Eliminar catálogo (y sus fotos de la BD) |
+| \`POST\` | \`/api/catalogs/switch\` | Cambiar catálogo activo \`{ catalogId }\` |
+
+## Fotos
+
+Todas las rutas de fotos operan sobre el catálogo activo.
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`GET\` | \`/api/photos\` | Lista con filtros (\`year\`, \`event\`, \`theme\`, \`favorite\`, \`untagged\`, \`tag\`, \`search\`, \`cursor\`, \`limit\`) |
+| \`GET\` | \`/api/photos/[id]\` | Detalle (metadatos + tags + temáticas) |
+| \`PATCH\` | \`/api/photos/[id]\` | Actualizar (\`is_favorite\`) |
+| \`GET\` | \`/api/photos/[id]/thumbnail\` | Miniatura WebP (\`?size=N\`, default 200) |
+| \`GET\` | \`/api/photos/[id]/original\` | Archivo original (stream) |
+| \`GET\` | \`/api/photos/groups\` | Grupos de eventos (\`year\`, \`event\`, \`count\`, \`cover_id\`) |
+| \`GET\` | \`/api/photos/map\` | Fotos con GPS (\`?year=N\` filtro opcional) |
+
+## Tags
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`GET\` | \`/api/tags\` | Todos los tags con conteo |
+| \`GET\` | \`/api/tags/[photoId]\` | Tags de una foto |
+| \`POST\` | \`/api/tags/[photoId]\` | Añadir tag \`{ name }\` |
+| \`DELETE\` | \`/api/tags/[photoId]\` | Eliminar tag \`{ name }\` |
+
+## Temáticas
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`GET\` | \`/api/themes\` | Lista con conteo |
+| \`POST\` | \`/api/themes\` | Crear \`{ name, color }\` |
+| \`PATCH\` | \`/api/themes/[id]\` | Actualizar |
+| \`DELETE\` | \`/api/themes/[id]\` | Eliminar |
+| \`GET\` | \`/api/photo-themes/[photoId]\` | Temáticas de una foto |
+| \`POST\` | \`/api/photo-themes/[photoId]\` | Asignar \`{ themeId }\` |
+| \`DELETE\` | \`/api/photo-themes/[photoId]\` | Desasignar |
+
+## Timeline
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`GET\` | \`/api/timeline\` | Fotos paginadas por cursor (\`level\`, \`cursor\`, \`limit\`) |
+
+## Proyectos
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`GET\` | \`/api/projects\` | Lista de proyectos |
+| \`POST\` | \`/api/projects\` | Crear proyecto |
+| \`GET\` | \`/api/projects/[id]\` | Detalle con fotos |
+| \`PATCH\` | \`/api/projects/[id]\` | Actualizar |
+| \`DELETE\` | \`/api/projects/[id]\` | Eliminar |
+| \`POST\` | \`/api/projects/generate\` | Generar con IA \`{ scopeType, scopeValue, count, filters? }\` |
+
+## Escaneo
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`POST\` | \`/api/scan\` | Iniciar escaneo del catálogo activo |
+| \`GET\` | \`/api/scan/status\` | Estado \`{ running, done, total, currentEvent, error }\` |
+
+## Vigilante de carpetas
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`GET\` | \`/api/watcher/status\` | Estado del vigilante |
+| \`POST\` | \`/api/watcher/toggle\` | Activar/desactivar \`{ enabled: boolean }\` |
+
+## IA (Ollama)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| \`POST\` | \`/api/ai/classify/[photoId]\` | Clasificar una foto |
+| \`POST\` | \`/api/ai/classify/batch\` | Clasificar en batch \`{ year?, limit? }\` |
+| \`GET\` | \`/api/ai/classify/status\` | Estado de la clasificación |
+| \`POST\` | \`/api/ai/classify/year\` | Clasificar todo un año |
+| \`GET\` | \`/api/ai/review/[photoId]\` | Review de composición, luz y puntuación |
+| \`POST\` | \`/api/ai/search\` | Búsqueda semántica \`{ query, mode, year? }\` |
+| \`GET\` | \`/api/ollama/status\` | Estado de conexión con Ollama |
+
+## Formato de paginación (Timeline)
+
+\`\`\`json
+{
+  "groups": [
+    {
+      "period": "2024-05",
+      "label": "mayo 2024",
+      "count": 47,
+      "photos": [{ "id": 1, "filename": "DSC_0001.jpg", "taken_at": "2024-05-14T10:23:00" }]
+    }
+  ],
+  "nextCursor": "2024-05-14T10:23:00",
+  "hasMore": true
+}
+\`\`\`
+
+> **Nota:** US-023 (pendiente) estandarizará todas las respuestas con envelope \`{ data, error, meta }\` y prefijo \`/api/v1/\` para el cliente iOS.`;
+
+  DOCS['tecnico/04-componentes.md'] = `# Componentes y estructura de la UI
+
+## Árbol de rutas (App Router)
+
+\`\`\`
+src/app/
+├── layout.tsx                     ← Root layout: providers globales + fuente Geist
+├── page.tsx                       ← Redirect → /library
+├── login/page.tsx                 ← Formulario de contraseña
+├── library/
+│   ├── page.tsx                   ← Server Component
+│   ├── LibraryClient.tsx          ← Client: grid/lista, filtros, paginación
+│   └── [photoId]/page.tsx         ← Detalle de foto
+├── map/
+│   ├── page.tsx                   ← Server Component (ssr: false para Leaflet)
+│   ├── MapClient.tsx              ← Leaflet + markercluster + filtro año
+│   └── MapWrapper.tsx             ← Wrapper de carga dinámica
+├── stats/
+│   └── StatsClient.tsx            ← Cards + gráficas CSS
+├── projects/
+│   ├── ProjectsClient.tsx         ← CRUD de proyectos
+│   └── [id]/page.tsx              ← Detalle de portfolio
+├── tags/
+│   ├── TagsClient.tsx             ← Nube de tags
+│   └── [tag]/page.tsx             ← Galería por tag
+├── settings/
+│   └── catalogs/
+│       └── CatalogsClient.tsx     ← CRUD de catálogos
+└── api/                           ← API Routes
+\`\`\`
+
+## Proveedores de contexto (Root Layout)
+
+\`\`\`
+ModalProvider
+  └── ScanProvider
+        └── ClassifyProvider
+              └── {children}
+\`\`\`
+
+| Proveedor | Propósito |
+|---|---|
+| \`ModalProvider\` | Modales de confirmación y alertas globales |
+| \`ScanProvider\` | Estado de escaneo; polling a \`/api/scan/status\` y \`/api/watcher/status\` |
+| \`ClassifyProvider\` | Estado de clasificación IA; polling a \`/api/ai/classify/status\` |
+
+## Componentes compartidos
+
+### \`CatalogSwitcher.tsx\`
+Selector del catálogo activo en la cabecera del sidebar. Con un solo catálogo muestra un badge de nombre; con varios despliega la lista. El cambio llama a \`POST /api/catalogs/switch\`.
+
+### \`BottomSheet.tsx\`
+Panel inferior deslizante para mobile. Reemplaza el panel lateral en pantallas pequeñas. Incluye handle de drag y cierre con swipe hacia abajo.
+
+### \`Icons.tsx\`
+Biblioteca de iconos SVG inline: \`IconPhoto\`, \`IconGrid\`, \`IconStar\`, \`IconSearch\`, \`IconRefresh\`, \`IconPlus\`, \`IconLogout\`, \`IconEdit\`, \`IconTrash\`, \`IconFolder\`, \`IconTag\`, \`IconTimeline\`, \`IconStats\`, \`IconMap\`, \`IconCatalog\`, \`IconSettings\`.
+
+### \`Sidebar.tsx\`
+Navegación lateral. Incluye: \`CatalogSwitcher\`, links a todas las vistas, CRUD de temáticas, lista de proyectos, botón de escaneo, indicador del vigilante, enlace a Ajustes > Catálogos, y botón de logout.
+
+### \`DetailPanel.tsx\`
+Panel deslizante (desktop) / \`BottomSheet\` (mobile) con detalle de foto: miniatura, EXIF, tags, temáticas, acciones.
+
+### \`EmptyState.tsx\`
+Estado vacío genérico con icono, título, descripción y CTA opcional.
+
+### \`PhotoGrid.tsx\` / \`FolderGrid.tsx\`
+Grids reutilizables para fotos y grupos de eventos.
+
+### \`AISearchPanel.tsx\`
+Panel de búsqueda con IA. Toggle entre modo rápido y modo profundo.
+
+## Páginas clave
+
+### LibraryClient.tsx
+Biblioteca con filtros, paginación y detalle lateral/bottom sheet.
+
+### MapClient.tsx
+Mapa Leaflet con clustering y filtro por año. Carga dinámica (ssr: false).
+
+### CatalogsClient.tsx
+Gestión de catálogos: listado con conteo de fotos, crear/editar/eliminar catálogo, cambiar catálogo por defecto.`;
+
+  DOCS['tecnico/05-despliegue.md'] = `# Despliegue
+
+## Resumen
+
+photoshelf se distribuye como una imagen Docker multi-stage. El contenedor expone el puerto 3000 y necesita dos volúmenes: uno de solo lectura para las fotos y uno de lectura/escritura para la base de datos y la caché de thumbnails.
+
+## Imagen Docker
+
+\`\`\`
+ghcr.io/labombina7/photoshelf:latest
+\`\`\`
+
+### Proceso de build (multi-stage)
+
+\`\`\`dockerfile
+# Etapa 1: Builder
+FROM node:20-slim AS builder
+# Instala dependencias: python3, make, g++, libvips-dev
+# npm ci → npm run build → Next.js standalone output
+
+# Etapa 2: Runner (imagen final slim)
+FROM node:20-slim AS runner
+# Solo libvips en runtime (para sharp)
+# Copia: .next/standalone, .next/static, public
+CMD ["node", "server.js"]
+\`\`\`
+
+## docker-compose.yml mínimo
+
+\`\`\`yaml
+services:
+  app:
+    image: ghcr.io/labombina7/photoshelf:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      APP_PASSWORD: \${APP_PASSWORD}
+      SESSION_SECRET: \${SESSION_SECRET}
+      PHOTOS_PATH: /photos
+      CACHE_PATH: /data/.cache
+      DB_PATH: /data/photoshelf.db
+      OLLAMA_URL: \${OLLAMA_URL:-http://192.168.1.135:11434}
+    volumes:
+      - /ruta/local/a/fotos:/photos:ro
+      - photoshelf_data:/data
+
+volumes:
+  photoshelf_data:
+\`\`\`
+
+## Volúmenes
+
+| Volumen | Ruta en contenedor | Permisos | Contenido |
+|---|---|---|---|
+| Fotos | \`/photos\` | \`:ro\` (solo lectura) | Estructura \`AÑO/EVENTO/*.jpg\` |
+| Datos | \`/data\` | lectura/escritura | \`photoshelf.db\`, \`.cache/\` |
+
+> **Múltiples catálogos**: si usas varios catálogos con rutas distintas, monta cada volumen de fotos como un volumen separado en el contenedor y configura las rutas desde la UI de catálogos.
+
+## Synology NAS (caso de uso típico)
+
+1. Crear el proyecto desde el \`docker-compose.yml\`
+2. Mapear el volumen de fotos a la carpeta de Photos del NAS (solo lectura)
+3. Crear un volumen Docker para \`/data\`
+4. Configurar las variables de entorno en Container Manager
+
+## Configuración de Ollama (opcional)
+
+\`\`\`yaml
+OLLAMA_URL: http://192.168.1.XXX:11434
+\`\`\`
+
+El modelo necesario es \`llama3.2-vision:11b\`:
+
+\`\`\`bash
+ollama pull llama3.2-vision:11b
+\`\`\`
+
+Si \`OLLAMA_URL\` no está configurado, todas las funciones de IA se desactivan silenciosamente.
+
+## Actualización
+
+\`\`\`bash
+docker compose pull
+docker compose up -d
+\`\`\`
+
+La base de datos es persistente en el volumen \`photoshelf_data\`.
+
+## Build local (desarrollo)
+
+\`\`\`bash
+npm install
+npm run dev      # servidor de desarrollo con hot reload
+npm run build    # build de producción
+npm start
+\`\`\`
+
+## CI/CD
+
+GitHub Actions: build de imagen Docker en cada push a \`main\` → push a \`ghcr.io/labombina7/photoshelf:latest\`. Las features se desarrollan en ramas y se mergean a \`main\` via PR.`;
+
+  DOCS['tecnico/06-configuracion.md'] = `# Configuración
+
+Todas las variables de entorno son opcionales salvo \`APP_PASSWORD\` y \`SESSION_SECRET\`, que son obligatorias para el funcionamiento seguro de la aplicación.
+
+## Variables de entorno
+
+| Variable | Obligatoria | Valor por defecto | Descripción |
+|---|---|---|---|
+| \`APP_PASSWORD\` | Sí | — | Contraseña única de acceso a la app |
+| \`SESSION_SECRET\` | Sí | — | Secreto para firmar la cookie de sesión (mínimo 32 caracteres) |
+| \`PHOTOS_PATH\` | No | \`/photos\` | Ruta por defecto para el primer catálogo (si no se configura ninguno desde la UI) |
+| \`DB_PATH\` | No | \`/data/photoshelf.db\` | Ruta del archivo SQLite |
+| \`CACHE_PATH\` | No | \`/data/.cache\` | Directorio para la caché de thumbnails WebP |
+| \`OLLAMA_URL\` | No | — | URL base de Ollama (p. ej. \`http://192.168.1.10:11434\`) |
+
+## Detalle de cada variable
+
+### \`APP_PASSWORD\`
+
+La contraseña que el usuario escribe en la pantalla de login. No hay sistema de usuarios — una sola contraseña para toda la instancia.
+
+### \`SESSION_SECRET\`
+
+Secreto criptográfico usado por \`iron-session\` para firmar y verificar la cookie de sesión. Debe ser aleatorio y de al menos 32 caracteres.
+
+\`\`\`bash
+openssl rand -hex 32
+\`\`\`
+
+### \`PHOTOS_PATH\`
+
+Ruta inicial de fotos. Con múltiples catálogos, los catálogos adicionales se configuran desde **Ajustes > Catálogos** en la interfaz — no es necesario añadir más variables de entorno.
+
+### \`DB_PATH\`
+
+Ruta completa al archivo SQLite. El directorio padre debe existir y tener permisos de escritura.
+
+### \`CACHE_PATH\`
+
+Directorio donde se guardan las miniaturas WebP. Se crea automáticamente si no existe:
+
+\`\`\`
+.cache/
+└── {id}_{size}.webp
+\`\`\`
+
+### \`OLLAMA_URL\`
+
+URL base del servidor Ollama. Si no se configura, todas las funciones de IA están desactivadas:
+- Clasificación automática y manual
+- Búsqueda con IA
+- Review de foto (composición, luz, puntuación)
+- Generación de portfolios con IA
+
+\`\`\`
+OLLAMA_URL=http://192.168.1.135:11434
+\`\`\`
+
+El modelo usado es \`llama3.2-vision:11b\`.
+
+## Archivo \`.env.local\` (desarrollo)
+
+\`\`\`bash
+APP_PASSWORD=dev_password
+SESSION_SECRET=dev_secret_32_chars_minimum_here_xx
+PHOTOS_PATH=/Users/miusuario/Photos
+DB_PATH=/Users/miusuario/photoshelf-dev.db
+CACHE_PATH=/Users/miusuario/.photoshelf-cache
+OLLAMA_URL=http://localhost:11434
+\`\`\`
+
+## Seguridad
+
+- La cookie de sesión tiene \`httpOnly: true\`, \`secure: true\` (en producción) y \`sameSite: 'strict'\`
+- La sesión expira a los 7 días (\`maxAge: 7 * 24 * 60 * 60\`)
+- Todos los endpoints verifican la sesión antes de procesar la petición
+- El volumen de fotos se monta en modo solo lectura (\`:ro\`) — photoshelf nunca modifica las fotos originales`;
+
+  // ── VIEWER LOGIC ──────────────────────────────────────────────────────────
   const welcome = document.getElementById('welcome');
   const markdownView = document.getElementById('markdown-view');
-  const loading = document.getElementById('loading');
   const topbarBreadcrumb = document.getElementById('topbar-breadcrumb');
   const topbarTitle = document.getElementById('topbar-title');
   const topbarBadge = document.getElementById('topbar-badge');
 
-  async function loadDoc(file, type, title) {
-    // Update nav active state
+  function loadDoc(file, type, title) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    const activeBtn = document.querySelector(`[data-file="${file}"]`);
+    const activeBtn = document.querySelector('[data-file="' + file + '"]');
     if (activeBtn) activeBtn.classList.add('active');
 
-    // Update topbar
     topbarBreadcrumb.textContent = type === 'func' ? 'Funcional' : 'Técnico';
     topbarTitle.textContent = title;
     topbarTitle.style.display = 'inline';
@@ -525,56 +1531,42 @@
     topbarBadge.className = 'badge ' + (type === 'func' ? 'badge-func' : 'badge-tech');
     topbarBadge.style.display = 'inline';
 
-    // Show loading
     welcome.style.display = 'none';
     markdownView.style.display = 'none';
-    loading.style.display = 'flex';
 
-    try {
-      const resp = await fetch(file);
-      if (!resp.ok) throw new Error('Not found');
-      const md = await resp.text();
-
-      // Render markdown
-      const html = marked.parse(md);
-      markdownView.innerHTML = html;
-
-      // Process mermaid blocks
-      markdownView.querySelectorAll('pre code.language-mermaid').forEach((codeEl) => {
-        const pre = codeEl.parentElement;
-        const div = document.createElement('div');
-        div.className = 'mermaid';
-        div.textContent = codeEl.textContent;
-        pre.replaceWith(div);
-      });
-
-      loading.style.display = 'none';
+    const md = DOCS[file];
+    if (!md) {
+      markdownView.innerHTML = '<p style="color:var(--text-muted)">Documento no encontrado: ' + file + '</p>';
       markdownView.style.display = 'block';
-      document.getElementById('content').scrollTop = 0;
-
-      // Run mermaid on the new elements
-      mermaid.run({ nodes: markdownView.querySelectorAll('.mermaid') });
-
-    } catch (e) {
-      markdownView.innerHTML = `<p style="color:var(--text-muted)">No se pudo cargar el documento: ${file}</p>`;
-      loading.style.display = 'none';
-      markdownView.style.display = 'block';
+      return;
     }
+
+    const html = marked.parse(md);
+    markdownView.innerHTML = html;
+
+    markdownView.querySelectorAll('pre code.language-mermaid').forEach((codeEl) => {
+      const pre = codeEl.parentElement;
+      const div = document.createElement('div');
+      div.className = 'mermaid';
+      div.textContent = codeEl.textContent;
+      pre.replaceWith(div);
+    });
+
+    markdownView.style.display = 'block';
+    document.getElementById('content').scrollTop = 0;
+    mermaid.run({ nodes: markdownView.querySelectorAll('.mermaid') });
   }
 
-  // Attach click handlers to nav items
   document.querySelectorAll('.nav-item[data-file]').forEach(btn => {
     btn.addEventListener('click', () => {
       loadDoc(btn.dataset.file, btn.dataset.type, btn.dataset.title);
     });
   });
 
-  // Keyboard navigation
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       welcome.style.display = 'block';
       markdownView.style.display = 'none';
-      loading.style.display = 'none';
       topbarTitle.style.display = 'none';
       topbarBadge.style.display = 'none';
       topbarBreadcrumb.textContent = 'Inicio';

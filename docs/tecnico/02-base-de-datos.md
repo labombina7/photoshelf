@@ -12,8 +12,17 @@ photoshelf usa **SQLite** a través de `better-sqlite3`. La base de datos se cre
 
 ```mermaid
 erDiagram
+    catalogs {
+        INTEGER id PK
+        TEXT name UK
+        TEXT path
+        INTEGER is_default
+        TEXT created_at
+    }
+
     photos {
         INTEGER id PK
+        INTEGER catalog_id FK
         TEXT path UK
         TEXT filename
         INTEGER year
@@ -68,6 +77,7 @@ erDiagram
         INTEGER position
     }
 
+    catalogs ||--o{ photos : "contiene"
     photos ||--o{ photo_tags : "tiene"
     tags ||--o{ photo_tags : "usada en"
     photos ||--o{ photo_themes : "pertenece a"
@@ -78,13 +88,25 @@ erDiagram
 
 ## Tablas
 
-### `photos`
-Tabla principal. Cada fila es una foto escaneada.
+### `catalogs`
+Bibliotecas de fotos independientes. Añadida en EPIC-001.
 
 | Columna | Tipo | Descripción |
 |---|---|---|
 | `id` | INTEGER PK | Auto-incremental |
-| `path` | TEXT UNIQUE | Ruta relativa a PHOTOS_PATH (`2023/Boda/foto.jpg`) |
+| `name` | TEXT UNIQUE | Nombre del catálogo (e.g. "Fotos personales") |
+| `path` | TEXT | Ruta del directorio de fotos en el host |
+| `is_default` | INTEGER | 0/1 — catálogo seleccionado por defecto |
+| `created_at` | TEXT | Fecha de creación |
+
+### `photos`
+Tabla principal. Cada fila es una foto escaneada, asociada a un catálogo.
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `id` | INTEGER PK | Auto-incremental |
+| `catalog_id` | INTEGER FK → catalogs | Catálogo al que pertenece |
+| `path` | TEXT UNIQUE | Ruta relativa al directorio del catálogo |
 | `filename` | TEXT | Nombre del archivo |
 | `year` | INTEGER | Año extraído de la ruta |
 | `event` | TEXT | Nombre de la carpeta de evento |
@@ -144,6 +166,7 @@ Fotos de un proyecto, con posición para el orden narrativo.
 ## Índices
 
 ```sql
+idx_photos_catalog  ON photos(catalog_id)
 idx_photos_year     ON photos(year)
 idx_photos_event    ON photos(year, event)
 idx_photos_fav      ON photos(is_favorite)
@@ -158,7 +181,7 @@ idx_project_photos_p ON project_photos(project_id)
 ## Estrategia de upsert en el escaneo
 
 ```sql
-INSERT INTO photos (path, ...) VALUES (...)
+INSERT INTO photos (catalog_id, path, ...) VALUES (...)
 ON CONFLICT(path) DO UPDATE SET
   scanned_at = excluded.scanned_at,
   size_bytes  = excluded.size_bytes,
@@ -167,3 +190,7 @@ ON CONFLICT(path) DO UPDATE SET
 ```
 
 Los campos EXIF solo se actualizan si estaban vacíos (`COALESCE`), preservando correcciones manuales.
+
+## Catálogo activo
+
+La selección del catálogo activo se gestiona mediante la cookie de sesión `active_catalog_id`. El módulo `src/lib/catalog-context.ts` la resuelve en cada request y expone el catálogo al resto de la aplicación. Todas las queries de `src/lib/queries/` reciben el `catalogId` como parámetro.

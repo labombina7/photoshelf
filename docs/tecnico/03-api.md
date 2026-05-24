@@ -9,7 +9,19 @@ Todos los endpoints requieren sesión activa (cookie `iron-session`). Las respue
 | `POST` | `/api/auth/login` | `{ password }` → establece sesión |
 | `POST` | `/api/auth/logout` | Destruye la sesión |
 
+## Catálogos
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/catalogs` | Lista de catálogos con conteo de fotos |
+| `POST` | `/api/catalogs` | Crear catálogo `{ name, path, isDefault? }` |
+| `PATCH` | `/api/catalogs/[id]` | Actualizar nombre o path |
+| `DELETE` | `/api/catalogs/[id]` | Eliminar catálogo (y sus fotos de la BD) |
+| `POST` | `/api/catalogs/switch` | Cambiar catálogo activo `{ catalogId }` |
+
 ## Fotos
+
+Todas las rutas de fotos operan sobre el catálogo activo (resuelto desde la sesión).
 
 | Método | Ruta | Descripción |
 |---|---|---|
@@ -19,7 +31,7 @@ Todos los endpoints requieren sesión activa (cookie `iron-session`). Las respue
 | `GET` | `/api/photos/[id]/thumbnail` | Miniatura WebP (`?size=N`, default 200) |
 | `GET` | `/api/photos/[id]/original` | Archivo original (stream) |
 | `GET` | `/api/photos/groups` | Grupos de eventos (`year`, `event`, `count`, `cover_id`) |
-| `GET` | `/api/photos/map` | Fotos con GPS para el mapa (`id`, `filename`, `taken_at`, `event`, `gps_lat`, `gps_lon`) |
+| `GET` | `/api/photos/map` | Fotos con GPS para el mapa (`?year=N` filtro opcional) |
 
 ## Tags
 
@@ -63,7 +75,7 @@ Todos los endpoints requieren sesión activa (cookie `iron-session`). Las respue
 
 | Método | Ruta | Descripción |
 |---|---|---|
-| `POST` | `/api/scan` | Iniciar escaneo manual |
+| `POST` | `/api/scan` | Iniciar escaneo del catálogo activo |
 | `GET` | `/api/scan/status` | Estado del escaneo `{ running, done, total, currentEvent, error }` |
 
 ## Vigilante de carpetas
@@ -83,6 +95,7 @@ Todos los endpoints requieren sesión activa (cookie `iron-session`). Las respue
 | `POST` | `/api/ai/classify/year` | Clasificar todas las fotos de un año |
 | `GET` | `/api/ai/review/[photoId]` | Obtener review de IA (composición, luz, puntuación) |
 | `POST` | `/api/ai/search` | Búsqueda semántica `{ query, mode: 'quick'\|'deep', year? }` |
+| `GET` | `/api/ollama/status` | Estado de conexión con Ollama |
 
 ## Formato de respuesta de paginación (Timeline)
 
@@ -102,3 +115,5 @@ Todos los endpoints requieren sesión activa (cookie `iron-session`). Las respue
   "hasMore": true
 }
 ```
+
+> **Nota:** US-023 (pendiente) estandarizará todas las respuestas con un envelope `{ data, error, meta }` y prefijo `/api/v1/` para el cliente iOS.
