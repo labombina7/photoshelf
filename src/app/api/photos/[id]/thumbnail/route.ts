@@ -10,14 +10,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   const db = getDb();
-  const photo = db.prepare('SELECT path FROM photos WHERE id = ?').get(parseInt(id, 10)) as { path: string } | undefined;
+  const photo = db.prepare(`
+    SELECT p.path, COALESCE(c.path, ?) as catalog_path
+    FROM photos p
+    LEFT JOIN catalogs c ON c.id = p.catalog_id
+    WHERE p.id = ?
+  `).get(PHOTOS_PATH, parseInt(id, 10)) as { path: string; catalog_path: string } | undefined;
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const size = parseInt(req.nextUrl.searchParams.get('size') ?? '400', 10);
   const fit = req.nextUrl.searchParams.get('fit') === 'inside' ? 'inside' : 'cover';
 
   try {
-    const { buffer, contentType } = await getThumbnail(photo.path, PHOTOS_PATH, size, fit);
+    const { buffer, contentType } = await getThumbnail(photo.path, photo.catalog_path, size, fit);
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': contentType,

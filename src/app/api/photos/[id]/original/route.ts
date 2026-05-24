@@ -25,13 +25,18 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const { id } = await params;
   const db = getDb();
-  const photo = db.prepare('SELECT path, filename FROM photos WHERE id = ?').get(parseInt(id, 10)) as { path: string; filename: string } | undefined;
+  const photo = db.prepare(`
+    SELECT p.path, p.filename, COALESCE(c.path, ?) as catalog_path
+    FROM photos p
+    LEFT JOIN catalogs c ON c.id = p.catalog_id
+    WHERE p.id = ?
+  `).get(PHOTOS_PATH, parseInt(id, 10)) as { path: string; filename: string; catalog_path: string } | undefined;
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  // Validate path is within PHOTOS_PATH (path traversal protection)
+  // Validate path is within its catalog root (path traversal protection)
   let absPath: string;
   try {
-    absPath = resolvePhotoPath(photo.path, PHOTOS_PATH);
+    absPath = resolvePhotoPath(photo.path, photo.catalog_path);
   } catch {
     console.error('[security] Path traversal attempt blocked for photo id:', id, 'path:', photo.path);
     return NextResponse.json({ error: 'Access denied' }, { status: 403 });
