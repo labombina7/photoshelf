@@ -42,6 +42,8 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const catalogId = session.catalogId ?? 1;
+
   const sp     = req.nextUrl.searchParams;
   const level  = (sp.get('level') ?? 'month') as Level;
   const cursor = sp.get('cursor') ?? null;
@@ -51,7 +53,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid level' }, { status: 400 });
   }
 
-  const { rows, hasMore, nextCursor } = getTimelineRows(limit, cursor);
+  const { rows, hasMore, nextCursor } = getTimelineRows(limit, cursor, catalogId);
 
   // Group by period
   const groupMap   = new Map<string, Group>();
