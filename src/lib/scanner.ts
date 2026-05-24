@@ -36,8 +36,7 @@ export async function scanLibrary(
     VALUES
       (@path, @filename, @year, @event, @size_bytes, @width, @height,
        @taken_at, @camera, @exposure, @gps_lat, @gps_lon, @catalog_id, datetime('now'))
-    ON CONFLICT(path) DO UPDATE SET
-      catalog_id = excluded.catalog_id,
+    ON CONFLICT(path, catalog_id) DO UPDATE SET
       scanned_at = excluded.scanned_at,
       size_bytes = excluded.size_bytes,
       width      = COALESCE(photos.width, excluded.width),

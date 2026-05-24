@@ -12,9 +12,11 @@ export async function getThumbnail(
   size = DEFAULT_SIZE,
   fit: 'cover' | 'inside' = 'cover'
 ): Promise<{ buffer: Buffer; contentType: string }> {
+  // Include photosRoot in the key so two catalogs with an identical relative
+  // path don't collide in the cache (they point to different files).
   const cacheKey = crypto
     .createHash('md5')
-    .update(`${relativePath}:${size}:${fit}`)
+    .update(`${photosRoot}:${relativePath}:${size}:${fit}`)
     .digest('hex');
   const cachePath = path.join(CACHE_PATH, `${cacheKey}.webp`);
 

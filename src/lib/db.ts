@@ -137,4 +137,59 @@ function migrateEpic001(db: Database.Database) {
 
   // 5. Index on catalog_id for efficient filtering
   db.exec(`CREATE INDEX IF NOT EXISTS idx_photos_catalog ON photos(catalog_id)`);
+
+  // 6. EPIC-001 integrity fix: change UNIQUE(path) → UNIQUE(path, catalog_id).
+  //    SQLite can't ALTER a constraint, so we rebuild photos via a temp table.
+  //    The old UNIQUE index is named "sqlite_autoindex_photos_1".  We detect
+  //    whether the new compound index already exists before running.
+  migrateUniquePath(db);
+}
+
+function migrateUniquePath(db: Database.Database) {
+  // Check if compound unique index already exists
+  const exists = db.prepare(
+    `SELECT 1 FROM sqlite_master WHERE type='index' AND name='idx_photos_path_catalog'`
+  ).get();
+  if (exists) return; // already migrated
+
+  console.log('[db] Migrating UNIQUE(path) → UNIQUE(path, catalog_id) …');
+
+  db.exec(`
+    -- Rebuild photos without the old UNIQUE(path) constraint
+    CREATE TABLE photos_new (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      path        TEXT NOT NULL,
+      filename    TEXT NOT NULL,
+      year        INTEGER NOT NULL,
+      event       TEXT NOT NULL,
+      size_bytes  INTEGER,
+      width       INTEGER,
+      height      INTEGER,
+      taken_at    TEXT,
+      camera      TEXT,
+      exposure    TEXT,
+      gps_lat     REAL,
+      gps_lon     REAL,
+      is_favorite INTEGER NOT NULL DEFAULT 0,
+      created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+      scanned_at  TEXT NOT NULL DEFAULT (datetime('now')),
+      catalog_id  INTEGER NOT NULL DEFAULT 1,
+      UNIQUE(path, catalog_id)
+    );
+
+    INSERT INTO photos_new SELECT * FROM photos;
+
+    DROP TABLE photos;
+    ALTER TABLE photos_new RENAME TO photos;
+
+    -- Recreate all indexes
+    CREATE INDEX IF NOT EXISTS idx_photos_year     ON photos(year);
+    CREATE INDEX IF NOT EXISTS idx_photos_event    ON photos(year, event);
+    CREATE INDEX IF NOT EXISTS idx_photos_fav      ON photos(is_favorite);
+    CREATE INDEX IF NOT EXISTS idx_photos_gps      ON photos(gps_lat, gps_lon);
+    CREATE INDEX IF NOT EXISTS idx_photos_catalog  ON photos(catalog_id);
+    CREATE UNIQUE INDEX idx_photos_path_catalog    ON photos(path, catalog_id);
+  `);
+
+  console.log('[db] Migration UNIQUE(path, catalog_id) complete.');
 }
