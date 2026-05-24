@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
-import { countWithGps } from '@/lib/queries/photos';
+import { countWithGps, getMapYears } from '@/lib/queries/photos';
 import { getSidebarData } from '@/lib/queries/sidebar';
 import MapWrapper from './MapWrapper';
 
@@ -9,7 +9,9 @@ export default async function MapPage() {
   if (!session.isLoggedIn) redirect('/login');
 
   const sidebar = getSidebarData();
-  const withGps = countWithGps();
+  const availableYears = getMapYears();
+  const initialYear = availableYears[0] ?? null;
+  const withGps = initialYear !== null ? countWithGps(initialYear) : countWithGps();
 
   return (
     <MapWrapper
@@ -20,6 +22,8 @@ export default async function MapPage() {
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}
+      availableYears={availableYears}
+      initialYear={initialYear}
     />
   );
 }
