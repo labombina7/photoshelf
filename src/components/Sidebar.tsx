@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
-import { IconPhoto, IconGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap } from './Icons';
+import { IconPhoto, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -120,7 +120,7 @@ function SidebarInner({
           onClick={handleNavClick}
           className={`sidebar-item ${pathname === '/library' && !activeTheme && !activeFav ? 'active' : ''}`}
         >
-          <IconGrid />
+          <IconViewGrid />
           Todas las fotos
           <span className="sidebar-count">{totalPhotos.toLocaleString('es')}</span>
         </Link>

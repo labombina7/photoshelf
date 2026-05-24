@@ -256,6 +256,7 @@ export default function TimelineClient({
   }, []);
 
   const levelLabel: Record<Level, string> = { year: 'Año', month: 'Mes', day: 'Día' };
+  const levelTitle: Record<Level, string> = { year: 'Agrupar por año', month: 'Agrupar por mes', day: 'Agrupar por día' };
 
   const priorityCount = vzConfig.limit / 3;
 
@@ -291,6 +292,7 @@ export default function TimelineClient({
                 key={l}
                 className={`timeline-level-btn ${level === l ? 'active' : ''}`}
                 onClick={() => setLevel(l)}
+                title={levelTitle[l]}
               >
                 {levelLabel[l]}
               </button>
