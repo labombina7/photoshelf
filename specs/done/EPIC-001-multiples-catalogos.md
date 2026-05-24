@@ -1,5 +1,7 @@
 # EPIC-001: Múltiples catálogos de fotos
 
+> Estado: ✅ Desplegada — PR #43 mergeado en main
+
 ## Resumen
 
 Permitir al usuario gestionar múltiples bibliotecas de fotos independientes desde una única
