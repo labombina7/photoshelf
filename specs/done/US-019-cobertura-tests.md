@@ -1,5 +1,7 @@
 # Feature: Cobertura de tests — scanner, thumbnail y rutas API críticas
 
+> Estado: ✅ Desplegada
+
 ## Historia de usuario
 
 Como desarrollador de photoshelf,

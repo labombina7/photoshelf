@@ -1,5 +1,7 @@
 # Feature: UX mobile — swipe gestures y bottom sheet
 
+> Estado: ✅ Desplegada
+
 ## Historia de usuario
 
 Como fotógrafo que usa photoshelf desde el móvil (mientras Ollama y la app iOS no están disponibles),
