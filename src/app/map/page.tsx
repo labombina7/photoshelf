@@ -2,9 +2,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
 import { countWithGps } from '@/lib/queries/photos';
 import { getSidebarData } from '@/lib/queries/sidebar';
-import dynamic from 'next/dynamic';
-
-const MapClient = dynamic(() => import('./MapClient'), { ssr: false });
+import MapWrapper from './MapWrapper';
 
 export default async function MapPage() {
   const session = await getSession();
@@ -14,7 +12,7 @@ export default async function MapPage() {
   const withGps = countWithGps();
 
   return (
-    <MapClient
+    <MapWrapper
       total={sidebar.totalPhotos}
       withGps={withGps}
       themes={sidebar.themes}
