@@ -1,6 +1,6 @@
 # Backlog priorizado — photoshelf
 
-**Última actualización:** 2026-05-24
+**Última actualización:** 2026-05-24 (US-026 añadida)
 
 ---
 
@@ -32,6 +32,7 @@
 
 | ID | Feature | Motivación | Esfuerzo |
 |----|---------|------------|---------|
+| **US-026** | Personalidad visual (iconografía, micro-interacciones, copy) | La app funciona pero no tiene carácter. Iconos inconsistentes, tipografía plana, sin transiciones. | M |
 | **US-017** | Hardening técnico (errores/tipos) | Try/catch en rutas API, tipos TS unificados, MIME types. Mejora resiliencia. | M |
 | **US-013** | UX mobile (swipe, bottom sheet) | La web mobile es la alternativa a la app iOS mientras no existe. | M |
 | **US-019** | Cobertura de tests | Sin tests en scanner.ts ni thumbnail.ts. Cada refactor es una apuesta. | L |
