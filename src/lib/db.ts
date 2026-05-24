@@ -119,9 +119,12 @@ function migrateEpic001(db: Database.Database) {
     INSERT OR IGNORE INTO catalogs (id, name, path) VALUES (1, 'Principal', ?)
   `).run(PHOTOS_PATH);
 
-  // 3. Add catalog_id column to photos (idempotent via try/catch — SQLite has no IF NOT EXISTS for columns)
+  // 3. Add catalog_id column to photos (idempotent via try/catch — SQLite has no IF NOT EXISTS for columns).
+  //    NOTE: no REFERENCES clause here — SQLite rejects ALTER TABLE ADD COLUMN with both a
+  //    FK reference AND a non-NULL DEFAULT when foreign_keys = ON.  Referential integrity is
+  //    enforced at the application level (deleteCatalog cleans up photos first).
   try {
-    db.exec(`ALTER TABLE photos ADD COLUMN catalog_id INTEGER REFERENCES catalogs(id) DEFAULT 1`);
+    db.exec(`ALTER TABLE photos ADD COLUMN catalog_id INTEGER DEFAULT 1`);
   } catch {
     // Column already exists — safe to ignore
   }
