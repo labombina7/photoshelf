@@ -10,9 +10,15 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ ph
 
   const { photoId } = await params;
   const db = getDb();
-  const photo = db.prepare('SELECT path FROM photos WHERE id = ?').get(parseInt(photoId, 10)) as { path: string } | undefined;
+  const pid = parseInt(photoId, 10);
+  const photo = db.prepare(`
+    SELECT p.path, COALESCE(c.path, ?) as catalog_path
+    FROM photos p
+    LEFT JOIN catalogs c ON c.id = p.catalog_id
+    WHERE p.id = ?
+  `).get(PHOTOS_PATH, pid) as { path: string; catalog_path: string } | undefined;
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const review = await reviewPhoto(photo.path, PHOTOS_PATH);
+  const review = await reviewPhoto(photo.path, photo.catalog_path);
   return NextResponse.json(review);
 }

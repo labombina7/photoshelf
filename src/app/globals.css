@@ -1107,6 +1107,9 @@ body {
 .detail-panel-desktop { display: contents; }
 .detail-panel-mobile { display: none; }
 
+/* FAB to reopen the bottom sheet — hidden on desktop */
+.mobile-info-fab { display: none; }
+
 /* Bottom sheet — hidden on desktop */
 .bottom-sheet-backdrop { display: none; }
 .bottom-sheet-handle { display: none; }
@@ -1162,6 +1165,26 @@ body {
     width: 100% !important; border-left: none !important;
     overflow-y: visible !important;
     padding: 0;
+  }
+
+  /* FAB: reopen info bottom sheet */
+  .mobile-info-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(30,30,30,0.85);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.35);
+    z-index: 48;
+    cursor: pointer;
+    touch-action: manipulation;
   }
 
   /* Swipe chevron indicators */

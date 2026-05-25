@@ -4,6 +4,37 @@ import { resolvePhotoPath } from './config';
 
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
 
+/**
+ * Robustly extract the first JSON object from an Ollama response.
+ * Handles markdown code fences (```json ... ```) and uses bracket-counting
+ * so a greedy regex doesn't swallow trailing text after the closing brace.
+ */
+function extractJsonObject(raw: string): string {
+  // Strip markdown code fences if present
+  const cleaned = raw
+    .replace(/^```(?:json)?\s*/im, '')
+    .replace(/```\s*$/im, '')
+    .trim();
+
+  const start = cleaned.indexOf('{');
+  if (start === -1) return '{}';
+
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+  for (let i = start; i < cleaned.length; i++) {
+    const ch = cleaned[i];
+    if (escape)          { escape = false; continue; }
+    if (ch === '\\' && inString) { escape = true;  continue; }
+    if (ch === '"')      { inString = !inString;   continue; }
+    if (inString)        { continue; }
+    if (ch === '{')      { depth++; }
+    if (ch === '}')      { depth--; if (depth === 0) return cleaned.slice(start, i + 1); }
+  }
+  // Fallback: return from start to end of string
+  return cleaned.slice(start);
+}
+
 /** Escapes user-controlled strings before embedding them in Ollama prompts. */
 function escapeXml(str: string): string {
   return str
@@ -100,7 +131,7 @@ JSON:`
   );
 
   try {
-    const json = raw.match(/\{[\s\S]*\}/)?.[0] ?? '{}';
+    const json = extractJsonObject(raw);
     const parsed = JSON.parse(json);
     return {
       year: parsed.year ?? null,
@@ -191,7 +222,7 @@ Reply ONLY with this JSON, no explanation, no markdown:
   );
 
   try {
-    const json = raw.match(/\{[\s\S]*\}/)?.[0] ?? '{}';
+    const json = extractJsonObject(raw);
     const parsed = JSON.parse(json);
     const candidateSet = new Map(candidates.map(c => [c.id, c]));
     const selectedIds: number[] = Array.isArray(parsed.selectedIds)
@@ -245,7 +276,7 @@ Be concise, specific, and honest. Reply in Spanish.`,
   );
 
   try {
-    const json = raw.match(/\{[\s\S]*\}/)?.[0] ?? '{}';
+    const json = extractJsonObject(raw);
     const parsed = JSON.parse(json);
     return {
       composition: parsed.composition ?? '',

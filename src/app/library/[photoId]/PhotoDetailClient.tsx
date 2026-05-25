@@ -213,12 +213,26 @@ export default function PhotoDetailClient({
             <DetailPanel photo={photo} allThemes={allThemes} />
           </div>
 
-          {mobileSheetOpen && (
+          {mobileSheetOpen ? (
             <div className="detail-panel-mobile">
               <BottomSheet onClose={handleBottomSheetClose}>
                 <DetailPanel photo={photo} allThemes={allThemes} />
               </BottomSheet>
             </div>
+          ) : (
+            /* FAB to reopen the info sheet after dismissing it */
+            <button
+              className="mobile-info-fab"
+              onClick={() => setMobileSheetOpen(true)}
+              aria-label="Ver información de la foto"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="8" strokeWidth="3" />
+                <line x1="12" y1="12" x2="12" y2="16" />
+              </svg>
+            </button>
           )}
         </div>
       </div>
