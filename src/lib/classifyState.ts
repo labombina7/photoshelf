@@ -4,6 +4,8 @@ export interface ClassifyState {
   currentEvent: string;
   done: number;
   total: number;
+  errors: number;
+  firstError: string | null;
   error: string | null;
   completedAt: number | null;
 }
@@ -17,6 +19,8 @@ if (!g.__photoshelf_classify) {
     currentEvent: '',
     done: 0,
     total: 0,
+    errors: 0,
+    firstError: null,
     error: null,
     completedAt: null,
   };

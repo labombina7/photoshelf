@@ -34,15 +34,20 @@ export async function POST(req: NextRequest) {
   let processed = 0;
   let errors = 0;
 
+  let firstError: string | null = null;
+
   for (const photo of photos) {
     try {
       const tags = await classifyPhoto(photo.path, photosRoot);
       upsertAiTags(db, photo.id, tags);
       processed++;
-    } catch {
+    } catch (err) {
       errors++;
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[classify/batch] error on photo ${photo.id} (${photo.path}):`, msg);
+      if (!firstError) firstError = msg;
     }
   }
 
-  return NextResponse.json({ processed, total, errors });
+  return NextResponse.json({ processed, total, errors, firstError });
 }

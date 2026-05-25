@@ -49,6 +49,8 @@ export async function POST(req: NextRequest) {
     currentEvent: '',
     done: 0,
     total: photos.length,
+    errors: 0,
+    firstError: null,
     error: null,
     completedAt: null,
   });
@@ -56,12 +58,20 @@ export async function POST(req: NextRequest) {
   // Fire and forget — classify in background
   (async () => {
     let done = 0;
+    let errors = 0;
     for (const photo of photos) {
       updateClassifyState({ currentEvent: photo.event, done });
       try {
         const tags = await classifyPhoto(photo.path, photosRoot);
         upsertAiTags(db, photo.id, tags);
-      } catch { /* continue on per-photo errors */ }
+      } catch (err) {
+        errors++;
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`[classify] error on photo ${photo.id} (${photo.path}):`, msg);
+        // Save first error to state so the UI can surface it
+        if (errors === 1) updateClassifyState({ firstError: msg });
+        updateClassifyState({ errors });
+      }
       done++;
       updateClassifyState({ done });
     }
