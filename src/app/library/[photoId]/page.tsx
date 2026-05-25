@@ -27,7 +27,7 @@ export default async function PhotoDetailPage({
   const photo = getPhotoById(id);
   if (!photo) notFound();
 
-  const allThemes      = listThemes();
+  const allThemes      = listThemes(catalogId);
   const sidebar        = getSidebarData(catalogId);
   const years          = getYears(catalogId);
 

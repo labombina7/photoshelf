@@ -7,12 +7,14 @@ export interface ThemeWithCount extends Theme {
 
 // ── Read ──────────────────────────────────────────────────────────────────────
 
-export function listThemes(): ThemeWithCount[] {
+export function listThemes(catalogId = 1): ThemeWithCount[] {
   return getDb().prepare(`
-    SELECT th.id, th.name, th.color, COUNT(pt.photo_id) as photo_count
-    FROM themes th LEFT JOIN photo_themes pt ON pt.theme_id = th.id
+    SELECT th.id, th.name, th.color, COUNT(p.id) as photo_count
+    FROM themes th
+    LEFT JOIN photo_themes pt ON pt.theme_id = th.id
+    LEFT JOIN photos p ON p.id = pt.photo_id AND p.catalog_id = ?
     GROUP BY th.id ORDER BY th.name ASC
-  `).all() as ThemeWithCount[];
+  `).all(catalogId) as ThemeWithCount[];
 }
 
 export function getPhotoThemes(photoId: number): Theme[] {

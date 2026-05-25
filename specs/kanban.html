@@ -11,22 +11,23 @@
       --bg:        #0d0d0f;
       --surface:   #18181b;
       --surface2:  #1f1f23;
+      --surface3:  #27272a;
       --border:    #2e2e34;
+      --border2:   #3f3f46;
       --text:      #e4e4e7;
       --muted:     #71717a;
+      --muted2:    #52525b;
       --accent:    #a78bfa;
-
-      --col-ideas: #854d0e;
-      --col-todo:  #1d4ed8;
-      --col-done:  #166534;
-
-      --tag-epic:   #7c3aed;
-      --tag-us:     #0369a1;
-      --tag-next:   #dc2626;
+      --accent2:   #7c3aed;
 
       --effort-s: #4ade80;
       --effort-m: #facc15;
       --effort-l: #fb923c;
+
+      --tag-epic: #7c3aed;
+      --tag-us:   #0369a1;
+      --tag-next: #dc2626;
+      --tag-done: #166534;
     }
 
     body {
@@ -37,89 +38,86 @@
       min-height: 100vh;
     }
 
+    /* ── Header ─────────────────────────────────────────────── */
     header {
-      padding: 20px 28px 16px;
+      padding: 18px 28px 14px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 12px;
-    }
-    header h1 {
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-    header .subtitle {
-      color: var(--muted);
-      font-size: 13px;
-      margin-left: auto;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
     }
     .logo {
       width: 28px; height: 28px;
-      background: var(--accent);
-      border-radius: 6px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent));
+      border-radius: 7px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
+      font-size: 15px;
+    }
+    header h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; }
+    header .subtitle { color: var(--muted); font-size: 12px; margin-left: auto; }
+    .kbd-hint { font-size: 11px; color: var(--muted2); }
+    .kbd-hint kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 10px;
+      background: var(--surface2);
+      color: var(--muted);
     }
 
+    /* ── Board ──────────────────────────────────────────────── */
     .board {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      padding: 20px 24px 40px;
-      max-width: 1400px;
+      gap: 14px;
+      padding: 18px 20px 48px;
     }
 
     .column {
       background: var(--surface);
       border-radius: 12px;
       border: 1px solid var(--border);
-      overflow: hidden;
-      min-height: 500px;
       display: flex;
       flex-direction: column;
+      min-height: 400px;
     }
 
     .col-header {
-      padding: 14px 16px;
+      padding: 13px 14px 11px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 10px;
-      position: sticky;
-      top: 0;
-      background: var(--surface);
-      z-index: 1;
+      gap: 8px;
     }
-    .col-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-    }
+    .col-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
     .col-header h2 {
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--text);
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted);
     }
     .col-count {
       margin-left: auto;
-      background: var(--surface2);
+      background: var(--surface3);
       border: 1px solid var(--border);
       border-radius: 20px;
-      padding: 2px 8px;
+      padding: 1px 7px;
       font-size: 11px;
       color: var(--muted);
       font-weight: 600;
     }
 
     .col-body {
-      padding: 12px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       flex: 1;
-      overflow-y: auto;
     }
 
     /* ── Cards ─────────────────────────────────────────────── */
@@ -127,46 +125,55 @@
       background: var(--surface2);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 12px 14px;
-      cursor: default;
-      transition: border-color 0.15s, transform 0.15s;
+      padding: 11px 13px;
+      cursor: pointer;
+      transition: border-color 0.12s, box-shadow 0.12s, transform 0.12s;
+      position: relative;
     }
     .card:hover {
       border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.15), 0 4px 12px rgba(0,0,0,0.3);
       transform: translateY(-1px);
+    }
+    .card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     .card-top {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 8px;
+      gap: 5px;
+      margin-bottom: 7px;
       flex-wrap: wrap;
     }
 
     .badge {
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      padding: 2px 7px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 2px 6px;
       border-radius: 4px;
       text-transform: uppercase;
+      flex-shrink: 0;
     }
-    .badge-epic  { background: var(--tag-epic); color: #fff; }
-    .badge-us    { background: var(--tag-us);   color: #fff; }
-    .badge-next  { background: var(--tag-next); color: #fff; animation: pulse 2s infinite; }
+    .badge-epic { background: var(--tag-epic); color: #fff; }
+    .badge-us   { background: var(--tag-us);   color: #fff; }
+    .badge-next { background: var(--tag-next); color: #fff; animation: pulse 2s infinite; }
+    .badge-done { background: var(--tag-done); color: #86efac; }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; }
-      50%       { opacity: 0.65; }
+      50%       { opacity: 0.6; }
     }
 
     .effort {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 4px;
       margin-left: auto;
+      flex-shrink: 0;
     }
     .effort-s { color: var(--effort-s); border: 1px solid var(--effort-s); }
     .effort-m { color: var(--effort-m); border: 1px solid var(--effort-m); }
@@ -175,66 +182,348 @@
     .card-title {
       font-size: 13px;
       font-weight: 600;
-      line-height: 1.4;
-      margin-bottom: 6px;
+      line-height: 1.35;
+      margin-bottom: 5px;
       color: var(--text);
     }
+    .card-done .card-title { color: #86efac; }
 
     .card-summary {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--muted);
       line-height: 1.5;
     }
 
     .card-footer {
-      margin-top: 10px;
-      padding-top: 8px;
+      margin-top: 9px;
+      padding-top: 7px;
       border-top: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--muted);
+      gap: 5px;
+      font-size: 10px;
+      color: var(--muted2);
+      flex-wrap: wrap;
     }
     .dep-badge {
-      background: var(--surface);
+      background: var(--surface3);
       border: 1px solid var(--border);
       border-radius: 4px;
       padding: 1px 5px;
       font-size: 10px;
       font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color 0.1s, color 0.1s;
     }
+    .dep-badge:hover { border-color: var(--accent); color: var(--accent); }
 
-    .card-done .card-title { color: #86efac; }
-    .card-done { opacity: 0.75; }
+    .card-done { opacity: 0.7; }
     .card-done:hover { opacity: 1; }
 
-    .pr-link {
-      margin-left: auto;
-      color: var(--accent);
-      text-decoration: none;
+    .date-badge { font-size: 10px; color: var(--muted2); margin-left: auto; }
+
+    /* click indicator */
+    .card::after {
+      content: '↗';
+      position: absolute;
+      top: 10px;
+      right: 12px;
       font-size: 11px;
+      color: var(--muted2);
+      opacity: 0;
+      transition: opacity 0.12s;
     }
-    .pr-link:hover { text-decoration: underline; }
+    .card:hover::after { opacity: 1; }
 
     .empty-col {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; padding: 40px 16px;
+      color: var(--muted); font-size: 12px; flex: 1;
+    }
+    .empty-icon { font-size: 28px; }
+
+    /* ── Modal overlay ──────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 48px 20px 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 720px;
+      max-height: calc(100vh - 80px);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 40px 20px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      transform: translateY(12px);
+      transition: transform 0.18s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal-header {
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .modal-badges { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .modal-title-block { flex: 1; }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.25;
+      margin-top: 6px;
+    }
+    .modal-story {
+      margin-top: 8px;
+      font-size: 12px;
       color: var(--muted);
-      font-size: 13px;
+      line-height: 1.6;
+      font-style: italic;
+      border-left: 2px solid var(--border2);
+      padding-left: 10px;
+    }
+    .close-btn {
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      width: 32px; height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 16px;
+      flex-shrink: 0;
+      transition: background 0.1s, color 0.1s;
+      margin-top: 2px;
+    }
+    .close-btn:hover { background: var(--surface2); color: var(--text); }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 20px 22px 24px;
       flex: 1;
     }
-    .empty-icon { font-size: 32px; }
+    .modal-body::-webkit-scrollbar { width: 6px; }
+    .modal-body::-webkit-scrollbar-track { background: transparent; }
+    .modal-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-    /* date badge on done cards */
-    .date-badge {
+    /* Modal sections */
+    .modal-section { margin-bottom: 22px; }
+    .modal-section:last-child { margin-bottom: 0; }
+
+    .section-label {
       font-size: 10px;
-      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--muted2);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .modal-description {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.65;
+    }
+    .modal-description p { margin-bottom: 10px; }
+    .modal-description p:last-child { margin-bottom: 0; }
+    .modal-description code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11.5px;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0 4px;
+      color: #c4b5fd;
+    }
+
+    /* Acceptance criteria */
+    .ac-group { margin-bottom: 14px; }
+    .ac-group:last-child { margin-bottom: 0; }
+    .ac-group-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .ac-group-title::before { content: '▸'; font-size: 9px; }
+    .ac-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .ac-item {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      font-size: 12.5px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .ac-item code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0 4px;
+      color: #c4b5fd;
+    }
+    .checkbox {
+      width: 15px; height: 15px;
+      border: 1.5px solid var(--border2);
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .card-done .checkbox {
+      background: #166534;
+      border-color: #22c55e;
+    }
+
+    /* Dependencies */
+    .deps-grid { display: flex; flex-direction: column; gap: 8px; }
+    .dep-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .dep-id { font-size: 10px; font-weight: 700; color: var(--muted); min-width: 56px; }
+    .dep-name { font-size: 12.5px; color: var(--text); font-weight: 500; }
+    .dep-desc { font-size: 11.5px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+    .dep-status {
       margin-left: auto;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .dep-done  { background: rgba(34,197,94,0.1);  color: #86efac; border: 1px solid rgba(34,197,94,0.2); }
+    .dep-todo  { background: rgba(59,130,246,0.1); color: #93c5fd; border: 1px solid rgba(59,130,246,0.2); }
+    .dep-next  { background: rgba(220,38,38,0.1);  color: #fca5a5; border: 1px solid rgba(220,38,38,0.2); }
+
+    /* Components table */
+    .comp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .comp-table th {
+      text-align: left;
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted2);
+      border-bottom: 1px solid var(--border);
+    }
+    .comp-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      line-height: 1.4;
+      color: var(--text);
+    }
+    .comp-table tr:last-child td { border-bottom: none; }
+    .comp-table td:first-child { font-family: 'SF Mono','Fira Code',monospace; font-size: 11px; color: #c4b5fd; }
+    .comp-table td.new-tag::after {
+      content: 'nuevo';
+      font-family: inherit;
+      font-size: 9px;
+      font-weight: 700;
+      background: rgba(167,139,250,0.15);
+      border: 1px solid rgba(167,139,250,0.3);
+      border-radius: 3px;
+      padding: 1px 4px;
+      margin-left: 6px;
+      color: var(--accent);
+    }
+
+    /* Tech notes */
+    .tech-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .tech-item {
+      position: relative;
+      padding-left: 16px;
+      font-size: 12.5px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .tech-item::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: var(--muted2);
+    }
+    .tech-item code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      background: rgba(167, 139, 250, 0.1);
+      border-radius: 3px;
+      padding: 1px 5px;
+      color: #c4b5fd;
+    }
+
+    /* Out of scope */
+    .oos-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .oos-item {
+      display: flex; gap: 8px; align-items: flex-start;
+      font-size: 12px; color: var(--muted2); line-height: 1.5;
+    }
+    .oos-item::before { content: '✕'; font-size: 10px; color: var(--muted2); flex-shrink: 0; margin-top: 2px; }
+
+    /* Footer bar */
+    .modal-footer {
+      padding: 12px 22px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .modal-footer .effort-label { font-size: 11px; color: var(--muted); }
+    .modal-footer .esc-hint { font-size: 11px; color: var(--muted2); margin-left: auto; }
+    .modal-footer .esc-hint kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 10px;
+      background: var(--surface2);
+      color: var(--muted);
     }
   </style>
 </head>
@@ -243,12 +532,13 @@
 <header>
   <div class="logo">📷</div>
   <h1>photoshelf — Kanban</h1>
-  <span class="subtitle">Actualizado: 2026-05-24</span>
+  <span class="kbd-hint">Haz clic en una tarjeta para ver el detalle</span>
+  <span class="subtitle">2026-05-25</span>
 </header>
 
 <div class="board">
 
-  <!-- ═══════════════════ IDEAS ═══════════════════ -->
+  <!-- ═══════════════ IDEAS ═══════════════ -->
   <div class="column">
     <div class="col-header">
       <div class="col-dot" style="background:#ca8a04"></div>
@@ -263,24 +553,23 @@
     </div>
   </div>
 
-  <!-- ═══════════════════ TO DO ═══════════════════ -->
+  <!-- ═══════════════ TO DO ═══════════════ -->
   <div class="column">
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">9</span>
+      <span class="col-count">10</span>
     </div>
     <div class="col-body">
 
-      <!-- US-023 — NEXT UP -->
-      <div class="card">
+      <div class="card" tabindex="0" data-id="US-023" onclick="openModal('US-023')">
         <div class="card-top">
           <span class="badge badge-us">US-023</span>
           <span class="badge badge-next">▶ Siguiente</span>
           <span class="effort effort-m">M</span>
         </div>
         <div class="card-title">Contratos API estándar</div>
-        <div class="card-summary">Envelope uniforme <code>{ data, meta, error }</code>, códigos de error consistentes y prefijo de versión <code>/api/v1/</code>. Prerequisito para el cliente iOS — sin esto la API es frágil.</div>
+        <div class="card-summary">Envelope uniforme, errores consistentes y prefijo <code>/api/v1/</code>. Prerequisito para el cliente iOS.</div>
         <div class="card-footer">
           <span>Bloquea:</span>
           <span class="dep-badge">US-024</span>
@@ -288,101 +577,100 @@
         </div>
       </div>
 
-      <!-- US-024 -->
-      <div class="card">
+      <div class="card" tabindex="0" data-id="US-024" onclick="openModal('US-024')">
         <div class="card-top">
           <span class="badge badge-us">US-024</span>
           <span class="effort effort-m">M</span>
         </div>
         <div class="card-title">Endpoints iOS — browsing</div>
-        <div class="card-summary">Timeline paginado cursor-based, detalle completo de foto y navegación anterior/siguiente bajo <code>/api/v1/</code> para la app nativa iOS.</div>
+        <div class="card-summary">Timeline paginado, detalle completo de foto y navegación anterior/siguiente bajo <code>/api/v1/</code>.</div>
         <div class="card-footer">
           <span>Depende de:</span>
           <span class="dep-badge">US-023</span>
         </div>
       </div>
 
-      <!-- US-025 -->
-      <div class="card">
+      <div class="card" tabindex="0" data-id="US-025" onclick="openModal('US-025')">
         <div class="card-top">
           <span class="badge badge-us">US-025</span>
           <span class="effort effort-m">M</span>
         </div>
         <div class="card-title">Endpoints iOS — acciones</div>
-        <div class="card-summary">Búsqueda por texto e IA, navegación por tags, disparo de scan y autenticación con sesión persistente para la app nativa iOS.</div>
+        <div class="card-summary">Búsqueda por texto e IA, tags, scan y autenticación con sesión persistente para app nativa.</div>
         <div class="card-footer">
           <span>Depende de:</span>
           <span class="dep-badge">US-023</span>
         </div>
       </div>
 
-      <!-- EPIC-002 -->
-      <div class="card">
+      <div class="card" tabindex="0" data-id="EPIC-002" onclick="openModal('EPIC-002')">
         <div class="card-top">
           <span class="badge badge-epic">EPIC-002</span>
           <span class="effort effort-l">L</span>
         </div>
         <div class="card-title">API pública iOS-ready</div>
-        <div class="card-summary">Épica contenedora: convierte los route handlers actuales en una API HTTP limpia con contratos estables, versionado y autenticación válida para clientes nativos.</div>
-        <div class="card-footer">
-          <span>US-023 → US-024 → US-025</span>
-        </div>
+        <div class="card-summary">Épica contenedora: API HTTP con contratos estables, versionado y auth para clientes nativos.</div>
+        <div class="card-footer"><span>US-023 → US-024 → US-025</span></div>
       </div>
 
-      <!-- US-017 -->
-      <div class="card">
+      <div class="card" tabindex="0" data-id="US-017" onclick="openModal('US-017')">
         <div class="card-top">
           <span class="badge badge-us">US-017</span>
           <span class="effort effort-m">M</span>
         </div>
         <div class="card-title">Hardening técnico</div>
-        <div class="card-summary">Try/catch en todas las rutas API, tipos TypeScript unificados en interfaces compartidas y validación de MIME types en uploads. Elimina crashes silenciosos.</div>
+        <div class="card-summary">Try/catch en todas las rutas API, tipos TypeScript unificados y validación de MIME types.</div>
       </div>
 
-      <!-- US-021 -->
-      <div class="card">
+      <div class="card" tabindex="0" data-id="US-021" onclick="openModal('US-021')">
         <div class="card-top">
           <span class="badge badge-us">US-021</span>
           <span class="effort effort-l">L</span>
         </div>
         <div class="card-title">Proveedores LLM cloud</div>
-        <div class="card-summary">Desacopla la dependencia de Ollama local añadiendo soporte para OpenAI Vision y Anthropic Claude como proveedores alternativos de IA. Activa clasificación cuando Ollama no está disponible.</div>
+        <div class="card-summary">OpenAI Vision y Anthropic Claude como alternativas a Ollama. Activa IA sin Ollama local.</div>
       </div>
 
-      <!-- US-004 -->
-      <div class="card">
+      <div class="card" tabindex="0" data-id="US-004" onclick="openModal('US-004')">
         <div class="card-top">
           <span class="badge badge-us">US-004</span>
           <span class="effort effort-m">M</span>
         </div>
         <div class="card-title">Operaciones en lote</div>
-        <div class="card-summary">Modo selección múltiple en la vista de biblioteca para aplicar acciones masivas: añadir tag, marcar favoritas, asignar tema o añadir a proyecto sobre decenas de fotos a la vez.</div>
+        <div class="card-summary">Selección múltiple en biblioteca con acciones masivas: tags, favoritos, proyectos, temas.</div>
       </div>
 
-      <!-- US-003 -->
-      <div class="card">
+      <div class="card" tabindex="0" data-id="US-003" onclick="openModal('US-003')">
         <div class="card-top">
           <span class="badge badge-us">US-003</span>
           <span class="effort effort-l">L</span>
         </div>
         <div class="card-title">Detección de duplicados</div>
-        <div class="card-summary">Herramienta que detecta fotos idénticas (hash SHA-256) o casi-idénticas (dimensiones + tamaño). Presenta grupos de duplicados con UI de comparación para decidir cuál conservar.</div>
+        <div class="card-summary">Detecta fotos idénticas (SHA-256) o similares y presenta UI de comparación para resolver grupos.</div>
       </div>
 
-      <!-- US-005 -->
-      <div class="card">
+      <div class="card" tabindex="0" data-id="US-005" onclick="openModal('US-005')">
         <div class="card-top">
           <span class="badge badge-us">US-005</span>
           <span class="effort effort-l">L</span>
         </div>
         <div class="card-title">Álbumes inteligentes</div>
-        <div class="card-summary">Colecciones virtuales definidas por reglas de filtrado que se evalúan en tiempo real: "todas las fotos de 2023 con tag 'viaje' que sean favoritas". Se actualizan solas al añadir fotos nuevas.</div>
+        <div class="card-summary">Colecciones virtuales definidas por reglas que se evalúan en tiempo real contra la base de datos.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-026b" onclick="openModal('US-026b')">
+        <div class="card-top">
+          <span class="badge badge-us">US-026</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Persistencia DB fuera de Docker</div>
+        <div class="card-summary">Bind mount para que el <code>.db</code> quede en el NAS visible para Hyper Backup y snapshots de Synology.</div>
       </div>
 
     </div>
   </div>
 
-  <!-- ═══════════════════ DONE ═══════════════════ -->
+  <!-- ═══════════════ DONE ═══════════════ -->
   <div class="column">
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
@@ -391,150 +679,1073 @@
     </div>
     <div class="col-body">
 
-      <!-- EPIC-001 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="EPIC-001" onclick="openModal('EPIC-001')">
         <div class="card-top">
           <span class="badge badge-epic">EPIC-001</span>
-          <span class="date-badge">2026-05-24 · PR #43</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #43</span>
         </div>
         <div class="card-title">Múltiples catálogos</div>
-        <div class="card-summary">Soporte completo para gestionar varias bibliotecas de fotos independientes: migración BD, contexto servidor, filtrado de queries, escaneo, API de gestión y UI de selección.</div>
+        <div class="card-summary">Soporte completo para varias bibliotecas independientes: BD, contexto servidor, UI de selección.</div>
       </div>
 
-      <!-- US-026 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-026" onclick="openModal('US-026')">
         <div class="card-top">
           <span class="badge badge-us">US-026</span>
-          <span class="date-badge">2026-05-24 · PR #42</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #42</span>
         </div>
         <div class="card-title">Personalidad visual</div>
-        <div class="card-summary">Iconografía coherente con Lucide, micro-interacciones en hover/click, paleta de color consistente y animaciones de transición que refuerzan la identidad de la app.</div>
+        <div class="card-summary">Iconografía Lucide, micro-interacciones y paleta de color consistente en toda la app.</div>
       </div>
 
-      <!-- US-027 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-027" onclick="openModal('US-027')">
         <div class="card-top">
           <span class="badge badge-us">US-027</span>
-          <span class="date-badge">2026-05-24</span>
+          <span class="badge badge-done">✓ done</span>
         </div>
         <div class="card-title">Mapa — filtro por año</div>
-        <div class="card-summary">Selector de año en el mapa con carga progresiva. Evita pintar miles de marcadores de golpe en catálogos grandes, mejorando drásticamente el rendimiento.</div>
+        <div class="card-summary">Selector de año con carga progresiva. Evita pintar miles de marcadores de golpe.</div>
       </div>
 
-      <!-- US-022 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-022" onclick="openModal('US-022')">
         <div class="card-top">
           <span class="badge badge-us">US-022</span>
-          <span class="date-badge">2026-05-24 · PR #37</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #37</span>
         </div>
         <div class="card-title">Capa de repositorio</div>
-        <div class="card-summary">Módulos en <code>src/lib/queries/</code> que centralizan todo el acceso a datos. Ningún Server Component importa <code>getDb()</code> directamente; la API también los usa.</div>
+        <div class="card-summary">Módulos en <code>src/lib/queries/</code>. Ningún Server Component importa <code>getDb()</code> directamente.</div>
       </div>
 
-      <!-- US-020 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-020" onclick="openModal('US-020')">
         <div class="card-top">
           <span class="badge badge-us">US-020</span>
-          <span class="date-badge">2026-05-24 · PR #38</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #38</span>
         </div>
         <div class="card-title">Next.js 15 + React 19</div>
-        <div class="card-summary">Actualización del framework principal. Adaptación de Server Actions, nuevas APIs de React 19 y resolución de breaking changes de la migración.</div>
+        <div class="card-summary">Actualización de framework y resolución de breaking changes de la migración.</div>
       </div>
 
-      <!-- US-019 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-019" onclick="openModal('US-019')">
         <div class="card-top">
           <span class="badge badge-us">US-019</span>
-          <span class="date-badge">2026-05-24 · PR #41</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #41</span>
         </div>
         <div class="card-title">Cobertura de tests</div>
-        <div class="card-summary">Tests unitarios para config, scanner, thumbnail y autenticación. Base de confianza para refactorizaciones futuras sin regresiones silenciosas.</div>
+        <div class="card-summary">Tests unitarios para config, scanner, thumbnail y autenticación.</div>
       </div>
 
-      <!-- US-013 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-013" onclick="openModal('US-013')">
         <div class="card-top">
           <span class="badge badge-us">US-013</span>
-          <span class="date-badge">2026-05-24 · PR #40</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #40</span>
         </div>
         <div class="card-title">UX mobile — swipe y bottom sheet</div>
-        <div class="card-summary">Gestos swipe en la vista de detalle, bottom sheet nativo en móvil y adaptaciones del grid para pantallas pequeñas. La app es tan cómoda en móvil como en escritorio.</div>
+        <div class="card-summary">Gestos swipe en detalle, bottom sheet en móvil y adaptaciones del grid.</div>
       </div>
 
-      <!-- US-016 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-016" onclick="openModal('US-016')">
         <div class="card-top">
           <span class="badge badge-us">US-016</span>
-          <span class="date-badge">2026-05-24 · PR #36</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #36</span>
         </div>
         <div class="card-title">Centralización código duplicado</div>
-        <div class="card-summary"><code>upsertAiTags</code>, <code>buildPhotoFilter</code> y <code>PHOTOS_PATH</code> extraídos a módulos compartidos. Elimina 5 copias inline y un antipatrón de importación circular.</div>
+        <div class="card-summary"><code>upsertAiTags</code>, <code>buildPhotoFilter</code> y <code>PHOTOS_PATH</code> en módulos compartidos.</div>
       </div>
 
-      <!-- US-018 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-018" onclick="openModal('US-018')">
         <div class="card-top">
           <span class="badge badge-us">US-018</span>
-          <span class="date-badge">2026-05-23 · PR #35</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #35</span>
         </div>
         <div class="card-title">Optimización queries y polling</div>
-        <div class="card-summary">Queries SQL con índices, eliminación de N+1 en tags, intervalo de polling reducido y debounce en búsqueda. La app responde notablemente más rápida en bibliotecas grandes.</div>
+        <div class="card-summary">Índices SQL, eliminación de N+1, debounce en búsqueda e intervalo de polling optimizado.</div>
       </div>
 
-      <!-- US-014 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-014" onclick="openModal('US-014')">
         <div class="card-top">
           <span class="badge badge-us">US-014</span>
-          <span class="date-badge">2026-05-23 · PR #34</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #34</span>
         </div>
         <div class="card-title">Hardening autenticación</div>
-        <div class="card-summary">Protección de todas las rutas API con middleware de sesión, rotación de tokens, rate limiting en login y headers de seguridad HTTP.</div>
+        <div class="card-summary">Middleware de sesión en todas las rutas, rate limiting en login y headers de seguridad.</div>
       </div>
 
-      <!-- US-015 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-015" onclick="openModal('US-015')">
         <div class="card-top">
           <span class="badge badge-us">US-015</span>
-          <span class="date-badge">2026-05-23 · PR #34</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #34</span>
         </div>
         <div class="card-title">Protección path traversal</div>
-        <div class="card-summary">Validación de rutas de archivo en todos los endpoints que sirven o procesan imágenes. Previene acceso a ficheros fuera del directorio de fotos permitido.</div>
+        <div class="card-summary">Validación de rutas en endpoints que sirven o procesan imágenes.</div>
       </div>
 
-      <!-- US-010 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-010" onclick="openModal('US-010')">
         <div class="card-top">
           <span class="badge badge-us">US-010</span>
-          <span class="date-badge">2026-05-23 · PR #35</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #35</span>
         </div>
         <div class="card-title">Accesibilidad global</div>
-        <div class="card-summary">Aria-labels en botones icon-only, navegación por teclado en todas las secciones clave, contraste WCAG AA y foco visible en todos los controles interactivos.</div>
+        <div class="card-summary">Aria-labels, navegación por teclado, contraste WCAG AA y foco visible.</div>
       </div>
 
-      <!-- US-011 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-011" onclick="openModal('US-011')">
         <div class="card-top">
           <span class="badge badge-us">US-011</span>
-          <span class="date-badge">2026-05-23 · PR #35</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #35</span>
         </div>
         <div class="card-title">Feedback errores IA</div>
-        <div class="card-summary">Mensajes de error comprensibles cuando la clasificación IA falla, con acción de reintento y distinción clara entre error de red, Ollama no disponible o imagen no procesable.</div>
+        <div class="card-summary">Mensajes claros cuando falla la clasificación IA, con acción de reintento.</div>
       </div>
 
-      <!-- US-012 -->
-      <div class="card card-done">
+      <div class="card card-done" tabindex="0" data-id="US-012" onclick="openModal('US-012')">
         <div class="card-top">
           <span class="badge badge-us">US-012</span>
-          <span class="date-badge">2026-05-23 · PR #35</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #35</span>
         </div>
         <div class="card-title">Empty states con CTA</div>
-        <div class="card-summary">Estados vacíos con ilustración, mensaje contextual y llamada a la acción principal. El usuario sabe exactamente qué hacer cuando no hay fotos, tags o proyectos.</div>
+        <div class="card-summary">Estados vacíos con mensaje contextual y llamada a la acción principal.</div>
       </div>
 
     </div>
   </div>
-
 </div>
+
+<!-- ══════════════════════════ MODAL ══════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-badges" id="modal-badges"></div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-story" id="modal-story"></div>
+      </div>
+      <button class="close-btn" onclick="closeModal()" title="Cerrar (Esc)">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <span class="effort-label" id="modal-effort-label"></span>
+      <span class="esc-hint"><kbd>Esc</kbd> para cerrar</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────
+// Card data — extracted from spec files
+// ─────────────────────────────────────────────────────────────────
+const CARDS = {
+
+  'US-023': {
+    id: 'US-023',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    next: true,
+    title: 'Contratos API estándar',
+    story: 'Como desarrollador de una app iOS que consume la API de photoshelf,\nquiero que todos los endpoints devuelvan respuestas con el mismo formato, códigos de error consistentes y un prefijo de versión,\npara poder escribir un cliente robusto sin tratar cada endpoint de forma especial.',
+    description: [
+      'Los route handlers de photoshelf devuelven respuestas heterogéneas: algunos retornan <code>{ photos: [] }</code>, otros <code>{ groups: [] }</code>, otros un array directo, y los errores pueden ser strings, objetos <code>{ error: string }</code> o respuestas 500 sin cuerpo.',
+      'Esta US establece un <strong>contrato estándar</strong> para todos los endpoints de la API: envelope de respuesta uniforme <code>{ data: T, meta?: PaginationMeta }</code>, formato de error tipado <code>{ error, code, status }</code>, paginación consistente (cursor o offset) y prefijo de versión <code>/api/v1/</code>.',
+      'Los endpoints existentes bajo <code>/api/</code> se mantienen sin cambios para no romper la web. Los nuevos se crean bajo <code>/api/v1/</code>. Todas las rutas <code>/api/v1/*</code> verifican sesión automáticamente vía middleware.'
+    ],
+    criteria: [
+      {
+        group: 'Envelope de respuesta',
+        items: [
+          'Se define el tipo <code>ApiResponse&lt;T&gt;</code> en <code>src/lib/api.ts</code> con <code>data</code>, <code>meta?</code>',
+          'Se define <code>ApiError { error, code, status }</code>',
+          'Helper <code>apiSuccess&lt;T&gt;(data, meta?): NextResponse</code> que envuelve correctamente',
+          'Helper <code>apiError(code, message, status): NextResponse</code>',
+          'HTTP Status codes semánticamente correctos: 200/201/400/401/404/429/500',
+        ]
+      },
+      {
+        group: 'Versionado',
+        items: [
+          'Los endpoints existentes bajo <code>/api/</code> se mantienen sin cambios (compatibilidad web)',
+          'Nuevos endpoints bajo <code>/api/v1/</code> como route group en Next.js App Router',
+          'Directorio <code>src/app/api/v1/</code> con estructura de rutas paralelas',
+        ]
+      },
+      {
+        group: 'Autenticación en /api/v1/',
+        items: [
+          'Middleware de Next.js en <code>src/middleware.ts</code> con matcher <code>["/api/v1/:path*"]</code>',
+          'Sin sesión activa: <code>ApiError { code: "UNAUTHORIZED", status: 401 }</code>',
+          'Las cookies de iron-session funcionan desde iOS (verificado: <code>SameSite=Lax</code>)',
+        ]
+      },
+      {
+        group: 'Paginación estándar',
+        items: [
+          'Endpoints de lista aceptan <code>?limit=50&offset=0</code> (máx. 200) o <code>?cursor=&lt;string&gt;</code>',
+          'Respuesta incluye <code>meta.total</code>, <code>meta.hasMore</code>, <code>meta.nextCursor</code>',
+          'Límite por defecto: 50; máximo: 200',
+        ]
+      },
+      {
+        group: 'Documentación',
+        items: [
+          'Se crea <code>docs/api-v1.md</code> con lista de endpoints, parámetros y ejemplos de respuesta',
+          'Incluye sección de autenticación: cómo hacer login desde iOS',
+        ]
+      }
+    ],
+    dependencies: [
+      { id: 'US-022', name: 'Capa de repositorio', desc: 'El repositorio centraliza el acceso a datos que los endpoints v1 consumen.', status: 'done' }
+    ],
+    blocks: ['US-024', 'US-025'],
+    components: [
+      { path: 'src/lib/api.ts', desc: 'Nuevo — helpers apiSuccess, apiError, withAuth, parsePagination, tipos', isNew: true },
+      { path: 'src/middleware.ts', desc: 'Nuevo o modificado — verificar sesión para /api/v1/*', isNew: true },
+      { path: 'src/app/api/v1/', desc: 'Nuevo directorio — route group para la API versionada', isNew: true },
+      { path: 'docs/api-v1.md', desc: 'Nuevo — documentación de contratos para consumidores externos', isNew: true },
+    ],
+    tech: [
+      'Para listas de fotos ordenadas por fecha, cursor-based es más robusto (evita el problema "foto nueva antes del offset"). El cursor puede ser <code>taken_at + id</code> encoded en base64.',
+      'El middleware de Next.js para verificar sesión es más eficiente que verificar en cada route handler. Usar HOF <code>withAuth</code> como alternativa si el middleware tiene limitaciones con <code>getIronSession</code>.',
+      'iOS y cookies: <code>URLSession</code> maneja cookies automáticamente con <code>HTTPCookieStorage</code>. Flujo: <code>POST /api/v1/auth/login</code> → <code>Set-Cookie</code> → iOS almacena y envía en cada petición.',
+    ],
+    outOfScope: [
+      'Autenticación por Bearer token / JWT (la cookie de sesión es suficiente para iOS v1)',
+      'Rate limiting por API key',
+      'OpenAPI / Swagger spec generada automáticamente',
+      'Versionado mayor (/api/v2/) — se hace cuando haya breaking changes reales',
+      'CORS para orígenes externos',
+    ]
+  },
+
+  'US-024': {
+    id: 'US-024',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Endpoints iOS — browsing',
+    story: 'Como app nativa iOS de photoshelf,\nquiero endpoints que devuelvan el timeline paginado, el detalle completo de una foto y sus imágenes,\npara implementar las vistas de browsing principales sin lógica de transformación en el cliente.',
+    description: [
+      'Los endpoints actuales cubren los casos de browsing para la web, pero no están pensados para un cliente iOS: el timeline devuelve todas las agrupaciones de golpe, el detalle de foto está distribuido entre varias rutas, y la paginación no es consistente.',
+      'Esta US crea los endpoints bajo <code>/api/v1/</code> para timeline, detalle de foto y navegación anterior/siguiente, siguiendo los contratos definidos en US-023. Los Server Components de la web siguen usando el repositorio directamente sin pasar por HTTP.'
+    ],
+    criteria: [
+      {
+        group: 'GET /api/v1/timeline',
+        items: [
+          'Devuelve periodos del timeline (año/mes/día según <code>zoom</code>) paginados con cursor',
+          'Parámetros: <code>?zoom=1|2|3|4|5&limit=50&cursor=&lt;base64&gt;&catalogId=1</code>',
+          'Respuesta: <code>{ data: [{periodKey, label, count, thumbnail}], meta: {hasMore, nextCursor} }</code>',
+        ]
+      },
+      {
+        group: 'GET /api/v1/timeline/{periodKey}/photos',
+        items: [
+          'Devuelve las fotos de un periodo concreto (ej. <code>2024-08</code>) paginadas',
+          'Respuesta incluye: <code>id, filename, taken_at, thumbnail_url, gps_lat?, gps_lon?</code>',
+        ]
+      },
+      {
+        group: 'GET /api/v1/photos/{id}',
+        items: [
+          'Detalle completo: metadatos EXIF, tags (con source), themes, URLs de thumbnail y original',
+          'Si no existe → 404 con <code>ApiError { code: "NOT_FOUND" }</code>',
+        ]
+      },
+      {
+        group: 'GET /api/v1/photos/{id}/thumbnail y /original',
+        items: [
+          'Thumbnail: parámetro <code>?size=120|200|400|800</code>, WebP, <code>Cache-Control: immutable</code>',
+          'Original: <code>Content-Disposition: attachment</code> y <code>Content-Type</code> correcto',
+        ]
+      },
+      {
+        group: 'Navegación contextual',
+        items: [
+          '<code>GET /api/v1/photos/{id}/adjacent?context=timeline|tag|event</code>',
+          'Devuelve <code>{ prev: {id, thumbnail_url}|null, next: {id, thumbnail_url}|null }</code>',
+        ]
+      }
+    ],
+    dependencies: [
+      { id: 'US-022', name: 'Capa de repositorio', desc: 'Los endpoints v1 consumen las funciones del repositorio, no SQL inline.', status: 'done' },
+      { id: 'US-023', name: 'Contratos API estándar', desc: 'Define el envelope y los helpers que usan todos los endpoints v1.', status: 'next' }
+    ],
+    components: [
+      { path: 'src/app/api/v1/timeline/route.ts', desc: 'Timeline paginado', isNew: true },
+      { path: 'src/app/api/v1/timeline/[periodKey]/photos/route.ts', desc: 'Fotos de un periodo', isNew: true },
+      { path: 'src/app/api/v1/photos/[id]/route.ts', desc: 'Detalle completo de foto', isNew: true },
+      { path: 'src/app/api/v1/photos/[id]/thumbnail/route.ts', desc: 'Sirve thumbnail', isNew: true },
+      { path: 'src/app/api/v1/photos/[id]/original/route.ts', desc: 'Sirve imagen original', isNew: true },
+      { path: 'src/app/api/v1/photos/[id]/adjacent/route.ts', desc: 'Navegación contextual', isNew: true },
+      { path: 'src/lib/queries/timeline.ts', desc: 'Ampliar con soporte de cursor y catalogId' },
+      { path: 'src/lib/queries/photos.ts', desc: 'Ampliar con getAdjacent(id, context, value)' },
+    ],
+    tech: [
+      'El cursor del timeline: base64 del <code>periodKey</code> (ej. <code>"2024-08"</code> → <code>"MjAyNC0w"</code>). El servidor decodifica y hace <code>WHERE period_key &lt; ?</code>.',
+      '<code>taken_at</code> en la respuesta debe ser ISO 8601 con timezone UTC (importante para iOS <code>Date</code> parsing).',
+      'Headers <code>Cache-Control: public, max-age=31536000, immutable</code> en thumbnails para que iOS las cachee.',
+    ],
+    outOfScope: [
+      'Búsqueda semántica (cubierta en US-025)',
+      'Streaming de fotos para vídeos o RAWs grandes',
+      'Endpoint de listado plano sin agrupar por timeline',
+      'Soporte para Live Photos de iOS',
+    ]
+  },
+
+  'US-025': {
+    id: 'US-025',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Endpoints iOS — acciones',
+    story: 'Como app nativa iOS de photoshelf,\nquiero endpoints para buscar fotos por texto o IA, navegar por tags, disparar un escaneo y autenticarme con sesión persistente,\npara implementar las acciones principales sin lógica de negocio en el cliente.',
+    description: [
+      'Además de las vistas de browsing (US-024), una app iOS necesita acciones: buscar fotos, clasificar por tags, ver el estado de operaciones en curso y autenticarse de forma persistente entre sesiones.',
+      'La búsqueda semántica devuelve resultados sin paginación, el login no documenta el mecanismo de cookies para iOS, y no hay un endpoint unificado de estado de la app. Esta US completa la superficie de API bajo <code>/api/v1/</code> para los flujos de acción.'
+    ],
+    criteria: [
+      {
+        group: 'Autenticación',
+        items: [
+          '<code>POST /api/v1/auth/login</code>: acepta <code>{ password: string }</code>, devuelve <code>Set-Cookie</code> en éxito',
+          '<code>GET /api/v1/auth/me</code>: ping de sesión — devuelve 200 si activa, 401 si no',
+          '<code>POST /api/v1/auth/logout</code>: invalida la sesión',
+          'Rate limit de US-014 devuelve <code>ApiError { code: "RATE_LIMITED", status: 429 }</code>',
+        ]
+      },
+      {
+        group: 'Tags',
+        items: [
+          '<code>GET /api/v1/tags</code>: todos los tags con conteo, parámetros <code>?catalogId&source=ai|manual|all</code>',
+          '<code>GET /api/v1/tags/{tagName}/photos</code>: fotos por tag paginadas (mismo formato que timeline/{period}/photos)',
+        ]
+      },
+      {
+        group: 'Búsqueda',
+        items: [
+          '<code>GET /api/v1/photos?q=&year=&tag=&favorite=&limit=&cursor=</code>: búsqueda/filtrado con cursor',
+          '<code>POST /api/v1/ai/search</code>: búsqueda semántica, devuelve <code>[{id, score, thumbnail_url, taken_at}]</code>',
+          'Si Ollama no disponible: <code>ApiError { code: "AI_UNAVAILABLE", status: 503 }</code>',
+        ]
+      },
+      {
+        group: 'Favoritos y tags de foto',
+        items: [
+          '<code>POST /api/v1/photos/{id}/favorite</code>: toggle — devuelve <code>{ id, is_favorite }</code>',
+          '<code>POST /api/v1/photos/{id}/tags</code>: añade tags manuales',
+          '<code>DELETE /api/v1/photos/{id}/tags/{tagName}</code>: elimina tag manual',
+        ]
+      },
+      {
+        group: 'Scan y estado',
+        items: [
+          '<code>POST /api/v1/scan</code>: dispara escaneo; 409 si ya hay uno en curso; 202 si se inicia',
+          '<code>GET /api/v1/status</code>: estado unificado de scan + classify + watcher en un solo endpoint',
+          '<code>POST /api/v1/photos/{id}/classify</code>: clasificación IA individual, devuelve tags asignados',
+        ]
+      }
+    ],
+    dependencies: [
+      { id: 'US-014', name: 'Hardening autenticación', desc: 'Rate limiting en login que los endpoints v1 de auth deben exponer correctamente.', status: 'done' },
+      { id: 'US-022', name: 'Capa de repositorio', desc: 'Funciones de repositorio para tags, fotos y búsqueda.', status: 'done' },
+      { id: 'US-023', name: 'Contratos API estándar', desc: 'Envelope, helpers y middleware de auth que todos los endpoints v1 usan.', status: 'next' }
+    ],
+    components: [
+      { path: 'src/app/api/v1/auth/{login,me,logout}/route.ts', desc: 'Auth para iOS', isNew: true },
+      { path: 'src/app/api/v1/tags/route.ts', desc: 'Listado de tags con conteo', isNew: true },
+      { path: 'src/app/api/v1/tags/[tagName]/photos/route.ts', desc: 'Fotos por tag paginadas', isNew: true },
+      { path: 'src/app/api/v1/photos/route.ts', desc: 'Búsqueda y filtrado con cursor', isNew: true },
+      { path: 'src/app/api/v1/ai/search/route.ts', desc: 'Búsqueda semántica con formato v1', isNew: true },
+      { path: 'src/app/api/v1/scan/route.ts', desc: 'Disparar y monitorizar scan', isNew: true },
+      { path: 'src/app/api/v1/status/route.ts', desc: 'Estado unificado de operaciones', isNew: true },
+      { path: 'src/app/api/v1/photos/[id]/classify/route.ts', desc: 'Clasificar foto con IA', isNew: true },
+      { path: 'src/app/api/v1/photos/[id]/tags/route.ts', desc: 'Gestión de tags de foto', isNew: true },
+    ],
+    tech: [
+      '<code>GET /api/v1/auth/me</code> es el ping de sesión que iOS llama al arrancar para verificar si la cookie guardada sigue siendo válida.',
+      '<code>POST /api/v1/ai/search</code> es POST (no GET) porque el body puede ser largo y tiene semántica de efectos de caché distintos. No debe cachearse agresivamente.',
+      'La búsqueda semántica puede tardar 5-30 segundos. iOS debe mostrar indicador de carga; el timeout del servidor no debe ser inferior a 60s.',
+    ],
+    outOfScope: [
+      'Edición de metadatos de la foto (título, descripción)',
+      'Endpoints de proyectos (generación y listado) — puede añadirse en v1.1',
+      'WebSocket para progreso de scan en tiempo real',
+      'Upload de fotos desde iOS',
+      'Compartir fotos o exportar a Photos.app',
+    ]
+  },
+
+  'EPIC-002': {
+    id: 'EPIC-002',
+    type: 'EPIC',
+    column: 'todo',
+    effort: 'L',
+    title: 'API pública iOS-ready',
+    story: 'Como desarrollador de una app nativa iOS,\nquiero una API HTTP limpia con contratos estables, versionado y autenticación,\npara construir una app iOS que consuma la misma biblioteca de photoshelf que la web.',
+    description: [
+      'photoshelf es hoy una app web monolítica donde los Server Components de Next.js acceden directamente a SQLite. Los route handlers existen, pero no están diseñados para un cliente externo: sin paginación consistente, sin versionado, errores heterogéneos, y autenticación no probada desde iOS.',
+      'El enfoque es <strong>pragmático</strong>: no se obliga a los Server Components a pasar por HTTP (añadiría latencia innecesaria). En cambio, se centraliza el acceso a datos en <code>src/lib/queries/</code> (US-022 ✅) y se estandarizan y amplían los contratos de los route handlers.',
+      'El orden de ejecución es: <code>US-022 ✅ → US-023 → US-024 + US-025</code>. Las US-024 y US-025 son paralelizables una vez US-023 esté completa.'
+    ],
+    criteria: [
+      {
+        group: 'Estructura de la épica',
+        items: [
+          'US-022 (capa de repositorio): ✅ Completada — no hay SQL inline en páginas',
+          'US-023 (contratos API): envelope uniforme, errores tipados, prefijo /api/v1/',
+          'US-024 (endpoints browsing): timeline, detalle de foto, thumbnails, navegación',
+          'US-025 (endpoints acciones): auth, tags, búsqueda, scan, estado unificado',
+        ]
+      }
+    ],
+    dependencies: [
+      { id: 'EPIC-001', name: 'Múltiples catálogos', desc: 'Todos los endpoints v1 incluyen catalogId desde el inicio para que EPIC-001 no requiera breaking changes.', status: 'done' },
+      { id: 'US-016', name: 'Centralización código duplicado', desc: 'Extrae helpers de query-building que la capa de repositorio usa como base.', status: 'done' },
+    ],
+    components: [],
+    tech: [
+      'La misma API sirve tanto a la web (vía repositorio directo en Server Components) como a la app iOS (vía HTTP).',
+      'Todos los endpoints diseñados incluyen el parámetro <code>catalogId</code> opcional desde el inicio.',
+    ],
+    outOfScope: [
+      'Implementación de la app iOS',
+      'Autenticación OAuth / SSO / multi-tenant',
+      'WebSockets para notificaciones en tiempo real',
+      'Rate limiting por API key',
+      'Documentación OpenAPI/Swagger generada automáticamente',
+    ]
+  },
+
+  'US-017': {
+    id: 'US-017',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Hardening técnico',
+    story: 'Como desarrollador de photoshelf,\nquiero que todas las rutas de API tengan manejo de errores explícito y tipos TypeScript correctos,\npara que los fallos se registren y devuelvan respuestas HTTP consistentes en lugar de crashear el proceso.',
+    description: [
+      'El análisis de deuda técnica identificó tres categorías de fragilidad: (1) rutas API sin try/catch que crashean silenciosamente, (2) uso de <code>any</code> en TypeScript que oculta bugs en queries SQLite y respuestas de Ollama, y (3) MIME types inconsistentes que no cubren todos los formatos que el escáner indexa.',
+      'Esta US aplica una pasada de hardening técnico en estas tres áreas <strong>sin modificar los contratos de API</strong> — solo añade robustez interna.'
+    ],
+    criteria: [
+      {
+        group: 'Try/catch en rutas API',
+        items: [
+          'Todas las rutas en <code>src/app/api/</code> tienen try/catch para errores inesperados',
+          'En caso de error: HTTP 500 con <code>{ error: "Internal server error" }</code> + <code>console.error</code> con el error original',
+          'Los errores de validación de parámetros devuelven HTTP 400, no 500',
+        ]
+      },
+      {
+        group: 'Tipos TypeScript',
+        items: [
+          'Los resultados de queries SQLite usan tipos explícitos (no <code>as any</code>)',
+          'Las respuestas de Ollama tienen un tipo <code>OllamaResponse</code>',
+          '<code>tsconfig.json</code> tiene <code>"noImplicitAny": true</code>',
+          'Build sin errores de tipo con la configuración estricta',
+        ]
+      },
+      {
+        group: 'MIME types centralizados',
+        items: [
+          'Objeto <code>MIME_TYPES</code> en <code>src/lib/config.ts</code> para: <code>.jpg .jpeg .png .webp .heic .heif .tiff .tif .avif</code>',
+          'El endpoint <code>/api/photos/[id]/original</code> usa este mapa en lugar de un switch hardcodeado',
+          'Si la extensión no está en el mapa, devuelve <code>application/octet-stream</code> como fallback',
+        ]
+      },
+      {
+        group: 'Consistencia de respuestas',
+        items: [
+          'Todas las respuestas de error usan el mismo formato: <code>{ error: string }</code>',
+          'Las respuestas de éxito tienen tipos de retorno explícitos en los route handlers',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/config.ts', desc: 'Añadir MIME_TYPES map' },
+      { path: 'src/app/api/photos/[id]/original/route.ts', desc: 'Usar MIME_TYPES, mejorar try/catch' },
+      { path: 'src/app/api/scan/route.ts', desc: 'Try/catch, tipos en respuesta' },
+      { path: 'src/app/api/ai/search/route.ts', desc: 'Try/catch, tipos' },
+      { path: 'Otros route handlers', desc: 'Pasada sistemática de try/catch y tipado' },
+    ],
+    tech: [
+      'No modificar contratos de API — solo añadir try/catch y mejorar tipos internos.',
+      'Priorizar los endpoints más usados: <code>photos</code>, <code>scan</code>, <code>ai/search</code>, <code>thumbnail</code>, <code>original</code>.',
+    ],
+    outOfScope: [
+      'Error tracking externo (Sentry, Datadog)',
+      'Logs estructurados (JSON logging)',
+      'Respuestas de error con códigos de error tipados (enum)',
+    ]
+  },
+
+  'US-021': {
+    id: 'US-021',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Proveedores LLM cloud',
+    story: 'Como fotógrafo que usa photoshelf en un contexto donde Ollama no está disponible,\nquiero poder configurar un proveedor de IA en la nube (OpenAI, Anthropic) como alternativa,\npara seguir clasificando y buscando fotos con IA aunque no tenga Ollama corriendo localmente.',
+    description: [
+      'La app depende en exclusiva de Ollama local para tres funciones de IA: clasificación de fotos (<code>classifyPhoto</code>), búsqueda semántica (<code>parseSearchQuery</code>) y revisión de foto (<code>reviewPhoto</code>). Si Ollama no está disponible, estas funciones fallan completamente.',
+      'Esta US introduce un sistema de <strong>proveedores intercambiables</strong>. El proveedor activo se configura con la variable de entorno <code>AI_PROVIDER</code>. Se implementan adaptadores para OpenAI GPT-4o y Anthropic Claude, además del adaptador Ollama existente (refactorizado).'
+    ],
+    criteria: [
+      {
+        group: 'Sistema de proveedores',
+        items: [
+          'Interfaz <code>AIProvider</code> en <code>src/lib/ai/provider.ts</code> con métodos <code>generateText</code> y <code>generateVision</code>',
+          'Variable <code>AI_PROVIDER</code> acepta: <code>ollama</code> (default), <code>openai</code>, <code>anthropic</code>',
+          'Si falta la API key del proveedor configurado, el servidor lanza error claro al arrancar',
+        ]
+      },
+      {
+        group: 'Adaptadores',
+        items: [
+          'Adaptador Ollama: código existente de <code>src/lib/ollama.ts</code> movido a <code>src/lib/ai/adapters/ollama.ts</code>, mismo comportamiento',
+          'Adaptador OpenAI: usa <code>gpt-4o</code> para visión y <code>gpt-4o-mini</code> para texto',
+          'Adaptador Anthropic: usa <code>claude-3-5-sonnet-20241022</code> para visión y texto',
+        ]
+      },
+      {
+        group: 'Integración',
+        items: [
+          '<code>src/lib/ai/index.ts</code> exporta <code>getAIProvider(): AIProvider</code> que lee <code>AI_PROVIDER</code>',
+          'Las funciones de <code>ollama.ts</code> usan <code>getAIProvider()</code> en lugar de fetch directo',
+          'La interfaz de usuario no muestra cambios — solo el proveedor cambia internamente',
+          'Cada adaptador cloud incluye timeout razonable (60s visión, 30s texto)',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/ai/provider.ts', desc: 'Interfaz AIProvider', isNew: true },
+      { path: 'src/lib/ai/adapters/ollama.ts', desc: 'Adaptador Ollama (código existente refactorizado)', isNew: true },
+      { path: 'src/lib/ai/adapters/openai.ts', desc: 'Nuevo — adaptador OpenAI GPT-4o', isNew: true },
+      { path: 'src/lib/ai/adapters/anthropic.ts', desc: 'Nuevo — adaptador Anthropic Claude', isNew: true },
+      { path: 'src/lib/ai/index.ts', desc: 'Factory getAIProvider()', isNew: true },
+      { path: 'src/lib/ollama.ts', desc: 'Refactorizar para usar getAIProvider()' },
+      { path: 'src/instrumentation.ts', desc: 'Validar API key del proveedor activo al arranque' },
+    ],
+    tech: [
+      'Añadir <code>openai</code> y <code>@anthropic-ai/sdk</code> como dependencias opcionales o con dynamic imports para no penalizar el bundle.',
+      'Los prompts de clasificación y búsqueda son portables — GPT-4o y Claude entienden español e inglés.',
+      'Visión con Anthropic: <code>image/jpeg</code> base64 en el campo <code>content</code> de los mensajes.',
+    ],
+    outOfScope: [
+      'UI para cambiar de proveedor desde la interfaz (solo variables de entorno)',
+      'Fallback automático a otro proveedor cuando el principal falla',
+      'Soporte de Google Gemini, Mistral u otros proveedores',
+      'Tracking de costes de API por foto procesada',
+    ]
+  },
+
+  'US-004': {
+    id: 'US-004',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Operaciones en lote',
+    story: 'Como fotógrafo que organiza una biblioteca con cientos de fotos por evento,\nquiero seleccionar múltiples fotos a la vez y aplicarles acciones en bloque,\npara etiquetar, agrupar o marcar como favorita docenas de fotos sin hacerlo una a una.',
+    description: [
+      'Modo de <strong>selección múltiple</strong> en la vista de biblioteca (<code>/library</code>) que permite activar un "modo selección", pinchar sobre las fotos y aplicar una acción en lote sobre todas ellas.',
+      'Las acciones disponibles son: añadir tag, añadir a proyecto, marcar/desmarcar favorita, y asignar tema. El modo de selección se activa con un botón en el topbar o con el atajo <code>S</code>. Soporta <code>Shift+clic</code> para seleccionar rangos.'
+    ],
+    criteria: [
+      {
+        group: 'Activación del modo selección',
+        items: [
+          'Botón "Seleccionar" visible en el topbar del evento',
+          'Atajo de teclado <code>S</code> activa/desactiva el modo',
+          'En modo selección el topbar muestra "N fotos seleccionadas"',
+          'Botón "Cancelar" o <code>Escape</code> desactiva y limpia la selección',
+        ]
+      },
+      {
+        group: 'Selección de fotos',
+        items: [
+          'Clic: toggle individual; <code>Shift+clic</code>: selecciona rango entre última y actual',
+          'Checkbox visible en esquina superior izquierda en modo selección',
+          'Botón "Seleccionar todas" (del grupo visible)',
+          'La selección no persiste al salir del modo ni al cambiar de evento',
+        ]
+      },
+      {
+        group: 'Acciones disponibles',
+        items: [
+          '<strong>Añadir tag</strong>: selector con autocompletado; se aplica a todas las seleccionadas (<code>source: "manual"</code>)',
+          '<strong>Marcar favorita</strong>: toggle — si ninguna es favorita las marca todas; si alguna lo es, desmarca todas',
+          '<strong>Añadir a proyecto</strong>: selector de proyectos; añade al final respetando <code>position</code>',
+          '<strong>Asignar tema</strong>: selector con lista de temas con color',
+          'Cada acción muestra toast: "Aplicado a N fotos"',
+        ]
+      },
+      {
+        group: 'UX de acciones',
+        items: [
+          'Panel flotante inferior (bottom bar) cuando hay ≥1 foto seleccionada',
+          'Panel muestra: contador + iconos de acción + botón "Cancelar"',
+          'Acciones no destructivas en esta versión (no se puede borrar en lote)',
+          'Si una acción falla parcialmente, el toast indica cuántas tuvieron éxito',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/library/LibraryClient.tsx', desc: 'Añadir estado de selección, modo selección, Shift+clic' },
+      { path: 'src/components/PhotoGrid.tsx', desc: 'Mostrar checkbox en modo selección; bloquear apertura de detalle' },
+      { path: 'src/components/BulkActionBar.tsx', desc: 'Panel flotante inferior con acciones y contador', isNew: true },
+      { path: 'src/app/api/photos/bulk/route.ts', desc: 'Endpoint de acciones en lote', isNew: true },
+    ],
+    tech: [
+      'El estado de selección vive en <code>LibraryClient</code> como <code>Set&lt;number&gt;</code> de photo IDs.',
+      'La operación de rango necesita el índice de la última foto seleccionada en el array visible.',
+      'La API <code>bulk</code> usa una transacción SQLite para aplicar cambios atómicamente. Máximo 500 fotos por operación.',
+      'La adición a proyecto calcula <code>MAX(position) + 1</code> dentro de la transacción para evitar colisiones.',
+    ],
+    outOfScope: [
+      'Borrado masivo de fotos',
+      'Operaciones en lote en la vista timeline',
+      'Selección persistente entre sesiones',
+      'Aplicar múltiples tags en una sola operación de lote',
+    ]
+  },
+
+  'US-003': {
+    id: 'US-003',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Detección de duplicados',
+    story: 'Como fotógrafo con una biblioteca grande acumulada durante años,\nquiero detectar y gestionar fotos duplicadas o casi idénticas,\npara liberar espacio en disco y mantener la biblioteca limpia sin trabajo manual.',
+    description: [
+      'Una herramienta accesible desde el sidebar llamada "Duplicados". Analiza la biblioteca en busca de fotos idénticas (mismo hash SHA-256) o muy similares (mismas dimensiones y tamaño en bytes). Presenta los grupos en una interfaz de comparación donde el usuario elige cuál conservar.',
+      'El análisis ocurre en dos fases: fase rápida agrupando por <code>size_bytes + width + height</code>, y fase de verificación calculando SHA-256 para confirmar identidad byte a byte. No se usa IA — pure SQLite + Node.js <code>crypto</code>.',
+      'El sistema <strong>nunca borra físicamente</strong> los archivos por defecto. La acción "eliminar" mueve el archivo a <code>_trash/</code> dentro del directorio de fotos.'
+    ],
+    criteria: [
+      {
+        group: 'Análisis',
+        items: [
+          'Botón "Buscar duplicados" lanza el análisis en background con estado de progreso',
+          'Fase 1 (rápida): agrupa por <code>size_bytes + width + height</code>',
+          'Fase 2 (verificación): calcula SHA-256 para confirmar identidad',
+          'Resultados persistidos en tabla <code>duplicate_groups</code> para evitar reanálisis al recargar',
+        ]
+      },
+      {
+        group: 'Presentación de resultados',
+        items: [
+          'Vista en grid de grupos: cada grupo muestra las N fotos duplicadas juntas',
+          'Para cada grupo: número de copias, tamaño total liberable, fecha',
+          'Contador global: "X grupos · Y fotos redundantes · Z MB liberables"',
+        ]
+      },
+      {
+        group: 'Resolución por grupo',
+        items: [
+          'El usuario marca una foto como "conservar" (badge verde) y las demás quedan como "eliminar" (badge rojo)',
+          'Botón "Conservar la más reciente" (por <code>taken_at DESC</code>)',
+          'Botón "Conservar la de mayor resolución" (por <code>width * height DESC</code>)',
+          'Al confirmar, las fotos "eliminar" se mueven a <code>_trash/</code> y se borran de la DB',
+        ]
+      },
+      {
+        group: 'Seguridad',
+        items: [
+          'Nunca se puede confirmar sin tener exactamente 1 foto marcada como "conservar" por grupo',
+          'Modal de confirmación muestra el número de archivos que se moverán a <code>_trash/</code>',
+          'La UI indica claramente que la acción no tiene deshacer',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/duplicates/page.tsx', desc: 'Server component — carga resultados persistidos', isNew: true },
+      { path: 'src/app/duplicates/DuplicatesClient.tsx', desc: 'Client component — grupos, selección, confirmación', isNew: true },
+      { path: 'src/app/api/duplicates/scan/route.ts', desc: 'Lanza análisis background', isNew: true },
+      { path: 'src/app/api/duplicates/route.ts', desc: 'GET grupos persistidos', isNew: true },
+      { path: 'src/app/api/duplicates/resolve/route.ts', desc: 'POST para confirmar resolución', isNew: true },
+      { path: 'src/lib/duplicateScanner.ts', desc: 'Lógica de análisis (SHA-256, agrupación)', isNew: true },
+      { path: 'src/lib/db.ts', desc: 'Añadir tablas duplicate_groups y duplicate_photos' },
+      { path: 'src/components/Sidebar.tsx', desc: 'Nuevo enlace "Duplicados"' },
+    ],
+    tech: [
+      'El hash SHA-256 se calcula con <code>crypto.createHash("sha256")</code> sobre un stream del archivo original, sin cargar todo en memoria.',
+      'Mover a <code>_trash/</code> usa <code>fs.renameSync</code>; si está en distinto filesystem, fallback a copy+delete.',
+      'El análisis por fases usa el mismo patrón de estado en memoria que <code>scanState.ts</code>.',
+    ],
+    outOfScope: [
+      'Comparación perceptual (imágenes visualmente similares con distintos metadatos)',
+      'Recuperar archivos desde la papelera dentro de la propia app',
+      'Borrado físico permanente desde la UI',
+    ]
+  },
+
+  'US-005': {
+    id: 'US-005',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Álbumes inteligentes',
+    story: 'Como fotógrafo que filtra frecuentemente por las mismas combinaciones de criterios,\nquiero guardar filtros como álbumes que se actualizan solos cuando llegan fotos nuevas,\npara acceder a colecciones dinámicas sin recordar y reaplicar los filtros manualmente.',
+    description: [
+      'Los <strong>Álbumes inteligentes</strong> son colecciones virtuales definidas por reglas de filtrado que se evalúan en tiempo real. A diferencia de los Proyectos (curación manual estática), un álbum inteligente siempre muestra las fotos que cumplen sus criterios en el momento de consultarlo.',
+      'Ejemplos: "Todas mis fotos de montaña" (tag = montaña), "Fotos de 2023 sin etiquetar" (año = 2023, sin tags), "Favoritas con cámara Fuji" (favorita = sí, cámara LIKE "Fuji%"). Los álbumes se gestionan desde una sección del sidebar y usan la UI existente de <code>PhotoGrid</code>.'
+    ],
+    criteria: [
+      {
+        group: 'Creación de álbumes',
+        items: [
+          'Modal de creación con formulario de reglas (builder visual, no texto libre)',
+          'Reglas en v1: año (exacto o rango), tag (contiene, OR), tema, favorita, cámara (contiene), sin tags',
+          'Vista previa en tiempo real: "X fotos coinciden" mientras el usuario define las reglas (debounce 300ms)',
+          'Botón "Guardar álbum" crea el álbum y navega a su vista',
+        ]
+      },
+      {
+        group: 'Vista del álbum',
+        items: [
+          'Ruta <code>/smart-albums/[id]</code> con el mismo grid que <code>/library</code>',
+          'Topbar muestra nombre del álbum y número de fotos actuales (recalculado en cada visita)',
+          'Enlace "Editar reglas" abre el modal de edición',
+        ]
+      },
+      {
+        group: 'Gestión de álbumes',
+        items: [
+          'Sección "Álbumes" en el sidebar con nombre y contador',
+          'Página <code>/smart-albums</code> lista todos con: nombre, reglas en lenguaje natural, foto de portada, recuento',
+          'Borrar álbum (con confirmación) — solo borra el álbum, no las fotos',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/smart-albums/page.tsx', desc: 'Lista de álbumes', isNew: true },
+      { path: 'src/app/smart-albums/[id]/page.tsx', desc: 'Vista de fotos de un álbum', isNew: true },
+      { path: 'src/app/smart-albums/SmartAlbumBuilder.tsx', desc: 'Modal de creación/edición con preview en tiempo real', isNew: true },
+      { path: 'src/lib/smartAlbumQuery.ts', desc: 'Traduce reglas JSON → SQL seguro (whitelist de campos)', isNew: true },
+      { path: 'src/lib/db.ts', desc: 'Añadir tabla smart_albums (name TEXT, rules TEXT JSON)' },
+      { path: 'src/components/Sidebar.tsx', desc: 'Nueva sección "Álbumes"' },
+    ],
+    tech: [
+      '<code>smartAlbumQuery.ts</code> valida cada regla contra una whitelist de campos permitidos antes de construir el SQL para prevenir inyección.',
+      'El constructor de SQL usa parámetros bind de SQLite (<code>?</code>), nunca interpolación de strings.',
+      'La query resultante sigue el mismo patrón de <code>/api/photos</code> — mismos JOINs, mismos índices.',
+    ],
+    outOfScope: [
+      'Reglas basadas en rango de fechas exactas (solo año en v1)',
+      'Condición AND/OR explícita entre grupos de reglas (en v1 todas se combinan con AND)',
+      'Ordenación personalizada dentro del álbum',
+      'Exportar álbum inteligente como Proyecto estático',
+    ]
+  },
+
+  'US-026b': {
+    id: 'US-026',
+    type: 'US',
+    column: 'todo',
+    effort: 'S',
+    title: 'Persistencia DB fuera de Docker',
+    story: 'Como administrador de photoshelf,\nquiero que el archivo photoshelf.db se almacene en una ruta del NAS visible para Hyper Backup,\npara poder restaurar el estado anterior ante una migración problemática o corrupción de datos.',
+    description: [
+      'El DB está actualmente en un volumen Docker nombrado (<code>photoshelf_photoshelf_data</code>), almacenado en <code>/volume1/@docker/volumes/</code>. Esta ruta no está cubierta por los snapshots de Synology ni por Hyper Backup, lo que impide recuperar datos en caso de fallo.',
+      'Incidente documentado: migración de mayo 2026 borró todas las relaciones <code>photo_tags</code> vía <code>ON DELETE CASCADE</code>. No existía backup recuperable. Esta US cambia a un bind mount en una ruta del NAS accesible por Hyper Backup.'
+    ],
+    criteria: [
+      {
+        group: 'Configuración',
+        items: [
+          '<code>docker-compose.yml</code> usa bind mount: <code>${DATA_PATH:-/volume1/homes/javi/photoshelf-data}:/data</code>',
+          'El volumen nombrado <code>photoshelf_data</code> se elimina del compose',
+          'La carpeta del NAS tiene permisos correctos para el proceso del contenedor (UID 1000)',
+        ]
+      },
+      {
+        group: 'Migración y documentación',
+        items: [
+          'Procedimiento de migración del volumen antiguo al bind mount documentado en README o script',
+          'La ruta del bind mount es configurable vía variable de entorno <code>DATA_PATH</code>',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'docker-compose.yml', desc: 'Cambiar volumes: a bind mount con DATA_PATH' },
+      { path: 'README.md o scripts/migrate-data.sh', desc: 'Documentar/automatizar migración del volumen', isNew: true },
+    ],
+    tech: [
+      'Next.js corre como <code>node</code>, UID 1000. El directorio host debe tener <code>chown 1000:1000</code>.',
+      'Usar <code>fs.renameSync</code> del .db y .cache del volumen antiguo al nuevo bind mount.',
+    ],
+    outOfScope: [
+      'Backup automático programado desde la app',
+      'Replicación del DB en tiempo real',
+    ]
+  },
+
+  // ── DONE cards (lighter detail) ────────────────────────────
+  'EPIC-001': {
+    id: 'EPIC-001', type: 'EPIC', column: 'done', effort: 'L',
+    title: 'Múltiples catálogos',
+    story: 'Como fotógrafo con varias bibliotecas de fotos en distintas carpetas,\nquiero poder gestionarlas como catálogos independientes dentro de photoshelf,\npara cambiar entre ellas sin mezclar ni perder contexto.',
+    description: [
+      'Soporte completo para múltiples catálogos: migración de BD añadiendo tabla <code>catalogs</code> y columna <code>catalog_id</code> en fotos, contexto de servidor vía sesión, filtrado de todas las queries por catálogo, escáner por catálogo, API de gestión (CRUD) y UI de selección y gestión.',
+      '✅ Desplegada en PR #43 el 2026-05-24. Compuesta por las sub-historias US-009a → US-009g.'
+    ],
+    criteria: [{ group: 'Desplegada', items: ['US-009a: Migración catálogos BD', 'US-009b: Contexto catálogo servidor', 'US-009c: Filtrado queries por catálogo', 'US-009d: Escaneo por catálogo', 'US-009e: API gestión catálogos', 'US-009f: UI selector de catálogo', 'US-009g: UI gestión de catálogos'] }],
+    dependencies: [], components: [], tech: [], outOfScope: []
+  },
+
+  'US-022': {
+    id: 'US-022', type: 'US', column: 'done', effort: 'M',
+    title: 'Capa de repositorio',
+    story: 'Como desarrollador de photoshelf,\nquiero que ningún Server Component importe getDb() directamente,\npara que todo el acceso a datos esté centralizado en módulos reutilizables.',
+    description: [
+      'Módulos en <code>src/lib/queries/</code> que centralizan todo el acceso a datos. Ningún Server Component importa <code>getDb()</code> directamente; los route handlers también usan el repositorio.',
+      '✅ Desplegada en PR #37 el 2026-05-24. Incluye: <code>photos.ts</code>, <code>timeline.ts</code>, <code>tags.ts</code>, <code>stats.ts</code>, <code>sidebar.ts</code>, <code>themes.ts</code>, <code>groups.ts</code> y <code>catalogs.ts</code>.'
+    ],
+    criteria: [{ group: 'Desplegada', items: ['Ningún Server Component importa getDb() directamente', 'Módulos src/lib/queries/* con funciones por dominio', 'Todos los route handlers consumen el repositorio', 'getSidebarData() centraliza las 5 queries repetidas en cada página'] }],
+    dependencies: [], components: [], tech: [], outOfScope: []
+  },
+
+  'US-016': {
+    id: 'US-016', type: 'US', column: 'done', effort: 'M',
+    title: 'Centralización código duplicado',
+    story: 'Como desarrollador,\nquiero eliminar las 5 copias inline de upsertAiTags y las 8 definiciones de PHOTOS_PATH,\npara reducir la deuda técnica y tener un único punto de cambio.',
+    description: ['<code>upsertAiTags</code>, <code>buildPhotoFilter</code> y <code>PHOTOS_PATH</code> extraídos a módulos compartidos (<code>db-helpers.ts</code> y <code>config.ts</code>). Elimina 5 copias inline y un antipatrón de importación circular. ✅ Desplegada en PR #36 el 2026-05-24.'],
+    criteria: [{ group: 'Desplegada', items: ['upsertAiTags en db-helpers.ts (sin copias inline)', 'buildPhotoFilter en db-helpers.ts (JOIN + WHERE params correctamente ordenados)', 'PHOTOS_PATH en config.ts (sin redefiniciones en 8 archivos)'] }],
+    dependencies: [], components: [], tech: [], outOfScope: []
+  },
+
+  'US-014': {
+    id: 'US-014', type: 'US', column: 'done', effort: 'M',
+    title: 'Hardening autenticación',
+    description: ['Protección de todas las rutas API con middleware de sesión, rate limiting en login (máx. intentos por IP/ventana de tiempo), rotación de tokens de sesión y headers de seguridad HTTP. ✅ Desplegada en PR #34 el 2026-05-23.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-015': {
+    id: 'US-015', type: 'US', column: 'done', effort: 'M',
+    title: 'Protección path traversal',
+    description: ['Validación de rutas de archivo en todos los endpoints que sirven o procesan imágenes. Previene acceso a ficheros fuera del directorio de fotos permitido. ✅ Desplegada en PR #34 el 2026-05-23.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-018': {
+    id: 'US-018', type: 'US', column: 'done', effort: 'M',
+    title: 'Optimización queries y polling',
+    description: ['Queries SQL con índices, eliminación de N+1 en tags (batch WHERE photo_id IN (…)), debounce en búsqueda e intervalo de polling reducido. La app responde notablemente más rápida en bibliotecas grandes. ✅ Desplegada en PR #35 el 2026-05-23.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-010': {
+    id: 'US-010', type: 'US', column: 'done', effort: 'M',
+    title: 'Accesibilidad global',
+    description: ['Aria-labels en botones icon-only, navegación por teclado en secciones clave, contraste WCAG AA y foco visible en todos los controles interactivos. ✅ Desplegada en PR #35 el 2026-05-23.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-011': {
+    id: 'US-011', type: 'US', column: 'done', effort: 'S',
+    title: 'Feedback errores IA',
+    description: ['Mensajes de error comprensibles cuando la clasificación IA falla, con acción de reintento y distinción entre error de red, Ollama no disponible e imagen no procesable. ✅ Desplegada en PR #35 el 2026-05-23.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-012': {
+    id: 'US-012', type: 'US', column: 'done', effort: 'S',
+    title: 'Empty states con CTA',
+    description: ['Estados vacíos con mensaje contextual y llamada a la acción principal. El usuario sabe exactamente qué hacer cuando no hay fotos, tags o proyectos. ✅ Desplegada en PR #35 el 2026-05-23.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-013': {
+    id: 'US-013', type: 'US', column: 'done', effort: 'M',
+    title: 'UX mobile — swipe y bottom sheet',
+    description: ['Gestos swipe en la vista de detalle, bottom sheet nativo en móvil y adaptaciones del grid para pantallas pequeñas. La app es tan cómoda en móvil como en escritorio. ✅ Desplegada en PR #40 el 2026-05-24.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-019': {
+    id: 'US-019', type: 'US', column: 'done', effort: 'M',
+    title: 'Cobertura de tests',
+    description: ['Tests unitarios para config, scanner, thumbnail y autenticación. Base de confianza para refactorizaciones futuras sin regresiones silenciosas. ✅ Desplegada en PR #41 el 2026-05-24.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-020': {
+    id: 'US-020', type: 'US', column: 'done', effort: 'M',
+    title: 'Next.js 15 + React 19',
+    description: ['Actualización del framework principal. Adaptación de Server Actions, nuevas APIs de React 19 y resolución de breaking changes de la migración. ✅ Desplegada en PR #38 el 2026-05-24.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-026': {
+    id: 'US-026', type: 'US', column: 'done', effort: 'M',
+    title: 'Personalidad visual',
+    description: ['Iconografía coherente con Lucide, micro-interacciones en hover/click, paleta de color consistente y animaciones de transición que refuerzan la identidad de la app. ✅ Desplegada en PR #42 el 2026-05-24.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+  'US-027': {
+    id: 'US-027', type: 'US', column: 'done', effort: 'M',
+    title: 'Mapa — filtro por año',
+    description: ['Selector de año en el mapa con carga progresiva. Evita pintar miles de marcadores de golpe en catálogos grandes, mejorando drásticamente el rendimiento. ✅ Desplegada el 2026-05-24.'],
+    story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────
+// Modal logic
+// ─────────────────────────────────────────────────────────────────
+function openModal(cardId) {
+  const card = CARDS[cardId];
+  if (!card) return;
+
+  const overlay = document.getElementById('modal-overlay');
+  const badgesEl = document.getElementById('modal-badges');
+  const titleEl  = document.getElementById('modal-title');
+  const storyEl  = document.getElementById('modal-story');
+  const bodyEl   = document.getElementById('modal-body');
+  const effortEl = document.getElementById('modal-effort-label');
+
+  // Badges
+  const effortMap = { S: 'effort-s', M: 'effort-m', L: 'effort-l' };
+  const typeClass = card.type === 'EPIC' ? 'badge-epic' : 'badge-us';
+  const colTag = card.column === 'done' ? '<span class="badge badge-done">✓ done</span>' : (card.next ? '<span class="badge badge-next">▶ Siguiente</span>' : '');
+  badgesEl.innerHTML = `<span class="badge ${typeClass}">${card.id}</span>${colTag}<span class="effort ${effortMap[card.effort] || 'effort-m'}">${card.effort}</span>`;
+
+  // Title
+  titleEl.textContent = card.title;
+
+  // Story
+  if (card.story) {
+    storyEl.textContent = card.story;
+    storyEl.style.display = '';
+  } else {
+    storyEl.style.display = 'none';
+  }
+
+  // Effort label
+  const effortLabels = { S: 'Esfuerzo S — menos de 1 día', M: 'Esfuerzo M — 1 a 3 días', L: 'Esfuerzo L — 1 a 2 semanas' };
+  effortEl.textContent = effortLabels[card.effort] || '';
+
+  // Build body
+  let html = '';
+
+  // Description
+  if (card.description && card.description.length) {
+    html += `<div class="modal-section">
+      <div class="section-label">Descripción del producto</div>
+      <div class="modal-description">${card.description.map(p => `<p>${p}</p>`).join('')}</div>
+    </div>`;
+  }
+
+  // Acceptance criteria
+  if (card.criteria && card.criteria.length) {
+    html += `<div class="modal-section"><div class="section-label">Criterios de aceptación</div>`;
+    for (const group of card.criteria) {
+      html += `<div class="ac-group"><div class="ac-group-title">${group.group}</div><ul class="ac-list">`;
+      for (const item of group.items) {
+        html += `<li class="ac-item"><div class="checkbox"></div><span>${item}</span></li>`;
+      }
+      html += `</ul></div>`;
+    }
+    html += `</div>`;
+  }
+
+  // Dependencies
+  if (card.dependencies && card.dependencies.length) {
+    html += `<div class="modal-section"><div class="section-label">Dependencias técnicas y de diseño</div><div class="deps-grid">`;
+    for (const dep of card.dependencies) {
+      const statusMap = { done: 'dep-done', todo: 'dep-todo', next: 'dep-next' };
+      const statusLabel = { done: '✓ completada', todo: 'pendiente', next: '▶ siguiente' };
+      html += `<div class="dep-item">
+        <div><div class="dep-id">${dep.id}</div><div class="dep-name">${dep.name}</div><div class="dep-desc">${dep.desc}</div></div>
+        <div class="dep-status ${statusMap[dep.status] || 'dep-todo'}">${statusLabel[dep.status] || 'pendiente'}</div>
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+
+  // Blocks
+  if (card.blocks && card.blocks.length) {
+    html += `<div class="modal-section"><div class="section-label">Bloquea a</div><div class="deps-grid">`;
+    for (const blockId of card.blocks) {
+      const target = CARDS[blockId];
+      if (target) {
+        html += `<div class="dep-item">
+          <div><div class="dep-id">${blockId}</div><div class="dep-name">${target.title}</div></div>
+          <div class="dep-status dep-todo">pendiente</div>
+        </div>`;
+      }
+    }
+    html += `</div></div>`;
+  }
+
+  // Components
+  if (card.components && card.components.length) {
+    html += `<div class="modal-section"><div class="section-label">Componentes afectados</div>
+      <table class="comp-table"><thead><tr><th>Archivo</th><th>Cambio</th></tr></thead><tbody>`;
+    for (const c of card.components) {
+      html += `<tr><td${c.isNew ? ' class="new-tag"' : ''}>${c.path}</td><td>${c.desc}</td></tr>`;
+    }
+    html += `</tbody></table></div>`;
+  }
+
+  // Tech notes
+  if (card.tech && card.tech.length) {
+    html += `<div class="modal-section"><div class="section-label">Notas técnicas</div><ul class="tech-list">`;
+    for (const note of card.tech) {
+      html += `<li class="tech-item">${note}</li>`;
+    }
+    html += `</ul></div>`;
+  }
+
+  // Out of scope
+  if (card.outOfScope && card.outOfScope.length) {
+    html += `<div class="modal-section"><div class="section-label">Fuera de alcance (v1)</div><ul class="oos-list">`;
+    for (const item of card.outOfScope) {
+      html += `<li class="oos-item">${item}</li>`;
+    }
+    html += `</ul></div>`;
+  }
+
+  bodyEl.innerHTML = html;
+  bodyEl.scrollTop = 0;
+
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// Keyboard: Enter on focused card
+document.querySelectorAll('.card[tabindex]').forEach(card => {
+  card.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      card.click();
+    }
+  });
+});
+</script>
 
 </body>
 </html>
