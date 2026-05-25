@@ -30,7 +30,7 @@ export function getSidebarData(catalogId = 1): SidebarData {
     AND NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id)
   `).get(catalogId) as { c: number }).c;
 
-  const themes   = listThemes();
+  const themes   = listThemes(catalogId);
   const projects = getSidebarProjects(db);
   const catalogs = listCatalogs();
 

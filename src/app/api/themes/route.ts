@@ -6,7 +6,7 @@ export async function GET() {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  return NextResponse.json(listThemes());
+  return NextResponse.json(listThemes(session.catalogId ?? 1));
 }
 
 export async function POST(req: NextRequest) {
