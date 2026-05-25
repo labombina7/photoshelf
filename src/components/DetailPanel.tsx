@@ -87,7 +87,9 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? `Error ${res.status}`);
       const r = data as PhotoReview;
-      if (!r.score && !r.summary && !r.composition && !r.light) {
+      const isEmpty = !r.score && !r.summary && !r.composition && !r.light
+        && r.strengths.length === 0 && r.weaknesses.length === 0;
+      if (isEmpty) {
         throw new Error('La IA no pudo generar un análisis. Comprueba que Ollama esté disponible e inténtalo de nuevo.');
       }
       setReview(r);

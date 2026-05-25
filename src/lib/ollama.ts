@@ -275,20 +275,39 @@ Be concise, specific, and honest. Reply in Spanish.`,
     base64
   );
 
-  try {
-    const json = extractJsonObject(raw);
-    const parsed = JSON.parse(json);
-    return {
-      composition: parsed.composition ?? '',
-      light: parsed.light ?? '',
-      strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 3) : [],
-      weaknesses: Array.isArray(parsed.weaknesses) ? parsed.weaknesses.slice(0, 3) : [],
-      score: typeof parsed.score === 'number' ? Math.min(10, Math.max(1, Math.round(parsed.score))) : 0,
-      summary: parsed.summary ?? '',
-    };
-  } catch {
-    return { composition: '', light: '', strengths: [], weaknesses: [], score: 0, summary: raw.trim().slice(0, 300) };
+  const json = extractJsonObject(raw);
+
+  // Try 1: parse as-is
+  // Try 2: collapse literal newlines/CRs (LLMs sometimes embed them inside string values)
+  // Try 3: also strip trailing commas before } or ]
+  let parsed: Record<string, unknown> | null = null;
+  const candidates = [
+    json,
+    json.replace(/\r?\n/g, ' '),
+    json.replace(/\r?\n/g, ' ').replace(/,(\s*[}\]])/g, '$1'),
+  ];
+  for (const candidate of candidates) {
+    try { parsed = JSON.parse(candidate); break; } catch { /* try next */ }
   }
+
+  if (!parsed) {
+    console.error('[ollama] reviewPhoto: JSON.parse failed. Raw response:\n', raw.slice(0, 500));
+    return { composition: '', light: '', strengths: [], weaknesses: [], score: 0, summary: '' };
+  }
+
+  const scoreRaw = parsed.score;
+  const scoreNum = typeof scoreRaw === 'number'
+    ? scoreRaw
+    : typeof scoreRaw === 'string' ? parseFloat(scoreRaw) : NaN;
+
+  return {
+    composition: typeof parsed.composition === 'string' ? parsed.composition : '',
+    light:       typeof parsed.light === 'string'       ? parsed.light       : '',
+    strengths:   Array.isArray(parsed.strengths)  ? (parsed.strengths  as string[]).slice(0, 3) : [],
+    weaknesses:  Array.isArray(parsed.weaknesses) ? (parsed.weaknesses as string[]).slice(0, 3) : [],
+    score:       isNaN(scoreNum) ? 0 : Math.min(10, Math.max(1, Math.round(scoreNum))),
+    summary:     typeof parsed.summary === 'string' ? parsed.summary : '',
+  };
 }
 
 export async function photoMatchesConcept(
