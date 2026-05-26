@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconSparkle } from '@/components/Icons';
 import EmptyState from '@/components/EmptyState';
+import { useClassify } from '@/components/ClassifyProvider';
 import type { Photo, Tag } from '@/lib/types';
 
 interface PhotoWithTags extends Photo {
@@ -53,6 +54,7 @@ function EventGroupBlock({
   const [photos, setPhotos] = useState<PhotoWithTags[] | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
+  const { done: classifyDone, total: classifyTotal } = useClassify();
   const [classifying, setClassifying] = useState(false);
   const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number; errors?: number } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -146,6 +148,18 @@ function EventGroupBlock({
             <IconSparkle size={11} />
             <span>{classifying ? 'Clasificando…' : 'Clasificar'}</span>
           </button>
+          {classifying && (
+            <span className="classify-inline-progress">
+              <span className="classify-inline-track">
+                {classifyTotal > 0
+                  ? <span className="classify-inline-fill" style={{ width: `${Math.round((classifyDone / classifyTotal) * 100)}%` }} />
+                  : <span className="classify-inline-indeterminate" />}
+              </span>
+              {classifyTotal > 0 && (
+                <span className="classify-inline-count">({classifyDone}/{classifyTotal})</span>
+              )}
+            </span>
+          )}
           {/* Mobile: 3-dots menu */}
           <div ref={menuRef} className="event-menu-wrap event-menu--mobile">
             <button
