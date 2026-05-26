@@ -5,10 +5,20 @@ import { classifyPhoto } from '@/lib/ollama';
 import { PHOTOS_PATH } from '@/lib/config';
 import { upsertAiTags } from '@/lib/db-helpers';
 import { getCatalogById } from '@/lib/queries/catalogs';
+import { getClassifyState, updateClassifyState } from '@/lib/classifyState';
+
+export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  if (getClassifyState().running) {
+    return NextResponse.json(
+      { error: 'Hay una clasificación en curso. Espera a que termine.' },
+      { status: 409 }
+    );
+  }
 
   const { year, event } = await req.json();
   const catalogId = session.catalogId ?? 1;
@@ -31,9 +41,25 @@ export async function POST(req: NextRequest) {
 
   const photos = db.prepare(sql).all(...params) as { id: number; path: string }[];
   const total = photos.length;
+
+  if (total === 0) {
+    return NextResponse.json({ processed: 0, total: 0, errors: 0 });
+  }
+
+  updateClassifyState({
+    running: true,
+    year: year ? parseInt(year, 10) : null,
+    currentEvent: event ?? '',
+    done: 0,
+    total,
+    errors: 0,
+    firstError: null,
+    error: null,
+    completedAt: null,
+  });
+
   let processed = 0;
   let errors = 0;
-
   let firstError: string | null = null;
 
   for (const photo of photos) {
@@ -45,9 +71,13 @@ export async function POST(req: NextRequest) {
       errors++;
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`[classify/batch] error on photo ${photo.id} (${photo.path}):`, msg);
-      if (!firstError) firstError = msg;
+      if (!firstError) { firstError = msg; updateClassifyState({ firstError: msg }); }
+      updateClassifyState({ errors });
     }
+    updateClassifyState({ done: processed + errors });
   }
+
+  updateClassifyState({ running: false, completedAt: Date.now() });
 
   return NextResponse.json({ processed, total, errors, firstError });
 }
