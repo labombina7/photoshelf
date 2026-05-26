@@ -108,6 +108,7 @@ body {
 .sidebar-footer {
   border-top: 1px solid var(--border-light);
   padding: 10px 14px 14px;
+  position: relative;
 }
 .sidebar-footer-row {
   display: flex;
@@ -168,11 +169,16 @@ body {
 }
 .sidebar-logout-btn:hover { color: var(--text); background: var(--bg); }
 .sidebar-catalog-menu {
-  margin-top: 6px;
+  position: absolute;
+  bottom: calc(100% - 4px);
+  left: 14px;
+  right: 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: var(--surface);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  z-index: 10;
 }
 .sidebar-catalog-option {
   width: 100%;

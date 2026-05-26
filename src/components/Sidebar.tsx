@@ -9,8 +9,14 @@ import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 
-function shortenPath(p: string) {
-  return p.replace(/^\/(?:Users|home)\/[^/]+/, '~');
+function shortenPath(p: string): string {
+  if (!p) return '';
+  const s = p.replace(/^\/(?:Users|home)\/[^/]+/, '~');
+  if (s.length <= 32) return s;
+  // Si sigue siendo largo, muestra ~/…/últimasegmento
+  const parts = s.split('/').filter(Boolean);
+  const prefix = s.startsWith('~') ? '~' : '';
+  return `${prefix}/…/${parts[parts.length - 1]}`;
 }
 
 interface SidebarProps {
