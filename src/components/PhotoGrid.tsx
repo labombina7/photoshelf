@@ -137,6 +137,18 @@ function EventGroupBlock({
               : `✓ ${classifyResult.processed} clasificadas`}
           </span>
         )}
+        {classifying && (
+          <span className="classify-inline-progress">
+            <span className="classify-inline-track">
+              {classifyTotal > 0 && classifyDone > 0
+                ? <span className="classify-inline-fill" style={{ width: `${Math.round((classifyDone / classifyTotal) * 100)}%` }} />
+                : <span className="classify-inline-indeterminate" />}
+            </span>
+            {classifyTotal > 0 && classifyDone > 0 && (
+              <span className="classify-inline-count">({classifyDone}/{classifyTotal})</span>
+            )}
+          </span>
+        )}
         <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           {/* Desktop: classify button visible inline */}
           <button
@@ -148,18 +160,6 @@ function EventGroupBlock({
             <IconSparkle size={11} />
             <span>{classifying ? 'Clasificando…' : 'Clasificar'}</span>
           </button>
-          {classifying && (
-            <span className="classify-inline-progress">
-              <span className="classify-inline-track">
-                {classifyTotal > 0
-                  ? <span className="classify-inline-fill" style={{ width: `${Math.round((classifyDone / classifyTotal) * 100)}%` }} />
-                  : <span className="classify-inline-indeterminate" />}
-              </span>
-              {classifyTotal > 0 && (
-                <span className="classify-inline-count">({classifyDone}/{classifyTotal})</span>
-              )}
-            </span>
-          )}
           {/* Mobile: 3-dots menu */}
           <div ref={menuRef} className="event-menu-wrap event-menu--mobile">
             <button
