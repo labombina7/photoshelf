@@ -3,12 +3,15 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
-import { IconPhoto, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap } from './Icons';
+import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap, IconChevronDown, IconCheck } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
-import CatalogSwitcher from './CatalogSwitcher';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
+
+function shortenPath(p: string) {
+  return p.replace(/^\/(?:Users|home)\/[^/]+/, '~');
+}
 
 interface SidebarProps {
   themes: Theme[];
@@ -45,6 +48,19 @@ function SidebarInner({
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
   const [hoveredId, setHoveredId] = useState<number | null>(null);
+  const [catalogOpen, setCatalogOpen] = useState(false);
+
+  const activeCatalog = catalogs.find(c => c.id === activeCatalogId);
+
+  async function switchCatalog(id: number) {
+    if (id === activeCatalogId) return;
+    await fetch('/api/catalogs/switch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ catalogId: id }),
+    });
+    window.location.href = '/library';
+  }
 
   const activeTheme = searchParams.get('theme');
   const activeFav = searchParams.get('favorite');
@@ -114,7 +130,7 @@ function SidebarInner({
       {mobileOpen && <div className="sidebar-overlay" onClick={onMobileClose} />}
     <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`} role="navigation" aria-label="Navegación principal">
       <div className="sidebar-logo">
-        <IconPhoto size={18} />
+        <IconShelf size={18} />
         <span className="sidebar-logo-name">photoshelf</span>
       </div>
 
@@ -343,12 +359,7 @@ function SidebarInner({
 
       <div className="sidebar-spacer" />
 
-      <div style={{ padding: '0 18px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {/* Catalog switcher — always shown so the user can see the active catalog */}
-        {catalogs.length > 0 && (
-          <CatalogSwitcher catalogs={catalogs} activeCatalogId={activeCatalogId} />
-        )}
-
+      <div style={{ padding: '0 18px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
         {/* Watcher toggle */}
         {watcher.watching && (
           <button
@@ -392,23 +403,43 @@ function SidebarInner({
         </button>
       </div>
 
-      <div className="sidebar-user">
-        <div className="avatar">PS</div>
-        <div className="sidebar-user-info">
-          <div className="sidebar-user-name">photoshelf</div>
-          <div className="sidebar-user-sub">/photos</div>
+      <div className="sidebar-footer">
+        <div className="sidebar-footer-row">
+          <button
+            className="sidebar-catalog-btn"
+            onClick={() => catalogs.length > 1 ? setCatalogOpen(o => !o) : router.push('/settings/catalogs')}
+            title={catalogs.length > 1 ? 'Cambiar catálogo' : 'Gestionar catálogos'}
+          >
+            <div className="sidebar-catalog-text">
+              <span className="sidebar-catalog-name">{activeCatalog?.name ?? 'Principal'}</span>
+              <span className="sidebar-catalog-path">{shortenPath(activeCatalog?.path ?? '')}</span>
+            </div>
+            <IconChevronDown size={10} />
+          </button>
+          <button
+            onClick={handleLogout}
+            className="sidebar-logout-btn"
+            title="Cerrar sesión"
+            aria-label="Cerrar sesión"
+          >
+            <IconLogout size={14} />
+          </button>
         </div>
-        <button
-          onClick={handleLogout}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--text-tertiary)', marginLeft: 'auto', padding: 4,
-          }}
-          title="Cerrar sesión"
-          aria-label="Cerrar sesión"
-        >
-          <IconLogout />
-        </button>
+        {catalogOpen && catalogs.length > 1 && (
+          <div className="sidebar-catalog-menu">
+            {catalogs.map(cat => (
+              <button
+                key={cat.id}
+                className={`sidebar-catalog-option${cat.id === activeCatalogId ? ' active' : ''}`}
+                onClick={() => { switchCatalog(cat.id); setCatalogOpen(false); }}
+              >
+                <span className="catalog-dot" />
+                <span style={{ flex: 1 }}>{cat.name}</span>
+                {cat.id === activeCatalogId && <IconCheck size={11} />}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </aside>
     </>
