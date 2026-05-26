@@ -40,7 +40,6 @@ export function ClassifyProvider({ children }: { children: React.ReactNode }) {
     total: 0,
     error: null,
   });
-  const [showDone, setShowDone] = useState(false);
   const wasRunningRef = useRef(false);
 
   useEffect(() => {
@@ -54,9 +53,7 @@ export function ClassifyProvider({ children }: { children: React.ReactNode }) {
         setState(data);
 
         if (wasRunningRef.current && !data.running) {
-          setShowDone(true);
           router.refresh();
-          setTimeout(() => setShowDone(false), 4000);
         }
         wasRunningRef.current = data.running;
       } catch { /* ignore */ }
@@ -79,42 +76,9 @@ export function ClassifyProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const visible = state.running || showDone;
-  const pct = state.total > 0 ? Math.round((state.done / state.total) * 100) : 0;
-
   return (
     <ClassifyContext.Provider value={{ ...state, startClassify }}>
       {children}
-      {visible && (
-        <div className="scan-toast" style={{ bottom: 90 }}>
-          <div className="scan-toast-header">
-            <span className="scan-toast-title">
-              {state.running
-                ? `Clasificando${state.year ? ` ${state.year}` : ''}`
-                : state.error ? 'Error en la clasificación' : '✓ Clasificación completada'}
-            </span>
-            {state.running && state.total > 0 && (
-              <span className="scan-toast-count">{state.done}/{state.total}</span>
-            )}
-          </div>
-          {state.running && state.currentEvent && (
-            <div className="scan-toast-event">{state.currentEvent}</div>
-          )}
-          {state.error && (
-            <div className="scan-toast-event" style={{ color: '#ff8a80' }}>{state.error}</div>
-          )}
-          {state.running && state.total > 0 && (
-            <div className="scan-toast-track">
-              <div className="scan-toast-fill" style={{ width: `${pct}%` }} />
-            </div>
-          )}
-          {state.running && state.total === 0 && (
-            <div className="scan-toast-track">
-              <div className="scan-toast-indeterminate" />
-            </div>
-          )}
-        </div>
-      )}
     </ClassifyContext.Provider>
   );
 }

@@ -230,6 +230,12 @@ body {
 /* Desktop: show classify button inline; hide 3-dots menu */
 .classify-btn--desktop { display: inline-flex; }
 .event-menu--mobile { display: none; }
+/* Inline classify progress bar */
+.classify-inline-progress { display: inline-flex; align-items: center; gap: 6px; }
+.classify-inline-track { width: 80px; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+.classify-inline-fill { display: block; height: 100%; background: var(--tag-auto-color); transition: width 0.4s ease; }
+.classify-inline-indeterminate { display: block; height: 100%; width: 40%; background: var(--tag-auto-color); animation: indeterminate 1.4s ease infinite; }
+.classify-inline-count { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; }
 .year-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
 .year-tab {
   padding: 6px 14px; border-radius: 20px;
@@ -868,6 +874,7 @@ body {
   .event-count { flex-shrink: 0; }
   /* Mobile: hide inline classify, show 3-dots menu */
   .classify-btn--desktop { display: none; }
+  .classify-inline-progress { display: none; }
   .event-menu--mobile { display: block; }
 
   /* ── Photo grid — 3 cols ── */
