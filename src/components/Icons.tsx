@@ -8,11 +8,22 @@ export function IconPhoto({ size = 18 }: { size?: number }) {
   );
 }
 
+export function IconShelf({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="8" width="4" height="11" rx="0.75" />
+      <rect x="9" y="5" width="5" height="14" rx="0.75" />
+      <rect x="17" y="9" width="5" height="10" rx="0.75" />
+      <line x1="1" y1="20.5" x2="23" y2="20.5" strokeWidth="2.2" />
+    </svg>
+  );
+}
 
-export function IconStar({ size = 14 }: { size?: number }) {
+
+export function IconStar({ size = 14, filled = false }: { size?: number; filled?: boolean }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+      <path fill={filled ? 'currentColor' : 'none'} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
     </svg>
   );
 }
