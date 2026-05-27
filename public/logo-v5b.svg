@@ -1,8 +1,7 @@
 <svg viewBox="0 0 96 68" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!--
-    photoshelf v5b r3 — scattered prints con ilustraciones
-    8 copias con ángulos más extremos + contenido dibujado en color
-    Procesos: b&w · sepia · cianotipia · ámbar · paisaje
+    photoshelf v5b r4
+    9 copias · hero bajado · + retrato de personas
   -->
 
   <!-- Film body -->
@@ -37,14 +36,9 @@
     </filter>
   </defs>
 
-  <!-- ══════════════════════════════════════════════════════
-       8 copias · fondo → frente · ángulos más extremos
-       Cada print: borde blanco + ilustración interior en color
-  ══════════════════════════════════════════════════════ -->
   <g clip-path="url(#frame)">
 
     <!-- 1 · fondo esquina sup-izq · -18° · paisaje con sol -->
-    <!-- outer: x=9,y=16,w=18,h=13 · inner: x=12,y=18,w=12,h=9 -->
     <g transform="rotate(-18, 18, 23)" filter="url(#ps)">
       <rect x="9" y="16" width="18" height="13" rx="0.5"
             fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
@@ -54,7 +48,6 @@
     </g>
 
     <!-- 2 · fondo top-centro · +14° · atardecer sepia -->
-    <!-- outer: x=40,y=11,w=20,h=14 · inner: x=43,y=13,w=14,h=10 -->
     <g transform="rotate(14, 50, 18)" filter="url(#ps)">
       <rect x="40" y="11" width="20" height="14" rx="0.5"
             fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
@@ -63,8 +56,7 @@
       <circle cx="50" cy="15.5" r="2" fill="#e8a020"/>
     </g>
 
-    <!-- 3 · fondo esquina sup-der · -22° · niebla / nublado -->
-    <!-- outer: x=71,y=15,w=18,h=13 · inner: x=74,y=17,w=12,h=9 -->
+    <!-- 3 · fondo esquina sup-der · -22° · niebla -->
     <g transform="rotate(-22, 80, 22)" filter="url(#ps)">
       <rect x="71" y="15" width="18" height="13" rx="0.5"
             fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
@@ -74,7 +66,6 @@
     </g>
 
     <!-- 4 · fondo bottom-izq · +20° · cianotipia ciudad -->
-    <!-- outer: x=5,y=42,w=20,h=15 · inner: x=8,y=44,w=14,h=11 -->
     <g transform="rotate(20, 15, 50)" filter="url(#ps)">
       <rect x="5" y="42" width="20" height="15" rx="0.5"
             fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
@@ -85,7 +76,6 @@
     </g>
 
     <!-- 5 · fondo bottom-der · -14° · bosque ámbar -->
-    <!-- outer: x=65,y=41,w=20,h=15 · inner: x=68,y=43,w=14,h=11 -->
     <g transform="rotate(-14, 75, 49)" filter="url(#ps)">
       <rect x="65" y="41" width="20" height="15" rx="0.5"
             fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
@@ -96,7 +86,6 @@
     </g>
 
     <!-- 6 · capa media izq · +12° · mar y horizonte -->
-    <!-- outer: x=23,y=28,w=22,h=16 · inner: x=26,y=30,w=16,h=12 -->
     <g transform="rotate(12, 34, 36)" filter="url(#ps)">
       <rect x="23" y="28" width="22" height="16" rx="0.5"
             fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
@@ -105,8 +94,24 @@
       <circle cx="36" cy="32" r="1.5" fill="#f0c040"/>
     </g>
 
-    <!-- 7 · capa media der · -8° · montañas -->
-    <!-- outer: x=50,y=25,w=22,h=16 · inner: x=53,y=27,w=16,h=12 -->
+    <!-- 7 · retrato de personas · -12° · dos siluetas -->
+    <!-- outer: x=50,y=16,w=20,h=14 · inner: x=53,y=18,w=14,h=10 -->
+    <g transform="rotate(-12, 60, 23)" filter="url(#ps)">
+      <rect x="50" y="16" width="20" height="14" rx="0.5"
+            fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
+      <!-- cielo cálido -->
+      <rect x="53" y="18" width="14" height="7" fill="#e8c090"/>
+      <!-- tierra -->
+      <rect x="53" y="25" width="14" height="3" fill="#c07040"/>
+      <!-- persona 1 — izq -->
+      <circle cx="57" cy="21"   r="2"   fill="#2a1508"/>
+      <rect   x="55" y="23" width="4" height="5" rx="0.5" fill="#2a1508"/>
+      <!-- persona 2 — der, ligeramente más alta -->
+      <circle cx="63" cy="20.5" r="2"   fill="#2a1508"/>
+      <rect   x="61" y="22.5" width="4" height="5.5" rx="0.5" fill="#2a1508"/>
+    </g>
+
+    <!-- 8 · montañas · -8° · picos contra cielo frío -->
     <g transform="rotate(-8, 61, 33)" filter="url(#ps)">
       <rect x="50" y="25" width="22" height="16" rx="0.5"
             fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
@@ -115,15 +120,15 @@
       <polygon points="59,39 64,29 69,39" fill="#6a6068"/>
     </g>
 
-    <!-- 8 · frente hero · +3° · paisaje colorido completo -->
-    <!-- outer: x=34,y=28,w=26,h=19 · inner: x=37,y=30,w=20,h=15 -->
-    <g transform="rotate(3, 47, 38)" filter="url(#ps)">
-      <rect x="34" y="28" width="26" height="19" rx="0.5"
+    <!-- 9 · hero · +3° · paisaje completo · bajado para rellenar el frame -->
+    <!-- outer: x=34,y=31,w=26,h=19 · inner: x=37,y=33,w=20,h=15 -->
+    <g transform="rotate(3, 47, 41)" filter="url(#ps)">
+      <rect x="34" y="31" width="26" height="19" rx="0.5"
             fill="#ffffff" stroke="#a8a5a0" stroke-width="0.7"/>
-      <rect x="37" y="30" width="20" height="7"  fill="#6aa8d0"/>
-      <rect x="37" y="37" width="20" height="8"  fill="#5a8035"/>
-      <circle cx="52" cy="33"   r="2.5" fill="#f5b820"/>
-      <rect x="38" y="31" width="6" height="2" rx="1" fill="#e8f0f8" opacity="0.75"/>
+      <rect x="37" y="33" width="20" height="7"  fill="#6aa8d0"/>
+      <rect x="37" y="40" width="20" height="8"  fill="#5a8035"/>
+      <circle cx="52" cy="36"   r="2.5" fill="#f5b820"/>
+      <rect x="38" y="34" width="6" height="2" rx="1" fill="#e8f0f8" opacity="0.75"/>
     </g>
 
   </g>
