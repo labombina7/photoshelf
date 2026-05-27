@@ -31,7 +31,7 @@ export function listPhotos(
     ${joinSql}
     WHERE 1=1
     ${whereSql}
-    ORDER BY p.taken_at DESC, p.filename ASC LIMIT ? OFFSET ?
+    ORDER BY p.taken_at ASC, p.filename ASC LIMIT ? OFFSET ?
   `).all(...fp, limit, offset) as Record<string, unknown>[];
 
   let photos: PhotoWithTags[];
@@ -140,6 +140,103 @@ export function getPhotoSiblings(year: number, event: string, catalogId = 1): { 
   return getDb().prepare(
     'SELECT id FROM photos WHERE year = ? AND event = ? AND catalog_id = ? ORDER BY taken_at ASC, filename ASC'
   ).all(year, event, catalogId) as { id: number }[];
+}
+
+export interface AdjacentPhotos {
+  prev: { id: number; thumbnail_url: string } | null;
+  next: { id: number; thumbnail_url: string } | null;
+}
+
+function toAdjacent(id: number | undefined): { id: number; thumbnail_url: string } | null {
+  if (!id) return null;
+  return { id, thumbnail_url: `/api/v1/photos/${id}/thumbnail` };
+}
+
+export function getAdjacentInTimeline(photoId: number, catalogId = 1): AdjacentPhotos {
+  const db = getDb();
+  const photo = db.prepare('SELECT taken_at, filename FROM photos WHERE id = ? AND catalog_id = ?')
+    .get(photoId, catalogId) as { taken_at: string | null; filename: string } | undefined;
+  if (!photo) return { prev: null, next: null };
+
+  const { taken_at, filename } = photo;
+
+  const prevRow = taken_at
+    ? db.prepare(`
+        SELECT id FROM photos WHERE catalog_id = ?
+          AND (taken_at < ? OR (taken_at = ? AND filename < ?))
+        ORDER BY taken_at DESC, filename DESC LIMIT 1
+      `).get(catalogId, taken_at, taken_at, filename) as { id: number } | undefined
+    : undefined;
+
+  const nextRow = taken_at
+    ? db.prepare(`
+        SELECT id FROM photos WHERE catalog_id = ?
+          AND (taken_at > ? OR (taken_at = ? AND filename > ?))
+        ORDER BY taken_at ASC, filename ASC LIMIT 1
+      `).get(catalogId, taken_at, taken_at, filename) as { id: number } | undefined
+    : undefined;
+
+  return { prev: toAdjacent(prevRow?.id), next: toAdjacent(nextRow?.id) };
+}
+
+export function getAdjacentInEvent(photoId: number, catalogId = 1): AdjacentPhotos {
+  const db = getDb();
+  const photo = db.prepare('SELECT year, event, taken_at, filename FROM photos WHERE id = ? AND catalog_id = ?')
+    .get(photoId, catalogId) as { year: number; event: string; taken_at: string | null; filename: string } | undefined;
+  if (!photo) return { prev: null, next: null };
+
+  const { year, event, taken_at, filename } = photo;
+
+  const prevRow = taken_at
+    ? db.prepare(`
+        SELECT id FROM photos WHERE year = ? AND event = ? AND catalog_id = ?
+          AND (taken_at < ? OR (taken_at = ? AND filename < ?))
+        ORDER BY taken_at DESC, filename DESC LIMIT 1
+      `).get(year, event, catalogId, taken_at, taken_at, filename) as { id: number } | undefined
+    : undefined;
+
+  const nextRow = taken_at
+    ? db.prepare(`
+        SELECT id FROM photos WHERE year = ? AND event = ? AND catalog_id = ?
+          AND (taken_at > ? OR (taken_at = ? AND filename > ?))
+        ORDER BY taken_at ASC, filename ASC LIMIT 1
+      `).get(year, event, catalogId, taken_at, taken_at, filename) as { id: number } | undefined
+    : undefined;
+
+  return { prev: toAdjacent(prevRow?.id), next: toAdjacent(nextRow?.id) };
+}
+
+export function getAdjacentInTag(photoId: number, tagName: string, catalogId = 1): AdjacentPhotos {
+  const db = getDb();
+  const photo = db.prepare('SELECT taken_at, filename FROM photos WHERE id = ? AND catalog_id = ?')
+    .get(photoId, catalogId) as { taken_at: string | null; filename: string } | undefined;
+  if (!photo) return { prev: null, next: null };
+
+  const { taken_at, filename } = photo;
+
+  const prevRow = taken_at
+    ? db.prepare(`
+        SELECT p.id FROM photos p
+        JOIN photo_tags pt ON pt.photo_id = p.id
+        JOIN tags t ON t.id = pt.tag_id
+        WHERE t.name = ? AND p.catalog_id = ?
+          AND (p.taken_at < ? OR (p.taken_at = ? AND p.filename < ?))
+        ORDER BY p.taken_at DESC, p.filename DESC LIMIT 1
+      `).get(tagName, catalogId, taken_at, taken_at, filename) as { id: number } | undefined
+    : undefined;
+
+  const nextRow = taken_at
+    ? db.prepare(`
+        SELECT p.id FROM photos p
+        JOIN photo_tags pt ON pt.photo_id = p.id
+        JOIN tags t ON t.id = pt.tag_id
+        WHERE t.name = ? AND p.catalog_id = ?
+          AND (p.taken_at > ? OR (p.taken_at = ? AND p.filename > ?))
+        ORDER BY p.taken_at ASC, p.filename ASC LIMIT 1
+      `).get(tagName, catalogId, taken_at, taken_at, filename) as { id: number } | undefined
+    : undefined;
+
+  return { prev: toAdjacent(prevRow?.id), next: toAdjacent(nextRow?.id) };
 }
 
 // ── Map ───────────────────────────────────────────────────────────────────────
