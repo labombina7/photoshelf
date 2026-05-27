@@ -298,6 +298,14 @@ body {
 .btn--ghost:hover { background: var(--bg); color: var(--text); }
 .btn--danger { background: #dc2626; color: #fff; }
 .btn--danger:hover { background: #b91c1c; }
+.btn--subtle {
+  width: 100%; justify-content: center;
+  background: transparent; color: var(--text-secondary);
+  border: 1px dashed var(--border);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.btn--subtle:hover { border-color: var(--tag-auto-color); color: var(--tag-auto-color); background: var(--tag-auto-bg); }
+.btn--subtle:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-back {
   display: flex; align-items: center; gap: 6px;
@@ -548,16 +556,6 @@ body {
 .tag-input:focus { border-color: var(--text); }
 .tag-input::placeholder { color: var(--text-tertiary); }
 
-/* ── AI button ── */
-.ai-classify-btn {
-  width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 9px; border: 1px dashed var(--border);
-  border-radius: var(--radius-sm); background: transparent;
-  font-family: inherit; font-size: 13px; color: var(--text-secondary);
-  cursor: pointer; transition: all 0.15s;
-}
-.ai-classify-btn:hover { border-color: var(--tag-auto-color); color: var(--tag-auto-color); background: var(--tag-auto-bg); }
-.ai-classify-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* ── Themes ── */
 .theme-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }

@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   IconX, IconSparkle, IconCheck, IconCalendar,
-  IconCamera, IconMap, IconFile, IconAperture, IconStar,
+  IconCamera, IconMap, IconFile, IconAperture, IconStar, IconEye,
 } from './Icons';
+import { Button } from './ui/Button';
 import type { PhotoDetail, Theme } from '@/lib/types';
 import type { PhotoReview } from '@/lib/ollama';
 
@@ -215,20 +216,14 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
 
       {/* AI classify */}
       <div>
-        <button className="ai-classify-btn" onClick={classify} disabled={classifying}
-          aria-label={classifying ? 'Clasificando foto con IA…' : 'Clasificar foto con IA'}>
-          {classifying ? (
-            <>
-              <span className="spinner dark" />
-              Clasificando…
-            </>
-          ) : (
-            <>
-              <IconSparkle />
-              Clasificar
-            </>
-          )}
-        </button>
+        <Button
+          variant="subtle"
+          onClick={classify}
+          disabled={classifying}
+          aria-label={classifying ? 'Clasificando foto con IA…' : 'Clasificar foto con IA'}
+        >
+          {classifying ? <><span className="spinner dark" />Clasificando…</> : <><IconSparkle size={13} />Clasificar con IA</>}
+        </Button>
         {classifyError && (
           <div style={{
             marginTop: 6, padding: '6px 8px', borderRadius: 'var(--radius-sm)',
@@ -242,19 +237,14 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
 
       {/* AI review */}
       <div>
-        <button className="ai-classify-btn" onClick={requestReview} disabled={reviewing}>
-          {reviewing ? (
-            <>
-              <span className="spinner dark" />
-              Analizando…
-            </>
-          ) : (
-            <>
-              <IconSparkle />
-              Evaluar imagen
-            </>
-          )}
-        </button>
+        <Button
+          variant="subtle"
+          onClick={requestReview}
+          disabled={reviewing}
+          aria-label={reviewing ? 'Analizando imagen…' : 'Evaluar imagen con IA'}
+        >
+          {reviewing ? <><span className="spinner dark" />Analizando…</> : <><IconEye size={13} />Evaluar imagen</>}
+        </Button>
       </div>
 
       {/* Review error */}
