@@ -54,7 +54,7 @@ function EventGroupBlock({
   const [photos, setPhotos] = useState<PhotoWithTags[] | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
-  const { done: classifyDone, total: classifyTotal, running: classifyRunning, year: classifyYear } = useClassify();
+  const { done: classifyDone, total: classifyTotal } = useClassify();
   const [classifying, setClassifying] = useState(false);
   const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number; errors?: number } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -137,7 +137,7 @@ function EventGroupBlock({
               : `✓ ${classifyResult.processed} clasificadas`}
           </span>
         )}
-        {(classifying || (classifyRunning && classifyYear === group.year)) && (
+        {classifying && (
           <span className="classify-inline-progress">
             <span className="classify-inline-track">
               {classifyTotal > 0 && classifyDone > 0
