@@ -325,11 +325,12 @@ body {
 /* Desktop: show classify button inline; hide 3-dots menu */
 .classify-btn--desktop { display: inline-flex; }
 .event-menu--mobile { display: none; }
-/* Inline classify progress bar — flex:1 fills available space between event info and classify button */
-.classify-inline-progress { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 40px; }
-.classify-inline-track { flex: 1; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; min-width: 30px; }
-.classify-inline-fill { display: block; height: 100%; background: var(--tag-auto-color); transition: width 0.4s ease; }
-.classify-inline-indeterminate { display: block; height: 100%; width: 40%; background: var(--tag-auto-color); animation: indeterminate 1.4s ease infinite; }
+/* Inline classify progress bar */
+.classify-inline-progress { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 60px; }
+.classify-inline-track { flex: 1; height: 3px; background: var(--tag-auto-bg); border-radius: 2px; overflow: hidden; min-width: 40px; }
+.classify-inline-fill { display: block; height: 100%; background: var(--tag-auto-color); border-radius: 2px; transition: width 0.5s ease; min-width: 4px; }
+.classify-inline-pulse { display: block; height: 100%; width: 100%; background: var(--tag-auto-color); border-radius: 2px; animation: classify-pulse 1.2s ease-in-out infinite; }
+@keyframes classify-pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 .classify-inline-count { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; flex-shrink: 0; }
 .year-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
 .year-tab {
