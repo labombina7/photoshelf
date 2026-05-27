@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# photoshelf
 
-## Getting Started
+Gestor de fotos self-hosted para Synology NAS. Indexa carpetas locales, genera miniaturas, clasifica con IA (Ollama) y expone una API REST para clientes iOS.
 
-First, run the development server:
+## Despliegue en Synology (Docker Compose)
+
+### 1. Preparar directorios
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Crear carpeta de datos (debe ser escribible por UID 1000 — usuario node del contenedor)
+mkdir -p /volume1/homes/javi/photoshelf-data
+chown 1000:1000 /volume1/homes/javi/photoshelf-data
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Crear `.env`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cp .env.example .env
+# Editar APP_PASSWORD, SESSION_SECRET, OLLAMA_URL y DATA_PATH
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Arrancar
 
-## Learn More
+```bash
+docker compose up -d
+```
 
-To learn more about Next.js, take a look at the following resources:
+La app queda disponible en `http://<NAS-IP>:3000`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Migración desde volumen Docker nombrado
 
-## Deploy on Vercel
+Si venías usando una versión anterior con `photoshelf_data` (volumen nombrado), migra los datos antes de arrancar:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# 1. Parar la app
+docker compose down
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# 2. Copiar datos del volumen antiguo al nuevo bind mount
+docker run --rm \
+  -v photoshelf_photoshelf_data:/old \
+  -v /volume1/homes/javi/photoshelf-data:/new \
+  busybox sh -c "cp -a /old/. /new/"
+
+# 3. Ajustar permisos
+chown -R 1000:1000 /volume1/homes/javi/photoshelf-data
+
+# 4. Arrancar con el nuevo compose
+docker compose up -d
+
+# 5. Verificar que la app arranca y las fotos siguen visibles
+# Una vez confirmado, eliminar el volumen antiguo:
+docker volume rm photoshelf_photoshelf_data
+```
+
+---
+
+## Variables de entorno
+
+| Variable | Descripción | Ejemplo |
+|---|---|---|
+| `APP_PASSWORD` | Contraseña de login | `s3cr3t` |
+| `SESSION_SECRET` | Secreto de sesión (≥32 chars) | `openssl rand -hex 32` |
+| `OLLAMA_URL` | URL de la instancia Ollama | `http://192.168.1.135:11434` |
+| `DATA_PATH` | Ruta host para DB y caché | `/volume1/homes/javi/photoshelf-data` |
+
+---
+
+## Desarrollo local
+
+```bash
+npm install
+npm run dev       # http://localhost:3000
+npm run build     # build de producción
+npm test          # tests
+```
+
+La base de datos en desarrollo se crea en `photoshelf.db` en la raíz del proyecto.
