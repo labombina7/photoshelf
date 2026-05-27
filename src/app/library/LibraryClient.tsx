@@ -81,8 +81,14 @@ export default function LibraryClient({
   }, [collapsed]);
   const [viewMode, setViewMode] = useState<'list' | 'folders'>('folders');
   const { running: classifyingYear, done: classifyDone, total: classifyTotal, startClassify } = useClassify();
+  const [localClassifying, setLocalClassifying] = useState(false);
   const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Keep localClassifying in sync: clear it when the server confirms done
+  useEffect(() => {
+    if (localClassifying && !classifyingYear) setLocalClassifying(false);
+  }, [classifyingYear, localClassifying]);
 
   // If navigated to a specific event, always use list mode
   const effectiveViewMode = activeFilters.event ? 'list' : viewMode;
@@ -111,14 +117,18 @@ export default function LibraryClient({
 
   async function handleClassifyYear() {
     if (!activeYear) return;
+    setLocalClassifying(true);
     try {
       await startClassify(parseInt(activeYear, 10));
     } catch (err) {
+      setLocalClassifying(false);
       await alert(err instanceof Error ? err.message : 'Error al iniciar la clasificación', {
         title: 'Clasificación en curso',
       });
     }
   }
+
+  const showYearProgress = localClassifying || classifyingYear;
 
   const allKeys = allGroupKeys;
   const allCollapsed = collapsed.size === allKeys.length;
@@ -255,15 +265,15 @@ export default function LibraryClient({
               <button
                 className="collapse-btn classify-year-btn"
                 onClick={handleClassifyYear}
-                disabled={classifyingYear}
+                disabled={showYearProgress}
                 style={{ flexShrink: 0 }}
               >
                 <IconSparkle size={11} />
-                {classifyingYear
+                {showYearProgress
                   ? 'Clasificando…'
                   : `Clasificar año ${activeYear}`}
               </button>
-              {classifyingYear && (
+              {showYearProgress && (
                 <span className="classify-inline-progress">
                   <span className="classify-inline-track">
                     {classifyTotal > 0 && classifyDone > 0
