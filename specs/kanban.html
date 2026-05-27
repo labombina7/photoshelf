@@ -558,37 +558,9 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">10</span>
+      <span class="col-count">7</span>
     </div>
     <div class="col-body">
-
-      <div class="card" tabindex="0" data-id="US-023" onclick="openModal('US-023')">
-        <div class="card-top">
-          <span class="badge badge-us">US-023</span>
-          <span class="badge badge-next">▶ Siguiente</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Contratos API estándar</div>
-        <div class="card-summary">Envelope uniforme, errores consistentes y prefijo <code>/api/v1/</code>. Prerequisito para el cliente iOS.</div>
-        <div class="card-footer">
-          <span>Bloquea:</span>
-          <span class="dep-badge">US-024</span>
-          <span class="dep-badge">US-025</span>
-        </div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-024" onclick="openModal('US-024')">
-        <div class="card-top">
-          <span class="badge badge-us">US-024</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Endpoints iOS — browsing</div>
-        <div class="card-summary">Timeline paginado, detalle completo de foto y navegación anterior/siguiente bajo <code>/api/v1/</code>.</div>
-        <div class="card-footer">
-          <span>Depende de:</span>
-          <span class="dep-badge">US-023</span>
-        </div>
-      </div>
 
       <div class="card" tabindex="0" data-id="US-025" onclick="openModal('US-025')">
         <div class="card-top">
@@ -658,15 +630,6 @@
         <div class="card-summary">Colecciones virtuales definidas por reglas que se evalúan en tiempo real contra la base de datos.</div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-026b" onclick="openModal('US-026b')">
-        <div class="card-top">
-          <span class="badge badge-us">US-026</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Persistencia DB fuera de Docker</div>
-        <div class="card-summary">Bind mount para que el <code>.db</code> quede en el NAS visible para Hyper Backup y snapshots de Synology.</div>
-      </div>
-
     </div>
   </div>
 
@@ -675,9 +638,39 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">15</span>
+      <span class="col-count">18</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="US-024" onclick="openModal('US-024')">
+        <div class="card-top">
+          <span class="badge badge-us">US-024</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #56</span>
+        </div>
+        <div class="card-title">Endpoints iOS — browsing</div>
+        <div class="card-summary">Timeline paginado, detalle completo de foto y navegación anterior/siguiente bajo <code>/api/v1/</code>.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-026b" onclick="openModal('US-026b')">
+        <div class="card-top">
+          <span class="badge badge-us">US-026</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #55</span>
+        </div>
+        <div class="card-title">Persistencia DB fuera de Docker</div>
+        <div class="card-summary">Bind mount para que el <code>.db</code> quede en el NAS visible para Hyper Backup y snapshots de Synology.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-023" onclick="openModal('US-023')">
+        <div class="card-top">
+          <span class="badge badge-us">US-023</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #45</span>
+        </div>
+        <div class="card-title">Contratos API estándar</div>
+        <div class="card-summary">Envelope uniforme, errores consistentes y prefijo <code>/api/v1/</code>. Prerequisito para el cliente iOS.</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="EPIC-001" onclick="openModal('EPIC-001')">
         <div class="card-top">
@@ -850,9 +843,9 @@ const CARDS = {
   'US-023': {
     id: 'US-023',
     type: 'US',
-    column: 'todo',
+    column: 'done',
     effort: 'M',
-    next: true,
+    pr: 45,
     title: 'Contratos API estándar',
     story: 'Como desarrollador de una app iOS que consume la API de photoshelf,\nquiero que todos los endpoints devuelvan respuestas con el mismo formato, códigos de error consistentes y un prefijo de versión,\npara poder escribir un cliente robusto sin tratar cada endpoint de forma especial.',
     description: [
@@ -930,8 +923,9 @@ const CARDS = {
   'US-024': {
     id: 'US-024',
     type: 'US',
-    column: 'todo',
+    column: 'done',
     effort: 'M',
+    pr: 56,
     title: 'Endpoints iOS — browsing',
     story: 'Como app nativa iOS de photoshelf,\nquiero endpoints que devuelvan el timeline paginado, el detalle completo de una foto y sus imágenes,\npara implementar las vistas de browsing principales sin lógica de transformación en el cliente.',
     description: [
@@ -1457,8 +1451,9 @@ const CARDS = {
   'US-026b': {
     id: 'US-026',
     type: 'US',
-    column: 'todo',
+    column: 'done',
     effort: 'S',
+    pr: 55,
     title: 'Persistencia DB fuera de Docker',
     story: 'Como administrador de photoshelf,\nquiero que el archivo photoshelf.db se almacene en una ruta del NAS visible para Hyper Backup,\npara poder restaurar el estado anterior ante una migración problemática o corrupción de datos.',
     description: [
