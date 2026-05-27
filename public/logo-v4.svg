@@ -1,81 +1,89 @@
-<svg viewBox="0 0 96 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 120 68" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!--
-    photoshelf v4 — film strip + 3 cámaras, una balda
-    TLR (Rolleiflex) · Rangefinder analógica · DSLR
-    Más aire entre cámaras, siluetas más icónicas
+    photoshelf v4 — 120×68 · TLR · Rangefinder · DSLR
+    Canvas más ancho para dar masa a cada cámara.
+    TLR: cuerpo cuadrado, dos lentes grandes y simétricas.
+    Rangefinder: cuerpo muy horizontal, lente cilíndrica.
+    DSLR: pentaprisma alto y ancho, lente grande con anillos.
   -->
 
   <!-- Film body -->
-  <rect width="96" height="68" rx="5" fill="#1a1917"/>
+  <rect width="120" height="68" rx="5" fill="#1a1917"/>
 
-  <!-- Top sprockets -->
-  <rect x="7"  y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="22" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="37" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="52" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="67" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="82" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <!-- Top sprockets (7) -->
+  <rect x="6"   y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="23"  y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="40"  y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="57"  y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="74"  y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="91"  y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="108" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
 
-  <!-- Bottom sprockets -->
-  <rect x="7"  y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="22" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="37" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="52" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="67" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
-  <rect x="82" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <!-- Bottom sprockets (7) -->
+  <rect x="6"   y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="23"  y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="40"  y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="57"  y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="74"  y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="91"  y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="108" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
 
   <!-- Image frame -->
-  <rect x="7" y="11" width="82" height="46" fill="#f8f7f5"/>
+  <rect x="6" y="11" width="108" height="46" fill="#f8f7f5"/>
 
   <!-- Balda -->
-  <rect x="7" y="50" width="82" height="2" fill="#1a1917"/>
+  <rect x="6" y="50" width="108" height="2" fill="#1a1917"/>
 
 
   <!-- ══════════════════════════════════════════
-       TLR · Rolleiflex  (center x=19)
-       Clave: cuerpo casi cuadrado, DOS lentes grandes y simétricas
+       TLR · Rolleiflex  (zona x=6–42, centro x=24)
+       Cuerpo 18px ancho — casi cuadrado
+       Dos lentes r=5 simétricas y prominentes
   ══════════════════════════════════════════ -->
-  <!-- Visor waist-level (ligeramente más ancho que el cuerpo) -->
-  <rect x="12" y="22" width="14" height="4" rx="1" fill="#1a1917"/>
+  <!-- Visor waist-level (hood) -->
+  <rect x="14" y="20" width="20" height="4" rx="1" fill="#1a1917"/>
   <!-- Cuerpo -->
-  <rect x="13" y="26" width="12" height="24" rx="1" fill="#1a1917"/>
-  <!-- Lente visor (arriba) — grande y centrada -->
-  <circle cx="19" cy="32" r="4"   fill="#f8f7f5"/>
-  <circle cx="19" cy="32" r="1.5" fill="#1a1917" opacity="0.35"/>
-  <!-- Lente toma (abajo) — misma proporción -->
-  <circle cx="19" cy="42" r="4"   fill="#f8f7f5"/>
-  <circle cx="19" cy="42" r="1.5" fill="#1a1917" opacity="0.35"/>
+  <rect x="15" y="24" width="18" height="26" rx="1" fill="#1a1917"/>
+  <!-- Lente visor (arriba) -->
+  <circle cx="24" cy="30" r="5"   fill="#f8f7f5"/>
+  <circle cx="24" cy="30" r="2"   fill="#1a1917" opacity="0.4"/>
+  <!-- Lente toma (abajo) -->
+  <circle cx="24" cy="42" r="5"   fill="#f8f7f5"/>
+  <circle cx="24" cy="42" r="2"   fill="#1a1917" opacity="0.4"/>
 
 
   <!-- ══════════════════════════════════════════
-       Rangefinder analógica (center x=47)
-       Clave: cuerpo muy horizontal y plano, lente cilíndrica
+       Rangefinder analógica  (zona x=42–78, centro x=60)
+       Cuerpo 28×13 — muy horizontal
+       Lente cilíndrica izq + ventana visor der
   ══════════════════════════════════════════ -->
-  <!-- Lug de correa (pequeño saliente superior izq) -->
-  <rect x="34" y="35" width="2.5" height="3.5" rx="0.5" fill="#1a1917"/>
-  <!-- Cuerpo: proporción muy horizontal (26×12) -->
-  <rect x="34" y="38" width="26" height="12" rx="1" fill="#1a1917"/>
-  <!-- Lente: cilíndrica, lado izquierdo -->
-  <circle cx="42" cy="44" r="4.5" fill="#f8f7f5"/>
-  <circle cx="42" cy="44" r="2"   fill="#1a1917" opacity="0.35"/>
-  <!-- Ventana visor (pequeño rect top-right) -->
-  <rect x="53" y="39.5" width="5" height="3" rx="0.5" fill="#f8f7f5"/>
+  <!-- Lug de correa -->
+  <rect x="46" y="33" width="3" height="4" rx="0.5" fill="#1a1917"/>
+  <!-- Cuerpo horizontal -->
+  <rect x="46" y="37" width="28" height="13" rx="1" fill="#1a1917"/>
+  <!-- Lente -->
+  <circle cx="55" cy="43.5" r="5"   fill="#f8f7f5"/>
+  <circle cx="55" cy="43.5" r="2.2" fill="#1a1917" opacity="0.35"/>
+  <!-- Ventana visor -->
+  <rect x="66" y="39" width="6" height="3.5" rx="0.5" fill="#f8f7f5"/>
 
 
   <!-- ══════════════════════════════════════════
-       DSLR  (center x=76)
-       Clave: joroba de pentaprisma bien marcada, lente grande y dominante
+       DSLR  (zona x=78–114, centro x=96)
+       Pentaprisma 14×10 — alto y prominente
+       Lente r=9 — grande y dominante
+       Grip lateral bien definido
   ══════════════════════════════════════════ -->
-  <!-- Pentaprisma: prominente, claramente separado del cuerpo -->
-  <rect x="70" y="15" width="12" height="10" rx="1.5" fill="#1a1917"/>
+  <!-- Pentaprisma -->
+  <rect x="89" y="15" width="14" height="10" rx="2" fill="#1a1917"/>
   <!-- Cuerpo -->
-  <rect x="66" y="25" width="20" height="25" rx="1" fill="#1a1917"/>
-  <!-- Grip lateral derecho -->
-  <rect x="84" y="28" width="3.5" height="17" rx="2"   fill="#1a1917"/>
-  <!-- Lente: grande, dominante, tres anillos concéntricos -->
-  <circle cx="76" cy="37" r="8"   fill="#f8f7f5"/>
-  <circle cx="76" cy="37" r="5.5" fill="#1a1917" opacity="0.15"/>
-  <circle cx="76" cy="37" r="3.5" fill="#f8f7f5" opacity="0.7"/>
-  <circle cx="76" cy="37" r="1.5" fill="#1a1917"/>
+  <rect x="85" y="25" width="22" height="25" rx="1" fill="#1a1917"/>
+  <!-- Grip (derecho) -->
+  <rect x="105" y="28" width="4" height="18" rx="2" fill="#1a1917"/>
+  <!-- Lente — tres anillos -->
+  <circle cx="94" cy="37" r="9"   fill="#f8f7f5"/>
+  <circle cx="94" cy="37" r="6.5" fill="#1a1917" opacity="0.15"/>
+  <circle cx="94" cy="37" r="4"   fill="#f8f7f5" opacity="0.7"/>
+  <circle cx="94" cy="37" r="1.5" fill="#1a1917"/>
 
 </svg>
