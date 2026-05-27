@@ -31,7 +31,7 @@ export function listPhotos(
     ${joinSql}
     WHERE 1=1
     ${whereSql}
-    ORDER BY p.taken_at DESC, p.filename ASC LIMIT ? OFFSET ?
+    ORDER BY p.taken_at ASC, p.filename ASC LIMIT ? OFFSET ?
   `).all(...fp, limit, offset) as Record<string, unknown>[];
 
   let photos: PhotoWithTags[];
