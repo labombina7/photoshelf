@@ -80,7 +80,7 @@ export default function LibraryClient({
     try { sessionStorage.setItem('photoshelf_collapsed', JSON.stringify(Array.from(collapsed))); } catch {}
   }, [collapsed]);
   const [viewMode, setViewMode] = useState<'list' | 'folders'>('folders');
-  const { running: classifyingYear, startClassify } = useClassify();
+  const { running: classifyingYear, done: classifyDone, total: classifyTotal, startClassify } = useClassify();
   const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -251,17 +251,30 @@ export default function LibraryClient({
 
           {/* Classify-year button is shown in both views */}
           {showClassifyYear && (
-            <div className="collapse-controls">
+            <div className="collapse-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
               <button
                 className="collapse-btn classify-year-btn"
                 onClick={handleClassifyYear}
                 disabled={classifyingYear}
+                style={{ flexShrink: 0 }}
               >
                 <IconSparkle size={11} />
                 {classifyingYear
                   ? 'Clasificando…'
                   : `Clasificar año ${activeYear}`}
               </button>
+              {classifyingYear && (
+                <span className="classify-inline-progress">
+                  <span className="classify-inline-track">
+                    {classifyTotal > 0 && classifyDone > 0
+                      ? <span className="classify-inline-fill" style={{ width: `${Math.round((classifyDone / classifyTotal) * 100)}%` }} />
+                      : <span className="classify-inline-pulse" />}
+                  </span>
+                  {classifyTotal > 0 && classifyDone > 0 && (
+                    <span className="classify-inline-count">({classifyDone}/{classifyTotal})</span>
+                  )}
+                </span>
+              )}
             </div>
           )}
 
