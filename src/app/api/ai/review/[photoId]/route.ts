@@ -19,6 +19,12 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ ph
   `).get(PHOTOS_PATH, pid) as { path: string; catalog_path: string } | undefined;
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const review = await reviewPhoto(photo.path, photo.catalog_path);
-  return NextResponse.json(review);
+  try {
+    const review = await reviewPhoto(photo.path, photo.catalog_path);
+    return NextResponse.json(review);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[review] reviewPhoto failed:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
