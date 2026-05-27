@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>photoshelf v5b — scattered prints</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #f8f7f5;
+           color: #1a1917; padding: 52px 48px; }
+    h1 { font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+         text-transform: uppercase; color: #a8a5a0; margin-bottom: 40px; }
+    section { margin-bottom: 52px; }
+    h2 { font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+         text-transform: uppercase; color: #c8c5c0; margin-bottom: 20px; }
+    hr { border: none; border-top: 1px solid #e8e6e1; margin: 44px 0; }
+    .row { display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap; }
+    .col { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .label { font-size: 10px; color: #a8a5a0; }
+    .chip { padding: 20px 28px; border-radius: 12px; display: inline-flex; }
+    .on-beige { background: #f8f7f5; border: 1px solid #e8e6e1; }
+    .on-dark   { background: #111110; }
+    .lockup { display: inline-flex; align-items: center; gap: 14px; }
+    .lockup-text { font-size: 22px; letter-spacing: -0.5px; color: #1a1917; }
+    .lockup-text strong { font-weight: 600; }
+    .lockup-text em { font-weight: 400; font-style: normal; }
+    .lockup-dark { background: #1a1917; padding: 16px 24px; border-radius: 10px;
+                   display: inline-flex; align-items: center; gap: 14px; }
+    .lockup-dark .lockup-text { color: #f8f7f5; }
+  </style>
+</head>
+<body>
+
+<h1>photoshelf v5b — scattered prints</h1>
+
+<section>
+  <h2>Mark a tamaño grande</h2>
+  <div class="chip on-beige" style="display:inline-flex;">
+    <img src="logo-v5b.svg" width="288" height="204"/>
+  </div>
+</section>
+
+<hr>
+
+<section>
+  <h2>Escala</h2>
+  <div class="row">
+    <div class="col">
+      <img src="logo-v5b.svg" width="192" height="136"/>
+      <span class="label">192px</span>
+    </div>
+    <div class="col">
+      <img src="logo-v5b.svg" width="96" height="68"/>
+      <span class="label">96px</span>
+    </div>
+    <div class="col">
+      <img src="logo-v5b.svg" width="72" height="51"/>
+      <span class="label">72px</span>
+    </div>
+    <div class="col">
+      <img src="logo-v5b.svg" width="48" height="34"/>
+      <span class="label">48px</span>
+    </div>
+    <div class="col">
+      <img src="logo-v5b.svg" width="32" height="23"/>
+      <span class="label">32px</span>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<section>
+  <h2>Lockup</h2>
+  <div style="display:flex; flex-direction:column; gap:16px; align-items:flex-start;">
+    <div class="lockup">
+      <img src="logo-v5b.svg" width="72" height="51"/>
+      <span class="lockup-text"><strong>photo</strong><em>shelf</em></span>
+    </div>
+    <div class="lockup-dark">
+      <img src="logo-v5b.svg" width="72" height="51"/>
+      <span class="lockup-text"><strong>photo</strong><em>shelf</em></span>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<section>
+  <h2>Sobre fondos</h2>
+  <div class="row" style="align-items:center;">
+    <div class="col">
+      <div class="chip on-beige"><img src="logo-v5b.svg" width="144" height="102"/></div>
+      <span class="label">Beige (default)</span>
+    </div>
+    <div class="col">
+      <div class="chip on-dark"><img src="logo-v5b.svg" width="144" height="102"/></div>
+      <span class="label">Oscuro</span>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

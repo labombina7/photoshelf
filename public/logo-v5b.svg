@@ -1,0 +1,87 @@
+<svg viewBox="0 0 96 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!--
+    photoshelf v5b — scattered prints
+    Tira de negativo + copias fotográficas esparcidas como sobre una mesa
+    5 prints con rotación y solapamiento → profundidad de colección
+  -->
+
+  <!-- Film body -->
+  <rect width="96" height="68" rx="5" fill="#1a1917"/>
+
+  <!-- Top sprockets (6) -->
+  <rect x="7"  y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="22" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="37" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="52" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="67" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="82" y="3" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+
+  <!-- Bottom sprockets (6) -->
+  <rect x="7"  y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="22" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="37" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="52" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="67" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+  <rect x="82" y="60" width="7" height="5" rx="1.5" fill="#f8f7f5"/>
+
+  <!-- Image frame (base crema) -->
+  <rect x="7" y="11" width="82" height="46" fill="#f8f7f5"/>
+
+  <defs>
+    <!-- Clip al área del frame -->
+    <clipPath id="frame">
+      <rect x="7" y="11" width="82" height="46"/>
+    </clipPath>
+    <!-- Sombra suave → sensación de copia física levantada -->
+    <filter id="ps" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0.4" dy="0.7" stdDeviation="0.9"
+                    flood-color="#1a1917" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- ══════════════════════════════════════════
+       Prints esparcidas — z-order: fondo → frente
+       Cada <g> = una copia fotográfica
+       Outer rect = borde blanco del papel
+       Inner rect = imagen en tono b&w
+  ══════════════════════════════════════════ -->
+  <g clip-path="url(#frame)">
+
+    <!-- Print 1 · fondo izq · -8° · muy oscura (subexpuesta) -->
+    <g transform="rotate(-8, 25, 30)" filter="url(#ps)">
+      <rect x="14" y="22" width="22" height="16" rx="0.5"
+            fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
+      <rect x="17" y="24" width="16" height="12" fill="#1a1917" opacity="0.82"/>
+    </g>
+
+    <!-- Print 2 · fondo der · +7° · clara (sobreexpuesta) -->
+    <g transform="rotate(7, 71, 30)" filter="url(#ps)">
+      <rect x="60" y="22" width="22" height="16" rx="0.5"
+            fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
+      <rect x="63" y="24" width="16" height="12" fill="#1a1917" opacity="0.26"/>
+    </g>
+
+    <!-- Print 3 · medio izq · +5° · tono medio -->
+    <g transform="rotate(5, 33, 41)" filter="url(#ps)">
+      <rect x="22" y="33" width="22" height="16" rx="0.5"
+            fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
+      <rect x="25" y="35" width="16" height="12" fill="#1a1917" opacity="0.60"/>
+    </g>
+
+    <!-- Print 4 · medio der · -4° · oscura -->
+    <g transform="rotate(-4, 63, 39)" filter="url(#ps)">
+      <rect x="52" y="31" width="22" height="16" rx="0.5"
+            fill="#ffffff" stroke="#c0bdb8" stroke-width="0.5"/>
+      <rect x="55" y="33" width="16" height="12" fill="#1a1917" opacity="0.76"/>
+    </g>
+
+    <!-- Print 5 · frente centro · +2° · hero (exposición correcta) -->
+    <g transform="rotate(2, 48, 37)" filter="url(#ps)">
+      <rect x="35" y="27" width="26" height="19" rx="0.5"
+            fill="#ffffff" stroke="#a8a5a0" stroke-width="0.7"/>
+      <rect x="38" y="30" width="20" height="14" fill="#1a1917" opacity="0.58"/>
+    </g>
+
+  </g>
+
+</svg>
