@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>photoshelf — comparativa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #f8f7f5;
+           color: #1a1917; padding: 48px; }
+    h1 { font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+         text-transform: uppercase; color: #a8a5a0; margin-bottom: 40px; }
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .panel { background: #fff; border: 1px solid #e8e6e1; border-radius: 16px;
+             padding: 28px 24px 20px; display: flex; flex-direction: column; gap: 20px; }
+    .label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+             text-transform: uppercase; color: #3b62d4; }
+    .title { font-size: 15px; font-weight: 600; margin-top: 2px; }
+    .hero  { display: flex; justify-content: center; }
+    hr { border: none; border-top: 1px solid #e8e6e1; }
+    .scale { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+    .sz    { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .sz span { font-size: 9px; color: #a8a5a0; }
+    .lockup { display: flex; align-items: center; gap: 12px; }
+    .lockup-text { font-size: 18px; letter-spacing: -0.4px; }
+    .lockup-text strong { font-weight: 600; }
+    .lockup-text em { font-weight: 400; font-style: normal; }
+    .desc { font-size: 12px; line-height: 1.7; color: #706e6a; }
+  </style>
+</head>
+<body>
+
+<h1>photoshelf — una balda vs dos baldas escalonadas</h1>
+
+<div class="compare">
+
+  <!-- A: una balda -->
+  <div class="panel">
+    <div><div class="label">Opción A</div><div class="title">Una balda · 4 cámaras</div></div>
+    <div class="hero"><img src="logo-v3a.svg" width="288" height="204"/></div>
+    <hr>
+    <div class="scale">
+      <div class="sz"><img src="logo-v3a.svg" width="192" height="136"/><span>192px</span></div>
+      <div class="sz"><img src="logo-v3a.svg" width="96"  height="68" /><span>96px</span></div>
+      <div class="sz"><img src="logo-v3a.svg" width="64"  height="45" /><span>64px</span></div>
+      <div class="sz"><img src="logo-v3a.svg" width="48"  height="34" /><span>48px</span></div>
+      <div class="sz"><img src="logo-v3a.svg" width="32"  height="23" /><span>32px</span></div>
+    </div>
+    <hr>
+    <div class="lockup">
+      <img src="logo-v3a.svg" width="72" height="51"/>
+      <span class="lockup-text"><strong>photo</strong><em>shelf</em></span>
+    </div>
+    <p class="desc">Las 4 cámaras narran la evolución de la fotografía de izq a der.
+    Más limpio y legible a tamaños pequeños.</p>
+  </div>
+
+  <!-- B: dos baldas -->
+  <div class="panel">
+    <div><div class="label">Opción B</div><div class="title">Dos baldas · 2+2 escalonadas</div></div>
+    <div class="hero"><img src="logo-v3b.svg" width="288" height="204"/></div>
+    <hr>
+    <div class="scale">
+      <div class="sz"><img src="logo-v3b.svg" width="192" height="136"/><span>192px</span></div>
+      <div class="sz"><img src="logo-v3b.svg" width="96"  height="68" /><span>96px</span></div>
+      <div class="sz"><img src="logo-v3b.svg" width="64"  height="45" /><span>64px</span></div>
+      <div class="sz"><img src="logo-v3b.svg" width="48"  height="34" /><span>48px</span></div>
+      <div class="sz"><img src="logo-v3b.svg" width="32"  height="23" /><span>32px</span></div>
+    </div>
+    <hr>
+    <div class="lockup">
+      <img src="logo-v3b.svg" width="72" height="51"/>
+      <span class="lockup-text"><strong>photo</strong><em>shelf</em></span>
+    </div>
+    <p class="desc">TLR y DSLR arriba en los extremos, rangefinder y compacta abajo en el
+    centro. Más profundidad, más carácter de vitrina de colección.</p>
+  </div>
+
+</div>
+</body>
+</html>
