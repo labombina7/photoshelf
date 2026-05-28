@@ -210,20 +210,7 @@ body {
 
 /* ── App shell ── */
 .app-shell { display: flex; flex-direction: row; min-height: 100vh; }
-.main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; position: relative; }
-/* Logo decorativo centrado en el área principal */
-.main::before {
-  content: '';
-  position: fixed;
-  top: 50%;
-  left: calc(50vw + var(--sidebar-w) / 2);
-  transform: translate(-50%, -50%);
-  width: 420px;
-  height: 371px; /* 420 × 608/687 */
-  background: url('/logo_10.png') center / contain no-repeat;
-  opacity: 0.055;
-  pointer-events: none;
-}
+.main { flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
 
 /* ── Topbar ── */
 .topbar {

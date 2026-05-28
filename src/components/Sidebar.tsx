@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap, IconChevronDown, IconCheck } from './Icons';
