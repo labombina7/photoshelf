@@ -151,25 +151,14 @@ function SidebarInner({
       </div>
 
       <div className="sidebar-section">
-        <div className="sidebar-section-label">Biblioteca</div>
-
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Link
-            href="/library"
-            onClick={handleNavClick}
-            className={`sidebar-item ${pathname === '/library' && !activeTheme && !activeFav ? 'active' : ''}`}
-            style={{ flex: 1 }}
-          >
-            <IconViewGrid />
-            Todas las fotos
-            <span className="sidebar-count">{totalPhotos.toLocaleString('es')}</span>
-          </Link>
+        <div className="sidebar-section-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          Biblioteca
           {watcher.watching && (
             <button
               onClick={toggleWatcher}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                padding: '4px 10px 4px 4px', flexShrink: 0,
+                padding: '2px 4px', flexShrink: 0,
                 display: 'flex', alignItems: 'center',
               }}
               title={
@@ -190,6 +179,16 @@ function SidebarInner({
             </button>
           )}
         </div>
+
+        <Link
+          href="/library"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/library' && !activeTheme && !activeFav ? 'active' : ''}`}
+        >
+          <IconViewGrid />
+          Todas las fotos
+          <span className="sidebar-count">{totalPhotos.toLocaleString('es')}</span>
+        </Link>
 
         <Link
           href="/timeline"
