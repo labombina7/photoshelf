@@ -6,22 +6,32 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pho
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { photoId } = await params;
-  const { name, source = 'manual' } = await req.json();
-  if (!name?.trim()) return NextResponse.json({ error: 'Name required' }, { status: 400 });
+  try {
+    const { photoId } = await params;
+    const { name, source = 'manual' } = await req.json();
+    if (!name?.trim()) return NextResponse.json({ error: 'Name required' }, { status: 400 });
 
-  const tag = addTagToPhoto(parseInt(photoId, 10), name, source);
-  return NextResponse.json({ ok: true, ...tag });
+    const tag = addTagToPhoto(parseInt(photoId, 10), name, source);
+    return NextResponse.json({ ok: true, ...tag });
+  } catch (err) {
+    console.error('[tags/photoId] Error adding tag:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ photoId: string }> }) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { photoId } = await params;
-  const { name } = await req.json();
-  if (!name) return NextResponse.json({ error: 'Name required' }, { status: 400 });
+  try {
+    const { photoId } = await params;
+    const { name } = await req.json();
+    if (!name) return NextResponse.json({ error: 'Name required' }, { status: 400 });
 
-  removeTagFromPhoto(parseInt(photoId, 10), name);
-  return NextResponse.json({ ok: true });
+    removeTagFromPhoto(parseInt(photoId, 10), name);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('[tags/photoId] Error removing tag:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

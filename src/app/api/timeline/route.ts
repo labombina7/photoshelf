@@ -42,38 +42,43 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const catalogId = session.catalogId ?? 1;
-
-  const sp     = req.nextUrl.searchParams;
-  const level  = (sp.get('level') ?? 'month') as Level;
-  const cursor = sp.get('cursor') ?? null;
-  const limit  = Math.min(parseInt(sp.get('limit') ?? '60', 10), 120);
+  const sp    = req.nextUrl.searchParams;
+  const level = (sp.get('level') ?? 'month') as Level;
 
   if (!['year', 'month', 'day'].includes(level)) {
     return NextResponse.json({ error: 'Invalid level' }, { status: 400 });
   }
 
-  const { rows, hasMore, nextCursor } = getTimelineRows(limit, cursor, catalogId);
+  try {
+    const catalogId = session.catalogId ?? 1;
+    const cursor = sp.get('cursor') ?? null;
+    const limit  = Math.min(parseInt(sp.get('limit') ?? '60', 10), 120);
 
-  // Group by period
-  const groupMap   = new Map<string, Group>();
-  const groupOrder: string[] = [];
+    const { rows, hasMore, nextCursor } = getTimelineRows(limit, cursor, catalogId);
 
-  for (const row of rows) {
-    const period = getPeriodKey(row.taken_at, level);
-    if (!groupMap.has(period)) {
-      groupMap.set(period, { label: formatLabel(period, level), period, count: 0, photos: [] });
-      groupOrder.push(period);
+    // Group by period
+    const groupMap   = new Map<string, Group>();
+    const groupOrder: string[] = [];
+
+    for (const row of rows) {
+      const period = getPeriodKey(row.taken_at, level);
+      if (!groupMap.has(period)) {
+        groupMap.set(period, { label: formatLabel(period, level), period, count: 0, photos: [] });
+        groupOrder.push(period);
+      }
+      const g = groupMap.get(period)!;
+      g.photos.push({ id: row.id, filename: row.filename, taken_at: row.taken_at });
+      g.count++;
     }
-    const g = groupMap.get(period)!;
-    g.photos.push({ id: row.id, filename: row.filename, taken_at: row.taken_at });
-    g.count++;
+
+    const sorted = groupOrder
+      .filter(p => p !== 'nodate')
+      .concat(groupOrder.includes('nodate') ? ['nodate'] : [])
+      .map(p => groupMap.get(p)!);
+
+    return NextResponse.json({ groups: sorted, nextCursor, hasMore });
+  } catch (err) {
+    console.error('[timeline] Error building timeline:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
-  const sorted = groupOrder
-    .filter(p => p !== 'nodate')
-    .concat(groupOrder.includes('nodate') ? ['nodate'] : [])
-    .map(p => groupMap.get(p)!);
-
-  return NextResponse.json({ groups: sorted, nextCursor, hasMore });
 }

@@ -533,7 +533,7 @@
   <div class="logo">📷</div>
   <h1>photoshelf — Kanban</h1>
   <span class="kbd-hint">Haz clic en una tarjeta para ver el detalle</span>
-  <span class="subtitle">2026-05-25</span>
+  <span class="subtitle">2026-05-28</span>
 </header>
 
 <div class="board">
@@ -558,9 +558,104 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">7</span>
+      <span class="col-count">15</span>
     </div>
     <div class="col-body">
+
+      <div class="card" tabindex="0" data-id="EPIC-003" onclick="openModal('EPIC-003')">
+        <div class="card-top">
+          <span class="badge badge-epic">EPIC-003</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Búsqueda unificada en el header</div>
+        <div class="card-summary">Barra universal centrada en el header — keyword, tags, eventos e IA con clasificador inteligente. Reemplaza el panel AISearch lateral.</div>
+        <div class="card-footer"><span>US-028 → … → US-034</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-028" onclick="openModal('US-028')">
+        <div class="card-top">
+          <span class="badge badge-us">US-028</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Shell de la barra en el header</div>
+        <div class="card-summary">Header global con barra de búsqueda centrada, atajo ⌘K y colapso a icono en mobile.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-029" onclick="openModal('US-029')">
+        <div class="card-top">
+          <span class="badge badge-us">US-029</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Clasificador de intención (sin Ollama)</div>
+        <div class="card-summary">Módulo heurístico que decide si la query es por año, tag, evento, fulltext o IA — sin llamar a Ollama.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-030" onclick="openModal('US-030')">
+        <div class="card-top">
+          <span class="badge badge-us">US-030</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">API de búsqueda unificada</div>
+        <div class="card-summary"><code>GET /api/search</code> — enruta la query al handler correcto y devuelve resultados con intent, fotos, tags y eventos.</div>
+        <div class="card-footer">
+          <span>Depende de:</span>
+          <span class="dep-badge">US-029</span>
+        </div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-031" onclick="openModal('US-031')">
+        <div class="card-top">
+          <span class="badge badge-us">US-031</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Página de resultados /search</div>
+        <div class="card-summary">Resultados en el área principal con URL navegable, secciones por tipo y estados de carga y vacío.</div>
+        <div class="card-footer">
+          <span>Depende de:</span>
+          <span class="dep-badge">US-028</span>
+          <span class="dep-badge">US-030</span>
+        </div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-032" onclick="openModal('US-032')">
+        <div class="card-top">
+          <span class="badge badge-us">US-032</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Búsqueda IA con indicador visual</div>
+        <div class="card-summary">Badge ✦ IA en la barra cuando el clasificador activa Ollama. Modo deep incremental desde la página de resultados.</div>
+        <div class="card-footer">
+          <span>Depende de:</span>
+          <span class="dep-badge">US-031</span>
+        </div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-033" onclick="openModal('US-033')">
+        <div class="card-top">
+          <span class="badge badge-us">US-033</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Historial y sugerencias autocomplete</div>
+        <div class="card-summary">Últimas 5 búsquedas en localStorage + sugerencias de tags y eventos desde la BD mientras escribes.</div>
+        <div class="card-footer">
+          <span>Depende de:</span>
+          <span class="dep-badge">US-028</span>
+        </div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-034" onclick="openModal('US-034')">
+        <div class="card-top">
+          <span class="badge badge-us">US-034</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Retirar AISearchPanel y botón Buscar</div>
+        <div class="card-summary">Cleanup final: eliminar el panel lateral antiguo y sus estilos una vez la búsqueda unificada esté validada.</div>
+        <div class="card-footer">
+          <span>Depende de:</span>
+          <span class="dep-badge">US-031</span>
+          <span class="dep-badge">US-032</span>
+        </div>
+      </div>
 
       <div class="card" tabindex="0" data-id="US-025" onclick="openModal('US-025')">
         <div class="card-top">
@@ -839,6 +934,453 @@
 // Card data — extracted from spec files
 // ─────────────────────────────────────────────────────────────────
 const CARDS = {
+
+  'EPIC-003': {
+    id: 'EPIC-003',
+    type: 'EPIC',
+    column: 'todo',
+    effort: 'L',
+    title: 'Búsqueda unificada en el header',
+    story: 'Como usuario de photoshelf,\nquiero una sola barra de búsqueda centrada en el header, visible desde cualquier vista,\npara encontrar fotos, tags, eventos o hacer búsquedas en lenguaje natural sin tener que saber qué tipo de búsqueda necesito.',
+    description: [
+      'Hoy photoshelf tiene dos mecanismos de búsqueda desconectados: un filtro de texto en <code>/library</code> y un panel lateral de búsqueda IA (<code>AISearchPanel</code>) accesible desde el botón "Buscar" con icono de estrella. El usuario no tiene un punto de entrada unificado, y los resultados de la búsqueda IA aparecen en un panel flotante en lugar del área principal.',
+      'Esta épica unifica toda la búsqueda en <strong>una sola barra centrada en el header</strong> que soporta búsqueda keyword (fotos, tags, eventos, proyectos) y búsqueda IA en lenguaje natural. Un <strong>clasificador heurístico</strong> decide automáticamente qué tipo de búsqueda ejecutar — sin llamar a Ollama salvo cuando es realmente necesario. Los resultados van a <code>/search</code>, con URL navegable y compartible.',
+      'Orden de ejecución: <code>US-029 + US-028</code> (paralelos) → <code>US-030</code> → <code>US-031</code> → <code>US-032 + US-033</code> → <code>US-034</code> (cleanup).'
+    ],
+    criteria: [
+      {
+        group: 'Historias hijas',
+        items: [
+          'US-028: Shell de la barra de búsqueda en el header (header global, ⌘K, mobile)',
+          'US-029: Clasificador de intención sin Ollama (year / tag / event / fulltext / ai)',
+          'US-030: API unificada GET /api/search con routing por intent',
+          'US-031: Página /search — resultados en área principal con URL navegable',
+          'US-032: Búsqueda IA con badge ✦ IA y modo deep desde la página de resultados',
+          'US-033: Historial localStorage + autocomplete de tags y eventos',
+          'US-034: Eliminación de AISearchPanel y botón "Buscar" del sidebar',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [],
+    tech: [
+      'El clasificador heurístico es la pieza clave: decide el tipo de búsqueda en < 1ms sin red. Ollama solo se llama cuando la query tiene lenguaje natural genuino (≥ 4 palabras, verbos descriptivos, "?" o "¿").',
+      'La URL <code>/search?q=...</code> hace los resultados compartibles y compatibles con el botón atrás del navegador.',
+      'El atajo ⌘K es el estándar de facto en apps modernas (Linear, Notion, GitHub). Reduce la fricción de búsqueda drásticamente.',
+    ],
+    outOfScope: [
+      'Búsqueda federada entre catálogos',
+      'Búsqueda por similitud visual (embeddings)',
+      'Filtros avanzados en la página de resultados (v2)',
+      'Búsqueda por voz',
+      'Indexación FTS5 de SQLite (mejora de rendimiento futura)',
+    ]
+  },
+
+  'US-028': {
+    id: 'US-028',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Shell de la barra de búsqueda en el header',
+    story: 'Como usuario de photoshelf,\nquiero una barra de búsqueda centrada y visible en el header de la app,\npara iniciar cualquier búsqueda desde cualquier vista sin tener que ir al sidebar.',
+    description: [
+      'Actualmente no existe un header visual global en el layout. Esta US crea el componente <code>AppHeader</code> con la barra centrada, el atajo ⌘K y el comportamiento en mobile. No conecta todavía con resultados — entrega el shell visual e interacción básica.',
+    ],
+    criteria: [
+      {
+        group: 'Layout y posición',
+        items: [
+          'Header fijo en la parte superior con tres zonas: logo (izq), barra de búsqueda (centro ~40%), acciones (der)',
+          '<code>position: sticky; top: 0</code> con z-index por encima del sidebar pero por debajo de modales',
+          'El layout integra <code>AppHeader</code> por encima del área de contenido principal',
+        ]
+      },
+      {
+        group: 'Barra de búsqueda',
+        items: [
+          'Placeholder: "Busca fotos, tags, eventos… o pregunta en lenguaje natural"',
+          'Al hacer foco (click o ⌘K), borde iluminado con <code>transition: border-color 150ms</code>',
+          'Enter o icono de lupa navega a <code>/search?q=...</code>',
+          'Escape limpia el foco y cierra el dropdown',
+          'Dropdown inline (vacío por ahora, se rellena en US-033)',
+        ]
+      },
+      {
+        group: 'Atajo de teclado',
+        items: [
+          '⌘K (Mac) / Ctrl+K (Windows/Linux) enfoca la barra desde cualquier vista',
+          'Hook <code>useSearchShortcut</code> con <code>document.addEventListener</code> en <code>useEffect</code>',
+        ]
+      },
+      {
+        group: 'Mobile',
+        items: [
+          'En < 768px la barra se colapsa a un icono de lupa',
+          'Al pulsar el icono, la barra se expande a pantalla completa',
+          'Estado local <code>expanded</code> gestionado en <code>AppHeader</code>',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/components/AppHeader.tsx', desc: 'Nuevo — header global con barra de búsqueda', isNew: true },
+      { path: 'src/hooks/useSearchShortcut.ts', desc: 'Nuevo — hook para ⌘K', isNew: true },
+      { path: 'src/app/layout.tsx', desc: 'Integrar AppHeader en el layout global' },
+    ],
+    tech: [
+      'El input usa <code>useRouter</code> de Next.js para navegar a <code>/search</code> al hacer submit.',
+      'No añadir animaciones complejas — el foco simple con CSS transition es suficiente para v1.',
+    ],
+    outOfScope: [
+      'Conectar con resultados de búsqueda reales (US-030, US-031)',
+      'Autocomplete con datos de tags/eventos (US-033)',
+      'Indicador visual de "modo IA" en la barra (US-032)',
+    ]
+  },
+
+  'US-029': {
+    id: 'US-029',
+    type: 'US',
+    column: 'todo',
+    effort: 'S',
+    title: 'Clasificador de intención de búsqueda (sin Ollama)',
+    story: 'Como desarrollador de photoshelf,\nquiero un clasificador de intención que decida el tipo de búsqueda antes de ejecutarla,\npara evitar llamadas innecesarias a Ollama y mantener la latencia por debajo de 100ms en el caso común.',
+    description: [
+      'El actual <code>AISearchPanel</code> llama siempre a <code>/api/ai/search</code>, que a su vez llama a <code>parseSearchQuery</code> de Ollama. Esto añade 1-3s de latencia incluso cuando el usuario escribe "verano" o "2022" — queries que se resuelven con SQL en < 20ms.',
+      'El clasificador es puro TypeScript sin dependencias externas, síncrono y portable (cliente + servidor). Decide el intent en < 1ms mediante reglas heurísticas por prioridad: year → tag → event → ai → fulltext.',
+    ],
+    criteria: [
+      {
+        group: 'Módulo y tipos',
+        items: [
+          'Módulo <code>src/lib/search/classifier.ts</code> con función <code>classifyQuery(query, hints): SearchIntent</code>',
+          '<code>SearchIntent</code> es un tipo discriminado: <code>year | tag | event | fulltext | ai</code>',
+          '<code>ClassifierHints</code> recibe listas de tags y eventos conocidos del llamante',
+        ]
+      },
+      {
+        group: 'Reglas de clasificación (en orden)',
+        items: [
+          'Solo 4 dígitos numéricos → <code>year</code>',
+          'Coincidencia exacta con tag conocido (normalizado) → <code>tag</code>',
+          'Coincidencia con nombre de evento → <code>event</code>',
+          'Contiene "?" o "¿" → <code>ai</code>',
+          '≥ 4 palabras → <code>ai</code>',
+          'Contiene token de lista de palabras descriptivas (colores, emociones, escenas) → <code>ai</code>',
+          'Resto → <code>fulltext</code>',
+        ]
+      },
+      {
+        group: 'Calidad',
+        items: [
+          'Tests unitarios en <code>src/lib/search/classifier.test.ts</code> con ≥ 15 casos',
+          'Normalización sin dependencias externas (trim + lowercase + map de acentos ASCII)',
+          'Función síncrona, sin llamadas de red',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/search/classifier.ts', desc: 'Nuevo — módulo de clasificación heurística', isNew: true },
+      { path: 'src/lib/search/classifier.test.ts', desc: 'Nuevo — tests unitarios ≥ 15 casos', isNew: true },
+    ],
+    tech: [
+      'La lista de palabras descriptivas (30-50 tokens: colores, emociones, escenas fotográficas) se define como constante en el módulo y puede ampliarse sin cambiar la firma.',
+      'No usar <code>Intl.Collator</code> para acentos — un map simple de caracteres es suficiente y más portable.',
+    ],
+    outOfScope: [
+      'Clasificación basada en embeddings o ML',
+      'Aprendizaje de patrones de búsqueda del usuario',
+      'Soporte de idiomas distintos del español (v1)',
+    ]
+  },
+
+  'US-030': {
+    id: 'US-030',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'API de búsqueda unificada',
+    story: 'Como cliente de la API,\nquiero un único endpoint de búsqueda que maneje todos los tipos de consulta,\npara no tener que saber de antemano si la query es por tag, evento, año o requiere IA.',
+    description: [
+      'Crea <code>GET /api/search?q=...</code> que usa el clasificador de US-029 para decidir la estrategia (year / tag / event / fulltext / ai) y devuelve resultados en un formato unificado con intent, fotos, tags y eventos.',
+      'Las búsquedas keyword (year, tag, event, fulltext) resuelven en < 100ms. Solo las búsquedas clasificadas como <code>ai</code> llaman a Ollama (1-5s). El endpoint es <code>GET</code> (no <code>POST</code>) para que la URL sea bookmarkable.',
+    ],
+    criteria: [
+      {
+        group: 'Endpoint',
+        items: [
+          '<code>GET /api/search?q={query}&catalog={id}</code> en <code>src/app/api/search/route.ts</code>',
+          'Requiere sesión autenticada (401 si no)',
+          'Query vacía → 400; query > 200 chars → truncar a 200',
+        ]
+      },
+      {
+        group: 'Routing por intent',
+        items: [
+          '<code>year</code>: SELECT photos WHERE year = ? — objetivo < 50ms',
+          '<code>tag</code>: JOIN photo_tags + tags — objetivo < 50ms',
+          '<code>event</code>: photos WHERE event LIKE ? — objetivo < 50ms',
+          '<code>fulltext</code>: LIKE sobre filename + event + tags.name — objetivo < 100ms',
+          '<code>ai</code>: llama a parseSearchQuery de Ollama — objetivo 1-5s; 503 si Ollama no disponible',
+        ]
+      },
+      {
+        group: 'Respuesta',
+        items: [
+          'Envelope: <code>{ data: { intent, isAI, query, photos[], tags[], events[], total }, meta: { duration_ms } }</code>',
+          '<code>isAI: true</code> solo cuando se ha llamado a Ollama',
+          'Máximo 200 fotos en v1 (sin paginación)',
+          'Resultados vacíos → 200 con <code>photos: []</code>, no 404',
+        ]
+      }
+    ],
+    dependencies: [
+      { id: 'US-029', name: 'Clasificador de intención', desc: 'El endpoint usa classifyQuery para decidir la estrategia sin llamar a Ollama innecesariamente.', status: 'todo' }
+    ],
+    components: [
+      { path: 'src/app/api/search/route.ts', desc: 'Nuevo — endpoint GET /api/search unificado', isNew: true },
+      { path: 'src/app/api/search/suggestions/route.ts', desc: 'Nuevo — endpoint GET /api/search/suggestions para autocomplete', isNew: true },
+      { path: 'src/lib/queries/search.ts', desc: 'Nuevo — lógica SQL extraída a capa de repositorio', isNew: true },
+    ],
+    tech: [
+      'La lógica SQL de búsqueda se extrae a <code>src/lib/queries/search.ts</code> siguiendo el patrón de capa de repositorio de US-022.',
+      'En modo fulltext, buscar también en <code>tags.name</code> para que "familia" encuentre fotos etiquetadas aunque el clasificador no lo detecte como intent tag.',
+    ],
+    outOfScope: [
+      'Paginación (v1: máximo 200 resultados)',
+      'Búsqueda deep (análisis visual foto a foto) — se mantiene en US-032',
+      'Filtros por fecha exacta, cámara, etc.',
+    ]
+  },
+
+  'US-031': {
+    id: 'US-031',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Página de resultados /search en el área principal',
+    story: 'Como usuario de photoshelf,\nquiero ver los resultados de búsqueda en el área principal de la app,\npara explorarlos con comodidad, usar el botón atrás y compartir la URL de mis resultados.',
+    description: [
+      'Crea la página <code>/search</code> que recibe la query por URL (<code>?q=...</code>), llama a <code>/api/search</code> y muestra los resultados como vista de primera clase dentro del layout normal. El header muestra la query activa. Cambiar la query actualiza la URL sin recargar la página.',
+    ],
+    criteria: [
+      {
+        group: 'Ruta y URL',
+        items: [
+          'Página en <code>src/app/search/page.tsx</code> — lee <code>searchParams.q</code>',
+          'URL: <code>/search?q={query}</code> — compartible y navegable con botón atrás',
+          'El header muestra la query activa cuando se está en /search',
+          'Cambiar la query en el header y pulsar Enter actualiza URL sin reload completo',
+        ]
+      },
+      {
+        group: 'Layout de resultados',
+        items: [
+          'Encabezado: "Resultados para \\"boda\\" — 42 fotos"',
+          'Secciones separadas cuando hay múltiples tipos: Fotos (grid) · Tags (chips) · Eventos (lista)',
+          'Grid de fotos reutiliza el componente PhotoGrid existente',
+          'Fotos clicables abren /library/{id}',
+        ]
+      },
+      {
+        group: 'Estados',
+        items: [
+          'Carga: skeleton/spinner en el área de resultados + spinner en icono de lupa del header',
+          'Vacío: "No encontramos nada para \\"xyz\\"" + sugerencias + botón "Buscar con IA" si el intent no era ai',
+          'Título de página: "\\"boda\\" — Búsqueda — photoshelf"',
+        ]
+      }
+    ],
+    dependencies: [
+      { id: 'US-028', name: 'Shell de la barra en el header', desc: 'El header con la barra de búsqueda debe existir antes de integrar la página de resultados.', status: 'todo' },
+      { id: 'US-030', name: 'API de búsqueda unificada', desc: 'La página consume GET /api/search para obtener los resultados.', status: 'todo' },
+    ],
+    components: [
+      { path: 'src/app/search/page.tsx', desc: 'Nuevo — Server Component que carga resultados SSR', isNew: true },
+      { path: 'src/app/search/SearchPageClient.tsx', desc: 'Nuevo — Client Component para actualizaciones de query', isNew: true },
+    ],
+    tech: [
+      'Carga inicial: Server Component lee searchParams.q y hace fetch a /api/search en el servidor (SSR) — sin hook de cliente para la primera carga.',
+      'URL /search sin parámetro q redirige a /library.',
+    ],
+    outOfScope: [
+      'Filtros en la página de resultados (v2)',
+      'Paginación de resultados (v1: máximo 200)',
+      'Ordenación de resultados',
+    ]
+  },
+
+  'US-032': {
+    id: 'US-032',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Búsqueda IA con indicador visual y resultados en área principal',
+    story: 'Como usuario de photoshelf,\nquiero saber cuándo una búsqueda está siendo procesada por IA y ver sus resultados de forma destacada,\npara entender la diferencia entre una búsqueda rápida y una búsqueda inteligente.',
+    description: [
+      'Cuando el clasificador (US-029) decide <code>ai</code>, la barra muestra un badge <strong>✦ IA</strong> antes de lanzar la búsqueda. Los resultados en <code>/search</code> muestran el concepto que Ollama interpretó. El modo deep (análisis visual foto a foto) es opcional y se activa manualmente desde la página de resultados.',
+    ],
+    criteria: [
+      {
+        group: 'Indicador en el header',
+        items: [
+          'Badge "✦ IA" aparece en la barra cuando el clasificador decide ai (< 50ms, antes de llamar a Ollama)',
+          'El badge usa <code>var(--accent-ai)</code> — nueva variable CSS en el tema',
+          'Durante la búsqueda, el spinner muestra "✦" en lugar del icono de lupa',
+        ]
+      },
+      {
+        group: 'Indicador en resultados',
+        items: [
+          'Encabezado muestra badge "✦ Búsqueda IA" cuando isAI: true',
+          'Línea: "La IA ha interpretado tu búsqueda como: [concepto]" (solo cuando difiere de la query)',
+          'Footer: "Búsqueda completada en 1.2s"',
+        ]
+      },
+      {
+        group: 'Modo deep (análisis visual)',
+        items: [
+          'Botón "Analizar fotos con visión IA (más lento)" en la página de resultados IA',
+          'Barra de progreso: "Analizando 50/320 fotos…"',
+          'Resultados incrementales en el grid sin recargar',
+          'Botón "Analizar 50 más" cuando quedan fotos sin analizar',
+        ]
+      },
+      {
+        group: 'Guardar temática',
+        items: [
+          'Botón "Guardar como temática" solo aparece en resultados IA',
+          'Funciona igual que en el AISearchPanel actual: nombre + asociar fotos',
+        ]
+      }
+    ],
+    dependencies: [
+      { id: 'US-031', name: 'Página de resultados /search', desc: 'El indicador IA y el modo deep se integran en la página de resultados.', status: 'todo' },
+    ],
+    components: [
+      { path: 'src/components/AppHeader.tsx', desc: 'Añadir badge ✦ IA calculado con classifyQuery en tiempo real' },
+      { path: 'src/app/search/SearchPageClient.tsx', desc: 'Añadir sección de resultados IA, modo deep incremental y guardar temática' },
+      { path: 'src/app/globals.css', desc: 'Añadir variable --accent-ai y estilos del badge ✦ IA' },
+    ],
+    tech: [
+      'El badge ✦ IA en el header se calcula en el cliente con classifyQuery (US-029) mientras el usuario escribe — debounce de 300ms.',
+      'Para el modo deep incremental, SearchPageClient hace polling o usa fetch con streaming al endpoint /api/ai/search existente.',
+    ],
+    outOfScope: [
+      'Modo deep automático sin confirmación del usuario',
+      'Comparar resultados IA vs keyword lado a lado',
+      'Explicabilidad de los resultados IA',
+    ]
+  },
+
+  'US-033': {
+    id: 'US-033',
+    type: 'US',
+    column: 'todo',
+    effort: 'S',
+    title: 'Historial de búsquedas y sugerencias autocomplete',
+    story: 'Como usuario de photoshelf,\nquiero ver mis búsquedas recientes y sugerencias de tags y eventos mientras escribo,\npara repetir búsquedas anteriores con un click y reducir los errores de escritura.',
+    description: [
+      'El shell de la barra (US-028) deja el dropdown vacío. Esta US lo rellena con historial local (<code>localStorage</code>) y sugerencias de BD — sin Ollama, sin IA. El endpoint <code>GET /api/search/suggestions</code> devuelve tags y eventos en < 50ms.',
+    ],
+    criteria: [
+      {
+        group: 'Historial de búsquedas',
+        items: [
+          'Al enfocar la barra (sin texto), dropdown muestra las últimas 5 búsquedas con icono de reloj',
+          'Guardado en <code>localStorage</code> (clave <code>photoshelf.search.history</code>, máx. 20 entradas)',
+          'Botón "Borrar historial" en el pie del dropdown',
+          'Historial se actualiza al pulsar Enter (no mientras se escribe)',
+        ]
+      },
+      {
+        group: 'Sugerencias autocomplete',
+        items: [
+          'Al escribir ≥ 2 caracteres, dropdown muestra sugerencias con debounce de 200ms',
+          'Hasta 5 tags (con conteo de fotos) + hasta 3 eventos (con año)',
+          'Datos de <code>GET /api/search/suggestions?q={query}</code> — LIKE "%q%" case-insensitive, < 50ms',
+          'Pulsar una sugerencia navega directamente a /search?q={sugerencia}',
+        ]
+      },
+      {
+        group: 'Navegación por teclado',
+        items: [
+          'Flechas ↑↓ navegan entre entradas del dropdown',
+          'Enter selecciona la entrada enfocada',
+          'Escape cierra el dropdown sin lanzar búsqueda',
+          'Dropdown con role="listbox" y aria-expanded',
+        ]
+      }
+    ],
+    dependencies: [
+      { id: 'US-028', name: 'Shell de la barra en el header', desc: 'El dropdown de sugerencias es parte del shell de la barra de búsqueda.', status: 'todo' },
+    ],
+    components: [
+      { path: 'src/components/AppHeader.tsx', desc: 'Añadir dropdown con historial y sugerencias' },
+      { path: 'src/app/api/search/suggestions/route.ts', desc: 'Nuevo — GET /api/search/suggestions', isNew: true },
+      { path: 'src/hooks/useSearchHistory.ts', desc: 'Nuevo — hook de localStorage para historial', isNew: true },
+    ],
+    tech: [
+      'Historial en localStorage con máximo de 20 entradas; al superar el límite, se elimina la entrada más antigua.',
+      'Debounce implementado con useRef + setTimeout — sin dependencias externas.',
+      'Las sugerencias no se cachean en el cliente (50ms de BD es suficientemente rápido).',
+    ],
+    outOfScope: [
+      'Sugerencias basadas en el historial de otros usuarios',
+      'Sugerencias de personas/caras detectadas',
+      'Ordenación por popularidad o frecuencia propia',
+    ]
+  },
+
+  'US-034': {
+    id: 'US-034',
+    type: 'US',
+    column: 'todo',
+    effort: 'S',
+    title: 'Retirar AISearchPanel y botón Buscar del sidebar',
+    story: 'Como mantenedor del código,\nquiero eliminar el AISearchPanel y el botón "Buscar" del sidebar una vez la búsqueda unificada esté operativa,\npara reducir la deuda técnica y evitar que el usuario tenga dos puntos de entrada de búsqueda distintos.',
+    description: [
+      'Cuando US-031 y US-032 estén desplegadas, toda la funcionalidad de <code>AISearchPanel</code> estará integrada en la barra del header y <code>/search</code>. Esta US hace el cleanup: elimina el componente, su botón de activación en el sidebar y todos sus estilos CSS.',
+      'Se ejecuta <strong>después</strong> de validar que la búsqueda unificada cubre todos los casos de uso del panel antiguo. El endpoint <code>/api/ai/search</code> se conserva temporalmente para el modo deep de US-032.',
+    ],
+    criteria: [
+      {
+        group: 'Eliminación',
+        items: [
+          'Se elimina <code>src/components/AISearchPanel.tsx</code>',
+          'Se elimina el botón <code>ai-search-trigger</code> del sidebar',
+          'Se eliminan todas las clases CSS <code>.ai-*</code> y <code>.ai-search-trigger</code> de globals.css',
+          'Se verifica que <code>IconSparkle</code> no se usa en otros sitios; si no, eliminar',
+        ]
+      },
+      {
+        group: 'Verificación',
+        items: [
+          'npm run build sin errores ni warnings de imports no usados',
+          'npm run lint sin errores',
+          'La búsqueda desde el header cubre: quick IA, deep IA, guardar temática',
+          'El sidebar no tiene espacio vacío ni elementos descuadrados',
+        ]
+      }
+    ],
+    dependencies: [
+      { id: 'US-031', name: 'Página de resultados /search', desc: 'Los resultados deben estar en el área principal antes de eliminar el panel.', status: 'todo' },
+      { id: 'US-032', name: 'Búsqueda IA con indicador visual', desc: 'El modo deep y guardar temática deben estar migrados antes del cleanup.', status: 'todo' },
+    ],
+    components: [
+      { path: 'src/components/AISearchPanel.tsx', desc: 'Eliminar' },
+      { path: 'src/components/Sidebar.tsx', desc: 'Quitar import + botón trigger ai-search-trigger' },
+      { path: 'src/app/globals.css', desc: 'Eliminar clases .ai-* y .ai-search-trigger' },
+      { path: 'src/components/Icons.tsx', desc: 'Verificar y eliminar IconSparkle si ya no se usa' },
+    ],
+    tech: [
+      'Hacer esta US en un PR separado y pequeño para que el diff sea fácil de revisar.',
+      'El endpoint /api/ai/search se mantiene — lo usa el modo deep de US-032. Añadir comentario indicando que es legado.',
+    ],
+    outOfScope: []
+  },
 
   'US-023': {
     id: 'US-023',
