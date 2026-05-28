@@ -144,15 +144,43 @@ function SidebarInner({
       <div className="sidebar-section">
         <div className="sidebar-section-label">Biblioteca</div>
 
-        <Link
-          href="/library"
-          onClick={handleNavClick}
-          className={`sidebar-item ${pathname === '/library' && !activeTheme && !activeFav ? 'active' : ''}`}
-        >
-          <IconViewGrid />
-          Todas las fotos
-          <span className="sidebar-count">{totalPhotos.toLocaleString('es')}</span>
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <Link
+            href="/library"
+            onClick={handleNavClick}
+            className={`sidebar-item ${pathname === '/library' && !activeTheme && !activeFav ? 'active' : ''}`}
+            style={{ flex: 1 }}
+          >
+            <IconViewGrid />
+            Todas las fotos
+            <span className="sidebar-count">{totalPhotos.toLocaleString('es')}</span>
+          </Link>
+          {watcher.watching && (
+            <button
+              onClick={toggleWatcher}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                padding: '4px 10px 4px 4px', flexShrink: 0,
+                display: 'flex', alignItems: 'center',
+              }}
+              title={
+                watcher.classifying
+                  ? `Clasificando fotos… (${watcher.classifyDone}/${watcher.classifyTotal}) · Clic para desactivar`
+                  : watcher.enabled
+                    ? 'Vigilando carpetas · Monitorización automática activa · Clic para desactivar'
+                    : 'Vigilancia desactivada · Clic para activar monitorización automática'
+              }
+              aria-label="Estado del vigilante de carpetas"
+            >
+              <span style={{
+                width: 7, height: 7, borderRadius: '50%',
+                background: watcher.enabled ? 'var(--tag-auto-color)' : 'var(--text-tertiary)',
+                boxShadow: watcher.enabled ? '0 0 0 3px rgba(59,98,212,0.15)' : 'none',
+                display: 'block',
+              }} />
+            </button>
+          )}
+        </div>
 
         <Link
           href="/timeline"
@@ -367,33 +395,6 @@ function SidebarInner({
       <div className="sidebar-spacer" />
 
       <div style={{ padding: '0 18px 8px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {/* Watcher toggle */}
-        {watcher.watching && (
-          <button
-            onClick={toggleWatcher}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: 7,
-              padding: '6px 10px', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)', background: 'transparent',
-              fontFamily: 'inherit', fontSize: 12, cursor: 'pointer',
-              color: watcher.enabled ? 'var(--tag-auto-color)' : 'var(--text-tertiary)',
-              borderColor: watcher.enabled ? 'var(--tag-auto-border)' : 'var(--border)',
-            }}
-            title={watcher.enabled ? 'Desactivar escaneo automático' : 'Activar escaneo automático'}
-          >
-            <span style={{
-              width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-              background: watcher.enabled ? 'var(--tag-auto-color)' : 'var(--text-tertiary)',
-              boxShadow: watcher.enabled ? '0 0 0 3px rgba(59,98,212,0.15)' : 'none',
-            }} />
-            {watcher.classifying
-              ? `Clasificando ${watcher.classifyDone}/${watcher.classifyTotal}…`
-              : watcher.enabled
-                ? 'Vigilando carpetas'
-                : 'Vigilancia desactivada'}
-          </button>
-        )}
-
         <button
           onClick={handleScan}
           disabled={running}
@@ -442,6 +443,7 @@ function SidebarInner({
               >
                 <span className="catalog-dot" />
                 <span style={{ flex: 1 }}>{cat.name}</span>
+                {cat.photo_count > 0 && <span className="sidebar-count">{cat.photo_count.toLocaleString('es')}</span>}
                 {cat.id === activeCatalogId && <IconCheck size={11} />}
               </button>
             ))}
