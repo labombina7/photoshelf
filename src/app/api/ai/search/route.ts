@@ -1,3 +1,8 @@
+/**
+ * @legacy — Endpoint mantenido para el modo deep de US-032 (DeepSearchPanel).
+ * El modo quick ha sido reemplazado por GET /api/search con intent=ai.
+ * No eliminar hasta que el modo deep se integre directamente en /api/search.
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
