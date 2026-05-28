@@ -5,5 +5,10 @@ import { getClassifyState } from '@/lib/classifyState';
 export async function GET() {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  return NextResponse.json(getClassifyState());
+  try {
+    return NextResponse.json(getClassifyState());
+  } catch (err) {
+    console.error('[classify/status] Error fetching classify state:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }

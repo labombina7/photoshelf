@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  try {
   const { scopeType, scopeValue, count = 15, tone, styles, tags: filterTags }: GenerateBody = await req.json();
   const db = getDb();
 
@@ -146,4 +147,9 @@ export async function POST(req: NextRequest) {
   insertAll();
 
   return NextResponse.json({ id: projectId, title, statement, photoCount: selectedIds.length });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    console.error('[projects/generate] Error generating project:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
