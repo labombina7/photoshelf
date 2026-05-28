@@ -31,8 +31,8 @@ export default function LoginPage() {
     <div className="login-wrap">
       <div className="login-card">
         <div className="login-logo">
-          <Image src="/logo_v9.png" alt="photoshelf" width={52} height={37} style={{ objectFit: 'contain' }} />
-          <span className="login-logo-name">photoshelf</span>
+          <Image src="/logo_10.png" alt="PhotoShelf" width={140} height={124} style={{ objectFit: 'contain' }} />
+          <span className="login-logo-name">PhotoShelf</span>
         </div>
 
         <p className="login-subtitle">Accede a tu biblioteca de fotos personal.</p>
