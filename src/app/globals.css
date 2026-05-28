@@ -55,9 +55,11 @@ body {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 0 18px 20px;
+  padding: 0 18px;
+  height: 38px;          /* 58px topbar − 20px sidebar padding-top = líneas alineadas */
   border-bottom: 1px solid var(--border-light);
   margin-bottom: 8px;
+  flex-shrink: 0;
 }
 .sidebar-logo-name {
   font-size: 15px;
