@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState } from 'react';
 import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap, IconChevronDown, IconCheck } from './Icons';
@@ -136,7 +137,7 @@ function SidebarInner({
       {mobileOpen && <div className="sidebar-overlay" onClick={onMobileClose} />}
     <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`} role="navigation" aria-label="Navegación principal">
       <div className="sidebar-logo">
-        <IconShelf size={18} />
+        <Image src="/logo_v9.png" alt="photoshelf" width={34} height={24} style={{ objectFit: 'contain' }} />
         <span className="sidebar-logo-name">photoshelf</span>
       </div>
 
