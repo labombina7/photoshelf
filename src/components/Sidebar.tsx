@@ -135,10 +135,6 @@ function SidebarInner({
     <>
       {mobileOpen && <div className="sidebar-overlay" onClick={onMobileClose} />}
     <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`} role="navigation" aria-label="Navegación principal">
-      <div className="sidebar-logo">
-        <span className="sidebar-logo-name">PhotoShelf</span>
-      </div>
-
       <div className="sidebar-section">
         <div className="sidebar-section-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           Biblioteca

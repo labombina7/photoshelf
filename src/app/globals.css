@@ -171,22 +171,14 @@ body { padding-top: var(--header-h); }
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  padding: 20px 0;
+  padding: 12px 0;
   position: sticky;
   top: var(--header-h);
   height: calc(100vh - var(--header-h));
   overflow-y: auto;
 }
-.sidebar-logo {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 0 18px;
-  height: 38px;          /* 58px topbar − 20px sidebar padding-top = líneas alineadas */
-  border-bottom: 1px solid var(--border-light);
-  margin-bottom: 8px;
-  flex-shrink: 0;
-}
+/* sidebar-logo eliminado — el logo vive ahora en AppHeader */
+.sidebar-logo { display: none; }
 .sidebar-logo-name {
   font-size: 15px;
   font-weight: 600;

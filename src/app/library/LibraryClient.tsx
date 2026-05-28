@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useTransition, useCallback, useMemo, useEffect } from 'react';
+import { useState, useTransition, useMemo, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
-import { IconSearch, IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
-import AISearchPanel from '@/components/AISearchPanel';
+import { IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -61,7 +60,6 @@ export default function LibraryClient({
   const searchParams = useSearchParams();
   const [toast, setToast] = useState('');
   const [_isPending, startTransition] = useTransition();
-  const [query, setQuery] = useState(searchParams.get('q') ?? '');
   // Restore collapsed state from sessionStorage so that navigating back from a photo
   // detail preserves which groups were open. Falls back to all-collapsed on first visit.
   const allGroupKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
@@ -105,15 +103,6 @@ export default function LibraryClient({
     params.delete('event');
     router.push(`/library?${params.toString()}`);
   }
-
-  const handleSearch = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
-    if (query.trim()) params.set('q', query.trim());
-    else params.delete('q');
-    params.delete('event');
-    router.push(`/library?${params.toString()}`);
-  }, [query, router, searchParams]);
 
   async function handleClassifyYear() {
     if (!activeYear) return;
@@ -194,7 +183,6 @@ export default function LibraryClient({
           </div>
           <span className="topbar-sub">{filteredTotal.toLocaleString('es')} fotos</span>
           <div className="topbar-spacer" />
-          <AISearchPanel />
           {canToggleView && (
             <div className="view-toggle">
               <button
@@ -213,16 +201,6 @@ export default function LibraryClient({
               </button>
             </div>
           )}
-          <form onSubmit={handleSearch}>
-            <div className="search-box">
-              <IconSearch />
-              <input
-                placeholder="Buscar fotos, tags, eventos…"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-            </div>
-          </form>
         </div>
 
         <div className="content">
