@@ -1,5 +1,7 @@
 # Feature: Hardening técnico — manejo de errores, tipos TypeScript y MIME types
 
+> Estado: ✅ Desplegada — PR #60 mergeado en main
+
 ## Historia de usuario
 
 Como desarrollador de photoshelf,
