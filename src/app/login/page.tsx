@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -31,7 +30,6 @@ export default function LoginPage() {
     <div className="login-wrap">
       <div className="login-card">
         <div className="login-logo">
-          <Image src="/logo_10.png" alt="PhotoShelf" width={140} height={124} style={{ objectFit: 'contain' }} />
           <span className="login-logo-name">PhotoShelf</span>
         </div>
 
