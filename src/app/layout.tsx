@@ -3,6 +3,7 @@ import './globals.css';
 import { ModalProvider } from '@/components/ModalProvider';
 import { ScanProvider } from '@/components/ScanProvider';
 import { ClassifyProvider } from '@/components/ClassifyProvider';
+import AppHeader from '@/components/AppHeader';
 
 export const metadata: Metadata = {
   title: 'photoshelf',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <AppHeader />
         <ModalProvider>
           <ScanProvider>
             <ClassifyProvider>
