@@ -137,7 +137,16 @@ function SidebarInner({
       {mobileOpen && <div className="sidebar-overlay" onClick={onMobileClose} />}
     <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`} role="navigation" aria-label="Navegación principal">
       <div className="sidebar-logo">
-        <Image src="/logo_v9.png" alt="photoshelf" width={34} height={24} style={{ objectFit: 'contain' }} />
+        <div style={{
+          background: '#fff',
+          border: '1px solid var(--border)',
+          borderRadius: 5,
+          padding: '2px 3px',
+          lineHeight: 0,
+          flexShrink: 0,
+        }}>
+          <Image src="/logo_v9.png" alt="photoshelf" width={42} height={30} style={{ objectFit: 'contain', display: 'block' }} />
+        </div>
         <span className="sidebar-logo-name">photoshelf</span>
       </div>
 
