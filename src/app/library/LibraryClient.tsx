@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
 import { IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -146,6 +147,62 @@ export default function LibraryClient({
   const showClassifyYear = !!activeYear && !activeFilters.event && !fav && !themeId;
   const canToggleView = !activeFilters.event && !fav;
 
+  // ── Inyectar contenido contextual en el AppHeader ──────────────────────────
+  useHeaderSlot(
+    useMemo(() => (
+      <div className="header-slot-library">
+        {/* Mobile: hamburger para abrir sidebar */}
+        <button
+          className="hamburger header-slot-hamburger"
+          onClick={() => setMobileSidebarOpen(true)}
+          title="Menú"
+        >
+          <IconMenu size={18} />
+        </button>
+
+        {/* Back button cuando se está dentro de un evento */}
+        {activeFilters.event && (
+          <button
+            className="back-btn"
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (activeYear) params.set('year', activeYear);
+              router.push(`/library?${params.toString()}`);
+            }}
+            title="Volver a carpetas"
+          >
+            ←
+          </button>
+        )}
+
+        {/* Título + contador */}
+        <span className="header-slot-title">{title}</span>
+        <span className="header-slot-sub">{filteredTotal.toLocaleString('es')} fotos</span>
+
+        {/* Vista toggle */}
+        {canToggleView && (
+          <div className="view-toggle">
+            <button
+              className={`view-toggle-btn ${effectiveViewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="Vista lista"
+            >
+              <IconViewList />
+            </button>
+            <button
+              className={`view-toggle-btn ${effectiveViewMode === 'folders' ? 'active' : ''}`}
+              onClick={() => setViewMode('folders')}
+              title="Vista carpetas"
+            >
+              <IconViewGrid />
+            </button>
+          </div>
+        )}
+      </div>
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    ), [title, filteredTotal, canToggleView, effectiveViewMode, activeFilters.event, activeYear]),
+  );
+
   return (
     <div className="app-shell">
       <Sidebar
@@ -161,48 +218,6 @@ export default function LibraryClient({
       />
 
       <div className="main">
-        <div className="topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
-              <IconMenu size={20} />
-            </button>
-            {activeFilters.event && (
-              <button
-                className="back-btn"
-                onClick={() => {
-                  const params = new URLSearchParams(searchParams.toString());
-                  params.delete('event');
-                  router.push(`/library?${params.toString()}`);
-                }}
-                title="Volver a carpetas"
-              >
-                ←
-              </button>
-            )}
-            <div className="topbar-title">{title}</div>
-          </div>
-          <span className="topbar-sub">{filteredTotal.toLocaleString('es')} fotos</span>
-          <div className="topbar-spacer" />
-          {canToggleView && (
-            <div className="view-toggle">
-              <button
-                className={`view-toggle-btn ${effectiveViewMode === 'list' ? 'active' : ''}`}
-                onClick={() => setViewMode('list')}
-                title="Vista lista"
-              >
-                <IconViewList />
-              </button>
-              <button
-                className={`view-toggle-btn ${effectiveViewMode === 'folders' ? 'active' : ''}`}
-                onClick={() => setViewMode('folders')}
-                title="Vista carpetas"
-              >
-                <IconViewGrid />
-              </button>
-            </div>
-          )}
-        </div>
-
         <div className="content">
           {years.length > 1 && (
             <>

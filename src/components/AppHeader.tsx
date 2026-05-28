@@ -1,11 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IconSearch, IconSparkle } from './Icons';
 import { useSearchShortcut } from '@/hooks/useSearchShortcut';
 import { classifyQuery } from '@/lib/search/classifier';
 import type { ClassifierHints } from '@/lib/search/classifier';
+import { HeaderSlotCtx } from './HeaderSlot';
 
 // ─── Minimal hints fetch (lazy, once per mount) ───────────────────────────────
 
@@ -23,6 +24,7 @@ async function fetchHints(): Promise<ClassifierHints> {
 
 export default function AppHeader() {
   const router = useRouter();
+  const { slot } = useContext(HeaderSlotCtx);
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState('');
   const [hints, setHints] = useState<ClassifierHints>({ tags: [], events: [] });
@@ -106,19 +108,24 @@ export default function AppHeader() {
         )}
       </form>
 
-      {/* Actions zone (mobile: search toggle) */}
-      <div className="app-header-actions">
-        <button
-          className="app-header-search-toggle"
-          onClick={() => {
-            setIsMobileExpanded(v => !v);
-            if (!isMobileExpanded) setTimeout(() => inputRef.current?.focus(), 50);
-          }}
-          aria-label="Abrir buscador"
-        >
-          <IconSearch size={16} />
-        </button>
-      </div>
+      {/* Slot zone — contenido contextual inyectado por la página activa */}
+      {slot ? (
+        <div className="app-header-slot">{slot}</div>
+      ) : (
+        /* Actions zone (mobile: search toggle) */
+        <div className="app-header-actions">
+          <button
+            className="app-header-search-toggle"
+            onClick={() => {
+              setIsMobileExpanded(v => !v);
+              if (!isMobileExpanded) setTimeout(() => inputRef.current?.focus(), 50);
+            }}
+            aria-label="Abrir buscador"
+          >
+            <IconSearch size={16} />
+          </button>
+        </div>
+      )}
     </header>
   );
 }

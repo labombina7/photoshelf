@@ -117,13 +117,38 @@ body {
   flex-shrink: 0;
 }
 
-/* Actions zone */
+/* Actions zone (fallback cuando no hay slot) */
 .app-header-actions {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
+/* Slot zone — contenido contextual inyectado por la página activa */
+.app-header-slot {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+.header-slot-library {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+.header-slot-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.2px;
+}
+.header-slot-sub {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+/* El hamburger del slot solo se muestra en móvil */
+.header-slot-hamburger { display: none; }
 
 /* Mobile toggle (hidden on desktop) */
 .app-header-search-toggle { display: none; }
