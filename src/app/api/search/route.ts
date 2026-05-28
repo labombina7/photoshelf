@@ -20,13 +20,11 @@ export async function GET(req: NextRequest) {
 
   const catalogParam = searchParams.get('catalog');
   const catalogId = catalogParam ? parseInt(catalogParam, 10) : await getActiveCatalogId();
+  const forceAI = searchParams.get('mode') === 'ai';
 
   try {
-    const start = Date.now();
-    const result = await executeSearch(q, catalogId);
-    const duration_ms = Date.now() - start;
-
-    return NextResponse.json({ data: result, meta: { duration_ms } });
+    const result = await executeSearch(q, catalogId, forceAI);
+    return NextResponse.json({ data: result, meta: { duration_ms: result.duration_ms } });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('[search] Error executing search:', message);
