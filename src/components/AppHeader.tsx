@@ -33,6 +33,16 @@ export default function AppHeader() {
     fetchHints().then(setHints);
   }, []);
 
+  // Sync input value when the /search page navigates with a query
+  useEffect(() => {
+    function onSync(e: Event) {
+      const q = (e as CustomEvent<string>).detail;
+      setValue(q);
+    }
+    window.addEventListener('photoshelf:search-sync', onSync);
+    return () => window.removeEventListener('photoshelf:search-sync', onSync);
+  }, []);
+
   // ⌘K / Ctrl+K → focus the search input
   const focusInput = useCallback(() => {
     setIsMobileExpanded(true);
