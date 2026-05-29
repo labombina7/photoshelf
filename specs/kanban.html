@@ -558,15 +558,9 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">7</span>
+      <span class="col-count">6</span>
     </div>
     <div class="col-body">
-
-      <div class="card" tabindex="0" data-id="US-035" onclick="openModal('US-035')">
-        <div class="card-top">
-          <span class="badge badge-us">US-035</span>
-          <span class="effort effort-m">M</span>
-        </div>
         <div class="card-title">Visor de foto fullscreen en mobile</div>
         <div class="card-summary">La foto ocupa toda la pantalla (fondo negro). Controles flotantes semitransparentes. Panel de info cerrado por defecto, se abre solo al pulsar ⓘ.</div>
       </div>
@@ -639,9 +633,19 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">26</span>
+      <span class="col-count">27</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="US-035" onclick="openModal('US-035')">
+        <div class="card-top">
+          <span class="badge badge-us">US-035</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-05-29</span>
+        </div>
+        <div class="card-title">Visor de foto fullscreen en mobile</div>
+        <div class="card-summary">La foto ocupa toda la pantalla (fondo negro). Controles flotantes semitransparentes. Panel de info cerrado por defecto, se abre solo al pulsar ⓘ.</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="EPIC-003" onclick="openModal('EPIC-003')">
         <div class="card-top">
@@ -1389,7 +1393,7 @@ const CARDS = {
   'US-035': {
     id: 'US-035',
     type: 'US',
-    column: 'todo',
+    column: 'done',
     effort: 'M',
     title: 'Visor de foto fullscreen en mobile',
     story: 'Como usuario de photoshelf en el móvil,\nquiero que al abrir una foto ésta ocupe toda la pantalla con fondo negro y los controles flotantes encima,\npara tener una experiencia de visor nativa similar a la app de Fotos de iOS.',

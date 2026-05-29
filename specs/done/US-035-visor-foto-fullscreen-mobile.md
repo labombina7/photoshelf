@@ -1,5 +1,7 @@
 # US-035 — Visor de foto fullscreen en mobile
 
+> Estado: ✅ Desplegada — commit 97280ea (directo a main, 2026-05-29)
+
 ## Problema
 
 En la vista de detalle de foto, en móvil la imagen ocupa solo `45vh` (o `calc(100vh - 52px)` si el sheet está cerrado), con una topbar visible que consume espacio y con el panel de información abierto por defecto tapando parte de la foto.
