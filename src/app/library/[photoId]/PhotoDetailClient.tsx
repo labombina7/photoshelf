@@ -44,17 +44,20 @@ export default function PhotoDetailClient({
 }: Props) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [mobileSheetOpen, setMobileSheetOpen] = useState(true);
+  // US-035: sheet starts closed on mobile; HUD starts visible
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+  const [hudVisible, setHudVisible] = useState(true);
 
   // Touch swipe state for horizontal photo navigation
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const touchStartTime = useRef<number>(0);
+  // Suppress HUD toggle when a swipe just fired
+  const touchWasSwipe = useRef(false);
 
   // Keyboard navigation
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      // Don't intercept when typing in inputs
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
@@ -71,15 +74,17 @@ export default function PhotoDetailClient({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [prevId, nextId, navSearch, router]);
 
-  // Reset sheet open state when photo changes
+  // Reset state when photo changes
   useEffect(() => {
-    setMobileSheetOpen(true);
+    setMobileSheetOpen(false);
+    setHudVisible(true);
   }, [photo.id]);
 
   function handlePhotoAreaTouchStart(e: React.TouchEvent) {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
     touchStartTime.current = Date.now();
+    touchWasSwipe.current = false;
   }
 
   function handlePhotoAreaTouchEnd(e: React.TouchEvent) {
@@ -88,15 +93,14 @@ export default function PhotoDetailClient({
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
     const elapsed = Date.now() - touchStartTime.current;
-    const velocityX = Math.abs(deltaX) / elapsed; // px/ms
+    const velocityX = Math.abs(deltaX) / elapsed;
 
     // Only handle horizontal swipes (not vertical scroll)
     if (Math.abs(deltaX) > Math.abs(deltaY) && (Math.abs(deltaX) > 50 || velocityX > 0.3)) {
+      touchWasSwipe.current = true;
       if (deltaX < 0 && nextId) {
-        // Swipe left → next photo
         router.push(`/library/${nextId}${navSearch}`);
       } else if (deltaX > 0 && prevId) {
-        // Swipe right → prev photo
         router.push(`/library/${prevId}${navSearch}`);
       }
     }
@@ -105,12 +109,26 @@ export default function PhotoDetailClient({
     touchStartY.current = null;
   }
 
-  function handleBottomSheetClose() {
-    setMobileSheetOpen(false);
+  // Tap on the fullscreen viewer bg → toggle HUD (ignore swipes)
+  function handleViewerTap() {
+    if (touchWasSwipe.current) return;
+    setHudVisible(v => !v);
+  }
+
+  function handleMobileInfoOpen(e: React.MouseEvent) {
+    e.stopPropagation();
+    setMobileSheetOpen(true);
+    setHudVisible(true);
+  }
+
+  function handleBackClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    router.push(backHref);
   }
 
   return (
-    <div className="app-shell">
+    // US-035: detail-viewer-shell used by CSS to hide .main on ≤640px
+    <div className="app-shell detail-viewer-shell">
       {/* Sidebar drawer (mobile) / static (desktop) */}
       <Sidebar
         themes={sidebarThemes}
@@ -123,7 +141,6 @@ export default function PhotoDetailClient({
         catalogs={sidebarCatalogs}
         activeCatalogId={activeCatalogId}
       />
-      {/* Mobile sidebar overlay */}
       {mobileSidebarOpen && (
         <div
           className="sidebar-overlay"
@@ -132,6 +149,77 @@ export default function PhotoDetailClient({
         />
       )}
 
+      {/* ══ Mobile fullscreen viewer (US-035, ≤640px) ═══════════════════ */}
+      {/* Hidden on desktop/tablet via CSS; activated on ≤640px */}
+      <div className="photo-viewer-mobile">
+        {/* Full-screen tap + swipe area */}
+        <div
+          className="photo-viewer-bg"
+          onTouchStart={handlePhotoAreaTouchStart}
+          onTouchEnd={handlePhotoAreaTouchEnd}
+          onClick={handleViewerTap}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/api/photos/${photo.id}/thumbnail?size=1920&fit=inside`}
+            alt={photo.filename}
+            className="photo-viewer-img"
+            decoding="async"
+          />
+        </div>
+
+        {/* HUD: top gradient bar — back button + info button */}
+        <div className={`photo-viewer-hud-top${hudVisible ? '' : ' photo-viewer-hud--hidden'}`}>
+          <button
+            className="photo-viewer-btn"
+            onClick={handleBackClick}
+            aria-label={`Volver a ${backLabel}`}
+          >
+            ← {backLabel}
+          </button>
+          <button
+            className="photo-viewer-btn"
+            onClick={handleMobileInfoOpen}
+            aria-label="Información de la foto"
+          >
+            ⓘ Info
+          </button>
+        </div>
+
+        {/* Navigation: prev arrow */}
+        {prevId && (
+          <Link
+            href={`/library/${prevId}${navSearch}`}
+            className={`photo-viewer-nav photo-viewer-nav--prev${hudVisible ? '' : ' photo-viewer-hud--hidden'}`}
+            aria-label="Foto anterior"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <IconChevronLeft size={30} />
+          </Link>
+        )}
+
+        {/* Navigation: next arrow */}
+        {nextId && (
+          <Link
+            href={`/library/${nextId}${navSearch}`}
+            className={`photo-viewer-nav photo-viewer-nav--next${hudVisible ? '' : ' photo-viewer-hud--hidden'}`}
+            aria-label="Foto siguiente"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <IconChevronRight size={30} />
+          </Link>
+        )}
+
+        {/* Info bottom sheet — opens when ⓘ is pressed */}
+        {mobileSheetOpen && (
+          <BottomSheet onClose={() => setMobileSheetOpen(false)}>
+            <DetailPanel photo={photo} allThemes={allThemes} />
+          </BottomSheet>
+        )}
+      </div>
+
+      {/* ══ Desktop + tablet layout (≥641px) ═══════════════════════════ */}
+      {/* Hidden on ≤640px via CSS (.detail-viewer-shell > .main { display: none }) */}
       <div className="main">
         <div className="detail-topbar">
           {/* Hamburger — shown only on mobile via CSS */}
@@ -173,7 +261,7 @@ export default function PhotoDetailClient({
         </div>
 
         <div className="detail-body">
-          {/* Photo area with touch handlers */}
+          {/* Photo area with touch handlers (tablet 641–768px + desktop) */}
           <div
             className="detail-photo-area"
             onTouchStart={handlePhotoAreaTouchStart}
@@ -194,7 +282,7 @@ export default function PhotoDetailClient({
               ↓ Original
             </a>
 
-            {/* Swipe chevron indicators — only shown on mobile via CSS */}
+            {/* Swipe chevron indicators — only shown on tablet via CSS */}
             {prevId && (
               <div className="swipe-chevron swipe-chevron--prev" aria-hidden="true">
                 <IconChevronLeft size={16} />
@@ -208,32 +296,31 @@ export default function PhotoDetailClient({
           </div>
 
           {/* Desktop sidebar: always visible */}
-          {/* Mobile: DetailPanel inside BottomSheet (when open) */}
           <div className="detail-panel-desktop">
             <DetailPanel photo={photo} allThemes={allThemes} />
           </div>
 
-          {mobileSheetOpen ? (
-            <div className="detail-panel-mobile">
-              <BottomSheet onClose={handleBottomSheetClose}>
+          {/* Tablet (641–768px): bottom sheet or FAB */}
+          <div className="detail-panel-mobile">
+            {mobileSheetOpen ? (
+              <BottomSheet onClose={() => setMobileSheetOpen(false)}>
                 <DetailPanel photo={photo} allThemes={allThemes} />
               </BottomSheet>
-            </div>
-          ) : (
-            /* FAB to reopen the info sheet after dismissing it */
-            <button
-              className="mobile-info-fab"
-              onClick={() => setMobileSheetOpen(true)}
-              aria-label="Ver información de la foto"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="8" strokeWidth="3" />
-                <line x1="12" y1="12" x2="12" y2="16" />
-              </svg>
-            </button>
-          )}
+            ) : (
+              <button
+                className="mobile-info-fab"
+                onClick={() => setMobileSheetOpen(true)}
+                aria-label="Ver información de la foto"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="8" strokeWidth="3" />
+                  <line x1="12" y1="12" x2="12" y2="16" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
