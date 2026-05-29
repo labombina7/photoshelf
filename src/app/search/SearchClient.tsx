@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IconSparkle } from '@/components/Icons';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { SearchResult, SearchPhotoRow, TagMatch, EventMatch } from '@/lib/search/execute';
 
 // ─── Sync header ──────────────────────────────────────────────────────────────
@@ -229,10 +230,30 @@ function EmptyResult({ query, isAI }: { query: string; isAI: boolean }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function SearchClient({ result }: { result: SearchResult }) {
+  const router = useRouter();
   const { query, intent, isAI, aiConcept, photos, tags, events, total, duration_ms } = result;
 
   const hasSections = (photos.length > 0 ? 1 : 0) + (tags.length > 0 ? 1 : 0) + (events.length > 0 ? 1 : 0) > 1;
   const isEmpty     = total === 0 && tags.length === 0 && events.length === 0;
+
+  // ── Slot mobile: botón atrás + título ───────────────────────────────────────
+  useHeaderSlot(useMemo(() => (
+    <div className="header-slot-library">
+      <button
+        className="back-btn header-slot-hamburger"
+        onClick={() => router.back()}
+        aria-label="Volver"
+        title="Volver"
+      >
+        ←
+      </button>
+      <span className="header-slot-title">Búsqueda</span>
+      {total > 0 && (
+        <span className="header-slot-sub">{total} foto{total !== 1 ? 's' : ''}</span>
+      )}
+    </div>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [total]));
 
   return (
     <>

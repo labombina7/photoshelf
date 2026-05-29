@@ -157,7 +157,7 @@ body {
 @media (max-width: 640px) {
   .app-header-logo   { display: none; }
   .app-header-search { display: none; }
-  .app-header { padding: 0 12px; justify-content: flex-end; }
+  .app-header { padding: 0 12px; justify-content: flex-start; }
 
   /* ── Floating Action Button (lupa) ── */
   .mobile-search-fab {
