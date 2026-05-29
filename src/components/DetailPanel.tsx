@@ -210,7 +210,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
             onChange={(e) => setNewTag(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') addTag(); }}
           />
-          <button className="btn-small" onClick={addTag}>+</button>
+          <button className="btn-small" onClick={addTag} aria-label="Añadir etiqueta">Añadir</button>
         </div>
       </div>
 

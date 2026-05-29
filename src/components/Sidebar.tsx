@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
-import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap, IconChevronDown, IconCheck } from './Icons';
+import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconChevronDown, IconCheck } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -220,7 +220,7 @@ function SidebarInner({
             onClick={handleNavClick}
             className={`sidebar-item ${searchParams.get('untagged') ? 'active' : ''}`}
           >
-            <IconSearch />
+            <IconTagEmpty />
             Sin clasificar
             <span className="sidebar-count">{untaggedCount}</span>
           </Link>
@@ -391,7 +391,7 @@ function SidebarInner({
           onClick={handleNavClick}
           className={`sidebar-item ${pathname === '/settings/catalogs' ? 'active' : ''}`}
         >
-          <IconFolder size={14} />
+          <IconViewGrid size={14} />
           Catálogos
         </Link>
       </div>
@@ -410,7 +410,7 @@ function SidebarInner({
             cursor: running ? 'not-allowed' : 'pointer', opacity: running ? 0.6 : 1,
           }}
         >
-          <IconRefresh />
+          {running ? <span className="spinner dark" aria-hidden="true" /> : <IconRefresh />}
           {running ? 'Escaneando…' : 'Reescanear biblioteca'}
         </button>
       </div>

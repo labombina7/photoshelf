@@ -191,7 +191,11 @@ export default function PhotoDetailClient({
             onClick={handleMobileInfoOpen}
             aria-label="Información de la foto"
           >
-            ⓘ
+            <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="8" />
+              <line x1="12" y1="12" x2="12" y2="16" />
+            </svg>
           </button>
         </div>
 
@@ -291,7 +295,7 @@ export default function PhotoDetailClient({
               className="download-original-btn"
               title="Descargar original"
             >
-              ↓ Original
+              Descargar original{photo.size_bytes ? ` (${(photo.size_bytes / 1024 / 1024).toFixed(1)} MB)` : ''}
             </a>
 
             {/* Swipe chevron indicators — only shown on tablet via CSS */}

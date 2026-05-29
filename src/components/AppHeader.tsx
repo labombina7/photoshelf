@@ -36,12 +36,19 @@ export default function AppHeader() {
   const [dropdownOpen,     setDropdownOpen]     = useState(false);
   const [focusedIndex,     setFocusedIndex]     = useState(-1);
   const [mobileSheetOpen,  setMobileSheetOpen]  = useState(false);
+  const [searchShortcut,   setSearchShortcut]   = useState('⌘K');
 
   const { recent, push: pushHistory, clear: clearHistory } = useSearchHistory();
 
   // Load hints once on mount
   useEffect(() => {
     fetchHints().then(setHints);
+  }, []);
+
+  // Detect OS to show correct keyboard shortcut
+  useEffect(() => {
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform) || navigator.userAgent.includes('Mac');
+    setSearchShortcut(isMac ? '⌘K' : 'Ctrl+K');
   }, []);
 
   // Sync input value when /search page dispatches a sync event
@@ -181,7 +188,7 @@ export default function AppHeader() {
             onChange={e => { setValue(e.target.value); setFocusedIndex(-1); }}
             onFocus={() => setDropdownOpen(true)}
             onKeyDown={handleKeyDown}
-            placeholder="Buscar fotos, tags, eventos… (⌘K)"
+            placeholder={`Buscar fotos, tags, eventos… (${searchShortcut})`}
             className="app-header-input"
             autoComplete="off"
             spellCheck={false}
