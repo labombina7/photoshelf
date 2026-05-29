@@ -69,3 +69,6 @@ Esta US crea el **componente `AppHeader`** con la barra centrada. No conecta tod
 - Conectar con resultados de búsqueda reales (US-030, US-031)
 - Autocomplete con datos de tags/eventos (US-033)
 - Indicador visual de "modo IA" en la barra (US-032)
+---
+
+> Estado: ✅ Desplegada

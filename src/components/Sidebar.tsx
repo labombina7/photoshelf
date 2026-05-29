@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTimeline, IconStats, IconMap, IconChevronDown, IconCheck } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
@@ -55,6 +55,17 @@ function SidebarInner({
   const [editColor, setEditColor] = useState('');
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [eventOpen,   setEventOpen]   = useState(false);
+
+  // Listen for event-based open requests (e.g. from pages that can't pass props)
+  useEffect(() => {
+    function onOpen() { setEventOpen(true); }
+    window.addEventListener('photoshelf:sidebar-open', onOpen);
+    return () => window.removeEventListener('photoshelf:sidebar-open', onOpen);
+  }, []);
+
+  const isMobileOpen = mobileOpen || eventOpen;
+  function closeMobile() { setEventOpen(false); onMobileClose?.(); }
 
   const activeCatalog = catalogs.find(c => c.id === activeCatalogId);
 
@@ -128,13 +139,13 @@ function SidebarInner({
   }
 
   function handleNavClick() {
-    onMobileClose?.();
+    closeMobile();
   }
 
   return (
     <>
-      {mobileOpen && <div className="sidebar-overlay" onClick={onMobileClose} />}
-    <aside className={`sidebar${mobileOpen ? ' mobile-open' : ''}`} role="navigation" aria-label="Navegación principal">
+      {isMobileOpen && <div className="sidebar-overlay" onClick={closeMobile} />}
+    <aside className={`sidebar${isMobileOpen ? ' mobile-open' : ''}`} role="navigation" aria-label="Navegación principal">
       <div className="sidebar-section">
         <div className="sidebar-section-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           Biblioteca

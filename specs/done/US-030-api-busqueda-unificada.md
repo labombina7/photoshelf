@@ -98,3 +98,6 @@ Esta US crea `GET /api/search?q=...` que usa el clasificador de US-029 para deci
 - Búsqueda `deep` (análisis visual foto a foto con Ollama) — eso se mantiene como opción en la página de resultados (US-032)
 - Filtros por fecha exacta, cámara, etc.
 - Búsqueda cross-catálogo
+---
+
+> Estado: ✅ Desplegada

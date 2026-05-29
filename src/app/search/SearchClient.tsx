@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { IconSparkle } from '@/components/Icons';
+import { IconSparkle, IconMenu } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { SearchResult, SearchPhotoRow, TagMatch, EventMatch } from '@/lib/search/execute';
 
@@ -240,12 +240,12 @@ export default function SearchClient({ result }: { result: SearchResult }) {
   useHeaderSlot(useMemo(() => (
     <div className="header-slot-library">
       <button
-        className="back-btn header-slot-hamburger"
-        onClick={() => router.back()}
-        aria-label="Volver"
-        title="Volver"
+        className="header-slot-hamburger"
+        onClick={() => window.dispatchEvent(new CustomEvent('photoshelf:sidebar-open'))}
+        aria-label="Abrir menú"
+        title="Menú"
       >
-        ←
+        <IconMenu size={18} />
       </button>
       <span className="header-slot-title">Búsqueda</span>
       {total > 0 && (

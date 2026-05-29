@@ -46,7 +46,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       />
 
       <main className="main" role="main" aria-label="Resultados de búsqueda">
-        <div className="topbar">
+        <div className="topbar topbar--search-desktop">
           <span className="topbar-title">Búsqueda</span>
           <span className="topbar-sub">{q}</span>
         </div>

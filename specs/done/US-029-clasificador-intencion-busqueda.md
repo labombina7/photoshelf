@@ -86,3 +86,6 @@ El clasificador es la pieza clave de EPIC-003: decide el tipo de búsqueda en el
 - Clasificación basada en embeddings o ML (v2)
 - Aprendizaje de los patrones de búsqueda del usuario
 - Clasificación de queries en otros idiomas (v1 asume español)
+---
+
+> Estado: ✅ Desplegada

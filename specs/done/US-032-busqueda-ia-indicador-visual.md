@@ -78,3 +78,6 @@ Además, la búsqueda IA profunda (análisis visual foto a foto con Ollama) pued
 - Modo profundo automático sin confirmación del usuario
 - Comparar resultados IA vs resultados keyword lado a lado
 - Explicabilidad de los resultados IA (por qué apareció esta foto)
+---
+
+> Estado: ✅ Desplegada
