@@ -211,46 +211,38 @@ body {
     animation: mobile-fade-in 0.2s ease both;
   }
 
-  /* ── Bottom sheet — flex column: sugerencias arriba, input abajo ── */
+  /* ── Bottom sheet — sin flex: block flow + position fixed bottom 0
+     El sheet crece hacia arriba según su contenido; no hay espacio gris. ── */
   .mobile-search-sheet {
     position: fixed;
     left: 0; right: 0; bottom: 0;
     background: var(--surface);
     border-radius: 20px 20px 0 0;
     z-index: 120;
-    /* flex column: suggestions expand, form stays at bottom */
-    display: flex;
-    flex-direction: column;
-    max-height: 85dvh;
+    /* sin display:flex — block flow es suficiente */
     animation: mobile-sheet-up 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
     transform: translate3d(0, 0, 0);
     will-change: transform;
   }
 
-  /* Scrollable suggestions area at the top of the sheet.
-     flex: 0 1 auto → only as tall as content (no grey gap);
-     max-height caps it so long lists scroll instead of pushing the input off-screen */
+  /* Área de sugerencias: scrollea si hay muchos items, nada de espacio vacío */
   .mobile-search-sheet-suggestions {
-    flex: 0 1 auto;
+    max-height: 55dvh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 0 16px;
-    max-height: 55dvh;
-    min-height: 0;
   }
 
-  /* Drag handle just above the input */
+  /* Drag handle — entre las sugerencias y el input */
   .mobile-search-sheet-handle {
     width: 36px; height: 4px;
     background: var(--border2);
     border-radius: 2px;
     margin: 10px auto 10px;
-    flex-shrink: 0;
   }
 
-  /* Input form — pinned at bottom, never scrolls away */
+  /* Input — siempre al fondo, justo encima del teclado */
   .mobile-search-sheet-form {
-    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: 10px;
