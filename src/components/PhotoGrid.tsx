@@ -201,12 +201,17 @@ function EventGroupBlock({
                   href={`/library/${photo.id}${currentParams ? `?${currentParams}` : ''}`}
                   className="photo-item"
                 >
+                  <div className="photo-skeleton" aria-hidden="true" />
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`/api/photos/${photo.id}/thumbnail?size=300`}
                     alt={photo.tags.length > 0 ? photo.tags.slice(0, 3).map(t => t.name).join(', ') : photo.filename}
                     loading="lazy"
                     decoding="async"
+                    onLoad={(e) => {
+                      e.currentTarget.classList.add('loaded');
+                      (e.currentTarget.previousElementSibling as HTMLElement).style.display = 'none';
+                    }}
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                   {previewTags.length > 0 && (
