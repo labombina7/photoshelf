@@ -176,23 +176,22 @@ export default function AppHeader() {
         />
       </form>
 
-      {/* Slot / Actions */}
-      {slot ? (
-        <div className="app-header-slot">{slot}</div>
-      ) : (
-        <div className="app-header-actions">
-          <button
-            className="app-header-search-toggle"
-            onClick={() => {
-              setIsMobileExpanded(v => !v);
-              if (!isMobileExpanded) setTimeout(() => inputRef.current?.focus(), 50);
-            }}
-            aria-label="Abrir buscador"
-          >
-            <IconSearch size={16} />
-          </button>
-        </div>
-      )}
+      {/* Slot — contenido contextual de la página activa */}
+      {slot && <div className="app-header-slot">{slot}</div>}
+
+      {/* Actions — el toggle se renderiza siempre; en desktop está oculto por CSS */}
+      <div className="app-header-actions">
+        <button
+          className="app-header-search-toggle"
+          onClick={() => {
+            setIsMobileExpanded(v => !v);
+            if (!isMobileExpanded) setTimeout(() => inputRef.current?.focus(), 50);
+          }}
+          aria-label="Abrir buscador"
+        >
+          <IconSearch size={16} />
+        </button>
+      </div>
     </header>
   );
 }
