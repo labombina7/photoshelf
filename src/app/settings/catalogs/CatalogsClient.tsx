@@ -152,7 +152,7 @@ export default function CatalogsClient({
                 padding: '10px 14px',
                 border: `1px solid ${cat.id === activeCatalogId ? 'var(--accent)' : 'var(--border)'}`,
                 borderRadius: 'var(--radius-sm)',
-                background: cat.id === activeCatalogId ? 'rgba(var(--accent-rgb, 59,98,212), 0.06)' : 'transparent',
+                background: cat.id === activeCatalogId ? 'rgba(var(--accent-rgb), 0.06)' : 'transparent',
               }}>
                 {editingId === cat.id ? (
                   <>
