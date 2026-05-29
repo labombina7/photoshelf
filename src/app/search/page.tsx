@@ -8,7 +8,7 @@ import Sidebar from '@/components/Sidebar';
 import SearchClient from './SearchClient';
 
 interface SearchPageProps {
-  searchParams: Promise<{ q?: string; intent?: string }>;
+  searchParams: Promise<{ q?: string; intent?: string; mode?: string }>;
 }
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
@@ -30,7 +30,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   const catalogId = await getActiveCatalogId();
   const sidebar   = getSidebarData(catalogId);
-  const result    = await executeSearch(q, catalogId);
+  const forceAI   = sp.mode === 'ai';
+  const result    = await executeSearch(q, catalogId, forceAI);
 
   return (
     <div className="app-shell">

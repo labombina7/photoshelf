@@ -38,10 +38,13 @@ export interface SearchResult {
   intent: SearchIntentType;
   query: string;
   isAI: boolean;
+  /** Concept extracted by Ollama (only when isAI: true and different from query) */
+  aiConcept?: string;
   photos: SearchPhotoRow[];
   tags: TagMatch[];
   events: EventMatch[];
   total: number;
+  duration_ms: number;
 }
 
 const PHOTO_LIMIT = 200;
@@ -129,10 +132,10 @@ function searchFulltext(query: string, catalogId: number): SearchPhotoRow[] {
   ).all(catalogId, like, like, like) as SearchPhotoRow[];
 }
 
-async function searchAI(query: string, catalogId: number): Promise<SearchPhotoRow[]> {
-  const { year, tags } = await parseSearchQuery(query);
+async function searchAI(query: string, catalogId: number): Promise<{ photos: SearchPhotoRow[]; concept: string }> {
+  const { year, tags, concept } = await parseSearchQuery(query);
 
-  if (tags.length === 0 && !year) return [];
+  if (tags.length === 0 && !year) return { photos: [], concept };
 
   const db = getDb();
   let sql: string;
@@ -156,7 +159,7 @@ async function searchAI(query: string, catalogId: number): Promise<SearchPhotoRo
   }
 
   sql += ` ORDER BY p.taken_at ASC, p.filename ASC LIMIT ${PHOTO_LIMIT}`;
-  return db.prepare(sql).all(...params) as SearchPhotoRow[];
+  return { photos: db.prepare(sql).all(...params) as SearchPhotoRow[], concept };
 }
 
 // ─── Función principal ────────────────────────────────────────────────────────
@@ -164,13 +167,16 @@ async function searchAI(query: string, catalogId: number): Promise<SearchPhotoRo
 export async function executeSearch(
   query: string,
   catalogId = 1,
+  forceAI = false,
 ): Promise<SearchResult> {
-  const raw = query.trim().slice(0, 200);
+  const start = Date.now();
+  const raw   = query.trim().slice(0, 200);
   const hints = loadHints(catalogId);
-  const intent = classifyQuery(raw, hints);
+  const intent = forceAI ? { type: 'ai' as const } : classifyQuery(raw, hints);
 
   let photos: SearchPhotoRow[] = [];
   let isAI = false;
+  let aiConcept: string | undefined;
   let tags: TagMatch[] = [];
   let events: EventMatch[] = [];
 
@@ -196,10 +202,13 @@ export async function executeSearch(
       events = matchingEvents(raw, catalogId);
       break;
 
-    case 'ai':
-      photos = await searchAI(raw, catalogId);
-      isAI = true;
+    case 'ai': {
+      const aiResult = await searchAI(raw, catalogId);
+      photos    = aiResult.photos;
+      aiConcept = aiResult.concept !== raw ? aiResult.concept : undefined;
+      isAI      = true;
       break;
+    }
   }
 
   return {
@@ -210,5 +219,7 @@ export async function executeSearch(
     tags,
     events,
     total: photos.length,
+    aiConcept,
+    duration_ms: Date.now() - start,
   };
 }
