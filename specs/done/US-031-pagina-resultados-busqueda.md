@@ -76,3 +76,6 @@ Esta US crea la página `/search` que recibe la query por URL, llama a `/api/sea
 - Paginación de resultados — v1 muestra hasta 200
 - Ordenación de resultados — v1 usa el orden devuelto por la API
 - Guardar búsquedas como temáticas — se mantiene en US-032 solo para resultados IA
+---
+
+> Estado: ✅ Desplegada

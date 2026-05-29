@@ -158,6 +158,13 @@ body {
   .app-header-logo   { display: none; }
   .app-header-search { display: none; }
   .app-header { padding: 0 12px; justify-content: flex-start; }
+  /* Show hamburger button injected into header slot from pages (search, etc.) */
+  .header-slot-hamburger {
+    display: flex; align-items: center; justify-content: center;
+    background: none; border: none; cursor: pointer;
+    color: var(--text); padding: 4px; border-radius: 6px;
+    -webkit-tap-highlight-color: transparent;
+  }
 
   /* ── Floating Action Button (lupa) ── */
   .mobile-search-fab {
@@ -204,30 +211,43 @@ body {
     animation: mobile-fade-in 0.2s ease both;
   }
 
-  /* ── Bottom sheet ── */
+  /* ── Bottom sheet — flex column: sugerencias arriba, input abajo ── */
   .mobile-search-sheet {
     position: fixed;
     left: 0; right: 0; bottom: 0;
     background: var(--surface);
     border-radius: 20px 20px 0 0;
     z-index: 120;
-    padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+    /* flex column: suggestions expand, form stays at bottom */
+    display: flex;
+    flex-direction: column;
     max-height: 85dvh;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
     animation: mobile-sheet-up 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
     transform: translate3d(0, 0, 0);
     will-change: transform;
   }
 
+  /* Scrollable suggestions area at the top of the sheet */
+  .mobile-search-sheet-suggestions {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 16px;
+    min-height: 0; /* critical for flex overflow */
+  }
+
+  /* Drag handle just above the input */
   .mobile-search-sheet-handle {
     width: 36px; height: 4px;
     background: var(--border2);
     border-radius: 2px;
-    margin: 0 auto 14px;
+    margin: 10px auto 10px;
+    flex-shrink: 0;
   }
 
+  /* Input form — pinned at bottom, never scrolls away */
   .mobile-search-sheet-form {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -236,7 +256,7 @@ body {
     border-radius: 12px;
     padding: 0 14px;
     height: 48px;
-    margin-bottom: 8px;
+    margin: 0 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
     transition: border-color 0.15s;
   }
   .mobile-search-sheet-form:focus-within { border-color: #b0ada8; }
@@ -1166,6 +1186,8 @@ body { padding-top: var(--header-h); }
   /* ── Topbar ── */
   .hamburger { display: flex; align-items: center; }
   .topbar { padding: 0 12px; gap: 6px; min-height: 52px; }
+  /* On search page the topbar is redundant with the header slot — hide it on mobile */
+  .topbar--search-desktop { display: none; }
   .topbar-title { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
   .topbar-sub { display: none; }
   .view-toggle { display: none; }

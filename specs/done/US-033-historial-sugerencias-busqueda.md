@@ -84,3 +84,6 @@ No se usa Ollama ni ninguna IA en esta US. Todo es local o SQL simple.
 - Sugerencias basadas en el historial de búsquedas de otros usuarios
 - Sugerencias de personas/caras detectadas
 - Ordenación de sugerencias por popularidad o frecuencia propia
+---
+
+> Estado: ✅ Desplegada

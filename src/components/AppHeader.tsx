@@ -65,10 +65,24 @@ export default function AppHeader() {
     return () => document.removeEventListener('pointerdown', onPointerDown);
   }, []);
 
-  // Lock body scroll when mobile sheet is open
+  // Lock body scroll when mobile sheet is open (iOS-safe technique)
   useEffect(() => {
-    document.body.style.overflow = mobileSheetOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (mobileSheetOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.cssText = `overflow:hidden;position:fixed;top:-${scrollY}px;width:100%`;
+      document.body.dataset.scrollY = String(scrollY);
+    } else {
+      const scrollY = parseInt(document.body.dataset.scrollY ?? '0', 10);
+      document.body.style.cssText = '';
+      delete document.body.dataset.scrollY;
+      window.scrollTo(0, scrollY);
+    }
+    return () => {
+      const scrollY = parseInt(document.body.dataset.scrollY ?? '0', 10);
+      document.body.style.cssText = '';
+      delete document.body.dataset.scrollY;
+      if (scrollY) window.scrollTo(0, scrollY);
+    };
   }, [mobileSheetOpen]);
 
   // ⌘K / Ctrl+K → focus
@@ -220,17 +234,31 @@ export default function AppHeader() {
             aria-hidden="true"
           />
 
-          {/* Sheet */}
+          {/* Sheet — flex column: suggestions fill top, input pinned to bottom */}
           <div
             className="mobile-search-sheet"
             role="dialog"
             aria-modal="true"
             aria-label="Buscador"
           >
-            {/* Drag handle */}
+            {/* Suggestions scroll area (above input) */}
+            <div className="mobile-search-sheet-suggestions">
+              <SearchDropdown
+                open={true}
+                query={value}
+                history={recent()}
+                onSelect={navigate}
+                onClearHistory={clearHistory}
+                focusedIndex={focusedIndex}
+                setFocusedIndex={setFocusedIndex}
+                inline={true}
+              />
+            </div>
+
+            {/* Drag handle (above input) */}
             <div className="mobile-search-sheet-handle" />
 
-            {/* Input row */}
+            {/* Input row — pinned at bottom */}
             <form
               className="mobile-search-sheet-form"
               onSubmit={handleMobileSubmit}
@@ -270,18 +298,6 @@ export default function AppHeader() {
                 </button>
               )}
             </form>
-
-            {/* Suggestions inline */}
-            <SearchDropdown
-              open={true}
-              query={value}
-              history={recent()}
-              onSelect={navigate}
-              onClearHistory={clearHistory}
-              focusedIndex={focusedIndex}
-              setFocusedIndex={setFocusedIndex}
-              inline={true}
-            />
           </div>
         </>
       )}

@@ -65,3 +65,6 @@ Esta US se ejecuta **después** de validar que la búsqueda unificada cubre todo
 - Hacer esta US en un PR separado y pequeño para que el diff sea fácil de revisar
 - Ejecutar el linter después de la eliminación: `npm run lint`
 - No eliminar el endpoint `/api/ai/search` todavía — puede reutilizarse para el modo deep
+---
+
+> Estado: ✅ Desplegada
