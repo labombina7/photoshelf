@@ -52,6 +52,22 @@ export default function PhotoDetailClient({
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [hudVisible, setHudVisible] = useState(true);
 
+  // US-040: resolve back href/label from sessionStorage (preserves origin URL exactly)
+  const [resolvedBackHref, setResolvedBackHref] = useState(backHref);
+  const [resolvedBackLabel, setResolvedBackLabel] = useState(backLabel);
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('photoshelf_detail_origin');
+      if (stored) {
+        const { href, label } = JSON.parse(stored) as { href: string; label: string };
+        setResolvedBackHref(href);
+        setResolvedBackLabel(label);
+      }
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Touch swipe state for horizontal photo navigation
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -126,9 +142,14 @@ export default function PhotoDetailClient({
     setHudVisible(true);
   }
 
+  function clearOrigin() {
+    try { sessionStorage.removeItem('photoshelf_detail_origin'); } catch {}
+  }
+
   function handleBackClick(e: React.MouseEvent | React.TouchEvent) {
     e.stopPropagation();
-    router.push(backHref);
+    clearOrigin();
+    router.push(resolvedBackHref);
   }
 
   return (
@@ -177,9 +198,9 @@ export default function PhotoDetailClient({
           <button
             className="photo-viewer-btn photo-viewer-btn--close"
             onTouchStart={(e) => e.stopPropagation()}
-            onTouchEnd={(e) => { e.stopPropagation(); router.push(backHref); }}
+            onTouchEnd={(e) => { e.stopPropagation(); clearOrigin(); router.push(resolvedBackHref); }}
             onClick={handleBackClick}
-            aria-label={`Volver a ${backLabel}`}
+            aria-label={`Volver a ${resolvedBackLabel}`}
           >
             <IconX size={20} />
           </button>
@@ -246,9 +267,9 @@ export default function PhotoDetailClient({
             <IconMenu />
           </button>
 
-          <Link href={backHref} className="btn-back">
+          <Link href={resolvedBackHref} className="btn-back" onClick={clearOrigin}>
             <IconChevronLeft />
-            {backLabel}
+            {resolvedBackLabel}
           </Link>
           <span style={{ color: 'var(--text-tertiary)' }}>/</span>
           <span className="detail-filename">{photo.filename}</span>

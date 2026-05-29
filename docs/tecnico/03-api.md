@@ -71,6 +71,23 @@ Todas las rutas de fotos operan sobre el catálogo activo (resuelto desde la ses
 | `DELETE` | `/api/projects/[id]` | Eliminar proyecto |
 | `POST` | `/api/projects/generate` | Generar proyecto con IA `{ scopeType, scopeValue, count, filters? }` |
 
+## Búsqueda
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/search` | Búsqueda unificada `?q=<texto>&mode=quick\|deep&year=N` — devuelve fotos, tags y eventos |
+| `GET` | `/api/search/hints` | Hints para el clasificador: `{ tags: string[], events: string[] }` — se carga una vez al montar el header |
+| `GET` | `/api/search/suggestions` | Sugerencias de autocompletado `?q=<texto>` — tags y eventos que coinciden |
+
+### Modo de búsqueda
+
+El parámetro `mode` controla el tipo de búsqueda ejecutada:
+
+| `mode` | Descripción |
+|---|---|
+| `quick` | Búsqueda por texto en nombre de archivo, evento y tags — sin Ollama |
+| `deep` | Análisis visual con Ollama (lento, foto a foto) |
+
 ## Escaneo
 
 | Método | Ruta | Descripción |
@@ -94,10 +111,33 @@ Todas las rutas de fotos operan sobre el catálogo activo (resuelto desde la ses
 | `GET` | `/api/ai/classify/status` | Estado de la clasificación en curso |
 | `POST` | `/api/ai/classify/year` | Clasificar todas las fotos de un año |
 | `GET` | `/api/ai/review/[photoId]` | Obtener review de IA (composición, luz, puntuación) |
-| `POST` | `/api/ai/search` | Búsqueda semántica `{ query, mode: 'quick'\|'deep', year? }` |
+| `POST` | `/api/ai/search` | Búsqueda visual profunda `{ query, mode: 'quick'\|'deep', year? }` |
 | `GET` | `/api/ollama/status` | Estado de conexión con Ollama |
 
-## Formato de respuesta de paginación (Timeline)
+---
+
+## API v1 (cliente iOS)
+
+Prefijo `/api/v1/`. Misma autenticación por cookie. Respuestas con envelope `{ data, meta? }`.
+
+Ver [docs/api-v1.md](../api-v1.md) para referencia completa.
+
+Endpoints disponibles:
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/v1/photos` | Lista paginada (offset) con filtros |
+| `GET` | `/api/v1/photos/[id]` | Detalle con tags y temáticas |
+| `GET` | `/api/v1/photos/[id]/thumbnail` | Miniatura WebP |
+| `GET` | `/api/v1/photos/[id]/original` | Archivo original |
+| `GET` | `/api/v1/photos/[id]/adjacent` | IDs de foto anterior y siguiente en el evento |
+| `GET` | `/api/v1/timeline` | Timeline con cursor-based pagination |
+| `GET` | `/api/v1/timeline/[periodKey]/photos` | Fotos de un período concreto |
+| `GET` | `/api/v1/tags` | Tags del catálogo activo con conteo |
+| `GET` | `/api/v1/catalogs` | Lista de catálogos con catálogo activo |
+| `POST` | `/api/v1/catalogs/switch` | Cambiar catálogo activo |
+
+## Formato de respuesta de paginación (Timeline web)
 
 ```json
 {
@@ -115,5 +155,3 @@ Todas las rutas de fotos operan sobre el catálogo activo (resuelto desde la ses
   "hasMore": true
 }
 ```
-
-> **Nota:** US-023 (pendiente) estandarizará todas las respuestas con un envelope `{ data, error, meta }` y prefijo `/api/v1/` para el cliente iOS.

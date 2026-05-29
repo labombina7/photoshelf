@@ -533,7 +533,7 @@
   <div class="logo">📷</div>
   <h1>photoshelf — Kanban</h1>
   <span class="kbd-hint">Haz clic en una tarjeta para ver el detalle</span>
-  <span class="subtitle">2026-05-28</span>
+  <span class="subtitle">2026-05-30</span>
 </header>
 
 <div class="board">
@@ -558,11 +558,257 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">6</span>
+      <span class="col-count">33</span>
     </div>
     <div class="col-body">
-        <div class="card-title">Visor de foto fullscreen en mobile</div>
-        <div class="card-summary">La foto ocupa toda la pantalla (fondo negro). Controles flotantes semitransparentes. Panel de info cerrado por defecto, se abre solo al pulsar ⓘ.</div>
+
+      <!-- ── Insights 2026-05-29 ── -->
+
+      <div class="card" tabindex="0" data-id="US-040" onclick="openModal('US-040')">
+        <div class="card-top">
+          <span class="badge badge-us">US-040</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Navegación contextual — botón atrás y enlace desde Timeline</div>
+        <div class="card-summary">Guardar URL de origen en sessionStorage al abrir el detalle. Botón "atrás" restaura el estado exacto. Enlace "Ver en biblioteca →" desde los headers de período de la Timeline.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-041" onclick="openModal('US-041')">
+        <div class="card-top">
+          <span class="badge badge-us">US-041</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Mejoras UX mobile — swipe sidebar, mapa bottom sheet y toasts</div>
+        <div class="card-summary">Swipe-left para cerrar sidebar. Mapa panel al 40% con drag-to-70%. Toasts no solapados en mobile. CTA de catálogo accesible en mobile.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-043" onclick="openModal('US-043')">
+        <div class="card-top">
+          <span class="badge badge-us">US-043</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Hardening seguridad — rate limiting IA, middleware y validación catálogo</div>
+        <div class="card-summary">Rate limiting en /ai/review y /ai/search. Middleware universal para todos los endpoints /api/*. Validación de directorio al crear un catálogo.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-044" onclick="openModal('US-044')">
+        <div class="card-top">
+          <span class="badge badge-us">US-044</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Corrección errores críticos — classify/year, ai/search logging y DetailPanel</div>
+        <div class="card-summary">Migrar classify/year a <code>after()</code>. Añadir logging en catch del bucle deep. Try/catch con rollback en removeTag y toggleTheme del DetailPanel.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-045" onclick="openModal('US-045')">
+        <div class="card-top">
+          <span class="badge badge-us">US-045</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Rendimiento — count filtrado, caché de hints y evicción de thumbnails</div>
+        <div class="card-summary">Count de paginación respeta filtros activos. loadHints con TTL de 60s. Script de limpieza de caché de thumbnails con antigüedad > 30 días.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-046" onclick="openModal('US-046')">
+        <div class="card-top">
+          <span class="badge badge-us">US-046</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Capa de repositorio — eliminar SQL inline restante en routes</div>
+        <div class="card-summary">Mover SQL inline de projects, search/hints, search/suggestions y ai/search a <code>src/lib/queries/</code>. Mover getSidebarProjects fuera de db.ts.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-047" onclick="openModal('US-047')">
+        <div class="card-top">
+          <span class="badge badge-us">US-047</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Refactorización ollama.ts en submódulos y centralización de constantes</div>
+        <div class="card-summary">Dividir ollama.ts (341 líneas) en client, image, classify, search, review y projects. Centralizar magic numbers en config.ts.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-048" onclick="openModal('US-048')">
+        <div class="card-top">
+          <span class="badge badge-us">US-048</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Tests de integración para routes API críticas</div>
+        <div class="card-summary">Tests de integración para catalogs, scan y auth completo. Refactor de ollama.test.ts para testear el módulo real.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-049" onclick="openModal('US-049')">
+        <div class="card-top">
+          <span class="badge badge-us">US-049</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Modo comparación de fotos (side-by-side)</div>
+        <div class="card-summary">Vista /compare?a=ID&b=ID con dos columnas a pantalla completa. Navegación por teclado entre fotos. Marcar favorita sin salir de la comparación.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-050" onclick="openModal('US-050')">
+        <div class="card-top">
+          <span class="badge badge-us">US-050</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Exportar selección de fotos como ZIP</div>
+        <div class="card-summary">Modo selección múltiple en biblioteca (Shift+click, checkboxes). Botón "Descargar selección" genera ZIP streaming con los originales.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-051" onclick="openModal('US-051')">
+        <div class="card-top">
+          <span class="badge badge-us">US-051</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Modo presentación — slideshow automático</div>
+        <div class="card-summary">Avance automático configurable (3s/5s/10s/30s) con crossfade. HUD mínimo con play/pausa, barra de progreso y contador. Tecla P para activar.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-052" onclick="openModal('US-052')">
+        <div class="card-top">
+          <span class="badge badge-us">US-052</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Agrupación de fotos por persona con Ollama</div>
+        <div class="card-summary">Tags persona: generados por LLaVA durante la clasificación. Vista "Personas" en sidebar. Posibilidad de nombrar personas detectadas.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-053" onclick="openModal('US-053')">
+        <div class="card-top">
+          <span class="badge badge-us">US-053</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Panel de actividad reciente — historial de cambios</div>
+        <div class="card-summary">Tabla activity_log en SQLite. Registro de escaneos, clasificaciones, tags y favoritos. Vista de historial filtrable con descripciones en lenguaje natural.</div>
+      </div>
+
+      <!-- ── Research 2026-05-29 ── -->
+
+      <div class="card" tabindex="0" data-id="US-054" onclick="openModal('US-054')">
+        <div class="card-top">
+          <span class="badge badge-us">US-054</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Culling rápido de ráfagas</div>
+        <div class="card-summary">Agrupación automática de disparos por timestamp. Modo teclado: Enter (favorita), X (skip), → (siguiente). Para semi-pros con sesiones de cientos de ráfagas.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-055" onclick="openModal('US-055')">
+        <div class="card-top">
+          <span class="badge badge-us">US-055</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Detección de pares RAW+JPEG</div>
+        <div class="card-summary">Vincular archivos RAW y JPEG del mismo disparo. Ajuste de visibilidad: mostrar ambos, solo RAW o solo JPEG. Panel de revisión de pares en /tools/raw-pairs.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-056" onclick="openModal('US-056')">
+        <div class="card-top">
+          <span class="badge badge-us">US-056</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Verificación de integridad de archivos</div>
+        <div class="card-summary">Detecta huérfanos en DB, archivos no indexados en disco y archivos corruptos. Informe de salud con acciones: re-escanear, eliminar huérfanos, mover corruptos a cuarentena.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-057" onclick="openModal('US-057')">
+        <div class="card-top">
+          <span class="badge badge-us">US-057</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Exportar catálogo sin lock-in</div>
+        <div class="card-summary">Export completo de metadatos en JSON, CSV y sidecars XMP. Incluye tags, favoritos, temáticas y álbumes. Respuesta directa al miedo al vendor lock-in post-Adobe.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-058" onclick="openModal('US-058')">
+        <div class="card-top">
+          <span class="badge badge-us">US-058</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Búsqueda por similitud visual</div>
+        <div class="card-summary">Botón "Buscar similares" en el detalle de foto. Ollama describe la foto referencia visualmente y lanza una búsqueda semántica. Resultados con nivel de similaridad.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-059" onclick="openModal('US-059')">
+        <div class="card-top">
+          <span class="badge badge-us">US-059</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Revisión y confianza en tags IA</div>
+        <div class="card-summary">Indicador de confianza por tag (high/medium/low). Flujo flashcard para revisar tags IA pendientes. Confirmar o rechazar con teclado. Badge de cola de revisión en sidebar.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-060" onclick="openModal('US-060')">
+        <div class="card-top">
+          <span class="badge badge-us">US-060</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Inferencia automática de ubicación GPS con IA</div>
+        <div class="card-summary">Capa 1: extrae topónimo del nombre de carpeta → geocodifica con Nominatim. Capa 2: algoritmo de "viaje" por duración + análisis visual Ollama. Propuestas con confianza para revisión.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-061" onclick="openModal('US-061')">
+        <div class="card-top">
+          <span class="badge badge-us">US-061</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Dashboard de salud de la biblioteca</div>
+        <div class="card-summary">7 métricas: indexación, clasificación IA, GPS, duplicados, pares RAW, tags pendientes, integridad. Score 0-100 con tendencia histórica. Acciones directas desde cada métrica.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-062" onclick="openModal('US-062')">
+        <div class="card-top">
+          <span class="badge badge-us">US-062</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">"On This Day" — Memorias del pasado</div>
+        <div class="card-summary">Banner diario con fotos tomadas un día como hoy en años anteriores. Página /memories con grupos por año. Narrativa IA opcional (Ollama). Convierte la app en algo que el usuario visita cada día.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-063" onclick="openModal('US-063')">
+        <div class="card-top">
+          <span class="badge badge-us">US-063</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Filtrado por atributos técnicos EXIF</div>
+        <div class="card-summary">Filtros de ISO, apertura, velocidad y focal en el sidebar. Integración con el clasificador de búsqueda (f/1.8, ISO 3200, 50mm). Sección "Perfil técnico" en estadísticas.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-064" onclick="openModal('US-064')">
+        <div class="card-top">
+          <span class="badge badge-us">US-064</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Wizard de organización para biblioteca caótica</div>
+        <div class="card-summary">Diagnóstico automático + plan de misiones priorizadas por impacto/esfuerzo. Para el amateur con años de fotos sin organizar. "¿Por dónde empiezo?" → 3–8 misiones concretas de 30 min.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-065" onclick="openModal('US-065')">
+        <div class="card-top">
+          <span class="badge badge-us">US-065</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Importador con asistente de estructura de carpetas</div>
+        <div class="card-summary">Analiza carpetas existentes, infiere el año por EXIF y propone reorganización a AÑO/EVENTO/. Ejecuta movimientos con log reversible y lanza scan automático. Elimina la barrera de entrada principal.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-066" onclick="openModal('US-066')">
+        <div class="card-top">
+          <span class="badge badge-us">US-066</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Afinamiento de prompts de Ollama</div>
+        <div class="card-summary">Auditar, documentar y mejorar los 5 prompts que llaman a Ollama (classify, search, project, review, concept). Script de evaluación manual + corrección de fallos conocidos por función.</div>
+      </div>
+
+      <!-- ── US previas ── -->
+
+      <div class="card" tabindex="0" data-id="US-036" onclick="openModal('US-036')">
+        <div class="card-top">
+          <span class="badge badge-us">US-036</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Visor fullscreen en desktop con navegación por teclado</div>
+        <div class="card-summary">Modo fullscreen activable desde el detalle de foto en desktop. Flechas flotantes ‹ › y botón × para cerrar. Navegación con ← → y Escape por teclado.</div>
       </div>
 
       <div class="card" tabindex="0" data-id="US-025" onclick="openModal('US-025')">
@@ -633,9 +879,49 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">27</span>
+      <span class="col-count">31</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="US-038" onclick="openModal('US-038')">
+        <div class="card-top">
+          <span class="badge badge-us">US-038</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #78 · 2026-05-30</span>
+        </div>
+        <div class="card-title">Skeleton shimmer en PhotoGrid y transición de vista</div>
+        <div class="card-summary">Skeleton shimmer en la biblioteca. Transición de opacidad con <code>useTransition</code> al cambiar entre vista carpetas/lista.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-042" onclick="openModal('US-042')">
+        <div class="card-top">
+          <span class="badge badge-us">US-042</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #77 · 2026-05-30</span>
+        </div>
+        <div class="card-title">Accesibilidad — segunda pasada de aria-labels y roles</div>
+        <div class="card-summary">aria-labels dinámicos en temáticas, estilos <code>.ai-panel-close</code>, alt con tags IA en thumbnails, <code>role="tablist"</code> en tabs de año, <code>aria-valuetext</code> en slider.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-039" onclick="openModal('US-039')">
+        <div class="card-top">
+          <span class="badge badge-us">US-039</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #76 · 2026-05-30</span>
+        </div>
+        <div class="card-title">Quick-wins de copy, iconografía y coherencia visual</div>
+        <div class="card-summary">Botón "+" → "Añadir", ⓘ → SVG, × → <code>IconX</code>, icono "Sin clasificar" y "Catálogos" corregidos, "Descargar original (X MB)", spinner en "Reescanear", EmptyState en proyectos.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-037" onclick="openModal('US-037')">
+        <div class="card-top">
+          <span class="badge badge-us">US-037</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #75 · 2026-05-30</span>
+        </div>
+        <div class="card-title">Corrección de variables CSS no definidas</div>
+        <div class="card-summary">Declara <code>--border2</code>, <code>--bg-secondary</code>, <code>--accent</code> y <code>--accent-rgb</code> en <code>:root</code>. Elimina bugs visuales en FAB mobile, skeleton y mapa.</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-035" onclick="openModal('US-035')">
         <div class="card-top">
@@ -1454,6 +1740,73 @@ const CARDS = {
       'Modo panorámico / rotación de pantalla',
       'Compartir foto',
       'Swipe vertical para cerrar el visor',
+    ]
+  },
+
+  'US-036': {
+    id: 'US-036',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Visor fullscreen en desktop con navegación por teclado',
+    story: 'Como usuario de photoshelf en desktop,\nquiero poder ver una foto a pantalla completa con botones flotantes de navegación y navegar entre fotos con las flechas del teclado,\npara disfrutar de una visualización inmersiva sin distracciones y recorrer mis fotos sin soltar el teclado.',
+    description: [
+      'En el detalle de foto en desktop, la imagen coexiste con la topbar y el panel lateral. No hay forma de ver la foto ocupando toda la pantalla ni de navegar entre fotos con el teclado.',
+      'Esta US añade un <strong>modo visor fullscreen</strong>: al pulsar el botón de pantalla completa (o la tecla F), la foto ocupa el 100% con fondo negro. Iconos flotantes ‹ y › permiten ir a la foto anterior/siguiente, y el botón × cierra el visor. Las teclas ← → navegan entre fotos; Escape cierra el visor.',
+      'En mobile (≤640px) no aplica: el visor inmersivo ya está implementado en US-035.',
+    ],
+    criteria: [
+      {
+        group: 'Activación',
+        items: [
+          'Existe un botón de fullscreen visible en la zona de imagen en desktop',
+          'Al pulsarlo, la foto ocupa el 100% de la pantalla con fondo negro',
+          'La tecla F (fuera de inputs) también activa el visor',
+          'El botón de fullscreen no aparece en mobile (≤640px)',
+        ]
+      },
+      {
+        group: 'Controles flotantes',
+        items: [
+          'Botón × en la esquina superior derecha para cerrar el visor',
+          'Flecha ‹ en el borde izquierdo (solo si existe foto anterior)',
+          'Flecha › en el borde derecho (solo si existe foto siguiente)',
+          'Los botones tienen fondo semitransparente y se oscurecen al hover',
+        ]
+      },
+      {
+        group: 'Navegación por teclado',
+        items: [
+          'Tecla ← navega a la foto anterior si existe',
+          'Tecla → navega a la foto siguiente si existe',
+          'Tecla Escape cierra el visor',
+          'Las teclas solo actúan cuando el foco no está en un input/textarea',
+        ]
+      },
+      {
+        group: 'Sin regresiones',
+        items: [
+          'El comportamiento actual del detalle (desktop y mobile) no cambia',
+          'Sin errores TypeScript',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/library/[photoId]/PhotoDetailClient.tsx', desc: 'Estado fullscreenOpen, listeners de teclado (ArrowLeft/Right/Escape/f), overlay .photo-fs-overlay con botón × y flechas ‹ ›' },
+      { path: 'src/app/globals.css', desc: '.photo-fs-overlay (fixed, inset 0, z-index 100), .photo-fs-close, .photo-fs-nav-prev, .photo-fs-nav-next, .photo-fs-trigger — todos ocultos en mobile' },
+    ],
+    tech: [
+      'El overlay usa CSS position:fixed + inset:0 — no requestFullscreen nativo.',
+      'Al abrir el visor: document.body.style.overflow = "hidden"; al cerrar: restaurar.',
+      'Los listeners de teclado se registran en useEffect y se limpian al desmontar.',
+      'La navegación reutiliza router.push con el mismo patrón que los botones prev/next existentes.',
+    ],
+    outOfScope: [
+      'Zoom con pinch-to-zoom o rueda del ratón',
+      'Presentación de diapositivas automática',
+      'requestFullscreen nativa del navegador',
+      'Soporte en mobile (cubierto por US-035)',
     ]
   },
 

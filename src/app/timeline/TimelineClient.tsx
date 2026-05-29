@@ -322,6 +322,14 @@ export default function TimelineClient({
                 {level === 'year' && group.period !== 'nodate' && (
                   <span className="timeline-period-count">{group.count.toLocaleString('es')} fotos</span>
                 )}
+                {group.period !== 'nodate' && (
+                  <Link
+                    href={`/library?year=${group.period.split('-')[0]}`}
+                    className="timeline-library-link"
+                  >
+                    Ver en biblioteca →
+                  </Link>
+                )}
               </div>
 
               <div className={`timeline-grid timeline-grid--z${visualZoom}`}>
@@ -330,6 +338,14 @@ export default function TimelineClient({
                     key={photo.id}
                     href={`/library/${photo.id}`}
                     className="photo-item"
+                    onClick={() => {
+                      try {
+                        sessionStorage.setItem('photoshelf_detail_origin', JSON.stringify({
+                          href: window.location.pathname + window.location.search,
+                          label: 'Timeline',
+                        }));
+                      } catch {}
+                    }}
                   >
                     <div className="photo-item-wrapper">
                       <div className="photo-skeleton" />

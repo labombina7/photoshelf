@@ -41,7 +41,24 @@ Al pulsar cualquier foto se abre el visor de detalle (`/library/[id]`) con:
 - **Temáticas** asociadas
 - **Review de IA** (si Ollama está configurado): composición, luz, puntos fuertes/débiles, puntuación 1-10
 - Botón de favorito
-- Navegación anterior/siguiente
+- Navegación anterior/siguiente (contador de posición en el evento)
+
+## Visor de foto
+
+### Desktop
+
+En pantallas ≥ 641 px, el detalle se muestra con la imagen centrada, la topbar y el panel lateral de información. Hay un botón para abrir el original y otro para ver la foto a pantalla completa.
+
+### Mobile (visor inmersivo)
+
+En pantallas ≤ 640 px, la foto ocupa toda la pantalla (`100dvh`) con fondo negro — experiencia similar a la app nativa de iOS Photos:
+
+- La topbar desaparece; los controles flotan semitransparentes sobre la imagen.
+- **HUD superior**: gradiente negro-transparente, botón "← Atrás" (izquierda), botón "ⓘ" (derecha).
+- **Flechas de navegación** ‹ › en los bordes laterales para ir a la foto anterior/siguiente.
+- **Tap** en la imagen: oculta/muestra el HUD (modo inmersivo).
+- **Swipe horizontal**: navega entre fotos del evento.
+- **Pulsar ⓘ**: abre el bottom sheet con toda la información de la foto (EXIF, tags, temáticas).
 
 ## Escaneo de biblioteca
 

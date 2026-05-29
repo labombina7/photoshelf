@@ -15,19 +15,44 @@ Lee y comprende:
 - `src/app/api/` — endpoints implementados
 - `src/lib/db.ts` — esquema de base de datos y capacidades actuales
 
-## Paso 2 — Identifica el siguiente número secuencial
+## Paso 2 — Lee los informes de insights pendientes
+
+Busca todos los ficheros en `insights/` con `**Estado:** pendiente`.
+
+Para cada hallazgo accionable de esos informes:
+- Evalúa si ya existe una US en `specs/todo/` o `specs/done/` que lo cubra
+- Si no existe, conviértelo en una User Story nueva
+- No hay límite de US derivadas de insights — genera una por cada hallazgo relevante
+
+Al finalizar, marca cada fichero procesado cambiando su línea de estado:
+```
+**Estado:** pendiente
+```
+por:
+```
+**Estado:** procesado — US generadas el FECHA
+```
+
+## Paso 3 — Identifica el siguiente número secuencial
 
 Mira los ficheros en `specs/todo/` y `specs/done/` y determina cuál es el último US-NNN para continuar la numeración.
 
-## Paso 3 — Genera entre 3 y 5 User Stories nuevas
+## Paso 4 — Genera las User Stories
 
-Para cada feature propuesta:
-- Que aporte valor real a un fotógrafo que gestiona una biblioteca grande
-- Que sea técnicamente viable con el stack actual (Next.js 15, React 19, SQLite, sharp, Ollama opcional)
-- Que no duplique funcionalidad ya existente o ya especificada
+### A) Derivadas de insights (sin límite)
 
-Crea un fichero `specs/todo/US-NNN-nombre-kebab.md` por cada feature, siguiendo
-exactamente esta estructura:
+Por cada hallazgo accionable de los informes pendientes que no tenga US existente,
+crea un fichero `specs/todo/US-NNN-nombre-kebab.md`.
+
+### B) Features creativas adicionales (hasta 5)
+
+Propón hasta 5 features nuevas que:
+- Aporten valor real a un fotógrafo que gestiona una biblioteca grande
+- Sean técnicamente viables con el stack actual (Next.js 15, React 19, SQLite, sharp, Ollama opcional)
+- No dupliquen funcionalidad ya existente o ya especificada
+- No provengan de los informes de insights
+
+Para todas las US (A y B), usa exactamente esta estructura:
 
 ```
 # Feature: [Nombre descriptivo]
@@ -88,9 +113,17 @@ para [beneficio o motivación].
 - [Qué NO entra en esta primera versión]
 ```
 
-## Paso 4 — Presenta un resumen
+## Paso 5 — Presenta un resumen
 
-Tras crear los ficheros, muestra al usuario una tabla resumen:
+Tras crear los ficheros, muestra al usuario dos tablas:
+
+### Desde insights
+
+| ID | Feature | Origen |
+|----|---------|--------|
+| US-NNN | Nombre | UX Audit / Tech Debt — descripción breve del hallazgo |
+
+### Features nuevas
 
 | ID | Feature | Por qué ahora |
 |----|---------|---------------|
