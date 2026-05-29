@@ -227,13 +227,16 @@ body {
     will-change: transform;
   }
 
-  /* Scrollable suggestions area at the top of the sheet */
+  /* Scrollable suggestions area at the top of the sheet.
+     flex: 0 1 auto → only as tall as content (no grey gap);
+     max-height caps it so long lists scroll instead of pushing the input off-screen */
   .mobile-search-sheet-suggestions {
-    flex: 1;
+    flex: 0 1 auto;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     padding: 0 16px;
-    min-height: 0; /* critical for flex overflow */
+    max-height: 55dvh;
+    min-height: 0;
   }
 
   /* Drag handle just above the input */
@@ -1181,7 +1184,9 @@ body { padding-top: var(--header-h); }
 
   /* ── App shell ── */
   .app-shell { display: block; }
-  .main { min-height: 100vh; }
+  /* overflow: hidden en desktop evita scroll horizontal pero rompe position:sticky
+     en iOS Safari — lo reseteamos en móvil para que el topbar quede fijo */
+  .main { min-height: 100vh; overflow: unset; }
 
   /* ── Topbar ── */
   .hamburger { display: flex; align-items: center; }
