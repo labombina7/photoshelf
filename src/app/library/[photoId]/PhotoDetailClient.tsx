@@ -6,7 +6,7 @@ import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import DetailPanel from '@/components/DetailPanel';
 import BottomSheet from '@/components/BottomSheet';
-import { IconChevronLeft, IconChevronRight, IconMenu } from '@/components/Icons';
+import { IconChevronLeft, IconChevronRight, IconMenu, IconX } from '@/components/Icons';
 import type { PhotoDetail, Theme } from '@/lib/types';
 
 interface Props {
@@ -14,6 +14,8 @@ interface Props {
   allThemes: Theme[];
   prevId: number | null;
   nextId: number | null;
+  photoIndex: number;
+  photoTotal: number;
   navSearch: string;
   backHref: string;
   backLabel: string;
@@ -31,6 +33,8 @@ export default function PhotoDetailClient({
   allThemes,
   prevId,
   nextId,
+  photoIndex,
+  photoTotal,
   navSearch,
   backHref,
   backLabel,
@@ -168,25 +172,26 @@ export default function PhotoDetailClient({
           />
         </div>
 
-        {/* HUD: top gradient bar — back button + info button */}
+        {/* HUD: top gradient bar — X close | counter | ⓘ info */}
         <div className={`photo-viewer-hud-top${hudVisible ? '' : ' photo-viewer-hud--hidden'}`}>
           <button
-            className="photo-viewer-btn"
+            className="photo-viewer-btn photo-viewer-btn--close"
             onTouchStart={(e) => e.stopPropagation()}
             onTouchEnd={(e) => { e.stopPropagation(); router.push(backHref); }}
             onClick={handleBackClick}
             aria-label={`Volver a ${backLabel}`}
           >
-            ← {backLabel}
+            <IconX size={20} />
           </button>
+          <span className="photo-viewer-counter">{photoIndex} / {photoTotal}</span>
           <button
-            className="photo-viewer-btn"
+            className="photo-viewer-btn photo-viewer-btn--info"
             onTouchStart={(e) => e.stopPropagation()}
             onTouchEnd={(e) => { e.stopPropagation(); setMobileSheetOpen(true); setHudVisible(true); }}
             onClick={handleMobileInfoOpen}
             aria-label="Información de la foto"
           >
-            ⓘ Info
+            ⓘ
           </button>
         </div>
 
@@ -245,6 +250,7 @@ export default function PhotoDetailClient({
           <span className="detail-filename">{photo.filename}</span>
 
           <div className="detail-nav">
+            <span className="detail-counter">{photoIndex} / {photoTotal}</span>
             {prevId ? (
               <Link href={`/library/${prevId}${navSearch}`} className="btn-icon">
                 <IconChevronLeft />

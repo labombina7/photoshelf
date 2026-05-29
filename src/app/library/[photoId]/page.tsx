@@ -65,6 +65,8 @@ export default async function PhotoDetailPage({
       allThemes={allThemes}
       prevId={prevId}
       nextId={nextId}
+      photoIndex={idx + 1}
+      photoTotal={siblings.length}
       navSearch={navSearch}
       backHref={backHref}
       backLabel={backLabel}
