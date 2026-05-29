@@ -706,6 +706,14 @@ body { padding-top: var(--header-h); }
 .timeline-period-count {
   font-size: 12px; color: var(--text-tertiary); font-weight: 400;
 }
+.timeline-library-link {
+  margin-left: auto;
+  font-size: 11px; color: var(--text-tertiary); font-weight: 400;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 120ms;
+}
+.timeline-library-link:hover { color: var(--accent); }
 .timeline-grid {
   display: grid;
   gap: 4px;
