@@ -159,8 +159,11 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
           {projects.length === 0 ? (
             <div className="empty-state">
               <IconSparkle size={32} />
-              <p>Aún no hay proyectos.</p>
-              <p style={{ fontSize: 12 }}>Pulsa "Nuevo proyecto" para generar uno.</p>
+              <p className="empty-state-title">Aún no hay proyectos</p>
+              <p className="empty-state-subtitle">Genera tu primer portfolio con IA a partir de cualquier conjunto de fotos.</p>
+              <button className="btn btn--primary" onClick={() => setShowNew(true)}>
+                Crear primer proyecto
+              </button>
             </div>
           ) : (
             <div className="projects-grid">

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
-import { IconMenu, IconMap } from '@/components/Icons';
+import { IconMenu, IconMap, IconX } from '@/components/Icons';
 import type { Theme } from '@/lib/types';
 
 interface PhotoPoint {
@@ -240,7 +240,7 @@ export default function MapClient({
                     </span>
                   )}
                 </span>
-                <button className="map-panel-close" onClick={() => setPanelOpen(false)}>×</button>
+                <button className="map-panel-close" onClick={() => setPanelOpen(false)} aria-label="Cerrar panel"><IconX size={14} /></button>
               </div>
               <div className="map-panel-list">
                 {selectedPhotos.map(photo => (
