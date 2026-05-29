@@ -204,7 +204,7 @@ function EventGroupBlock({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`/api/photos/${photo.id}/thumbnail?size=300`}
-                    alt={photo.filename}
+                    alt={photo.tags.length > 0 ? photo.tags.slice(0, 3).map(t => t.name).join(', ') : photo.filename}
                     loading="lazy"
                     decoding="async"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}

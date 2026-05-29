@@ -293,6 +293,7 @@ function SidebarInner({
                     onClick={() => startEdit(theme)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 3, borderRadius: 4 }}
                     title="Editar"
+                    aria-label={`Editar temática ${theme.name}`}
                   >
                     <IconEdit />
                   </button>
@@ -300,6 +301,7 @@ function SidebarInner({
                     onClick={() => deleteTheme(theme.id, theme.name)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 3, borderRadius: 4 }}
                     title="Eliminar"
+                    aria-label={`Eliminar temática ${theme.name}`}
                   >
                     <IconTrash />
                   </button>

@@ -4,6 +4,7 @@ export interface TimelinePhotoRow {
   id: number;
   filename: string;
   taken_at: string | null;
+  tags_preview: string | null;
 }
 
 export interface TimelineResult {
@@ -22,16 +23,17 @@ export interface TimelineResult {
 export function getTimelineRows(limit: number, cursor?: string | null, catalogId = 1): TimelineResult {
   const db = getDb();
 
+  const tagsSql = `(SELECT GROUP_CONCAT(t.name, ', ') FROM (SELECT t.name FROM photo_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.photo_id = p.id LIMIT 3)) AS tags_preview`;
   const rows: TimelinePhotoRow[] = cursor
     ? db.prepare(`
-        SELECT id, filename, taken_at FROM photos
-        WHERE catalog_id = ? AND (taken_at IS NULL OR taken_at < ?)
-        ORDER BY taken_at DESC NULLS LAST, created_at DESC LIMIT ?
+        SELECT p.id, p.filename, p.taken_at, ${tagsSql} FROM photos p
+        WHERE p.catalog_id = ? AND (p.taken_at IS NULL OR p.taken_at < ?)
+        ORDER BY p.taken_at DESC NULLS LAST, p.created_at DESC LIMIT ?
       `).all(catalogId, cursor, limit + 1) as TimelinePhotoRow[]
     : db.prepare(`
-        SELECT id, filename, taken_at FROM photos
-        WHERE catalog_id = ?
-        ORDER BY taken_at DESC NULLS LAST, created_at DESC LIMIT ?
+        SELECT p.id, p.filename, p.taken_at, ${tagsSql} FROM photos p
+        WHERE p.catalog_id = ?
+        ORDER BY p.taken_at DESC NULLS LAST, p.created_at DESC LIMIT ?
       `).all(catalogId, limit + 1) as TimelinePhotoRow[];
 
   const hasMore = rows.length > limit;

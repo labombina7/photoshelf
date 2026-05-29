@@ -227,6 +227,8 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
                   onChange={e => setCount(parseInt(e.target.value, 10))}
                   style={{ width: '100%' }}
                   disabled={generating}
+                  aria-label="Número de fotos"
+                  aria-valuetext={`${count} fotos`}
                 />
               </div>
 

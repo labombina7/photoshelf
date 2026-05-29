@@ -254,7 +254,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           <div className="review-modal">
             <div className="review-modal-header">
               <span style={{ fontWeight: 600, fontSize: 14 }}>Análisis de la imagen</span>
-              <button className="ai-panel-close" onClick={() => setReviewError(null)} aria-label="Cerrar">
+              <button className="ai-panel-close" onClick={() => setReviewError(null)} aria-label="Cerrar análisis de IA">
                 <IconX size={14} />
               </button>
             </div>
@@ -274,7 +274,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           <div className="review-modal">
             <div className="review-modal-header">
               <span style={{ fontWeight: 600, fontSize: 14 }}>Análisis de la imagen</span>
-              <button className="ai-panel-close" onClick={() => setReview(null)} aria-label="Cerrar">
+              <button className="ai-panel-close" onClick={() => setReview(null)} aria-label="Cerrar análisis de IA">
                 <IconX size={14} />
               </button>
             </div>
