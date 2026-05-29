@@ -106,7 +106,7 @@ function searchByYear(year: number, catalogId: number): SearchPhotoRow[] {
 
 function searchByTag(tagName: string, catalogId: number): SearchPhotoRow[] {
   return getDb().prepare(
-    `SELECT p.${PHOTO_COLS.split(', ').map(c => `p.${c}`).join(', ')}
+    `SELECT ${PHOTO_COLS.split(', ').map(c => `p.${c}`).join(', ')}
      FROM photos p
      JOIN photo_tags pt ON pt.photo_id = p.id
      JOIN tags t ON t.id = pt.tag_id
@@ -141,10 +141,12 @@ async function searchAI(query: string, catalogId: number): Promise<{ photos: Sea
   let sql: string;
   let params: (string | number)[];
 
+  const colList = PHOTO_COLS.split(', ').map(c => `p.${c}`).join(', ');
+
   if (tags.length > 0) {
     const ph = tags.map(() => '?').join(',');
     sql = `
-      SELECT p.${PHOTO_COLS.split(', ').map(c => `p.${c}`).join(', ')}
+      SELECT ${colList}
       FROM photos p
       JOIN photo_tags pt ON pt.photo_id = p.id
       JOIN tags t ON t.id = pt.tag_id
@@ -153,9 +155,9 @@ async function searchAI(query: string, catalogId: number): Promise<{ photos: Sea
     if (year) { sql += ' AND p.year = ?'; params.push(year); }
     sql += ` GROUP BY p.id HAVING COUNT(DISTINCT t.name) = ${tags.length}`;
   } else {
-    sql = `SELECT ${PHOTO_COLS} FROM photos WHERE catalog_id = ?`;
+    sql = `SELECT ${colList} FROM photos p WHERE p.catalog_id = ?`;
     params = [catalogId];
-    if (year) { sql += ' AND year = ?'; params.push(year); }
+    if (year) { sql += ' AND p.year = ?'; params.push(year); }
   }
 
   sql += ` ORDER BY p.taken_at ASC, p.filename ASC LIMIT ${PHOTO_LIMIT}`;
@@ -203,10 +205,17 @@ export async function executeSearch(
       break;
 
     case 'ai': {
-      const aiResult = await searchAI(raw, catalogId);
-      photos    = aiResult.photos;
-      aiConcept = aiResult.concept !== raw ? aiResult.concept : undefined;
-      isAI      = true;
+      try {
+        const aiResult = await searchAI(raw, catalogId);
+        photos    = aiResult.photos;
+        aiConcept = aiResult.concept !== raw ? aiResult.concept : undefined;
+        isAI      = true;
+      } catch {
+        // Ollama no disponible — fallback a fulltext
+        photos = searchFulltext(raw, catalogId);
+        tags   = matchingTags(raw, catalogId);
+        events = matchingEvents(raw, catalogId);
+      }
       break;
     }
   }
