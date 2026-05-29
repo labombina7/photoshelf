@@ -197,9 +197,9 @@ export default function AppHeader() {
         <div className="app-header-actions" />
       </header>
 
-      {/* ── Mobile: floating bottom search bar ─────────────────────────────── */}
+      {/* ── Mobile: floating search FAB ─────────────────────────────────────── */}
       <button
-        className="mobile-search-bar"
+        className={`mobile-search-fab${mobileSheetOpen ? ' mobile-search-fab--hidden' : ''}`}
         onClick={() => {
           setMobileSheetOpen(true);
           setTimeout(() => mobileInputRef.current?.focus(), 120);
@@ -207,15 +207,7 @@ export default function AppHeader() {
         aria-label="Abrir buscador"
         aria-haspopup="dialog"
       >
-        <IconSearch size={16} />
-        <span className="mobile-search-bar-label">
-          {value || 'Buscar fotos, tags, eventos…'}
-        </span>
-        {showAiBadge && (
-          <span className="mobile-search-bar-ai">
-            <IconSparkle size={11} />
-          </span>
-        )}
+        <IconSearch size={20} />
       </button>
 
       {/* ── Mobile: bottom sheet ────────────────────────────────────────────── */}
@@ -247,7 +239,9 @@ export default function AppHeader() {
               <IconSearch size={16} />
               <input
                 ref={mobileInputRef}
-                type="search"
+                type="text"
+                inputMode="search"
+                enterKeyHint="search"
                 value={value}
                 onChange={e => { setValue(e.target.value); setFocusedIndex(-1); }}
                 onKeyDown={handleMobileKeyDown}
@@ -255,6 +249,7 @@ export default function AppHeader() {
                 className="mobile-search-sheet-input"
                 autoComplete="off"
                 autoCorrect="off"
+                autoCapitalize="off"
                 spellCheck={false}
                 autoFocus
               />

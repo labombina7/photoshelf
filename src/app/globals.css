@@ -150,94 +150,83 @@ body {
 /* El hamburger del slot solo se muestra en móvil */
 .header-slot-hamburger { display: none; }
 
-/* Mobile: bottom search bar (floating pill) — hidden on desktop */
-.mobile-search-bar { display: none; }
+/* Mobile FAB — oculto en desktop */
+.mobile-search-fab { display: none; }
 
 /* ── Responsive header ──────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  /* Ocultar logo y barra de búsqueda del header en móvil */
   .app-header-logo   { display: none; }
   .app-header-search { display: none; }
-  /* El header en móvil solo muestra el slot (año, título, etc.) */
-  .app-header {
-    padding: 0 12px;
-    justify-content: flex-end;
-  }
+  .app-header { padding: 0 12px; justify-content: flex-end; }
 
-  /* ── Floating bottom search bar ── */
-  .mobile-search-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  /* ── Floating Action Button (lupa) ── */
+  .mobile-search-fab {
+    /* translate3d crea compositing layer en iOS → no desaparece al hacer scroll */
     position: fixed;
-    bottom: 16px;
-    left: 16px;
-    right: 16px;
-    height: 50px;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    right: 20px;
+    z-index: 95;
+
+    width: 54px;
+    height: 54px;
+    border-radius: 27px;
     background: var(--surface);
     border: 1px solid var(--border2);
-    border-radius: 25px;
-    padding: 0 18px;
-    cursor: pointer;
-    z-index: 95;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2);
-    color: var(--text-tertiary);
-    font-family: inherit;
-    font-size: 14px;
-    text-align: left;
-    transition: box-shadow 0.15s, border-color 0.15s;
-  }
-  .mobile-search-bar:active {
-    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
-  }
-  .mobile-search-bar svg { flex-shrink: 0; color: var(--text-tertiary); }
-  .mobile-search-bar-label {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .mobile-search-bar-ai {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 1px 6px rgba(0,0,0,0.2);
+    color: var(--text-secondary);
+
     display: flex;
     align-items: center;
-    color: var(--tag-auto-color);
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.18s;
+    transform: translate3d(0, 0, 0);
+    will-change: transform, opacity;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mobile-search-fab:active {
+    transform: translate3d(0, 0, 0) scale(0.9);
+  }
+  /* Se oculta mientras el sheet está abierto */
+  .mobile-search-fab--hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(0, 10px, 0) scale(0.85);
   }
 
   /* ── Backdrop ── */
   .mobile-search-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(0,0,0,0.55);
     z-index: 110;
-    animation: fade-in 0.2s ease;
+    touch-action: none;
+    animation: mobile-fade-in 0.2s ease both;
   }
 
   /* ── Bottom sheet ── */
   .mobile-search-sheet {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: 0; right: 0; bottom: 0;
     background: var(--surface);
     border-radius: 20px 20px 0 0;
     z-index: 120;
-    padding: 10px 16px max(env(safe-area-inset-bottom, 16px), 16px);
-    max-height: 85svh;
+    padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 20px);
+    max-height: 85dvh;
     overflow-y: auto;
-    animation: sheet-up 0.28s cubic-bezier(0.32, 0.72, 0, 1);
     -webkit-overflow-scrolling: touch;
+    animation: mobile-sheet-up 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
   }
 
-  /* Drag handle */
   .mobile-search-sheet-handle {
-    width: 36px;
-    height: 4px;
+    width: 36px; height: 4px;
     background: var(--border2);
     border-radius: 2px;
     margin: 0 auto 14px;
   }
 
-  /* Search input inside the sheet */
   .mobile-search-sheet-form {
     display: flex;
     align-items: center;
@@ -250,35 +239,30 @@ body {
     margin-bottom: 8px;
     transition: border-color 0.15s;
   }
-  .mobile-search-sheet-form:focus-within {
-    border-color: #b0ada8;
-  }
+  .mobile-search-sheet-form:focus-within { border-color: #b0ada8; }
   .mobile-search-sheet-form svg { color: var(--text-tertiary); flex-shrink: 0; }
+
   .mobile-search-sheet-input {
     flex: 1;
-    background: none;
-    border: none;
-    outline: none;
+    background: none; border: none; outline: none;
     font-family: inherit;
-    font-size: 16px; /* >= 16px evita zoom automático en iOS */
+    font-size: 16px; /* ≥16px → sin zoom automático en iOS */
     color: var(--text);
     min-width: 0;
+    -webkit-appearance: none;
+    appearance: none;
   }
   .mobile-search-sheet-input::placeholder { color: var(--text-tertiary); }
-  .mobile-search-sheet-input::-webkit-search-cancel-button { display: none; }
 
-  /* Clear button inside sheet input */
   .mobile-search-sheet-clear {
-    background: none;
-    border: none;
+    background: none; border: none;
     color: var(--text-tertiary);
-    font-size: 13px;
-    cursor: pointer;
-    padding: 4px;
-    line-height: 1;
+    font-size: 14px; cursor: pointer;
+    padding: 4px 2px; line-height: 1;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  /* SearchDropdown en modo inline — sin position absolute */
+  /* SearchDropdown dentro del sheet: fluye inline, sin position absolute */
   .search-dropdown--inline {
     position: static !important;
     box-shadow: none !important;
@@ -292,20 +276,20 @@ body {
   }
 }
 
-/* Body padding: arriba para el header fijo, abajo para la barra flotante en móvil */
+/* Body offset: header fijo arriba, FAB abajo en móvil */
 body { padding-top: var(--header-h); }
 @media (max-width: 640px) {
-  body { padding-bottom: 82px; }
+  body { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ── Animations ── */
-@keyframes fade-in {
+@keyframes mobile-fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-@keyframes sheet-up {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
+@keyframes mobile-sheet-up {
+  from { transform: translate3d(0, 100%, 0); }
+  to   { transform: translate3d(0, 0, 0); }
 }
 
 /* ── Sidebar ── */
