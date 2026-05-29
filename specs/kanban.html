@@ -558,9 +558,18 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">15</span>
+      <span class="col-count">16</span>
     </div>
     <div class="col-body">
+
+      <div class="card" tabindex="0" data-id="US-035" onclick="openModal('US-035')">
+        <div class="card-top">
+          <span class="badge badge-us">US-035</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Visor de foto fullscreen en mobile</div>
+        <div class="card-summary">La foto ocupa toda la pantalla (fondo negro). Controles flotantes semitransparentes. Panel de info cerrado por defecto, se abre solo al pulsar ⓘ.</div>
+      </div>
 
       <div class="card" tabindex="0" data-id="EPIC-003" onclick="openModal('EPIC-003')">
         <div class="card-top">
@@ -1380,6 +1389,73 @@ const CARDS = {
       'El endpoint /api/ai/search se mantiene — lo usa el modo deep de US-032. Añadir comentario indicando que es legado.',
     ],
     outOfScope: []
+  },
+
+  'US-035': {
+    id: 'US-035',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Visor de foto fullscreen en mobile',
+    story: 'Como usuario de photoshelf en el móvil,\nquiero que al abrir una foto ésta ocupe toda la pantalla con fondo negro y los controles flotantes encima,\npara tener una experiencia de visor nativa similar a la app de Fotos de iOS.',
+    description: [
+      'En la vista de detalle de foto, en móvil la imagen actualmente ocupa solo parte de la pantalla (45vh o calc(100vh - 52px)) y el panel de información se abre por defecto tapando la foto. El resultado no se parece a un visor nativo.',
+      'Esta US transforma la experiencia mobile: la foto ocupa el 100 % de la pantalla con fondo negro, los controles flotan semitransparentes sobre ella, y el panel de info empieza cerrado — se abre solo cuando el usuario pulsa el botón ⓘ.',
+      'En desktop no hay cambios: topbar + panel lateral siempre visibles.',
+    ],
+    criteria: [
+      {
+        group: 'Vista inmersiva',
+        items: [
+          'La foto ocupa toda la pantalla (100dvh) con fondo negro en mobile (≤640px)',
+          'La topbar (detail-topbar) no se muestra en mobile',
+          'La imagen usa object-fit: contain centrada vertical y horizontalmente',
+          'El swipe horizontal para navegar entre fotos sigue funcionando',
+        ]
+      },
+      {
+        group: 'HUD flotante',
+        items: [
+          'HUD superior: gradiente negro-transparente, botón ← Atrás (top-left), botón ⓘ (top-right)',
+          'Flechas prev/next semitransparentes en los bordes laterales (solo si existen foto previa/siguiente)',
+          'Tap en la zona de foto alterna la visibilidad del HUD (toggle inmersivo)',
+          'El HUD desaparece con transición de opacidad suave',
+        ]
+      },
+      {
+        group: 'Panel de información',
+        items: [
+          'Al cargar la página, el panel de info está cerrado por defecto',
+          'Pulsar ⓘ abre el bottom sheet con DetailPanel',
+          'La foto detrás se oscurece levemente mientras el sheet está abierto',
+          'Cerrar el sheet (swipe down) devuelve la foto a plena visibilidad',
+        ]
+      },
+      {
+        group: 'Desktop sin cambios',
+        items: [
+          'En ≥641px el comportamiento actual no cambia: topbar + panel lateral siempre visible',
+          'Sin errores TypeScript, sin regresiones en desktop',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/library/[photoId]/PhotoDetailClient.tsx', desc: 'Añadir photo-viewer-mobile wrapper, HUD, toggle HUD, cambiar mobileSheetOpen inicial a false' },
+      { path: 'src/app/globals.css', desc: 'photo-viewer-mobile (fullscreen), photo-viewer-hud-top (gradiente), photo-viewer-nav-prev/next, photo-viewer-hud--hidden, ocultar detail-topbar en mobile' },
+    ],
+    tech: [
+      'El BottomSheet y DetailPanel ya existen — reutilizar sin cambios.',
+      'Usar las mismas clases de animación del buscador (mobile-sheet-up) para la apertura del sheet.',
+      'HUD semitransparente: text-shadow para legibilidad sobre fotos claras u oscuras.',
+      'El estado hudVisible (boolean, default true) controla la visibilidad del HUD con transición CSS.',
+    ],
+    outOfScope: [
+      'Pinch-to-zoom sobre la imagen',
+      'Modo panorámico / rotación de pantalla',
+      'Compartir foto',
+      'Swipe vertical para cerrar el visor',
+    ]
   },
 
   'US-023': {
