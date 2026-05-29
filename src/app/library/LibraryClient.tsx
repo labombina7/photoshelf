@@ -222,8 +222,14 @@ export default function LibraryClient({
           {years.length > 1 && (
             <>
               {/* Desktop: chip tabs */}
-              <div className="year-tabs year-tabs--desktop">
-                <button className={`year-tab ${!activeYear ? 'active' : ''}`} onClick={() => setYear(null)}>
+              <div className="year-tabs year-tabs--desktop" role="tablist" aria-label="Filtrar por año">
+                <button
+                  className={`year-tab ${!activeYear ? 'active' : ''}`}
+                  onClick={() => setYear(null)}
+                  role="tab"
+                  aria-selected={!activeYear}
+                  tabIndex={!activeYear ? 0 : -1}
+                >
                   Todos
                 </button>
                 {years.map((y) => (
@@ -231,6 +237,9 @@ export default function LibraryClient({
                     key={y}
                     className={`year-tab ${activeYear === String(y) ? 'active' : ''}`}
                     onClick={() => setYear(String(y))}
+                    role="tab"
+                    aria-selected={activeYear === String(y)}
+                    tabIndex={activeYear === String(y) ? 0 : -1}
                   >
                     {y}
                   </button>

@@ -12,6 +12,7 @@ interface PhotoRow {
   id: number;
   filename: string;
   taken_at: string | null;
+  tags_preview: string | null;
 }
 
 interface Group {
@@ -335,7 +336,7 @@ export default function TimelineClient({
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`/api/photos/${photo.id}/thumbnail?size=${vzConfig.size}`}
-                        alt={photo.filename}
+                        alt={photo.tags_preview ?? photo.filename}
                         loading="lazy"
                         decoding="async"
                         fetchPriority={allPhotos.indexOf(photo) < priorityCount ? 'high' : 'auto'}
