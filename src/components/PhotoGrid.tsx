@@ -200,6 +200,14 @@ function EventGroupBlock({
                   key={photo.id}
                   href={`/library/${photo.id}${currentParams ? `?${currentParams}` : ''}`}
                   className="photo-item"
+                  onClick={() => {
+                    try {
+                      sessionStorage.setItem('photoshelf_detail_origin', JSON.stringify({
+                        href: window.location.pathname + window.location.search,
+                        label: 'Biblioteca',
+                      }));
+                    } catch {}
+                  }}
                 >
                   <div className="photo-skeleton" aria-hidden="true" />
                   {/* eslint-disable-next-line @next/next/no-img-element */}
