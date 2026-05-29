@@ -60,7 +60,7 @@ export default function LibraryClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [toast, setToast] = useState('');
-  const [_isPending, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
   // Restore collapsed state from sessionStorage so that navigating back from a photo
   // detail preserves which groups were open. Falls back to all-collapsed on first visit.
   const allGroupKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
@@ -184,14 +184,14 @@ export default function LibraryClient({
           <div className="view-toggle">
             <button
               className={`view-toggle-btn ${effectiveViewMode === 'list' ? 'active' : ''}`}
-              onClick={() => setViewMode('list')}
+              onClick={() => startTransition(() => setViewMode('list'))}
               title="Vista lista"
             >
               <IconViewList />
             </button>
             <button
               className={`view-toggle-btn ${effectiveViewMode === 'folders' ? 'active' : ''}`}
-              onClick={() => setViewMode('folders')}
+              onClick={() => startTransition(() => setViewMode('folders'))}
               title="Vista carpetas"
             >
               <IconViewGrid />
@@ -290,6 +290,7 @@ export default function LibraryClient({
             </div>
           )}
 
+          <div style={{ opacity: isPending ? 0 : 1, transition: 'opacity 120ms ease' }}>
           {effectiveViewMode === 'folders' ? (
             <FolderGrid groups={groups} showYear={!activeYear} />
           ) : (
@@ -310,6 +311,7 @@ export default function LibraryClient({
               />
             </>
           )}
+          </div>
         </div>
       </div>
 
