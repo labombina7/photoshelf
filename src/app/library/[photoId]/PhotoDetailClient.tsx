@@ -52,8 +52,6 @@ export default function PhotoDetailClient({
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const touchStartTime = useRef<number>(0);
-  // Suppress HUD toggle when a swipe just fired
-  const touchWasSwipe = useRef(false);
 
   // Keyboard navigation
   useEffect(() => {
@@ -84,7 +82,6 @@ export default function PhotoDetailClient({
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
     touchStartTime.current = Date.now();
-    touchWasSwipe.current = false;
   }
 
   function handlePhotoAreaTouchEnd(e: React.TouchEvent) {
@@ -95,33 +92,37 @@ export default function PhotoDetailClient({
     const elapsed = Date.now() - touchStartTime.current;
     const velocityX = Math.abs(deltaX) / elapsed;
 
-    // Only handle horizontal swipes (not vertical scroll)
-    if (Math.abs(deltaX) > Math.abs(deltaY) && (Math.abs(deltaX) > 50 || velocityX > 0.3)) {
-      touchWasSwipe.current = true;
+    const isHorizontalSwipe =
+      Math.abs(deltaX) > Math.abs(deltaY) &&
+      (Math.abs(deltaX) > 50 || velocityX > 0.3);
+
+    const isTap =
+      Math.abs(deltaX) < 15 &&
+      Math.abs(deltaY) < 15 &&
+      elapsed < 400;
+
+    if (isHorizontalSwipe) {
       if (deltaX < 0 && nextId) {
         router.push(`/library/${nextId}${navSearch}`);
       } else if (deltaX > 0 && prevId) {
         router.push(`/library/${prevId}${navSearch}`);
       }
+    } else if (isTap) {
+      // Toggle HUD via touch (avoids iOS ghost-click after navigation)
+      setHudVisible(v => !v);
     }
 
     touchStartX.current = null;
     touchStartY.current = null;
   }
 
-  // Tap on the fullscreen viewer bg → toggle HUD (ignore swipes)
-  function handleViewerTap() {
-    if (touchWasSwipe.current) return;
-    setHudVisible(v => !v);
-  }
-
-  function handleMobileInfoOpen(e: React.MouseEvent) {
+  function handleMobileInfoOpen(e: React.MouseEvent | React.TouchEvent) {
     e.stopPropagation();
     setMobileSheetOpen(true);
     setHudVisible(true);
   }
 
-  function handleBackClick(e: React.MouseEvent) {
+  function handleBackClick(e: React.MouseEvent | React.TouchEvent) {
     e.stopPropagation();
     router.push(backHref);
   }
@@ -152,12 +153,11 @@ export default function PhotoDetailClient({
       {/* ══ Mobile fullscreen viewer (US-035, ≤640px) ═══════════════════ */}
       {/* Hidden on desktop/tablet via CSS; activated on ≤640px */}
       <div className="photo-viewer-mobile">
-        {/* Full-screen tap + swipe area */}
+        {/* Full-screen swipe + tap area (no onClick — toggle via onTouchEnd to avoid iOS ghost clicks) */}
         <div
           className="photo-viewer-bg"
           onTouchStart={handlePhotoAreaTouchStart}
           onTouchEnd={handlePhotoAreaTouchEnd}
-          onClick={handleViewerTap}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -172,6 +172,8 @@ export default function PhotoDetailClient({
         <div className={`photo-viewer-hud-top${hudVisible ? '' : ' photo-viewer-hud--hidden'}`}>
           <button
             className="photo-viewer-btn"
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => { e.stopPropagation(); router.push(backHref); }}
             onClick={handleBackClick}
             aria-label={`Volver a ${backLabel}`}
           >
@@ -179,6 +181,8 @@ export default function PhotoDetailClient({
           </button>
           <button
             className="photo-viewer-btn"
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => { e.stopPropagation(); setMobileSheetOpen(true); setHudVisible(true); }}
             onClick={handleMobileInfoOpen}
             aria-label="Información de la foto"
           >
@@ -192,7 +196,8 @@ export default function PhotoDetailClient({
             href={`/library/${prevId}${navSearch}`}
             className={`photo-viewer-nav photo-viewer-nav--prev${hudVisible ? '' : ' photo-viewer-hud--hidden'}`}
             aria-label="Foto anterior"
-            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
           >
             <IconChevronLeft size={30} />
           </Link>
@@ -204,7 +209,8 @@ export default function PhotoDetailClient({
             href={`/library/${nextId}${navSearch}`}
             className={`photo-viewer-nav photo-viewer-nav--next${hudVisible ? '' : ' photo-viewer-hud--hidden'}`}
             aria-label="Foto siguiente"
-            onClick={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
           >
             <IconChevronRight size={30} />
           </Link>
