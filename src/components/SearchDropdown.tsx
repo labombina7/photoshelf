@@ -23,6 +23,8 @@ interface SearchDropdownProps {
   /** Controlled focused index (-1 = none) */
   focusedIndex: number;
   setFocusedIndex: (i: number) => void;
+  /** Modo inline: sin position:absolute, para usar dentro del bottom sheet móvil */
+  inline?: boolean;
 }
 
 // ─── Fetch suggestions with debounce ─────────────────────────────────────────
@@ -65,6 +67,7 @@ export default function SearchDropdown({
   onClearHistory,
   focusedIndex,
   setFocusedIndex,
+  inline = false,
 }: SearchDropdownProps) {
   const { tags, events } = useSuggestions(query);
 
@@ -84,7 +87,7 @@ export default function SearchDropdown({
 
   return (
     <ul
-      className="search-dropdown"
+      className={`search-dropdown${inline ? ' search-dropdown--inline' : ''}`}
       role="listbox"
       aria-label="Sugerencias de búsqueda"
       onMouseLeave={() => setFocusedIndex(-1)}

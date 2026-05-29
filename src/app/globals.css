@@ -150,43 +150,163 @@ body {
 /* El hamburger del slot solo se muestra en móvil */
 .header-slot-hamburger { display: none; }
 
-/* Mobile toggle (hidden on desktop) */
-.app-header-search-toggle { display: none; }
+/* Mobile: bottom search bar (floating pill) — hidden on desktop */
+.mobile-search-bar { display: none; }
 
-/* ── Responsive ── */
+/* ── Responsive header ──────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .app-header-logo { display: none; }
-  .app-header-search {
-    display: none;
-    position: absolute;
-    top: var(--header-h);
-    left: 0; right: 0;
-    max-width: 100%;
-    margin: 0;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    height: 48px;
-    padding: 0 16px;
-    background: var(--surface);
+  /* Ocultar logo y barra de búsqueda del header en móvil */
+  .app-header-logo   { display: none; }
+  .app-header-search { display: none; }
+  /* El header en móvil solo muestra el slot (año, título, etc.) */
+  .app-header {
+    padding: 0 12px;
+    justify-content: flex-end;
   }
-  .app-header-search.expanded { display: flex; }
-  .app-header-search-toggle {
+
+  /* ── Floating bottom search bar ── */
+  .mobile-search-bar {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 34px; height: 34px;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
+    gap: 10px;
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    height: 50px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 25px;
+    padding: 0 18px;
     cursor: pointer;
-    color: var(--text-secondary);
+    z-index: 95;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.2);
+    color: var(--text-tertiary);
+    font-family: inherit;
+    font-size: 14px;
+    text-align: left;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .mobile-search-bar:active {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+  .mobile-search-bar svg { flex-shrink: 0; color: var(--text-tertiary); }
+  .mobile-search-bar-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mobile-search-bar-ai {
+    display: flex;
+    align-items: center;
+    color: var(--tag-auto-color);
+  }
+
+  /* ── Backdrop ── */
+  .mobile-search-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 110;
+    animation: fade-in 0.2s ease;
+  }
+
+  /* ── Bottom sheet ── */
+  .mobile-search-sheet {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    z-index: 120;
+    padding: 10px 16px max(env(safe-area-inset-bottom, 16px), 16px);
+    max-height: 85svh;
+    overflow-y: auto;
+    animation: sheet-up 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Drag handle */
+  .mobile-search-sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 0 auto 14px;
+  }
+
+  /* Search input inside the sheet */
+  .mobile-search-sheet-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0 14px;
+    height: 48px;
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+  .mobile-search-sheet-form:focus-within {
+    border-color: #b0ada8;
+  }
+  .mobile-search-sheet-form svg { color: var(--text-tertiary); flex-shrink: 0; }
+  .mobile-search-sheet-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 16px; /* >= 16px evita zoom automático en iOS */
+    color: var(--text);
+    min-width: 0;
+  }
+  .mobile-search-sheet-input::placeholder { color: var(--text-tertiary); }
+  .mobile-search-sheet-input::-webkit-search-cancel-button { display: none; }
+
+  /* Clear button inside sheet input */
+  .mobile-search-sheet-clear {
+    background: none;
+    border: none;
+    color: var(--text-tertiary);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  /* SearchDropdown en modo inline — sin position absolute */
+  .search-dropdown--inline {
+    position: static !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin-top: 4px;
   }
 }
 
-/* Offset body so fixed header doesn't overlap content */
+/* Body padding: arriba para el header fijo, abajo para la barra flotante en móvil */
 body { padding-top: var(--header-h); }
+@media (max-width: 640px) {
+  body { padding-bottom: 82px; }
+}
+
+/* ── Animations ── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
 
 /* ── Sidebar ── */
 .sidebar {

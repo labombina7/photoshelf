@@ -27,14 +27,15 @@ async function fetchHints(): Promise<ClassifierHints> {
 export default function AppHeader() {
   const router   = useRouter();
   const { slot } = useContext(HeaderSlotCtx);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const formRef  = useRef<HTMLFormElement>(null);
+  const inputRef       = useRef<HTMLInputElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+  const formRef        = useRef<HTMLFormElement>(null);
 
   const [value,            setValue]            = useState('');
   const [hints,            setHints]            = useState<ClassifierHints>({ tags: [], events: [] });
   const [dropdownOpen,     setDropdownOpen]     = useState(false);
   const [focusedIndex,     setFocusedIndex]     = useState(-1);
-  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+  const [mobileSheetOpen,  setMobileSheetOpen]  = useState(false);
 
   const { recent, push: pushHistory, clear: clearHistory } = useSearchHistory();
 
@@ -52,7 +53,7 @@ export default function AppHeader() {
     return () => window.removeEventListener('photoshelf:search-sync', onSync);
   }, []);
 
-  // Close dropdown when clicking outside
+  // Close desktop dropdown when clicking outside
   useEffect(() => {
     function onPointerDown(e: PointerEvent) {
       if (!formRef.current?.contains(e.target as Node)) {
@@ -64,15 +65,26 @@ export default function AppHeader() {
     return () => document.removeEventListener('pointerdown', onPointerDown);
   }, []);
 
+  // Lock body scroll when mobile sheet is open
+  useEffect(() => {
+    document.body.style.overflow = mobileSheetOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileSheetOpen]);
+
   // ⌘K / Ctrl+K → focus
   const focusInput = useCallback(() => {
-    setIsMobileExpanded(true);
-    inputRef.current?.focus();
-    inputRef.current?.select();
+    // On mobile, open the sheet
+    if (window.matchMedia('(max-width: 640px)').matches) {
+      setMobileSheetOpen(true);
+      setTimeout(() => mobileInputRef.current?.focus(), 120);
+    } else {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
   }, []);
   useSearchShortcut(focusInput);
 
-  // ─── Helpers ───────────────────────────────────────────────────────────────
+  // ─── Navigate helper ────────────────────────────────────────────────────────
 
   function navigate(q: string) {
     if (!q.trim()) return;
@@ -81,21 +93,20 @@ export default function AppHeader() {
     router.push(`/search?q=${encodeURIComponent(q)}&intent=${intent.type}`);
     setDropdownOpen(false);
     setFocusedIndex(-1);
+    setMobileSheetOpen(false);
+    setValue(q);
     inputRef.current?.blur();
+    mobileInputRef.current?.blur();
   }
+
+  // ─── Desktop submit ─────────────────────────────────────────────────────────
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // If an item is focused in the dropdown, select it
     const history = recent();
-    if (focusedIndex >= 0) {
-      const allItems = [
-        ...history.map(h => h.query),
-      ];
-      if (focusedIndex < allItems.length) {
-        navigate(allItems[focusedIndex]);
-        return;
-      }
+    if (focusedIndex >= 0 && focusedIndex < history.length) {
+      navigate(history[focusedIndex].query);
+      return;
     }
     navigate(value);
   }
@@ -105,21 +116,25 @@ export default function AppHeader() {
       if (dropdownOpen) { setDropdownOpen(false); setFocusedIndex(-1); return; }
       setValue('');
       inputRef.current?.blur();
-      setIsMobileExpanded(false);
       return;
     }
     if (!dropdownOpen) return;
+    const total = recent().length;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setFocusedIndex(i => Math.min(i + 1, total - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setFocusedIndex(i => Math.max(i - 1, -1)); }
+  }
 
-    const history = recent();
-    // Approximate total — we don't know suggestion count here; keyboard nav on history only for now
-    const total = history.length;
+  // ─── Mobile sheet submit ────────────────────────────────────────────────────
 
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setFocusedIndex(i => Math.min(i + 1, total - 1));
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setFocusedIndex(i => Math.max(i - 1, -1));
+  function handleMobileSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    navigate(value);
+  }
+
+  function handleMobileKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Escape') {
+      setMobileSheetOpen(false);
+      return;
     }
   }
 
@@ -128,70 +143,153 @@ export default function AppHeader() {
   const showAiBadge = liveIntent?.type === 'ai';
 
   return (
-    <header className="app-header">
-      {/* Logo */}
-      <div className="app-header-logo">
-        <span className="app-header-logo-text">photoshelf</span>
-      </div>
+    <>
+      {/* ── Desktop/global header ───────────────────────────────────────────── */}
+      <header className="app-header">
+        {/* Logo */}
+        <div className="app-header-logo">
+          <span className="app-header-logo-text">photoshelf</span>
+        </div>
 
-      {/* Search */}
-      <form
-        ref={formRef}
-        className={`app-header-search${isMobileExpanded ? ' expanded' : ''}`}
-        onSubmit={handleSubmit}
-        role="search"
-        style={{ position: 'relative' }}
+        {/* Desktop search */}
+        <form
+          ref={formRef}
+          className="app-header-search"
+          onSubmit={handleSubmit}
+          role="search"
+          style={{ position: 'relative' }}
+        >
+          <IconSearch size={14} />
+          <input
+            ref={inputRef}
+            type="search"
+            value={value}
+            onChange={e => { setValue(e.target.value); setFocusedIndex(-1); }}
+            onFocus={() => setDropdownOpen(true)}
+            onKeyDown={handleKeyDown}
+            placeholder="Buscar fotos, tags, eventos… (⌘K)"
+            className="app-header-input"
+            autoComplete="off"
+            spellCheck={false}
+            aria-expanded={dropdownOpen}
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+          />
+          {showAiBadge && (
+            <span className="app-header-ai-badge" title="Búsqueda inteligente con IA">
+              <IconSparkle size={11} />
+              <span>IA</span>
+            </span>
+          )}
+          <SearchDropdown
+            open={dropdownOpen}
+            query={value}
+            history={recent()}
+            onSelect={navigate}
+            onClearHistory={clearHistory}
+            focusedIndex={focusedIndex}
+            setFocusedIndex={setFocusedIndex}
+          />
+        </form>
+
+        {/* Slot + actions */}
+        {slot && <div className="app-header-slot">{slot}</div>}
+        <div className="app-header-actions" />
+      </header>
+
+      {/* ── Mobile: floating bottom search bar ─────────────────────────────── */}
+      <button
+        className="mobile-search-bar"
+        onClick={() => {
+          setMobileSheetOpen(true);
+          setTimeout(() => mobileInputRef.current?.focus(), 120);
+        }}
+        aria-label="Abrir buscador"
+        aria-haspopup="dialog"
       >
-        <IconSearch size={14} />
-        <input
-          ref={inputRef}
-          type="search"
-          value={value}
-          onChange={e => { setValue(e.target.value); setFocusedIndex(-1); }}
-          onFocus={() => setDropdownOpen(true)}
-          onKeyDown={handleKeyDown}
-          placeholder="Buscar fotos, tags, eventos… (⌘K)"
-          className="app-header-input"
-          autoComplete="off"
-          spellCheck={false}
-          aria-expanded={dropdownOpen}
-          aria-haspopup="listbox"
-          aria-autocomplete="list"
-        />
+        <IconSearch size={16} />
+        <span className="mobile-search-bar-label">
+          {value || 'Buscar fotos, tags, eventos…'}
+        </span>
         {showAiBadge && (
-          <span className="app-header-ai-badge" title="Búsqueda inteligente con IA">
+          <span className="mobile-search-bar-ai">
             <IconSparkle size={11} />
-            <span>IA</span>
           </span>
         )}
+      </button>
 
-        <SearchDropdown
-          open={dropdownOpen}
-          query={value}
-          history={recent()}
-          onSelect={navigate}
-          onClearHistory={() => { clearHistory(); }}
-          focusedIndex={focusedIndex}
-          setFocusedIndex={setFocusedIndex}
-        />
-      </form>
+      {/* ── Mobile: bottom sheet ────────────────────────────────────────────── */}
+      {mobileSheetOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="mobile-search-backdrop"
+            onClick={() => setMobileSheetOpen(false)}
+            aria-hidden="true"
+          />
 
-      {/* Slot — contenido contextual de la página activa */}
-      {slot && <div className="app-header-slot">{slot}</div>}
+          {/* Sheet */}
+          <div
+            className="mobile-search-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Buscador"
+          >
+            {/* Drag handle */}
+            <div className="mobile-search-sheet-handle" />
 
-      {/* Actions — el toggle se renderiza siempre; en desktop está oculto por CSS */}
-      <div className="app-header-actions">
-        <button
-          className="app-header-search-toggle"
-          onClick={() => {
-            setIsMobileExpanded(v => !v);
-            if (!isMobileExpanded) setTimeout(() => inputRef.current?.focus(), 50);
-          }}
-          aria-label="Abrir buscador"
-        >
-          <IconSearch size={16} />
-        </button>
-      </div>
-    </header>
+            {/* Input row */}
+            <form
+              className="mobile-search-sheet-form"
+              onSubmit={handleMobileSubmit}
+              role="search"
+            >
+              <IconSearch size={16} />
+              <input
+                ref={mobileInputRef}
+                type="search"
+                value={value}
+                onChange={e => { setValue(e.target.value); setFocusedIndex(-1); }}
+                onKeyDown={handleMobileKeyDown}
+                placeholder="Buscar fotos, tags, eventos…"
+                className="mobile-search-sheet-input"
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                autoFocus
+              />
+              {showAiBadge && (
+                <span className="app-header-ai-badge">
+                  <IconSparkle size={11} />
+                  <span>IA</span>
+                </span>
+              )}
+              {value && (
+                <button
+                  type="button"
+                  className="mobile-search-sheet-clear"
+                  onClick={() => { setValue(''); mobileInputRef.current?.focus(); }}
+                  aria-label="Borrar búsqueda"
+                >
+                  ✕
+                </button>
+              )}
+            </form>
+
+            {/* Suggestions inline */}
+            <SearchDropdown
+              open={true}
+              query={value}
+              history={recent()}
+              onSelect={navigate}
+              onClearHistory={clearHistory}
+              focusedIndex={focusedIndex}
+              setFocusedIndex={setFocusedIndex}
+              inline={true}
+            />
+          </div>
+        </>
+      )}
+    </>
   );
 }
