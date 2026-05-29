@@ -4,33 +4,38 @@
 
 ```
 src/app/
-├── layout.tsx              ← Root layout: providers globales + fuente Geist
-├── page.tsx                ← Redirect → /library
-├── login/page.tsx          ← Página de login (formulario de contraseña)
+├── layout.tsx                  ← Root layout: providers globales + fuente Geist
+├── page.tsx                    ← Redirect → /library
+├── login/page.tsx              ← Página de login (formulario de contraseña)
 ├── library/
-│   ├── page.tsx            ← Server Component: carga fotos + sidebar data
-│   ├── LibraryClient.tsx   ← Client Component: grid/lista, filtros, paginación
-│   └── [photoId]/page.tsx  ← Detalle de foto (modal accesible por URL directa)
+│   ├── page.tsx                ← Server Component: carga fotos + sidebar data
+│   ├── LibraryClient.tsx       ← Client Component: grid/lista, filtros, paginación
+│   └── [photoId]/
+│       ├── page.tsx            ← Server Component: foto + prev/next IDs
+│       └── PhotoDetailClient.tsx ← Visor de foto (desktop + mobile fullscreen)
+├── search/
+│   ├── page.tsx                ← Server Component: ejecuta búsqueda, pasa resultado
+│   └── SearchClient.tsx        ← Client Component: resultados, búsqueda profunda IA
 ├── map/
-│   ├── page.tsx            ← Server Component: dynamic import (ssr: false)
-│   ├── MapClient.tsx       ← Client Component: Leaflet + markercluster + filtro año
-│   └── MapWrapper.tsx      ← Wrapper de carga dinámica
+│   ├── page.tsx                ← Server Component: dynamic import (ssr: false)
+│   ├── MapClient.tsx           ← Client Component: Leaflet + markercluster + filtro año
+│   └── MapWrapper.tsx          ← Wrapper de carga dinámica
 ├── stats/
-│   ├── page.tsx            ← Server Component
-│   └── StatsClient.tsx     ← Client Component: cards + gráficas de barras CSS
+│   ├── page.tsx                ← Server Component
+│   └── StatsClient.tsx         ← Client Component: cards + gráficas de barras CSS
 ├── projects/
-│   ├── page.tsx            ← Lista de portfolios
-│   ├── ProjectsClient.tsx  ← Client Component: CRUD de proyectos
-│   └── [id]/page.tsx       ← Detalle de un portfolio
+│   ├── page.tsx                ← Lista de portfolios
+│   ├── ProjectsClient.tsx      ← Client Component: CRUD de proyectos
+│   └── [id]/page.tsx           ← Detalle de un portfolio
 ├── tags/
-│   ├── page.tsx            ← Vista de tags
-│   ├── TagsClient.tsx      ← Client Component: nube de tags + filtrado
-│   └── [tag]/page.tsx      ← Galería de fotos por tag
+│   ├── page.tsx                ← Vista de tags
+│   ├── TagsClient.tsx          ← Client Component: nube de tags + filtrado
+│   └── [tag]/page.tsx          ← Galería de fotos por tag
 ├── settings/
 │   └── catalogs/
-│       ├── page.tsx        ← Server Component: lista de catálogos
-│       └── CatalogsClient.tsx ← Client Component: CRUD de catálogos
-└── api/                    ← API Routes (ver doc de API)
+│       ├── page.tsx            ← Server Component: lista de catálogos
+│       └── CatalogsClient.tsx  ← Client Component: CRUD de catálogos
+└── api/                        ← API Routes (ver doc de API)
 ```
 
 ## Proveedores de contexto (Root Layout)
@@ -50,7 +55,52 @@ ModalProvider
 | `ScanProvider` | Expone `running`, `startScan`, `watcher`, `toggleWatcher`; hace polling a `/api/scan/status` y `/api/watcher/status` |
 | `ClassifyProvider` | Expone estado de clasificación IA; hace polling a `/api/ai/classify/status` |
 
+## Layout de la aplicación
+
+```
+┌──────────────────────────────────────────────────────┐
+│  AppHeader  [Logo] [SearchBar─────────────────] [✦]  │  ← header fijo, z-index alto
+├─────────────┬────────────────────────────────────────┤
+│             │                                        │
+│   Sidebar   │           Contenido principal          │
+│             │           (Server/Client Component)    │
+│  - Nav      │                                        │
+│  - Catálogos│                                        │
+│  - Temáticas│                                        │
+│  - Proyectos│                                        │
+│  - Scan     │                                        │
+│  - Watcher  │                                        │
+└─────────────┴────────────────────────────────────────┘
+```
+
+En mobile (≤ 640 px) el sidebar se oculta y se accede desde un botón de menú en el header.
+
 ## Componentes compartidos
+
+### `AppHeader.tsx`
+
+Header fijo en la parte superior de todas las páginas. Contiene:
+
+- **Logo / nombre** de la app (enlace a `/library`)
+- **SearchBar** — input de búsqueda con clasificación de intención, historial, autocompletado y dropdown de sugerencias
+- **SearchDropdown** — overlay con historial reciente, tags sugeridos y eventos que coinciden con el texto
+- Botón IA (`✦`) — indicador visual cuando la búsqueda activa usa el clasificador de IA
+
+El header escucha el evento `photoshelf:search-sync` para mantener el texto del input sincronizado cuando el usuario navega a la página `/search`.
+
+### `SearchDropdown.tsx`
+
+Dropdown del autocompletado de búsqueda. Aparece bajo el input mientras el usuario escribe y muestra:
+
+- **Historial** reciente (máximo 5 entradas, guardado en localStorage)
+- **Tags** del catálogo que coinciden con el texto
+- **Eventos** del catálogo que coinciden con el texto
+
+Al seleccionar un elemento ejecuta la búsqueda directamente o aplica el filtro correspondiente.
+
+### `HeaderSlot.tsx` / `useHeaderSlot`
+
+Sistema de portal liviano para inyectar contenido en el header desde páginas hijas. Algunas páginas (como `/search`) usan `useHeaderSlot` para renderizar controles contextuales en la zona derecha del header sin prop drilling.
 
 ### `Sidebar.tsx`
 
@@ -71,15 +121,17 @@ Selector de catálogo activo integrado en el sidebar. Solo se muestra cuando hay
 
 ### `BottomSheet.tsx`
 
-Panel inferior deslizante para mobile (US-013). Reemplaza el panel lateral en pantallas pequeñas. Acepta `isOpen`, `onClose` y `children`. Incluye handle de drag y cierre con swipe hacia abajo.
+Panel inferior deslizante para mobile. Reemplaza el panel lateral en pantallas pequeñas. Acepta `isOpen`, `onClose` y `children`. Incluye handle de drag y cierre con swipe hacia abajo.
 
 ### `Icons.tsx`
 
-Biblioteca de iconos SVG inline (US-026). Exporta: `IconPhoto`, `IconGrid`, `IconStar`, `IconSearch`, `IconRefresh`, `IconPlus`, `IconLogout`, `IconEdit`, `IconTrash`, `IconFolder`, `IconTag`, `IconTimeline`, `IconStats`, `IconMap`, `IconCatalog`, `IconSettings`.
+Biblioteca de iconos SVG inline. Exporta: `IconPhoto`, `IconGrid`, `IconStar`, `IconSearch`, `IconSparkle`, `IconRefresh`, `IconPlus`, `IconLogout`, `IconEdit`, `IconTrash`, `IconFolder`, `IconTag`, `IconTimeline`, `IconStats`, `IconMap`, `IconCatalog`, `IconSettings`, `IconMenu`.
 
 ### `DetailPanel.tsx`
 
-Panel lateral deslizante (desktop) / bottom sheet (mobile) que muestra el detalle de una foto: miniatura grande, metadatos EXIF (cámara, exposición, GPS, fecha), tags (manual + IA), temáticas asignadas, y acciones (favorita, añadir tag, asignar temática).
+Panel de información de una foto. En desktop se desliza desde la derecha; en mobile se integra en el bottom sheet del visor inmersivo.
+
+Muestra: miniatura grande, metadatos EXIF (cámara, exposición, GPS, fecha), tags (manual + IA), temáticas asignadas, review de IA y acciones (favorita, añadir tag, asignar temática).
 
 ### `PhotoGrid.tsx`
 
@@ -89,13 +141,9 @@ Grid de fotos reutilizable (usado en Biblioteca y Proyectos). Acepta `photos[]`,
 
 Grid de grupos de eventos (vista de carpetas en Biblioteca). Muestra portada del evento, nombre y contador de fotos.
 
-### `AISearchPanel.tsx`
-
-Panel de búsqueda con IA. Toggle entre modo rápido (tags) y modo profundo (visión). Muestra resultados inline con indicador de carga.
-
 ### `EmptyState.tsx`
 
-Estado vacío genérico con icono, título, descripción y CTA opcional. Usado en Biblioteca, Tags y otras vistas cuando no hay datos (US-012).
+Estado vacío genérico con icono, título, descripción y CTA opcional. Usado en Biblioteca, Tags y otras vistas cuando no hay datos.
 
 ### `ModalProvider.tsx`
 
@@ -120,7 +168,7 @@ Context con polling al estado de clasificación IA:
 
 ## Páginas clave — detalles
 
-### LibraryClient.tsx
+### `LibraryClient.tsx`
 
 ```
 Estado local:
@@ -130,21 +178,69 @@ Estado local:
 
 Flujo:
   URL params → filtros activos → fetch /api/photos → PhotoGrid / FolderGrid
-  Click foto → DetailPanel (desliza desde la derecha en desktop, BottomSheet en mobile)
+  Click foto → navega a /library/[id]
   Click carpeta → aplica filtro event=
 ```
 
-### MapClient.tsx
+### `PhotoDetailClient.tsx`
+
+Visor de foto con dos modos de experiencia según breakpoint:
+
+**Desktop (≥ 641 px)**
+```
+  [← Atrás]  [N de M]          [★]  [⛶ Fullscreen]
+  ┌────────────────────┬───────────────────────────┐
+  │                    │  DetailPanel              │
+  │    Foto (contain)  │  - Metadatos EXIF         │
+  │                    │  - Tags                   │
+  │  [‹ Anterior]      │  - Temáticas              │
+  │         [Siguiente ›]  - Review IA             │
+  └────────────────────┴───────────────────────────┘
+```
+
+**Mobile (≤ 640 px) — visor inmersivo**
+```
+  ┌─────────────────────────────┐  ← negro, 100dvh
+  │ ← Atrás             ⓘ Info │  ← HUD semitransparente
+  │                             │
+  │         [ FOTO ]            │
+  │                             │
+  │     ‹               ›       │  ← flechas nav
+  └─────────────────────────────┘
+  [pulsar ⓘ abre el BottomSheet con DetailPanel]
+```
+
+Estado del componente:
+- `hudVisible` — visibilidad del HUD (toggle con tap en la imagen)
+- `mobileSheetOpen` — apertura del bottom sheet de información
+
+### `SearchClient.tsx`
+
+```
+Props: result: SearchResult (fotos, tags, eventos que coinciden)
+
+Secciones:
+  - SearchPhotoGrid: grid de fotos con enlace al detalle
+  - TagsSection: tags coincidentes
+  - EventsSection: eventos coincidentes
+  - DeepSearchPanel: búsqueda profunda con IA (streaming de resultados)
+  - SaveThemePanel: guardar resultados como temática
+
+Sincroniza el texto del header con el parámetro ?q= via evento
+photoshelf:search-sync
+```
+
+### `MapClient.tsx`
 
 ```
 Carga dinámica (ssr: false) para evitar errores de window en SSR.
 Leaflet inicializado en useEffect.
-markerClusterGroup con L.divIcon circular (foto de miniatura).
-Filtro por año en la topbar — reduce marcadores de 10k+ a ~500 (US-027).
-Click en marker → panel lateral (desktop) / BottomSheet (mobile) con info de foto.
+markerClusterGroup con L.divIcon circular (miniatura de foto).
+Filtro por año en la topbar — reduce marcadores de 10k+ a ~500.
+Click en marker → navega a /library/[id].
 ```
 
-### StatsClient.tsx
+### `StatsClient.tsx`
 
 ```
 Datos cargados por el Server Component padre.
@@ -154,10 +250,10 @@ Visualización:
   - Top tags: lista con conteo
 ```
 
-### CatalogsClient.tsx
+### `CatalogsClient.tsx`
 
 ```
-Gestión de catálogos (EPIC-001):
+Gestión de catálogos:
   - Listado con nombre, ruta, conteo de fotos y badge de "activo"
   - Crear catálogo: nombre + ruta del directorio
   - Editar nombre o ruta

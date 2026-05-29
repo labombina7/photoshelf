@@ -36,15 +36,21 @@ photoshelf espera que las fotos estén organizadas en el siguiente formato de ca
 | Módulo | Descripción |
 |---|---|
 | Biblioteca | Vista de cuadrícula y lista por evento, con filtros |
+| Visor de foto | Detalle de foto con EXIF, tags, temáticas y visor fullscreen |
 | Línea de tiempo | Exploración cronológica con zoom Año / Mes / Día |
 | Mapa | Mapa interactivo con fotos geolocalizadas |
 | Estadísticas | Dashboard con métricas de la colección |
 | Tags | Sistema de etiquetas manual y automático (IA) |
 | Temáticas | Colecciones personalizadas con color |
 | Portfolio | Proyectos fotográficos curados con IA |
-| Búsqueda IA | Búsqueda semántica por concepto visual |
+| Búsqueda | Barra de búsqueda en el header con clasificación de intención y búsqueda visual IA |
 | Vigilancia | Escaneo automático al detectar carpetas nuevas |
 
 ## Acceso
 
 La aplicación es accesible mediante un navegador web. Requiere una contraseña única configurada en el servidor. No hay sistema de usuarios múltiples — está concebida como herramienta personal.
+
+## Compatibilidad
+
+- **Desktop**: experiencia completa con sidebar, panel lateral de detalle y visor fullscreen.
+- **Mobile** (≤ 640 px): visor inmersivo (foto a pantalla completa con controles flotantes), navegación por swipe, bottom sheet de información.
