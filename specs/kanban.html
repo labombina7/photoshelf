@@ -558,7 +558,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">16</span>
+      <span class="col-count">7</span>
     </div>
     <div class="col-body">
 
@@ -569,101 +569,6 @@
         </div>
         <div class="card-title">Visor de foto fullscreen en mobile</div>
         <div class="card-summary">La foto ocupa toda la pantalla (fondo negro). Controles flotantes semitransparentes. Panel de info cerrado por defecto, se abre solo al pulsar ⓘ.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="EPIC-003" onclick="openModal('EPIC-003')">
-        <div class="card-top">
-          <span class="badge badge-epic">EPIC-003</span>
-          <span class="effort effort-l">L</span>
-        </div>
-        <div class="card-title">Búsqueda unificada en el header</div>
-        <div class="card-summary">Barra universal centrada en el header — keyword, tags, eventos e IA con clasificador inteligente. Reemplaza el panel AISearch lateral.</div>
-        <div class="card-footer"><span>US-028 → … → US-034</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-028" onclick="openModal('US-028')">
-        <div class="card-top">
-          <span class="badge badge-us">US-028</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Shell de la barra en el header</div>
-        <div class="card-summary">Header global con barra de búsqueda centrada, atajo ⌘K y colapso a icono en mobile.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-029" onclick="openModal('US-029')">
-        <div class="card-top">
-          <span class="badge badge-us">US-029</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Clasificador de intención (sin Ollama)</div>
-        <div class="card-summary">Módulo heurístico que decide si la query es por año, tag, evento, fulltext o IA — sin llamar a Ollama.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-030" onclick="openModal('US-030')">
-        <div class="card-top">
-          <span class="badge badge-us">US-030</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">API de búsqueda unificada</div>
-        <div class="card-summary"><code>GET /api/search</code> — enruta la query al handler correcto y devuelve resultados con intent, fotos, tags y eventos.</div>
-        <div class="card-footer">
-          <span>Depende de:</span>
-          <span class="dep-badge">US-029</span>
-        </div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-031" onclick="openModal('US-031')">
-        <div class="card-top">
-          <span class="badge badge-us">US-031</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Página de resultados /search</div>
-        <div class="card-summary">Resultados en el área principal con URL navegable, secciones por tipo y estados de carga y vacío.</div>
-        <div class="card-footer">
-          <span>Depende de:</span>
-          <span class="dep-badge">US-028</span>
-          <span class="dep-badge">US-030</span>
-        </div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-032" onclick="openModal('US-032')">
-        <div class="card-top">
-          <span class="badge badge-us">US-032</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Búsqueda IA con indicador visual</div>
-        <div class="card-summary">Badge ✦ IA en la barra cuando el clasificador activa Ollama. Modo deep incremental desde la página de resultados.</div>
-        <div class="card-footer">
-          <span>Depende de:</span>
-          <span class="dep-badge">US-031</span>
-        </div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-033" onclick="openModal('US-033')">
-        <div class="card-top">
-          <span class="badge badge-us">US-033</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Historial y sugerencias autocomplete</div>
-        <div class="card-summary">Últimas 5 búsquedas en localStorage + sugerencias de tags y eventos desde la BD mientras escribes.</div>
-        <div class="card-footer">
-          <span>Depende de:</span>
-          <span class="dep-badge">US-028</span>
-        </div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-034" onclick="openModal('US-034')">
-        <div class="card-top">
-          <span class="badge badge-us">US-034</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Retirar AISearchPanel y botón Buscar</div>
-        <div class="card-summary">Cleanup final: eliminar el panel lateral antiguo y sus estilos una vez la búsqueda unificada esté validada.</div>
-        <div class="card-footer">
-          <span>Depende de:</span>
-          <span class="dep-badge">US-031</span>
-          <span class="dep-badge">US-032</span>
-        </div>
       </div>
 
       <div class="card" tabindex="0" data-id="US-025" onclick="openModal('US-025')">
@@ -689,14 +594,6 @@
         <div class="card-footer"><span>US-023 → US-024 → US-025</span></div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-017" onclick="openModal('US-017')">
-        <div class="card-top">
-          <span class="badge badge-us">US-017</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Hardening técnico</div>
-        <div class="card-summary">Try/catch en todas las rutas API, tipos TypeScript unificados y validación de MIME types.</div>
-      </div>
 
       <div class="card" tabindex="0" data-id="US-021" onclick="openModal('US-021')">
         <div class="card-top">
@@ -742,9 +639,99 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">18</span>
+      <span class="col-count">26</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="EPIC-003" onclick="openModal('EPIC-003')">
+        <div class="card-top">
+          <span class="badge badge-epic">EPIC-003</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PRs #61–67</span>
+        </div>
+        <div class="card-title">Búsqueda unificada en el header</div>
+        <div class="card-summary">Barra universal centrada en el header — keyword, tags, eventos e IA con clasificador inteligente.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-017" onclick="openModal('US-017')">
+        <div class="card-top">
+          <span class="badge badge-us">US-017</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #60</span>
+        </div>
+        <div class="card-title">Hardening técnico</div>
+        <div class="card-summary">Try/catch en todas las rutas API, tipos TypeScript unificados y validación de MIME types.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-028" onclick="openModal('US-028')">
+        <div class="card-top">
+          <span class="badge badge-us">US-028</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #61</span>
+        </div>
+        <div class="card-title">Shell de la barra en el header</div>
+        <div class="card-summary">Header global con barra de búsqueda centrada, atajo ⌘K y colapso a icono en mobile.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-029" onclick="openModal('US-029')">
+        <div class="card-top">
+          <span class="badge badge-us">US-029</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #61</span>
+        </div>
+        <div class="card-title">Clasificador de intención (sin Ollama)</div>
+        <div class="card-summary">Módulo heurístico que decide si la query es por año, tag, evento, fulltext o IA — sin llamar a Ollama.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-030" onclick="openModal('US-030')">
+        <div class="card-top">
+          <span class="badge badge-us">US-030</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #62</span>
+        </div>
+        <div class="card-title">API de búsqueda unificada</div>
+        <div class="card-summary"><code>GET /api/search</code> — enruta la query al handler correcto y devuelve resultados con intent, fotos, tags y eventos.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-031" onclick="openModal('US-031')">
+        <div class="card-top">
+          <span class="badge badge-us">US-031</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #62</span>
+        </div>
+        <div class="card-title">Página de resultados /search</div>
+        <div class="card-summary">Resultados en el área principal con URL navegable, secciones por tipo y estados de carga y vacío.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-033" onclick="openModal('US-033')">
+        <div class="card-top">
+          <span class="badge badge-us">US-033</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #65</span>
+        </div>
+        <div class="card-title">Historial y sugerencias autocomplete</div>
+        <div class="card-summary">Últimas 5 búsquedas en localStorage + sugerencias de tags y eventos desde la BD mientras escribes.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-032" onclick="openModal('US-032')">
+        <div class="card-top">
+          <span class="badge badge-us">US-032</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #66</span>
+        </div>
+        <div class="card-title">Búsqueda IA con indicador visual</div>
+        <div class="card-summary">Badge ✦ IA en la barra cuando el clasificador activa Ollama. Modo deep incremental desde la página de resultados.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-034" onclick="openModal('US-034')">
+        <div class="card-top">
+          <span class="badge badge-us">US-034</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #67</span>
+        </div>
+        <div class="card-title">Retirar AISearchPanel y botón Buscar</div>
+        <div class="card-summary">Cleanup final: eliminar el panel lateral antiguo y sus estilos una vez la búsqueda unificada esté validada.</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-024" onclick="openModal('US-024')">
         <div class="card-top">
@@ -947,7 +934,8 @@ const CARDS = {
   'EPIC-003': {
     id: 'EPIC-003',
     type: 'EPIC',
-    column: 'todo',
+    column: 'done',
+    pr: '61–67',
     effort: 'L',
     title: 'Búsqueda unificada en el header',
     story: 'Como usuario de photoshelf,\nquiero una sola barra de búsqueda centrada en el header, visible desde cualquier vista,\npara encontrar fotos, tags, eventos o hacer búsquedas en lenguaje natural sin tener que saber qué tipo de búsqueda necesito.',
@@ -989,7 +977,8 @@ const CARDS = {
   'US-028': {
     id: 'US-028',
     type: 'US',
-    column: 'todo',
+    column: 'done',
+    pr: 61,
     effort: 'M',
     title: 'Shell de la barra de búsqueda en el header',
     story: 'Como usuario de photoshelf,\nquiero una barra de búsqueda centrada y visible en el header de la app,\npara iniciar cualquier búsqueda desde cualquier vista sin tener que ir al sidebar.',
@@ -1051,7 +1040,8 @@ const CARDS = {
   'US-029': {
     id: 'US-029',
     type: 'US',
-    column: 'todo',
+    column: 'done',
+    pr: 61,
     effort: 'S',
     title: 'Clasificador de intención de búsqueda (sin Ollama)',
     story: 'Como desarrollador de photoshelf,\nquiero un clasificador de intención que decida el tipo de búsqueda antes de ejecutarla,\npara evitar llamadas innecesarias a Ollama y mantener la latencia por debajo de 100ms en el caso común.',
@@ -1108,7 +1098,8 @@ const CARDS = {
   'US-030': {
     id: 'US-030',
     type: 'US',
-    column: 'todo',
+    column: 'done',
+    pr: 62,
     effort: 'M',
     title: 'API de búsqueda unificada',
     story: 'Como cliente de la API,\nquiero un único endpoint de búsqueda que maneje todos los tipos de consulta,\npara no tener que saber de antemano si la query es por tag, evento, año o requiere IA.',
@@ -1167,7 +1158,8 @@ const CARDS = {
   'US-031': {
     id: 'US-031',
     type: 'US',
-    column: 'todo',
+    column: 'done',
+    pr: 62,
     effort: 'M',
     title: 'Página de resultados /search en el área principal',
     story: 'Como usuario de photoshelf,\nquiero ver los resultados de búsqueda en el área principal de la app,\npara explorarlos con comodidad, usar el botón atrás y compartir la URL de mis resultados.',
@@ -1224,7 +1216,8 @@ const CARDS = {
   'US-032': {
     id: 'US-032',
     type: 'US',
-    column: 'todo',
+    column: 'done',
+    pr: 66,
     effort: 'M',
     title: 'Búsqueda IA con indicador visual y resultados en área principal',
     story: 'Como usuario de photoshelf,\nquiero saber cuándo una búsqueda está siendo procesada por IA y ver sus resultados de forma destacada,\npara entender la diferencia entre una búsqueda rápida y una búsqueda inteligente.',
@@ -1287,7 +1280,8 @@ const CARDS = {
   'US-033': {
     id: 'US-033',
     type: 'US',
-    column: 'todo',
+    column: 'done',
+    pr: 65,
     effort: 'S',
     title: 'Historial de búsquedas y sugerencias autocomplete',
     story: 'Como usuario de photoshelf,\nquiero ver mis búsquedas recientes y sugerencias de tags y eventos mientras escribo,\npara repetir búsquedas anteriores con un click y reducir los errores de escritura.',
@@ -1346,7 +1340,8 @@ const CARDS = {
   'US-034': {
     id: 'US-034',
     type: 'US',
-    column: 'todo',
+    column: 'done',
+    pr: 67,
     effort: 'S',
     title: 'Retirar AISearchPanel y botón Buscar del sidebar',
     story: 'Como mantenedor del código,\nquiero eliminar el AISearchPanel y el botón "Buscar" del sidebar una vez la búsqueda unificada esté operativa,\npara reducir la deuda técnica y evitar que el usuario tenga dos puntos de entrada de búsqueda distintos.',
@@ -1742,7 +1737,8 @@ const CARDS = {
   'US-017': {
     id: 'US-017',
     type: 'US',
-    column: 'todo',
+    column: 'done',
+    pr: 60,
     effort: 'M',
     title: 'Hardening técnico',
     story: 'Como desarrollador de photoshelf,\nquiero que todas las rutas de API tengan manejo de errores explícito y tipos TypeScript correctos,\npara que los fallos se registren y devuelvan respuestas HTTP consistentes en lugar de crashear el proceso.',
