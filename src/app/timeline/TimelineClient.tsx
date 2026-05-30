@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu } from '@/components/Icons';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 
 type Level = 'year' | 'month' | 'day';
@@ -36,6 +37,9 @@ interface Props {
 }
 
 const LEVELS: Level[] = ['year', 'month', 'day'];
+
+const LEVEL_LABEL: Record<Level, string> = { year: 'Año', month: 'Mes', day: 'Día' };
+const LEVEL_TITLE: Record<Level, string> = { year: 'Agrupar por año', month: 'Agrupar por mes', day: 'Agrupar por día' };
 
 const VISUAL_ZOOM_CONFIG = [
   { size: 100, limit: 120 },
@@ -269,8 +273,35 @@ export default function TimelineClient({
     return () => content.removeEventListener('touchend', handleTouchEnd);
   }, []);
 
-  const levelLabel: Record<Level, string> = { year: 'Año', month: 'Mes', day: 'Día' };
-  const levelTitle: Record<Level, string> = { year: 'Agrupar por año', month: 'Agrupar por mes', day: 'Agrupar por día' };
+  // Inject controls into the global app-header (matches library page pattern)
+  // On desktop: shows label + zoom controls on the right of the header
+  // On mobile: hamburger + label + zoom controls fill the header (logo/search hidden)
+  useHeaderSlot(
+    <div className="header-slot-timeline">
+      <button
+        className="hamburger header-slot-hamburger"
+        onClick={() => setMobileSidebarOpen(true)}
+        title="Menú"
+      >
+        <IconMenu size={20} />
+      </button>
+      <span className="header-slot-title header-slot-timeline__label">
+        {stickyLabel || 'Línea de tiempo'}
+      </span>
+      <div className="timeline-zoom-controls">
+        {LEVELS.map(l => (
+          <button
+            key={l}
+            className={`timeline-level-btn ${level === l ? 'active' : ''}`}
+            onClick={() => setLevel(l)}
+            title={LEVEL_TITLE[l]}
+          >
+            {LEVEL_LABEL[l]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 
   const priorityCount = vzConfig.limit / 3;
 
@@ -289,33 +320,6 @@ export default function TimelineClient({
       />
 
       <div className="main">
-        <div className="topbar topbar--timeline">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
-              <IconMenu size={20} />
-            </button>
-            <div className="topbar-title">
-              {stickyLabel || 'Línea de tiempo'}
-            </div>
-          </div>
-
-          <div className="topbar-spacer" />
-
-          {/* Temporal zoom controls */}
-          <div className="timeline-zoom-controls">
-            {LEVELS.map(l => (
-              <button
-                key={l}
-                className={`timeline-level-btn ${level === l ? 'active' : ''}`}
-                onClick={() => setLevel(l)}
-                title={levelTitle[l]}
-              >
-                {levelLabel[l]}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="content timeline-content" ref={contentRef}>
           {groups.map(group => (
             <div key={group.period} className="timeline-group">

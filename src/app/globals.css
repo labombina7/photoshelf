@@ -690,8 +690,19 @@ body { padding-top: var(--header-h); }
 .event-count { font-size: 11px; color: var(--text-tertiary); }
 
 /* ── Timeline ── */
-/* Timeline: no border-bottom en el topbar — los period headers ya tienen su propia separación */
-.topbar--timeline { border-bottom: none; }
+/* Header slot for timeline — matches library page pattern */
+.header-slot-timeline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-slot-timeline__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}
 
 .timeline-content { flex: 1; overflow-y: auto; padding: 0; }
 .timeline-group { padding: 0 28px 24px; }
