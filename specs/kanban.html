@@ -558,7 +558,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">31</span>
+      <span class="col-count">30</span>
     </div>
     <div class="col-body">
 
@@ -571,15 +571,6 @@
         </div>
         <div class="card-title">Hardening seguridad — rate limiting IA, middleware y validación catálogo</div>
         <div class="card-summary">Rate limiting en /ai/review y /ai/search. Middleware universal para todos los endpoints /api/*. Validación de directorio al crear un catálogo.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-044" onclick="openModal('US-044')">
-        <div class="card-top">
-          <span class="badge badge-us">US-044</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Corrección errores críticos — classify/year, ai/search logging y DetailPanel</div>
-        <div class="card-summary">Migrar classify/year a <code>after()</code>. Añadir logging en catch del bucle deep. Try/catch con rollback en removeTag y toggleTheme del DetailPanel.</div>
       </div>
 
       <div class="card" tabindex="0" data-id="US-045" onclick="openModal('US-045')">
@@ -861,7 +852,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">33</span>
+      <span class="col-count">34</span>
     </div>
     <div class="col-body">
 
@@ -873,6 +864,16 @@
         </div>
         <div class="card-title">Mejoras UX mobile — swipe sidebar, mapa drag-to-expand y toasts</div>
         <div class="card-summary">Swipe-left cierra sidebar. Panel del mapa 40% con drag hasta 70%. Toasts no solapados via clase <code>scan-running</code>. Formulario de catálogos al top.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-044" onclick="openModal('US-044')">
+        <div class="card-top">
+          <span class="badge badge-us">US-044</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #82 · 2026-05-30</span>
+        </div>
+        <div class="card-title">Bugs críticos — classify/year after(), ai/search logging, DetailPanel rollback</div>
+        <div class="card-summary"><code>after()</code> en classify/year. Logging en catch del bucle deep. <code>removeTag</code> y <code>toggleTheme</code> con try/catch y rollback optimista.</div>
       </div>
 
       <div class="card card-done" tabindex="0" data-id="US-040" onclick="openModal('US-040')">
