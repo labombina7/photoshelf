@@ -9,12 +9,18 @@ import { getDb } from '@/lib/db';
 import { parseSearchQuery, photoMatchesConcept } from '@/lib/ollama';
 import { PHOTOS_PATH } from '@/lib/config';
 import { upsertAiTags } from '@/lib/db-helpers';
+import { getAiSearchState, updateAiSearchState } from '@/lib/aiSearchState';
 const DEEP_BATCH = 50;
 
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  if (getAiSearchState().running) {
+    return NextResponse.json({ error: 'Operación en curso. Espera a que termine.' }, { status: 429 });
+  }
+
+  updateAiSearchState({ running: true, startedAt: Date.now() });
   try {
     const { prompt: rawPrompt, mode, offset = 0 } = await req.json();
     if (!rawPrompt?.trim()) return NextResponse.json({ error: 'Prompt required' }, { status: 400 });
@@ -102,5 +108,7 @@ export async function POST(req: NextRequest) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     console.error('[ai/search] Error during AI search:', message);
     return NextResponse.json({ error: message }, { status: 500 });
+  } finally {
+    updateAiSearchState({ running: false, startedAt: null });
   }
 }
