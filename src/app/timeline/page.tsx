@@ -10,8 +10,17 @@ export default async function TimelinePage() {
   if (!session.isLoggedIn) redirect('/login');
 
   const catalogId = await getActiveCatalogId();
-  const sidebar = getSidebarData(catalogId);
-  const { rows, hasMore, nextCursor } = getTimelineRows(60, null, catalogId);
+
+  let sidebar: ReturnType<typeof getSidebarData>;
+  let timelineResult: ReturnType<typeof getTimelineRows>;
+  try {
+    sidebar = getSidebarData(catalogId);
+    timelineResult = getTimelineRows(60, null, catalogId);
+  } catch (err) {
+    console.error('[Timeline/page] Error loading data for catalog', catalogId, ':', err);
+    throw err; // re-throw so error.tsx catches it
+  }
+  const { rows, hasMore, nextCursor } = timelineResult;
 
   return (
     <TimelineClient
