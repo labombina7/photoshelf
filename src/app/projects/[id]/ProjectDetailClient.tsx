@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useModal } from '@/components/ModalProvider';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconChevronLeft, IconTrash, IconX, IconCheck, IconEdit, IconMenu } from '@/components/Icons';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 
 interface ProjectPhoto {
@@ -90,12 +91,31 @@ export default function ProjectDetailClient({ project: initial, themes, projects
     setProject(p => ({ ...p, photos: newPhotos }));
   }
 
-  async function deleteProject() {
+  const deleteProject = useCallback(async () => {
     const ok = await confirm('¿Eliminar este proyecto?', { title: 'Eliminar proyecto', confirmLabel: 'Eliminar', danger: true });
     if (!ok) return;
     await fetch(`/api/projects/${project.id}`, { method: 'DELETE' });
     router.push('/projects');
-  }
+  }, [project.id, confirm, router]);
+
+  useHeaderSlot(useMemo(() => (
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
+        <IconMenu size={20} />
+      </button>
+      <Link href="/projects" className="back-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <IconChevronLeft size={14} />
+        Proyectos
+      </Link>
+      <span style={{ color: 'var(--text-tertiary)' }}>/</span>
+      <span className="header-slot-title">{project.title}</span>
+      <div className="topbar-spacer" />
+      <button className="btn-icon" onClick={deleteProject} title="Eliminar proyecto">
+        <IconTrash size={14} />
+      </button>
+    </div>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [project.title, deleteProject]));
 
   const currentPhoto = lightboxIdx !== null ? project.photos[lightboxIdx] : null;
 
@@ -112,23 +132,6 @@ export default function ProjectDetailClient({ project: initial, themes, projects
       />
 
       <div className="main">
-        {/* Topbar */}
-        <div className="topbar">
-          <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
-            <IconMenu size={20} />
-          </button>
-          <Link href="/projects" className="back-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <IconChevronLeft size={14} />
-            Proyectos
-          </Link>
-          <span style={{ color: 'var(--text-tertiary)' }}>/</span>
-          <span className="topbar-title">{project.title}</span>
-          <div className="topbar-spacer" />
-          <button className="btn-icon" onClick={deleteProject} title="Eliminar proyecto">
-            <IconTrash size={14} />
-          </button>
-        </div>
-
         <div className="content" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {/* Hero */}
           <div className="project-hero">
