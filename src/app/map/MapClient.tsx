@@ -46,11 +46,12 @@ export default function MapClient({
   const dragStartH = useRef<number>(40);
 
   function handlePanelDragStart(e: React.TouchEvent) {
+    if (!e.touches.length) return;
     dragStartY.current = e.touches[0].clientY;
     dragStartH.current = panelHeight;
   }
   function handlePanelDragMove(e: React.TouchEvent) {
-    if (dragStartY.current === null) return;
+    if (dragStartY.current === null || !e.touches.length) return;
     const deltaY = -(e.touches[0].clientY - dragStartY.current);
     const deltaPercent = (deltaY / window.innerHeight) * 100;
     setPanelHeight(Math.max(40, Math.min(70, dragStartH.current + deltaPercent)));
@@ -143,6 +144,10 @@ export default function MapClient({
       leafletRef.current = { map, cluster, L };
 
       setInitializing(false);
+      // Force Leaflet to recalculate container size after flex layout resolves
+      requestAnimationFrame(() => {
+        leafletRef.current?.map.invalidateSize();
+      });
     }
 
     init().catch(console.error);

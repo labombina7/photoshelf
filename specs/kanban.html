@@ -2566,6 +2566,1774 @@ const CARDS = {
     description: ['Selector de año en el mapa con carga progresiva. Evita pintar miles de marcadores de golpe en catálogos grandes, mejorando drásticamente el rendimiento. ✅ Desplegada el 2026-05-24.'],
     story: '', criteria: [], dependencies: [], components: [], tech: [], outOfScope: []
   },
+
+  'US-037': {
+    id: 'US-037', type: 'US', column: 'done', effort: 'S', pr: 75,
+    title: 'Corrección de variables CSS no definidas',
+    story: 'Como usuario de photoshelf,\nquiero que todos los elementos visuales se rendericen correctamente,\npara no encontrarme con bordes invisibles, fondos rotos o colores de acento inconsistentes.',
+    description: [
+      'El sistema de tokens CSS tiene tres variables referenciadas en el código pero no declaradas en <code>:root</code>: <code>--border2</code>, <code>--bg-secondary</code> y <code>--accent</code>/<code>--accent-rgb</code>. Esto produce bugs visuales silenciosos: el borde del FAB de búsqueda mobile no se renderiza, el skeleton shimmer queda sin color y los marcadores del mapa usan un fallback hardcodeado.',
+      'Esta US declara las tres variables en <code>:root</code> con valores semánticamente correctos y elimina los fallbacks hardcodeados innecesarios. ✅ Desplegada en PR #75 el 2026-05-30.',
+    ],
+    criteria: [
+      { group: 'Variables declaradas', items: ['<code>--border2: #dbd9d4</code> en <code>:root</code>', '<code>--bg-secondary: #f0ede8</code> en <code>:root</code>', '<code>--accent: #3b62d4</code> y <code>--accent-rgb: 59,98,212</code> en <code>:root</code>'] },
+      { group: 'Verificación visual', items: ['Borde del FAB mobile visible en iOS Safari y Chrome Android', 'Skeleton shimmer muestra la animación de gradiente correctamente', 'Marcadores del mapa y botones de año activos usan el mismo tono de azul'] }
+    ],
+    dependencies: [],
+    components: [{ path: 'src/app/globals.css', desc: 'Añadir --border2, --bg-secondary, --accent, --accent-rgb en :root' }],
+    tech: ['Verificar con DevTools que ninguna propiedad queda como var(--xxx) sin resolver (aparecería sin color en Computed Styles)'],
+    outOfScope: ['Modo oscuro', 'Auditoría completa del design token system']
+  },
+
+  'US-038': {
+    id: 'US-038', type: 'US', column: 'done', effort: 'S', pr: 78,
+    title: 'Skeleton shimmer en PhotoGrid y transición suave al cambiar de vista',
+    story: 'Como usuario de photoshelf navegando por la biblioteca,\nquiero que las fotos aparezcan con una animación de carga en lugar de surgir de golpe,\npara percibir la interfaz como fluida y profesional mientras las imágenes se descargan.',
+    description: [
+      'La Timeline ya tiene skeleton shimmer bien implementado, pero <strong>PhotoGrid</strong> (biblioteca y eventos) no — las fotos aparecen abruptamente. Adicionalmente, el toggle entre vista "carpetas" y "lista" produce un parpadeo visual.',
+      'Esta US extiende el patrón skeleton + transición a <code>PhotoGrid</code> y añade un fade-out/in al cambiar de vista usando <code>useTransition</code> de React. ✅ Desplegada en PR #78 el 2026-05-30.',
+    ],
+    criteria: [
+      { group: 'Skeleton en PhotoGrid', items: ['Imagen envuelta en <code>photo-item-wrapper + photo-skeleton</code>', 'Skeleton se oculta con evento <code>onLoad</code>', 'Comportamiento idéntico al de <code>TimelineClient.tsx</code>'] },
+      { group: 'Transición de vista', items: ['Toggle "carpetas"/"lista" hace fade-out antes del cambio y fade-in después', 'Transición ≤ 150ms', 'Usa <code>useTransition</code> de React para no bloquear la UI'] }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/components/PhotoGrid.tsx', desc: 'Envolver img en photo-item-wrapper + photo-skeleton, añadir onLoad' },
+      { path: 'src/app/library/LibraryClient.tsx', desc: 'useTransition + opacity transition al cambiar viewMode' },
+    ],
+    tech: ['El patrón de skeleton está en TimelineClient.tsx — copiar div.photo-item-wrapper > [photo-skeleton] + img con el onLoad', 'useTransition ya importado en LibraryClient.tsx — añadir startTransition(() => setViewMode(newMode))'],
+    outOfScope: ['Skeleton en la vista de mapa', 'Animación stagger elemento a elemento']
+  },
+
+  'US-039': {
+    id: 'US-039', type: 'US', column: 'done', effort: 'M', pr: 76,
+    title: 'Quick-wins de copy, iconografía y coherencia visual',
+    story: 'Como usuario de photoshelf,\nquiero que todos los botones, iconos y textos de la interfaz sean coherentes y semánticamente correctos,\npara poder usar la app con confianza sabiendo qué hace cada control sin necesidad de adivinar.',
+    description: [
+      'La auditoría UX identificó nueve problemas pequeños pero visibles de copy e iconografía: botón "+" sin label en DetailPanel, ícono unicode <code>ⓘ</code> en visor mobile, botón <code>×</code> inconsistente en el mapa, icono semánticamente incorrecto para "Sin clasificar", iconos duplicados en Catálogos/Proyectos, texto ambiguo "↓ Original", placeholder de atajo hardcodeado a macOS, estado vacío de proyectos sin <code>EmptyState</code> y sin spinner en "Reescanear".',
+      '✅ Desplegada en PR #76 el 2026-05-30.',
+    ],
+    criteria: [
+      { group: 'Copy e iconografía', items: ['Botón "+" → "Añadir" con aria-label en DetailPanel', 'Carácter ⓘ → SVG inline en visor mobile', 'Carácter × → <code>&lt;IconX&gt;</code> con aria-label en MapClient', 'Icono "Sin clasificar" corregido (no <code>&lt;IconSearch&gt;</code>)', 'Icono "Catálogos" diferenciado de "Proyectos"', '"↓ Original" → "Descargar original" (con tamaño si disponible)', 'Placeholder con detección de SO (⌘K / Ctrl+K)', 'Estado vacío de proyectos usa <code>&lt;EmptyState&gt;</code>', 'Spinner visible en botón "Reescanear" cuando running === true'] }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/components/DetailPanel.tsx', desc: 'Botón "+" → "Añadir"' },
+      { path: 'src/app/library/[photoId]/PhotoDetailClient.tsx', desc: 'ⓘ → SVG, texto descarga' },
+      { path: 'src/app/map/MapClient.tsx', desc: '× → IconX' },
+      { path: 'src/components/Sidebar.tsx', desc: 'Iconos sidebar, spinner Reescanear' },
+      { path: 'src/app/projects/ProjectsClient.tsx', desc: 'EmptyState en proyectos vacíos' },
+    ],
+    tech: ['El spinner inline del botón ya existe en globals.css como .spinner.dark — copiar el patrón del login', 'Detección de SO con navigator.platform en useEffect'],
+    outOfScope: ['Rediseño completo del sistema de iconos', 'Internacionalización (i18n)']
+  },
+
+  'US-040': {
+    id: 'US-040', type: 'US', column: 'done', effort: 'M', pr: 80,
+    title: 'Navegación contextual — botón "atrás" preserva estado y enlace a biblioteca desde Timeline',
+    story: 'Como fotógrafo navegando entre fotos y la biblioteca,\nquiero que el botón "atrás" me devuelva exactamente al estado y posición donde estaba antes de abrir el detalle de una foto,\npara no perder el filtro activo, el año seleccionado o la posición de scroll cada vez que entro y salgo de una foto.',
+    description: [
+      'Actualmente el botón "atrás" construye la URL de retorno en el servidor. Aunque preserva la query string, el usuario puede perder contexto cuando viene desde la Timeline o tiene filtros activos.',
+      'Esta US guarda la URL de origen en <code>sessionStorage</code> antes de navegar al detalle y la lee al volver. También añade un enlace discreto "Ver en biblioteca →" en los headers de período de la Timeline. ✅ Desplegada en PR #80 el 2026-05-30.',
+    ],
+    criteria: [
+      { group: 'sessionStorage de origen', items: ['URL de origen guardada en <code>photoshelf_detail_origin</code> antes de navegar al detalle', 'Al pulsar "atrás", se lee esa URL y se usa para navegar', 'Si no hay entrada, se usa backHref del servidor como fallback', 'La entrada se limpia al usarse'] },
+      { group: 'Timeline', items: ['Header de período incluye enlace discreto "Ver en biblioteca →"', 'Enlace navega a <code>/library?year=X</code>', 'Es un <code>&lt;a&gt;</code> real con href (no button con onClick)'] }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/library/[photoId]/PhotoDetailClient.tsx', desc: 'Leer photoshelf_detail_origin de sessionStorage' },
+      { path: 'src/app/timeline/TimelineClient.tsx', desc: 'Añadir enlace "Ver en biblioteca →" en timeline-period-header' },
+    ],
+    tech: ['sessionStorage es por pestaña — no interfiere con múltiples ventanas', 'La clave almacena un objeto: { href: string, label: string }'],
+    outOfScope: ['Restauración de posición de scroll al volver', 'Historial multi-nivel (breadcrumb)', 'Gestos de deslizamiento lateral para volver']
+  },
+
+  'US-042': {
+    id: 'US-042', type: 'US', column: 'done', effort: 'M', pr: 77,
+    title: 'Accesibilidad — segunda pasada de aria-labels, roles y alt dinámico',
+    story: 'Como usuario de photoshelf que usa lector de pantalla o navega con teclado,\nquiero que todos los controles interactivos tengan etiquetas descriptivas y que las imágenes tengan texto alternativo útil,\npara poder acceder al contenido de mis fotos y controlar la app sin depender de la visión.',
+    description: [
+      'La US-010 resolvió los problemas de accesibilidad más visibles. La auditoría UX del 2026-05-29 identificó un segundo grupo: botones de editar/eliminar temática sin aria-label, botón de cierre de modal sin estilos ni aria-label, alt text estático con nombres de fichero en thumbnails, slider de proyectos sin aria-valuetext, y tabs de año sin role="tab".',
+      '✅ Desplegada en PR #77 el 2026-05-30.',
+    ],
+    criteria: [
+      { group: 'Aria-labels', items: ['Botones de editar/eliminar temática en Sidebar tienen aria-label dinámico', 'Botón de cierre del modal de review tiene aria-label="Cerrar análisis de IA"', 'Slider de proyectos tiene aria-label y aria-valuetext dinámico'] },
+      { group: 'Alt dinámico en thumbnails', items: ['Si la foto tiene tags, alt usa los primeros 3 tags', 'Si no hay tags, fallback a filename', 'Aplica en PhotoGrid.tsx y TimelineClient.tsx'] },
+      { group: 'Tabs de año', items: ['Contenedor tiene role="tablist" y aria-label="Filtrar por año"', 'Cada botón tiene role="tab" y aria-selected', 'Tab activo con tabindex="0", inactivos con tabindex="-1"'] }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/components/Sidebar.tsx', desc: 'aria-label dinámico en botones de temática' },
+      { path: 'src/components/PhotoGrid.tsx', desc: 'Alt dinámico con tags' },
+      { path: 'src/app/timeline/TimelineClient.tsx', desc: 'Alt dinámico con tags' },
+      { path: 'src/app/projects/ProjectsClient.tsx', desc: 'aria-label y aria-valuetext en slider' },
+      { path: 'src/app/library/LibraryClient.tsx', desc: 'role="tablist"/role="tab"/aria-selected en botones de año' },
+    ],
+    tech: ['Para alt dinámicos, verificar si GET /api/photos ya incluye tags; si no, añadir los 3 primeros con GROUP_CONCAT limitado', 'Estilos .ai-panel-close en globals.css: área táctil mínima 44×44px'],
+    outOfScope: ['ARIA live regions para escaneo/clasificación', 'Contraste en modo oscuro', 'Testing con VoiceOver/NVDA/JAWS']
+  },
+
+  'US-041': {
+    id: 'US-041',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Mejoras UX mobile — swipe sidebar, mapa bottom sheet y gestión de toasts',
+    story: 'Como usuario de photoshelf en un móvil o tablet,\nquiero que la interfaz responda a los gestos táctiles que espero de una app nativa,\npara navegar por mis fotos de forma cómoda sin tener que buscar botones pequeños o sufrir solapamientos de mensajes.',
+    description: [
+      'La experiencia mobile de photoshelf ha mejorado con el visor fullscreen y el bottom sheet del detalle. Sin embargo, quedan cuatro fricciones identificadas: swipe-left para cerrar el sidebar no está implementado (estándar en iOS/Android), el panel del mapa ocupa demasiado espacio (55%), los toasts se solapan en mobile, y el formulario de nuevo catálogo está oculto sin indicador visual.',
+      'Esta US resuelve cuatro problemas específicos de usabilidad móvil implementando gestos táctiles naturales, reutilizando patrones existentes como <code>BottomSheet.tsx</code>, y reorganizando controles en la topbar para que sean accesibles sin scroll.',
+    ],
+    criteria: [
+      {
+        group: 'Swipe-left para cerrar sidebar',
+        items: [
+          'Deslizar > 60px de derecha a izquierda cierra el sidebar',
+          'Usa <code>onTouchStart</code> / <code>onTouchEnd</code> sin interferir con scroll vertical',
+          'Animación igual que al pulsar overlay',
+        ]
+      },
+      {
+        group: 'Panel del mapa como bottom sheet',
+        items: [
+          'Altura inicial: 40% (reducida desde 55%)',
+          'Drag-to-expand hasta 70% de pantalla',
+          'Reutiliza patrón de <code>BottomSheet.tsx</code>',
+        ]
+      },
+      {
+        group: 'Gestión de toasts simultáneos',
+        items: [
+          'Toast genérico se desplaza a <code>bottom: 96px</code> cuando scan-toast está activo',
+          'Usa variable CSS dinámica desde <code>ScanProvider</code>',
+        ]
+      },
+      {
+        group: 'Formulario de catálogos accesible',
+        items: [
+          'Botón "Añadir catálogo" en cabecera o botón flotante en mobile',
+          'Usuario no necesita scroll para encontrarlo',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/components/Sidebar.tsx', desc: 'Añadir onTouchStart/onTouchEnd para swipe-left', isNew: false },
+      { path: 'src/app/map/MapClient.tsx', desc: 'Reducir altura inicial del panel a 40%, drag-to-expand', isNew: false },
+      { path: 'src/app/globals.css', desc: 'Gestión de posición de toasts simultáneos', isNew: false },
+      { path: 'src/components/ScanProvider.tsx', desc: 'Exponer estado running vía contexto', isNew: false },
+    ],
+    tech: [
+      'Umbral de swipe: 60px (mismo que US-035)',
+      'Drag-to-expand usa pattern de BottomSheet: translateY en state + CSS transform',
+      'Toasts: variable CSS <code>--toast-bottom</code> actualizada dinámicamente con <code>document.documentElement.style.setProperty</code>',
+    ],
+    outOfScope: [
+      'Clustering del mapa en servidor para mobile',
+      'Haptic feedback (vibración) al completar gestos',
+      'Notificaciones push cuando escaneo completa en background',
+    ]
+  },
+  'US-043': {
+    id: 'US-043',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Hardening de seguridad — rate limiting en IA, middleware universal y validación de catálogos',
+    story: 'Como administrador de photoshelf,\nquiero que los endpoints que consumen recursos intensivos (IA, clasificación) estén protegidos contra abuso,\npara que un uso incorrecto o un ataque no bloquee Ollama ni exponga rutas del sistema de archivos.',
+    description: [
+      'La auditoría de deuda técnica identificó tres vulnerabilidades críticas: endpoints de IA sin throttling (<code>/api/ai/classify/batch</code>, <code>/api/ai/search</code>, <code>/api/ai/review</code>) que pueden saturar Ollama; middleware de autenticación limitado a <code>/api/v1/*</code> dejando otros endpoints expuestos; y catálogos sin validación que podrían apuntar a <code>/etc</code> u otras rutas sensibles.',
+      'Esta US añade rate limiting consistente con el patrón de <code>classifyState.ts</code>, amplía el middleware a todos los endpoints, y valida que los paths de catálogos existan y sean accesibles antes de persistirlos.',
+    ],
+    criteria: [
+      {
+        group: 'Rate limiting en endpoints de IA',
+        items: [
+          '<code>/api/ai/review/[photoId]</code> y <code>/api/ai/search</code> rechazan con HTTP 429 si hay operación en curso',
+          'Usa patrón consistente de <code>classifyState.running</code> con mutex en <code>globalThis</code>',
+          'Respuesta 429: <code>{ error: "Operación en curso. Espera a que termine." }</code>',
+        ]
+      },
+      {
+        group: 'Middleware universal de autenticación',
+        items: [
+          'Matcher ampliado a <code>/api/:path*</code> para cubrir todos los endpoints',
+          'Valida sesión con iron-session (criptografía real, no solo presencia de cookie)',
+          'Endpoints públicos explícitamente excluidos',
+        ]
+      },
+      {
+        group: 'Validación de directorio en catálogos',
+        items: [
+          '<code>createCatalog</code> verifica que path existe y es directorio antes de persistir',
+          'Error HTTP 400 si path no es accesible: <code>{ error: "El directorio no existe o no es accesible" }</code>',
+          'Opcionalmente valida que comienza con <code>ALLOWED_ROOT</code> env var',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/middleware.ts', desc: 'Ampliar matcher a /api/:path*; mejorar validación de sesión', isNew: false },
+      { path: 'src/lib/aiSearchState.ts', desc: 'Estado global para throttling de búsqueda IA (análogo a classifyState.ts)', isNew: true },
+      { path: 'src/app/api/ai/review/[photoId]/route.ts', desc: 'Añadir guard de concurrencia', isNew: false },
+      { path: 'src/app/api/ai/search/route.ts', desc: 'Añadir guard de concurrencia', isNew: false },
+      { path: 'src/lib/queries/catalogs.ts', desc: 'Validación de path en createCatalog', isNew: false },
+    ],
+    tech: [
+      'Throttle de búsqueda reutiliza patrón de <code>classifyState.ts</code>: objeto en <code>globalThis</code> con <code>running</code> y <code>startedAt</code>',
+      'Middleware amplía matcher a <code>"/api/:path*"</code>, excluye <code>/api/auth/login</code>',
+      'Validación de path: <code>path.resolve()</code> + <code>fs.statSync()</code> (patrón que existe en scan/route.ts)',
+    ],
+    outOfScope: [
+      'Rate limiting basado en IP (requiere Redis)',
+      'Auditoría de accesos con log estructurado',
+      'ALLOWED_ROOT como variable de entorno obligatoria de producción',
+      'CORS en endpoints de API pública',
+    ]
+  },
+  'US-044': {
+    id: 'US-044',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Corrección de errores críticos en background tasks y manejo de fallos silenciosos',
+    story: 'Como fotógrafo que usa la clasificación automática y la búsqueda IA,\nquiero que las operaciones en segundo plano completen siempre correctamente y que los fallos individuales sean visibles en los logs,\npara no encontrarme con clasificaciones incompletas sin explicación ni resultados de búsqueda vacíos sin saber por qué.',
+    description: [
+      'La auditoría de deuda técnica identificó tres bugs críticos en manejo de errores del backend: <code>classify/year</code> usa fire-and-forget sin <code>after()</code> permitiendo que Next.js abort el proceso; el catch vacío en <code>ai/search</code> modo deep no registra logs cuando Ollama falla; y <code>DetailPanel</code> tiene actualizaciones optimistas sin rollback cuando la red falla.',
+      'Esta US ancla la clasificación al runtime con <code>after()</code>, añade logging descriptivo en los catches, e implementa try/catch + rollback para las acciones optimistas del usuario, con notificación visual de errores en cada caso.',
+    ],
+    criteria: [
+      {
+        group: 'classify/year con after()',
+        items: [
+          'IIFE de clasificación en <code>src/app/api/ai/classify/year/route.ts</code> se reemplaza por <code>after()</code>',
+          'Handler devuelve HTTP 202 inmediatamente; proceso está anclado al runtime',
+          'Comportamiento idéntico desde el cliente',
+        ]
+      },
+      {
+        group: 'Logging en catch de ai/search',
+        items: [
+          'Catch vacío registra: <code>console.error("[ai/search] photo error:", candidate.id, err.message)</code>',
+          'Bucle continúa con siguiente foto (no aborta)',
+          'Array vacío con logs si todas fallan',
+        ]
+      },
+      {
+        group: 'Rollback en DetailPanel',
+        items: [
+          '<code>removeTag</code> envuelve fetch en try/catch + revierte estado local en caso de error',
+          'Toast de error: "No se pudo eliminar la etiqueta. Inténtalo de nuevo."',
+          '<code>toggleTheme</code> aplica mismo patrón',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/api/ai/classify/year/route.ts', desc: 'Reemplazar IIFE por after() de next/server', isNew: false },
+      { path: 'src/app/api/ai/search/route.ts', desc: 'Añadir console.error en catch del bucle deep', isNew: false },
+      { path: 'src/components/DetailPanel.tsx', desc: 'try/catch + rollback + toast en removeTag y toggleTheme', isNew: false },
+    ],
+    tech: [
+      '<code>after()</code> disponible desde Next.js 15; ya existe en scan/route.ts',
+      'Rollback: guardar valor antes: <code>const prevTags = tags; setTags(...); try { await fetch } catch { setTags(prevTags); toast }</code>',
+      'Sistema de toasts ya existe; verificar uso en ScanProvider.tsx para consistencia',
+    ],
+    outOfScope: [
+      'Retry automático con backoff exponencial',
+      'ARIA live regions para anunciar errores',
+      'Persistencia de estado de clasificación para recuperación ante reinicios',
+    ]
+  },
+  'US-045': {
+    id: 'US-045',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Rendimiento — count de paginación correcto, caché de hints y evicción de thumbnails',
+    story: 'Como fotógrafo con una biblioteca grande de varios miles de fotos,\nquiero que la paginación muestre el total correcto cuando hay filtros activos y que la app no consuma recursos innecesarios con búsquedas frecuentes ni llene el disco con thumbnails acumulados,\npara tener información fiable y un sistema que funcione bien a largo plazo.',
+    description: [
+      'La auditoría de deuda técnica identificó tres problemas de rendimiento: <code>listPhotos</code> devuelve el count total del catálogo sin aplicar filtros (year, event, tag, favorite) haciendo <code>hasMore</code> incorrecto; <code>loadHints</code> carga todos los tags en cada búsqueda sin caché; y los thumbnails WebP se acumulan indefinidamente en <code>data/.cache/</code> sin evicción.',
+      'Esta US corrige el count filtrado aplicando las mismas condiciones WHERE, cachea <code>loadHints</code> con TTL de 60s, e implementa evicción automática de thumbnails con antigüedad > 30 días al arrancar el servidor de forma no bloqueante.',
+    ],
+    criteria: [
+      {
+        group: 'Count filtrado en listPhotos',
+        items: [
+          'Total aplica mismos joins y condiciones de filtro que query principal',
+          'hasMore es correcto: <code>offset + results.length &lt; total</code>',
+          'Sin regresión de rendimiento',
+        ]
+      },
+      {
+        group: 'Caché en loadHints',
+        items: [
+          'Cachea resultado en memoria con TTL 60 segundos',
+          'Se invalida si se añade/elimina tag o expira por TTL',
+          'En 1000 búsquedas seguidas, query a BD se ejecuta ≤ 1 vez por minuto',
+        ]
+      },
+      {
+        group: 'Evicción de thumbnails',
+        items: [
+          'Script en <code>src/lib/thumbnail.ts</code> limpia entradas > 30 días',
+          'Se ejecuta al arrancar servidor en <code>instrumentation.ts</code>, no bloqueante',
+          'No elimina archivos accedidos recientemente (usa mtime)',
+          'Loguea archivos eliminados y espacio liberado',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/queries/photos.ts', desc: 'Corregir COUNT(*) para aplicar filtros', isNew: false },
+      { path: 'src/lib/search/execute.ts', desc: 'Caché en memoria con TTL para loadHints', isNew: false },
+      { path: 'src/lib/thumbnail.ts', desc: 'Función evictOldThumbnails(maxAgeDays)', isNew: false },
+      { path: 'src/instrumentation.ts', desc: 'Llamar a evictOldThumbnails(30) al arrancar', isNew: false },
+    ],
+    tech: [
+      'Count filtrado: reutilizar <code>buildPhotoFilter</code> de db-helpers.ts',
+      'Caché: objeto en módulo <code>{ data, expiresAt }</code>, no requiere Redis',
+      'Evicción: <code>fs.readdir</code> + <code>fs.stat(file).mtimeMs</code> comparado con <code>Date.now() - maxAgeDays * 86400000</code> en <code>setImmediate()</code>',
+    ],
+    outOfScope: [
+      'Límite de tamaño del caché en GB',
+      'Caché de resultados de queries de photos',
+      'Clustering del mapa en servidor',
+    ]
+  },
+  'US-046': {
+    id: 'US-046',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Capa de repositorio — eliminar SQL inline restante en route handlers',
+    story: 'Como desarrollador de photoshelf,\nquiero que ningún route handler ni componente importe <code>getDb()</code> directamente,\npara que toda la lógica de acceso a datos esté centralizada en <code>src/lib/queries/</code> y sea fácil de mantener, testear y auditar.',
+    description: [
+      'La US-022 estableció la arquitectura de repositorio pero dejó incompleta la migración. La auditoría de deuda técnica del 2026-05-29 identificó que al menos 12 ficheros de routes/pages siguen importando <code>getDb()</code> directamente e ejecutando SQL inline, violando la separación de responsabilidades definida en CLAUDE.md.',
+      'Esta US es el paso final: migra todos los SQL inline restantes a funciones de repositorio centralizadas en <code>src/lib/queries/search.ts</code>, <code>projects.ts</code> y <code>sidebar.ts</code>, y actualiza los route handlers para usar solo estas funciones.',
+    ],
+    criteria: [
+      {
+        group: 'Nuevas funciones de repositorio',
+        items: [
+          '<code>src/lib/queries/search.ts</code> con <code>getSearchHints</code>, <code>getSearchSuggestions</code>, <code>getAiSearchCandidates</code>',
+          '<code>src/lib/queries/projects.ts</code> con CRUD completo: list, getById, create, update, delete, getPhotos, setPhotos',
+          '<code>src/lib/queries/sidebar.ts</code> con <code>getSidebarProjects</code> movida desde db.ts',
+        ]
+      },
+      {
+        group: 'Migración de route handlers',
+        items: [
+          'Ningún route handler importa <code>getDb()</code>',
+          'Todos usan funciones de repositorio',
+          'Sin regresiones de comportamiento ni queries N+1',
+        ]
+      },
+      {
+        group: 'db.ts limpiada',
+        items: [
+          'Solo contiene <code>getDb()</code> e <code>initSchema()</code>',
+          '<code>getSidebarProjects</code> eliminada',
+        ]
+      }
+    ],
+    dependencies: ['US-022'],
+    components: [
+      { path: 'src/lib/queries/search.ts', desc: 'Nuevo — funciones de repositorio para búsqueda', isNew: true },
+      { path: 'src/lib/queries/projects.ts', desc: 'Nuevo — funciones de repositorio para proyectos', isNew: true },
+      { path: 'src/lib/queries/sidebar.ts', desc: 'Nuevo — getSidebarProjects', isNew: true },
+      { path: 'src/lib/db.ts', desc: 'Eliminar getSidebarProjects; solo getDb() e initSchema()', isNew: false },
+      { path: 'src/app/api/search/hints/route.ts', desc: 'Usar getSearchHints', isNew: false },
+      { path: 'src/app/api/search/suggestions/route.ts', desc: 'Usar getSearchSuggestions', isNew: false },
+      { path: 'src/app/api/projects/route.ts', desc: 'Usar getProjectList, createProject', isNew: false },
+      { path: 'src/app/api/ai/search/route.ts', desc: 'Usar getAiSearchCandidates', isNew: false },
+    ],
+    tech: [
+      'Seguir patrón en <code>src/lib/queries/photos.ts</code>: funciones que reciben <code>db</code> o usan <code>getDb()</code> internamente',
+      '<code>catalog_id</code> propagado correctamente (patrón EPIC-001)',
+      'Verificar que <code>getAiSearchCandidates</code> incluye filtro de <code>catalog_id</code>',
+    ],
+    outOfScope: [
+      'Unificar endpoints <code>/api/photos/*</code> y <code>/api/v1/photos/*</code>',
+      'Tests unitarios para nuevas funciones',
+      'Integrar modo deep en <code>/api/search?mode=deep</code>',
+    ]
+  },
+  'US-047': {
+    id: 'US-047',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Refactorización de ollama.ts en submódulos y centralización de constantes',
+    story: 'Como desarrollador de photoshelf,\nquiero que la integración con Ollama esté dividida en módulos con responsabilidades claras y que las constantes de configuración estén en un único lugar,\npara poder añadir nuevos modelos, cambiar timeouts o refactorizar la lógica de IA sin navegar 340 líneas de un fichero monolítico.',
+    description: [
+      '<code>src/lib/ollama.ts</code> tiene 341 líneas con cinco responsabilidades distintas mezcladas: extracción de JSON, escape de XML, lectura y resize de imágenes, comunicación HTTP, clasificación, parsing de búsqueda, generación de proyectos y review. Esta mezcla dificulta añadir nuevos proveedores (US-021) y testear funciones individuales. Paralelamente, constantes dispersas sin nombres descriptivos impiden cambiarlas de forma segura.',
+      'Esta US divide ollama.ts en submódulos (<code>client.ts</code>, <code>image.ts</code>, <code>classify.ts</code>, <code>search.ts</code>, <code>review.ts</code>, <code>projects.ts</code>) y centraliza constantes en <code>config.ts</code>. El fichero original se convierte en un barrel que re-exporta, manteniendo compatibilidad.',
+    ],
+    criteria: [
+      {
+        group: 'Estructura de submódulos',
+        items: [
+          '<code>src/lib/ollama/</code> con 6 submódulos (client, image, classify, search, review, projects) + index.ts barrel',
+          'Original <code>src/lib/ollama.ts</code> es barrel que importa desde <code>src/lib/ollama/index.ts</code>',
+          'Sin cambios en importadores existentes',
+        ]
+      },
+      {
+        group: 'Centralización de constantes',
+        items: [
+          '<code>src/lib/config.ts</code> (o <code>constants.ts</code>) con: OLLAMA_TIMEOUT_TEXT_MS, OLLAMA_TIMEOUT_VISION_MS, OLLAMA_TIMEOUT_CLASSIFY_MS, OLLAMA_IMAGE_SIZE, WATCHER_DEBOUNCE_MS, WATCHER_POLL_MS, AUTH_RATE_LIMIT_*',
+          'Magic numbers en <code>ollama.ts</code>, <code>folderWatcher.ts</code>, <code>thumbnail.ts</code>, <code>auth/login/route.ts</code> reemplazados por constantes',
+        ]
+      },
+      {
+        group: 'Sin regresiones',
+        items: [
+          'Todos los importadores de <code>@/lib/ollama</code> funcionan sin cambios',
+          'Tests existentes de ollama pasan',
+          'Comportamiento idéntico',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/ollama/client.ts', desc: 'Nuevo — HTTP con Ollama (texto y visión)', isNew: true },
+      { path: 'src/lib/ollama/image.ts', desc: 'Nuevo — lectura y resize de imagen', isNew: true },
+      { path: 'src/lib/ollama/classify.ts', desc: 'Nuevo — clasificación y parsing JSON', isNew: true },
+      { path: 'src/lib/ollama/search.ts', desc: 'Nuevo — parsing de queries de búsqueda', isNew: true },
+      { path: 'src/lib/ollama/review.ts', desc: 'Nuevo — review de fotos', isNew: true },
+      { path: 'src/lib/ollama/projects.ts', desc: 'Nuevo — generación de proyectos', isNew: true },
+      { path: 'src/lib/ollama/index.ts', desc: 'Nuevo — re-exporta API público', isNew: true },
+      { path: 'src/lib/ollama.ts', desc: 'Simplificar a barrel', isNew: false },
+      { path: 'src/lib/config.ts', desc: 'Añadir constantes con nombre', isNew: false },
+    ],
+    tech: [
+      '<code>src/lib/ollama.ts</code> es 3-5 líneas: <code>export * from "./ollama/index"</code>',
+      'Prioridad: tests existentes deben pasar sin cambios',
+      '<code>extractJsonObject</code> va en <code>classify.ts</code> o utils compartido',
+    ],
+    outOfScope: [
+      'Tests unitarios de funciones de parsing',
+      'Integración con OpenAI o Anthropic',
+      'Logging estructurado con pino',
+    ]
+  },
+  'US-048': {
+    id: 'US-048',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Tests de integración para routes API críticas y refactor de ollama.test.ts',
+    story: 'Como desarrollador de photoshelf,\nquiero tener tests de integración para las rutas de API más críticas y tests reales del módulo de Ollama,\npara poder refactorizar con confianza y detectar regresiones de seguridad antes de desplegar.',
+    description: [
+      'La US-019 estableció infraestructura de Vitest pero los 9 tests solo cubren lógica pura. No existen tests para route handlers críticos (<code>scan/route.ts</code>, <code>catalogs/route.ts</code>, <code>projects/route.ts</code>) con implicaciones de seguridad. Además, <code>ollama.test.ts</code> replica localmente funciones en lugar de testear el módulo real, dejando regresiones indetectables.',
+      'Esta US añade tests de integración para rutas API críticas con SQLite in-memory, mockea iron-session para simular autenticación, y refactoriza ollama.test.ts para importar y testear las funciones reales del módulo usando Vitest + mocks de fetch/sharp.',
+    ],
+    criteria: [
+      {
+        group: 'Tests de integración para routes API',
+        items: [
+          'Catálogos: GET, POST (válido/inválido/sin auth), DELETE (existe/no existe)',
+          'Scan: POST (inicio/ya en curso), GET /status, sin autenticación',
+          'Auth con cobertura: login correcto, password incorrecto, rate limit, body inválido',
+        ]
+      },
+      {
+        group: 'Refactor de ollama.test.ts',
+        items: [
+          'Importa <code>extractJsonObject</code> y otros helpers directamente del módulo',
+          'Solo <code>fetch</code> y <code>sharp</code> mockeados',
+          'Si <code>extractJsonObject</code> cambia, tests detectan regresión',
+          'Casos límite: JSON malformado, respuesta vacía, timeout simulado',
+        ]
+      },
+      {
+        group: 'Infraestructura',
+        items: [
+          'SQLite in-memory (<code>:memory:</code>) para aislamiento total',
+          'iron-session mockeado para simular sesiones autenticadas/no autenticadas',
+          '<code>npm test</code> ejecuta toda la suite',
+          'Tests pueden ejecutarse en paralelo sin conflictos',
+        ]
+      }
+    ],
+    dependencies: ['US-019'],
+    components: [
+      { path: 'src/app/api/catalogs/__tests__/catalogs.test.ts', desc: 'Nuevo — tests de integración', isNew: true },
+      { path: 'src/app/api/scan/__tests__/scan.test.ts', desc: 'Nuevo — tests de integración', isNew: true },
+      { path: 'src/app/api/auth/__tests__/login.test.ts', desc: 'Completar casos límite faltantes', isNew: false },
+      { path: 'src/__tests__/ollama.test.ts', desc: 'Refactorizar para testear módulo real', isNew: false },
+    ],
+    tech: [
+      'Mockear iron-session: <code>vi.mock("iron-session", () => ({ getIronSession: vi.fn().mockResolvedValue(...) }))</code>',
+      'Llamar handler directamente: <code>handler(new NextRequest(...))</code> o usar msw',
+      'BD in-memory con <code>initSchema()</code> existente',
+    ],
+    outOfScope: [
+      'Tests E2E con Playwright',
+      'Tests de componentes React',
+      'Coverage del 100%',
+    ]
+  },
+  'US-049': {
+    id: 'US-049',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Modo comparación de fotos (side-by-side)',
+    story: 'Como fotógrafo que trabaja con ráfagas o fotos similares de un mismo evento,\nquiero poder comparar dos fotos en pantalla completa una al lado de la otra,\npara decidir rápidamente cuál tiene mejor enfoque, exposición o composición y cuál marcar como favorita.',
+    description: [
+      'Una de las tareas más frecuentes en curación de biblioteca es elegir la mejor foto de series similares (ráfagas, ángulos diferentes). Actualmente photoshelf solo permite ver una foto a la vez, obligando a navegar hacia adelante y atrás. El modo comparación muestra dos fotos en columnas iguales a pantalla completa con controles para intercambiar fotos, marcar favorita y cerrar.',
+      'La segunda foto se selecciona desde la biblioteca (Shift+Click) o desde el detalle de la primera, sin interrumpir el flujo. La URL <code>/compare?a=ID1&b=ID2</code> permite compartir y enlazar comparaciones.',
+    ],
+    criteria: [
+      {
+        group: 'Activar la comparación',
+        items: [
+          'Botón "Comparar" en barra de acciones del detalle desktop',
+          'Selector lateral para elegir foto de comparación del mismo evento',
+          'O: Shift+Click en biblioteca para seleccionar dos fotos',
+          'URL: <code>/compare?a=ID1&b=ID2</code>',
+        ]
+      },
+      {
+        group: 'Vista de comparación',
+        items: [
+          'Dos columnas de igual ancho, 100% pantalla',
+          'Cada columna: nombre archivo, fecha, botón favorita',
+          'Click en foto abre detalle en pestaña nueva o modal',
+          'Mobile: fotos apiladas verticalmente',
+        ]
+      },
+      {
+        group: 'Navegación',
+        items: [
+          'Atajos: A (←), D (→) navegan en columna activa',
+          'Click en columna la activa',
+          'Escape cierra y vuelve al detalle',
+          'Botón "Elegir esta" navega al detalle elegido',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/compare/page.tsx', desc: 'Nuevo — página de comparación', isNew: true },
+      { path: 'src/app/compare/CompareClient.tsx', desc: 'Nuevo — lógica con teclado y acciones', isNew: true },
+      { path: 'src/app/library/[photoId]/PhotoDetailClient.tsx', desc: 'Añadir botón "Comparar"', isNew: false },
+    ],
+    tech: [
+      'URL con query params <code>?a=&b=</code> permite ambas aproximaciones (página o modal)',
+      'Reutilizar lista de fotos existente filtrada por event + year',
+      'Thumbnails <code>size=1920</code> disponibles en <code>/api/photos/[id]/thumbnail</code>',
+      'Images: <code>object-fit: contain</code> para no recortar',
+    ],
+    outOfScope: [
+      'Comparación de > 2 fotos (grid de 4)',
+      'Zoom sincronizado',
+      'Anotaciones sobre fotos',
+      'Exportar como PNG',
+    ]
+  },
+  'US-050': {
+    id: 'US-050',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Exportar selección de fotos como ZIP',
+    story: 'Como fotógrafo que quiere compartir o hacer backup de un subconjunto de fotos,\nquiero poder seleccionar varias fotos en la biblioteca y descargarlas todas en un único archivo ZIP,\npara no tener que descargarlas una por una o acceder directamente al NAS por SFTP.',
+    description: [
+      'photoshelf permite descargar solo una foto a la vez. Un caso muy común — "quiero las 15 mejores fotos de vacaciones para compartir con familia" — obliga a descargas individuales. Esta US añade modo selección múltiple en la biblioteca (Shift+Click) y endpoint de exportación que genera ZIP con streaming para no cargar todo en memoria.',
+      'La descarga incluye archivos originales con barra de progreso. Si algún archivo no es accesible, se omite con log de advertencia sin abortar el ZIP.',
+    ],
+    criteria: [
+      {
+        group: 'Modo selección múltiple',
+        items: [
+          'Shift+Click en foto activa modo selección',
+          'O: botón "Seleccionar" en toolbar',
+          'Checkboxes en esquina superior izquierda de cada foto',
+          'Shift+Click selecciona rango (primera a última)',
+          'Contador visible: "N fotos seleccionadas"',
+          'Escape o "Cancelar selección" limpia',
+        ]
+      },
+      {
+        group: 'Exportación ZIP',
+        items: [
+          'Botón "Descargar selección" aparece con ≥ 1 foto',
+          'ZIP generado con archivos originales',
+          'Nombre: <code>photoshelf-{fecha}.zip</code>',
+          'Streaming — generado e enviado de forma incremental',
+          'Archivo no accesible: se omite con log, no aborta',
+        ]
+      },
+      {
+        group: 'Feedback al usuario',
+        items: [
+          'Indicador de progreso durante generación',
+          'Advertencia si selección > 200 fotos',
+          'Toast de error si descarga falla',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/api/photos/export/route.ts', desc: 'Nuevo — genera ZIP streaming', isNew: true },
+      { path: 'src/components/PhotoGrid.tsx', desc: 'Modo selección con checkboxes', isNew: false },
+      { path: 'src/app/library/LibraryClient.tsx', desc: 'Toolbar con contador y botón exportar', isNew: false },
+      { path: 'src/lib/queries/photos.ts', desc: 'getPhotosByIds(ids: number[])', isNew: false },
+    ],
+    tech: [
+      'ZIP streaming: <code>archiver</code> con <code>archiver.pipe(response)</code>, o <code>fflate</code> pure-JS',
+      'Verificar que photoIds pertenecen al catálogo activo (evitar exfiltración)',
+      'Límite: máx 500 fotos por petición',
+      'Archivos originales: <code>resolvePhotoPath(photo.path)</code> (ya protegido contra path traversal)',
+    ],
+    outOfScope: [
+      'Exportar como thumbnails',
+      'Exportar metadatos como CSV',
+      'Crear proyecto a partir de selección',
+      'Descarga asíncrona con notificación diferida',
+    ]
+  },
+  'US-051': {
+    id: 'US-051',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Modo presentación — slideshow automático con intervalo configurable',
+    story: 'Como fotógrafo que quiere mostrar sus fotos en una pantalla o TV conectada al NAS,\nquiero poder activar un modo de presentación automático que cicle entre las fotos del evento o album seleccionado,\npara disfrutar de mis fotos sin interacción continua, como un marco digital moderno.',
+    description: [
+      'photoshelf corre en un NAS casero accesible desde TV u pantallas grandes del hogar. Un caso de uso diferenciador es el de "marco digital": mostrar fotos de las vacaciones en la pantalla del salón. El modo presentación extiende el visor fullscreen con avance automático configurable, transiciones suaves y HUD mínimo con controles de play/pausa.',
+      'Las fotos avanzan cada N segundos (configurable: 3/5/10/30s), se pueden pausar con Espacio, y al llegar a la última vuelven a la primera. El HUD se oculta tras 3s de inactividad. Las transiciones usan crossfade sin layout shift.',
+    ],
+    criteria: [
+      {
+        group: 'Activar presentación',
+        items: [
+          'Botón "Presentación" en toolbar de biblioteca o en HUD del visor fullscreen',
+          'Tecla P activa/desactiva cuando no hay focus en input',
+          'Comienza desde foto actual',
+        ]
+      },
+      {
+        group: 'Comportamiento slideshow',
+        items: [
+          'Avance automático cada N segundos (defecto: 5s)',
+          'Intervalo configurable desde HUD: 3/5/10/30s',
+          'Loop continuo al final',
+          'Pausa/reanuda con Espacio o botón del HUD',
+        ]
+      },
+      {
+        group: 'HUD de presentación',
+        items: [
+          'Mínimo: visible solo con movimiento ratón/toque, se oculta tras 3s',
+          'Controles: play/pausa, anterior, siguiente, intervalo, salir',
+          'Barra fina de progreso en base mostrando tiempo restante',
+          'Contador: "7 / 47"',
+        ]
+      },
+      {
+        group: 'Transiciones',
+        items: [
+          'Crossfade (fade-out + fade-in) de 0.5s',
+          'Suaves, sin layout shift ni parpadeo',
+        ]
+      }
+    ],
+    dependencies: ['US-035', 'US-036'],
+    components: [
+      { path: 'src/components/Slideshow.tsx', desc: 'Nuevo — avance automático, HUD, transiciones', isNew: true },
+      { path: 'src/app/library/[photoId]/PhotoDetailClient.tsx', desc: 'Botón presentación en HUD', isNew: false },
+      { path: 'src/app/library/LibraryClient.tsx', desc: 'Botón "Presentación" en toolbar', isNew: false },
+      { path: 'src/app/globals.css', desc: 'Estilos crossfade, barra progreso, HUD', isNew: false },
+    ],
+    tech: [
+      'Crossfade: <code>opacity</code> + <code>position: absolute</code> para superponer; no <code>transition</code> en <code>src</code>',
+      'Precargado: <code>new Image()</code> antes de que timer expire',
+      '<code>setInterval</code> con cleanup en <code>useEffect</code> (no setTimeout encadenado)',
+      'Barra progreso: <code>&lt;div&gt;</code> con <code>width: X%</code> actualizado cada 100ms, o animación CSS con <code>animation-duration</code>',
+    ],
+    outOfScope: [
+      'Música de fondo',
+      'Transiciones elaboradas (ken-burns)',
+      'Modo kiosk del SO',
+      'Guardar configuración por usuario',
+    ]
+  },
+  'US-052': {
+    id: 'US-052',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Agrupación de fotos por persona con reconocimiento facial vía Ollama',
+    story: 'Como fotógrafo que tiene miles de fotos de familia,\nquiero que la app identifique y agrupe automáticamente las fotos en las que aparece cada persona,\npara poder encontrar rápidamente "todas las fotos donde sale mi hijo" sin etiquetar manualmente cada una.',
+    description: [
+      'La búsqueda por personas es una funcionalidad diferenciadora en Google Photos / Apple Photos que no existe en photoshelf. Se aprovecha los modelos vision de Ollama (LLaVA, Gemma3) para detectar personas y describir sus características visualmente consistentes (ej. "persona con pelo corto castaño y gafas") durante la clasificación, almacenando como tags especiales con prefijo <code>persona:</code>.',
+      'El usuario puede "nombrar" esos descriptores para asociarlos a personas reales de su familia. El flujo: clasificación detecta personas → tags <code>persona:descriptor</code> → usuario los renombra → búsqueda unificada permite encontrar "Lucas". No requiere entrenamiento de modelos ni embeddings de caras reales.',
+    ],
+    criteria: [
+      {
+        group: 'Clasificación con detección de personas',
+        items: [
+          'Prompt de clasificación incluye instrucción para detectar personas visibles',
+          'Tags generados: <code>persona:adulto-pelo-castaño</code>, <code>persona:niño-pelo-rubio</code>, etc.',
+          'Almacenados con <code>source: "ai"</code> en photo_tags',
+          'Opcional si Ollama no disponible — sin error',
+        ]
+      },
+      {
+        group: 'Vista de personas',
+        items: [
+          'Nueva sección "Personas" en sidebar',
+          'Grid de tarjetas: descriptor textual, foto ejemplo, número de fotos',
+          'Click en tarjeta filtra biblioteca por esa persona',
+        ]
+      },
+      {
+        group: 'Nombrar personas',
+        items: [
+          'Usuario asigna nombre propio a descriptor',
+          'Almacenado como alias en DB',
+          'Aparece con nombre en sidebar y detalle',
+        ]
+      },
+      {
+        group: 'Búsqueda por persona',
+        items: [
+          'Búsqueda unificada: "Lucas" → fotos con tag alias',
+          'Detalle de foto muestra persona con nombre asignado',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/persons/page.tsx', desc: 'Nuevo — vista de personas', isNew: true },
+      { path: 'src/app/persons/PersonsClient.tsx', desc: 'Nuevo — grid de personas', isNew: true },
+      { path: 'src/app/api/persons/route.ts', desc: 'Nuevo — lista de personas', isNew: true },
+      { path: 'src/app/api/persons/[tagId]/route.ts', desc: 'Nuevo — renombrar persona', isNew: true },
+      { path: 'src/lib/ollama/classify.ts', desc: 'Ampliar prompt para detectar personas', isNew: false },
+      { path: 'src/components/Sidebar.tsx', desc: 'Añadir enlace a "Personas"', isNew: false },
+    ],
+    tech: [
+      'Modelos vision de Ollama (LLaVA 7B+, Gemma3) ya soportados',
+      'Descriptores: descripciones textuales que varían entre fotos (no embeddings reales)',
+      'Prefijo <code>persona:</code> en tags es convención',
+      'Alias: nueva columna <code>alias TEXT</code> en tabla <code>tags</code> o tabla <code>tag_aliases</code>',
+    ],
+    outOfScope: [
+      'Reconocimiento facial real con embeddings',
+      'Agrupación automática sin intervención',
+      'GDPR/anonimización',
+      'Sincronización con contactos',
+    ]
+  },
+  'US-053': {
+    id: 'US-053',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Panel de actividad reciente — historial de cambios en la biblioteca',
+    story: 'Como fotógrafo que gestiona activamente su biblioteca con etiquetas y clasificaciones,\nquiero ver un registro de las últimas acciones realizadas (fotos añadidas, etiquetas aplicadas, clasificaciones completadas),\npara poder deshacer cambios accidentales, revisar qué hizo la IA en la última sesión y retomar el trabajo donde lo dejé.',
+    description: [
+      'photoshelf no registra ningún historial de acciones. Si la IA genera tags incorrectos en 200 fotos, el usuario no sabe qué cambió. Esta US añade un registro ligero en SQLite y un panel de "Actividad reciente" con las acciones de las últimas 2 semanas: escaneos, clasificaciones, etiquetas, favoritos, proyectos.',
+      'El alcance es solo-lectura en v1: el usuario ve el historial pero sin undo/redo todavía. Las entradas se purguen automáticamente tras 30 días. El registro es no bloqueante.',
+    ],
+    criteria: [
+      {
+        group: 'Registro de actividad',
+        items: [
+          'Tabla <code>activity_log</code>: id, action_type, entity_type, entity_id, metadata JSON, created_at',
+          'Acciones: <code>scan_completed</code>, <code>classify_completed</code>, <code>tag_added/removed</code>, <code>favorite_toggled</code>, <code>project_created</code>',
+          'Purga automática: entradas > 30 días eliminadas',
+          'Escritura no bloqueante',
+        ]
+      },
+      {
+        group: 'Panel de actividad',
+        items: [
+          'Ruta <code>/activity</code> en sidebar',
+          'Últimas N acciones paginadas (defecto 50)',
+          'Cada entrada: tipo (icono), descripción legible, fecha relativa',
+          'Resumen para escaneos/clasificaciones: "47 fotos nuevas, 2 eliminadas"',
+          'Foto miniatura y nombre tag para entradas de etiqueta',
+        ]
+      },
+      {
+        group: 'Filtros del historial',
+        items: [
+          'Por tipo: todos / escaneos / etiquetas / favoritos',
+          'Por fecha: hoy / esta semana / este mes',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/activity/page.tsx', desc: 'Nuevo — página de actividad', isNew: true },
+      { path: 'src/app/activity/ActivityClient.tsx', desc: 'Nuevo — lista paginada con filtros', isNew: true },
+      { path: 'src/app/api/activity/route.ts', desc: 'Nuevo — endpoint de actividad', isNew: true },
+      { path: 'src/lib/queries/activity.ts', desc: 'Nuevo — logActivity, getActivity, purgeOldActivity', isNew: true },
+      { path: 'src/lib/db.ts', desc: 'Tabla activity_log', isNew: false },
+      { path: 'src/lib/scanner.ts', desc: 'Llamar logActivity al finalizar', isNew: false },
+      { path: 'src/components/ScanProvider.tsx', desc: 'Llamar logActivity al completar', isNew: false },
+      { path: 'src/components/DetailPanel.tsx', desc: 'Llamar logActivity en operaciones de tags', isNew: false },
+    ],
+    tech: [
+      '<code>logActivity()</code>: fire-and-forget o en <code>after()</code>, no bloquea',
+      'Descripción legible generada en cliente desde action_type + metadata',
+      'Purga: <code>setImmediate()</code> para no bloquear event loop',
+      'Tabla en misma BD SQLite existente',
+    ],
+    outOfScope: [
+      'Undo/redo de acciones',
+      'Notificaciones push al completar',
+      'Exportar historial como CSV',
+      'Historial multi-usuario',
+    ]
+  },
+  'US-054': {
+    id: 'US-054',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Culling rápido de ráfagas',
+    story: 'Como fotógrafo semi-profesional que dispara en ráfaga en eventos y bodas,\nquiero agrupar automáticamente los disparos similares y poder elegir el mejor de cada serie con atajos de teclado,\npara reducir de horas a minutos la selección post-sesión sin revisar foto a foto.',
+    description: [
+      'Después de una sesión intensa (boda, concierto, evento), el fotógrafo puede tener cientos de ráfagas de 5–20 disparos prácticamente idénticos. Revisarlos uno por uno es agotador — es el "decision fatigue" que paraliza el flujo de post-producción. El modo culling agrupa automáticamente disparos del mismo evento con diferencia de tiempo < N segundos (configurable, defecto 3s), y permite eligir rápidamente con teclado: Enter (favorita), X (descartar), → (skip).',
+      'El resultado es una colección de "elegidas" que el usuario puede revisar, exportar o usar para álbumes. Nada se borra — solo se aplica rating/tags. El usuario mantiene control total.',
+    ],
+    criteria: [
+      {
+        group: 'Agrupación de ráfagas',
+        items: [
+          'Detecta automáticamente grupos con diferencia <code>taken_at</code> ≤ umbral (defecto 3s)',
+          'Si no hay EXIF: usa <code>created_at</code>',
+          'Umbral configurable en UI: 1/3/5/10 segundos',
+          'Solo grupos con ≥ 2 fotos',
+        ]
+      },
+      {
+        group: 'Interfaz de culling',
+        items: [
+          'Acceso: botón "Modo culling" en evento o sidebar',
+          'Vista horizontal de fotos del grupo actual',
+          'Contador: "Grupo 7 de 34 · 5 fotos"',
+          'Nombre evento + hora de captura como contexto',
+          'Tamaño adecuado para evaluar enfoque',
+        ]
+      },
+      {
+        group: 'Atajos de teclado',
+        items: [
+          'Enter o F: marca favorita, avanza a siguiente foto',
+          'X: descarta, avanza',
+          '→: skip (siguiente foto sin decisión)',
+          '←: retrocede',
+          'Tab: salta a siguiente grupo',
+          'Escape: sale y vuelve al evento',
+        ]
+      },
+      {
+        group: 'Resumen y resultado',
+        items: [
+          'Al terminar: "X fotos marcadas favoritas de Y grupos revisados"',
+          'Fotos marcadas favoritas visibles con filtro "Favoritas" estándar',
+          'No persiste historial de sesiones (one-shot)',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/culling/[eventId]/page.tsx', desc: 'Nuevo — carga grupos de ráfaga', isNew: true },
+      { path: 'src/app/culling/[eventId]/CullingClient.tsx', desc: 'Nuevo — navegación por teclado', isNew: true },
+      { path: 'src/app/api/photos/[eventId]/bursts/route.ts', desc: 'Nuevo — detección de grupos por timestamp', isNew: true },
+      { path: 'src/lib/queries/bursts.ts', desc: 'Nuevo — lógica de agrupación temporal', isNew: true },
+      { path: 'src/app/(library)/[year]/[event]/page.tsx', desc: 'Botón "Modo culling" si hay ráfagas', isNew: false },
+    ],
+    tech: [
+      'Query de agrupación: SQLite window function <code>LAG(taken_at)</code> para diferencias',
+      'Grupos on-demand, no persistidos (se recomputan)',
+      'Tamaño imagen: <code>size=1200</code> de <code>/api/photos/[id]/thumbnail</code>',
+      'No requiere Ollama',
+    ],
+    outOfScope: [
+      'Culling global de toda la biblioteca',
+      'Sugerencia automática del mejor frame',
+      'Comparación side-by-side dentro del culling',
+      'Ráfagas detectadas por blur',
+      'Historial de sesiones persisitido',
+    ]
+  },
+  'US-055': {
+    id: 'US-055',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Detección y gestión de pares RAW+JPEG',
+    story: 'Como fotógrafo semi-profesional que dispara en modo RAW+JPEG simultáneamente,\nquiero que photoshelf reconozca automáticamente los pares RAW+JPEG del mismo disparo y me permita gestionar qué formato conservar,\npara no ver duplicados en mi biblioteca y mantener mi catálogo limpio sin trabajo manual.',
+    description: [
+      'Las cámaras modernas generan simultáneamente RAW + JPEG con el mismo nombre base (<code>DSC_0042.ARW</code> + <code>DSC_0042.jpg</code>). Sin herramientas específicas, aparecen como dos fotos — duplicados que confunden. Esta US detecta estos pares automáticamente durante el scan (mismo directorio + nombre base + extensión complementaria) y permite al usuario decidir: mostrar solo RAW, solo JPEG, o ambos.',
+      'La decisión solo afecta visibilidad en la biblioteca — ningún archivo se borra del disco. Los pares se vinculan vía columna <code>raw_pair_id</code> en la tabla <code>photos</code>.',
+    ],
+    criteria: [
+      {
+        group: 'Detección de pares',
+        items: [
+          'Durante scan: si existe par RAW↔JPEG, ambas se vinculan vía <code>raw_pair_id</code>',
+          'Detecta: .arw, .cr2, .cr3, .nef, .orf, .raf, .rw2, .dng, .raw',
+          'Mismo directorio requerido',
+          'No recomputados en re-escaneos salvo cambio de archivos',
+        ]
+      },
+      {
+        group: 'Visibilidad en la biblioteca',
+        items: [
+          'Ajuste en Configuración: "Mostrar pares RAW+JPEG" con opciones Ambos / Solo RAW / Solo JPEG',
+          'Preferencia persiste',
+          'Afecta a todos los grids (biblioteca, búsqueda, temáticas, álbumes)',
+        ]
+      },
+      {
+        group: 'Gestión de pares',
+        items: [
+          'Detalle de foto con par: badge "RAW+JPEG" con enlace al complementario',
+          'Badge abre complementario en modal o navega',
+          'Estadísticas: "X pares RAW+JPEG detectados"',
+        ]
+      },
+      {
+        group: 'Panel de revisión',
+        items: [
+          'Ruta <code>/tools/raw-pairs</code> desde sidebar',
+          'Lista todos los pares: RAW miniatura, nombre, tamaño',
+          'Permite aplicar visibilidad global o por par individual',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/scanner.ts', desc: 'Detección de pares durante indexación', isNew: false },
+      { path: 'src/lib/db.ts', desc: 'Columna <code>raw_pair_id INTEGER REFERENCES photos(id)</code>', isNew: false },
+      { path: 'src/lib/queries/photos.ts', desc: 'Filtrado por <code>raw_visibility</code> en listPhotos', isNew: false },
+      { path: 'src/app/tools/raw-pairs/page.tsx', desc: 'Nuevo — panel de revisión de pares', isNew: true },
+      { path: 'src/app/api/raw-pairs/route.ts', desc: 'Nuevo — lista de pares', isNew: true },
+      { path: 'src/app/(library)/[year]/[event]/[photoId]/PhotoDetailClient.tsx', desc: 'Badge RAW+JPEG', isNew: false },
+      { path: 'src/app/settings/page.tsx', desc: 'Ajuste de visibilidad', isNew: false },
+    ],
+    tech: [
+      'Detección en scanner: <code>path.parse(filename).name</code> como clave; segunda pasada sobre registros del evento',
+      'EXIF: RAW como autoritativo si ambos existen',
+      'Filtrado SQL: <code>WHERE (raw_pair_id IS NULL OR :visibility = "both" OR (ext IN (...) AND :visibility = "raw_only"))</code>',
+    ],
+    outOfScope: [
+      'Borrado automático de JPEG cuando se conserva RAW',
+      'Detección en directorios distintos',
+      'Vinculación manual con nombres base diferentes',
+      'Vista side-by-side RAW vs JPEG',
+    ]
+  },
+  'US-056': {
+    id: 'US-056',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Verificación de integridad y salud de archivos',
+    story: 'Como fotógrafo con años de fotos acumuladas en disco,\nquiero saber si algún archivo está corrupto, huérfano o ha desaparecido del disco,\npara confiar en que mi biblioteca es íntegra y no perder fotos silenciosamente.',
+    description: [
+      'El mayor miedo silencioso del fotógrafo que gestiona su propio archivo no es no encontrar una foto — es perder una foto sin saberlo. Discos que fallan gradualmente, archivos que se corrompen, reorganizaciones manuales de carpetas que dejan registros huérfanos: todas pasan sin que nada lo notifique. Esta US añade una herramienta de verificación periódica que detecta: archivos huérfanos en DB (registros sin archivo en disco), archivos no indexados en disco, y archivos corruptos (cabecera inválida).',
+      'El resultado es un informe que el usuario puede revisar y actuar: re-escanear no indexados, marcar huérfanos como "eliminados", mover corruptos a cuarentena.',
+    ],
+    criteria: [
+      {
+        group: 'Análisis de integridad',
+        items: [
+          'Botón "Verificar integridad" en herramientas del sidebar',
+          'Corre en background con indicador de progreso',
+          'Fase 1 — Huérfanos: <code>fs.existsSync(path)</code> para cada foto en DB',
+          'Fase 2 — No indexados: recorre directorios de fotos',
+          'Fase 3 — Corruptos: intenta abrir cabecera con <code>sharp</code> (opcional)',
+        ]
+      },
+      {
+        group: 'Informe de resultados',
+        items: [
+          'Página <code>/tools/integrity</code> muestra: total verificadas, huérfanos, no indexados, corruptos',
+          'Si sin problemas: "Tu biblioteca está íntegra ✓"',
+          'Fecha y hora del último análisis',
+        ]
+      },
+      {
+        group: 'Acciones sobre resultados',
+        items: [
+          '"Re-escanear no indexados" — scan parcial',
+          '"Marcar huérfanos como eliminados" — elimina registros (con confirmación)',
+          '"Mover corruptos a cuarentena" — mueve a <code>_quarantine/</code> (con confirmación)',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/tools/integrity/page.tsx', desc: 'Nuevo — carga último informe', isNew: true },
+      { path: 'src/app/tools/integrity/IntegrityClient.tsx', desc: 'Nuevo — progreso, resultados, acciones', isNew: true },
+      { path: 'src/app/api/integrity/scan/route.ts', desc: 'Nuevo — lanza análisis', isNew: true },
+      { path: 'src/app/api/integrity/status/route.ts', desc: 'Nuevo — estado', isNew: true },
+      { path: 'src/app/api/integrity/report/route.ts', desc: 'Nuevo — último informe', isNew: true },
+      { path: 'src/app/api/integrity/resolve/route.ts', desc: 'Nuevo — acciones sobre resultados', isNew: true },
+      { path: 'src/lib/integrityScanner.ts', desc: 'Nuevo — lógica de las tres fases', isNew: true },
+      { path: 'src/lib/db.ts', desc: 'Tabla <code>integrity_reports</code>', isNew: false },
+      { path: 'src/components/Sidebar.tsx', desc: 'Badge de alerta si hay huérfanos', isNew: false },
+    ],
+    tech: [
+      'Fase 1 y 2: <code>fs.existsSync</code> sin leer contenido (< 30s para 50k fotos)',
+      'Fase 3: <code>sharp(filePath).metadata()</code> lanza si corrupto; en batches de 100 con <code>setImmediate</code>',
+      'Resultados almacenados en <code>integrity_reports</code> con type/path/photo_id',
+    ],
+    outOfScope: [
+      'Verificación de checksums históricos',
+      'Reparación automática',
+      'Exportar informe como PDF',
+      'Programación automática semanal',
+    ]
+  },
+  'US-057': {
+    id: 'US-057',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Exportar catálogo completo (anti lock-in)',
+    story: 'Como fotógrafo que valora el control total sobre sus datos,\nquiero poder exportar todos mis metadatos, tags, favoritos y colecciones en un formato abierto y portable,\npara nunca sentir que mis datos de organización están atrapados en photoshelf.',
+    description: [
+      'El vendor lock-in asusta a fotógrafos que han sido "quemados" por Adobe o iCloud. photoshelf, al ser self-hosted y open source, tiene la ventaja de estar en el lado correcto. Esta US materializa esa ventaja: exportador completo que genera paquetes portable en formatos estándar: JSON (reimportable), CSV (procesable), y XMP sidecars (estándar de la industria compatible con Lightroom, digiKam).',
+      'Se exportan: tags, favoritos, rating, temáticas, álbumes, historial de clasificaciones IA. El JSON incluye versión de esquema para facilitar migraciones futuras.',
+    ],
+    criteria: [
+      {
+        group: 'Configuración del export',
+        items: [
+          'Página <code>/settings/export</code> con opciones: JSON / CSV / XMP sidecars / Todo (ZIP)',
+          'Incluir/excluir: tags IA, tags manuales, favoritos, temáticas, álbumes',
+          'Preview de tamaño estimado',
+        ]
+      },
+      {
+        group: 'Generación del export',
+        items: [
+          'En background con indicador de progreso',
+          'Archivo se descarga directamente',
+          'XMP sidecars: se escriben en mismo directorio que foto (no descargan)',
+          'JSON: incluye <code>schema_version: 1, exported_at, photos: [...]</code>',
+        ]
+      },
+      {
+        group: 'Formato JSON',
+        items: [
+          'Cada foto: filename, path, taken_at, camera, tags, favorite, themes, gps',
+          'Temáticas y álbumes con estructura de reglas',
+        ]
+      },
+      {
+        group: 'Formato XMP sidecars',
+        items: [
+          'Un <code>[nombre_foto].xmp</code> por foto',
+          'Campos: <code>dc:subject</code> (tags), <code>xmp:Rating</code> (favorito = 5 estrellas), <code>dc:description</code> (review IA)',
+          'Compatible con Lightroom Classic y digiKam',
+          'Si existe .xmp previo: pregunta sobreescribir o fusionar',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/settings/export/page.tsx', desc: 'Nuevo — configuración y export', isNew: true },
+      { path: 'src/app/settings/export/ExportClient.tsx', desc: 'Nuevo — formulario, progreso, historial', isNew: true },
+      { path: 'src/app/api/export/catalog/route.ts', desc: 'Nuevo — lanza generación', isNew: true },
+      { path: 'src/app/api/export/status/route.ts', desc: 'Nuevo — estado', isNew: true },
+      { path: 'src/app/api/export/download/route.ts', desc: 'Nuevo — descarga archivo', isNew: true },
+      { path: 'src/lib/catalogExporter.ts', desc: 'Nuevo — lógica de export (JSON, CSV, XMP)', isNew: true },
+      { path: 'src/lib/queries/export.ts', desc: 'Nuevo — queries para reunir datos', isNew: true },
+    ],
+    tech: [
+      'JSON: <code>fs.createWriteStream</code> en lugar de construir objeto completo (< 100MB para 100k fotos)',
+      'XMP: template XML string; campos estándar <code>dc:subject</code>, <code>xmp:Rating</code>, <code>exif:GPSLatitude/Longitude</code>',
+      'CSV: <code>csv-stringify</code> o manualmente para evitar dependencias',
+      'XMP se escriben en servidor — usuario accede via NAS',
+    ],
+    outOfScope: [
+      'Importar export JSON/XMP de otra herramienta',
+      'Export incrementales',
+      'Export de imágenes originales',
+      'Sincronización automática con Nextcloud/NAS',
+    ]
+  },
+  'US-058': {
+    id: 'US-058',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Búsqueda por similitud visual ("fotos parecidas a esta")',
+    story: 'Como fotógrafo que quiere encontrar fotos con el mismo estilo, ambiente o composición,\nquiero poder pulsar "buscar fotos similares a esta" en cualquier foto de mi biblioteca,\npara descubrir series, duplicar estilos o crear colecciones temáticas de forma visual.',
+    description: [
+      'La búsqueda semántica actual parte de texto. Esta US invierte el flujo: el usuario señala una foto como referencia y pide "encuéntrame fotos parecidas a esta". Los casos son distintos: encontrar fotos con luz de atardecer similar, recuperar fotos de misma sesión dispersas en eventos, construir temática visualmente cohesiva, encontrar variantes de composición a lo largo de años.',
+      'Se aprovecha Ollama vision para generar descripción detallada de la foto referencia (luz, composición, paleta, sujetos, estilo) que luego se usa como query de búsqueda semántica en la colección.',
+    ],
+    criteria: [
+      {
+        group: 'Activación',
+        items: [
+          'Botón "Buscar similares" en detalle de foto (solo si Ollama disponible)',
+          'Navega a <code>/search?similar_to={photoId}</code>',
+        ]
+      },
+      {
+        group: 'Página de resultados',
+        items: [
+          'Header muestra miniatura foto referencia + "Fotos similares a esta"',
+          'Sistema analiza referencia con Ollama vision',
+          'Resultados en grid ordenados por relevancia',
+          'Foto referencia excluida',
+          'Indicador de progreso mientras Ollama analiza',
+        ]
+      },
+      {
+        group: 'Calidad de resultados',
+        items: [
+          'Tags de similaridad: "muy similar", "similar", "relacionada"',
+          'Refinable con filtros adicionales (año, evento, tags)',
+          'Botón "Guardar como temática"',
+        ]
+      },
+      {
+        group: 'Comportamiento si Ollama falla',
+        items: [
+          'Error visible específico (igual que búsqueda IA existente)',
+          'Sin fallback silencioso',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/search/page.tsx', desc: 'Detectar param <code>similar_to</code>', isNew: false },
+      { path: 'src/app/search/SimilaritySearch.tsx', desc: 'Nuevo — header con referencia + descripción', isNew: true },
+      { path: 'src/app/api/search/similar/route.ts', desc: 'Nuevo — análisis + búsqueda', isNew: true },
+      { path: 'src/lib/search/similar.ts', desc: 'Nuevo — describe referencia → búsqueda semántica', isNew: true },
+      { path: 'src/app/(library)/[year]/[event]/[photoId]/PhotoDetailClient.tsx', desc: 'Botón "Buscar similares"', isNew: false },
+    ],
+    tech: [
+      'Prompt Ollama: describe luz, composición, paleta, sujeto, mood',
+      'Reutilizar <code>src/lib/ollama.ts</code> para llamadas vision',
+      'Búsqueda semántica: reutilizar <code>/api/search</code> con texto generado',
+      'Score similaridad: heurístico basado en coincidencia de conceptos (no embedding real)',
+    ],
+    outOfScope: [
+      'Embeddings vectoriales reales',
+      'Búsqueda por imagen cargada externamente',
+      'Filtro de similaridad ajustable',
+      'Comparación visual side-by-side',
+    ]
+  },
+  'US-059': {
+    id: 'US-059',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Revisión y validación de tags generados por IA',
+    story: 'Como fotógrafo que usa la clasificación automática con IA,\nquiero poder revisar los tags generados, confirmar los correctos y rechazar los erróneos en un flujo rápido,\npara poder confiar en que los tags de mi biblioteca son fiables y no llenarme de etiquetas incorrectas.',
+    description: [
+      'El mayor freno a IA en gestión fotográfica es la desconfianza. Un error visto = "la IA no sirve". Esta US añade dos capas de confianza: indicador de confianza por tag (<code>high/medium/low</code>) asignado heurísticamente durante clasificación, y flujo de revisión donde el usuario confirma/rechaza tags rápidamente. Los tags confirmados se marcan <code>validated: true</code> y nunca vuelven a la cola de revisión.',
+      'Vista dedicada en <code>/tools/review-tags</code> con flashcards: foto + tags con indicadores, atajos de teclado para confirmar/rechazar. Badge en sidebar muestra "X fotos por revisar".',
+    ],
+    criteria: [
+      {
+        group: 'Indicadores de confianza en detalle',
+        items: [
+          'Tags con <code>source: "ai"</code> muestran indicador: check verde (high), punto gris (medium), interrogante ámbar (low)',
+          'Hover: "Tag generado por IA · confianza alta/media/baja"',
+          'Tags validados por usuario: check diferente "Confirmado por ti"',
+        ]
+      },
+      {
+        group: 'Flujo de revisión',
+        items: [
+          'Ruta <code>/tools/review-tags</code> en sidebar',
+          'Flashcard: imagen + todos sus tags IA con indicadores',
+          'Para cada tag: ✓ (confirmar) o ✗ (rechazar) — atajo: número de posición (1-9)',
+          'Rechazar → elimina tag; Confirmar → <code>validated: true</code>',
+          '→ o Space: siguiente foto sin decidir sobre tags restantes',
+        ]
+      },
+      {
+        group: 'Filtros de cola',
+        items: [
+          'Mostrar por defecto: tags <code>low</code> o <code>medium</code>',
+          'Opción: "todas las fotos con tags IA" (incluyendo high confidence)',
+          'Contador en sidebar: "X fotos por revisar" (badge numérico)',
+        ]
+      },
+      {
+        group: 'Heurística de confianza inicial',
+        items: [
+          '<code>high</code>: modelo generó con alta certeza (indica en respuesta Ollama)',
+          '<code>medium</code>: sin indicadores de certeza explícitos',
+          '<code>low</code>: tag que aparece una sola vez, contradice otros, o contenido ambiguo',
+        ]
+      },
+      {
+        group: 'Estadísticas de calidad',
+        items: [
+          'Página <code>/stats</code> nueva sección "Calidad de IA": validados vs rechazados, tasa de aceptación por tipo',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/tools/review-tags/page.tsx', desc: 'Nuevo — cola de revisión', isNew: true },
+      { path: 'src/app/tools/review-tags/ReviewClient.tsx', desc: 'Nuevo — flashcard, atajos de teclado', isNew: true },
+      { path: 'src/app/api/tags/review-queue/route.ts', desc: 'Nuevo — cola de revisión', isNew: true },
+      { path: 'src/app/(library)/[year]/[event]/[photoId]/TagList.tsx', desc: 'Indicadores de confianza', isNew: false },
+      { path: 'src/lib/db.ts', desc: 'Columnas <code>confidence TEXT</code> y <code>validated BOOLEAN</code>', isNew: false },
+      { path: 'src/lib/ollama.ts', desc: 'Asignar confianza heurística en clasificación', isNew: false },
+      { path: 'src/components/Sidebar.tsx', desc: 'Badge numérico de fotos por revisar', isNew: false },
+    ],
+    tech: [
+      'Columnas: <code>confidence TEXT CHECK(...IN ("high","medium","low")) DEFAULT "medium"</code> y <code>validated INTEGER DEFAULT 0</code>',
+      'Confianza heurística: detecta "definitely", "clearly", "obviously" → high; "might", "possibly" → low; resto → medium',
+      'Badge en sidebar: query <code>SELECT COUNT(DISTINCT photo_id) FROM photo_tags WHERE source = "ai" AND validated = 0</code> — cacheable 60s',
+    ],
+    outOfScope: [
+      'Fine-tuning del modelo con validaciones del usuario',
+      'Sugerencias de tags alternativos',
+      'Revisión en lote',
+      'Export de histórico de validaciones',
+    ]
+  },
+  'US-060': {
+    id: 'US-060',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Inferencia automática de ubicación para fotos sin GPS',
+    story: 'Como fotógrafo con una cámara sin GPS o cuyo GPS falló durante un viaje,\nquiero que photoshelf infiera automáticamente la ubicación de mis fotos a partir del nombre del evento y del patrón de fechas,\npara enriquecer mi biblioteca con ubicaciones sin trabajo manual y ver esas fotos en el mapa.',
+    description: [
+      'La mayoría de réflex hasta 2020 sin GPS integrado. Pedir al usuario que pinche manualmente en el mapa por cada evento es trabajo que nunca hará. Esta US implementa inferencia automática en dos capas: (1) geocodificación del nombre de carpeta ("Viaje-Roma-2019" → Nominatim → coordenadas Roma), y (2) análisis visual de muestras de fotos si (1) falla (Ollama vision describe arquitectura, paisaje, clima → deduce región).',
+      'El sistema propone coordenadas con confianza (<code>high/medium/low</code) y explicación legible. El usuario revisa y confirma, ajusta o descarta cada propuesta. Nunca se aplica automáticamente sin revisión. Las coordenadas inferidas se marcan con <code>gps_source: "inferred_name" | "inferred_vision" | "manual"</code>.',
+    ],
+    criteria: [
+      {
+        group: 'Capa 1 — Geocodificación de nombre',
+        items: [
+          'Extrae topónimo del nombre de evento con Ollama (fallback: regex)',
+          'Geocodifica con API Nominatim (OpenStreetMap, sin API key)',
+          'Confianza: <code>importance > 0.5</code> → high; 0.3–0.5 → medium; < 0.3 → low',
+          'Almacena: coordenadas, topónimo, fuente, confianza, respuesta raw',
+        ]
+      },
+      {
+        group: 'Capa 2 — Inferencia visual (fallback)',
+        items: [
+          'Se activa si Capa 1 no devuelve resultado o baja confianza',
+          'Calcula duración evento y selecciona muestra de fotos distribuida',
+          'Ollama vision analiza muestra: "¿En qué país/región parece estar tomada?"',
+          'Agrupa respuestas por similaridad geográfica para detectar clusters',
+          'Si todas apuntan al mismo lugar → confianza alta, calcula centroide',
+          'Si hay dispersión → presenta clusters al usuario para decidir',
+        ]
+      },
+      {
+        group: 'Panel de revisión',
+        items: [
+          'Ruta <code>/tools/geolocate</code> con lista de eventos sin GPS con propuesta',
+          'Cada evento: nombre, fotos, propuesta + confianza (chip color), explicación legible',
+          'Para cada propuesta: Confirmar / Ajustar en mini-mapa / Descartar',
+          'Botón "Confirmar todas las de confianza alta" aplica en lote',
+        ]
+      },
+      {
+        group: 'Asignación y trazabilidad',
+        items: [
+          'Coordenadas con <code>gps_source: "inferred_name" | "inferred_vision" | "manual"</code>',
+          'Detalle de foto: "Ubicación inferida por IA · [explicación]" + botón "Corregir"',
+          'Fotos con GPS EXIF nunca se modifican',
+          'Botón "Quitar ubicación inferida" elimina coords y flag',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/tools/geolocate/page.tsx', desc: 'Nuevo — lista de propuestas', isNew: true },
+      { path: 'src/app/tools/geolocate/GeolocationClient.tsx', desc: 'Nuevo — revisión, confirmación, mini-mapa', isNew: true },
+      { path: 'src/app/api/geolocate/infer/route.ts', desc: 'Nuevo — lanza inferencia', isNew: true },
+      { path: 'src/app/api/geolocate/status/route.ts', desc: 'Nuevo — estado del proceso', isNew: true },
+      { path: 'src/app/api/geolocate/proposals/route.ts', desc: 'Nuevo — lista de propuestas', isNew: true },
+      { path: 'src/lib/geolocate/nameInference.ts', desc: 'Nuevo — Capa 1: topónimo + Nominatim', isNew: true },
+      { path: 'src/lib/geolocate/visionInference.ts', desc: 'Nuevo — Capa 2: análisis visual + clustering', isNew: true },
+      { path: 'src/lib/geolocate/tripAnalyzer.ts', desc: 'Nuevo — duración viaje y selección muestra', isNew: true },
+      { path: 'src/lib/db.ts', desc: 'Columna <code>gps_source TEXT</code>; tabla <code>geolocate_proposals</code>', isNew: false },
+      { path: 'src/components/Sidebar.tsx', desc: 'Badge con eventos sin GPS', isNew: false },
+    ],
+    tech: [
+      'Nominatim: rate limit 1 req/s, requerido User-Agent; throttle con <code>await sleep(1100)</code>',
+      'Topónimo fallback a inglés si primera búsqueda falla',
+      'Selección muestra: uniforme en tiempo del evento (no aleatoria); 6 fotos de evento de 5 días → fotos en 0%, 20%, 40%, 60%, 80%, 100%',
+      'Clustering: si ≥ 2/3 de muestra mencionan mismo país → cluster',
+    ],
+    outOfScope: [
+      'Aplicación automática sin revisión',
+      'Inferencia por tracks GPX externos',
+      'Subdivisión automática de eventos largos',
+      'Geocodificación inversa (coords → nombre)',
+      'APIs de pago (Google Maps, Mapbox)',
+      'Sincronización al EXIF original',
+    ]
+  },
+  'US-061': {
+    id: 'US-061',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Dashboard de salud de la biblioteca',
+    story: 'Como fotógrafo con una colección grande acumulada durante años,\nquiero ver de un vistazo en qué estado está mi biblioteca y qué tengo pendiente de organizar,\npara saber por dónde empezar sin sentirme abrumado.',
+    description: [
+      'El mayor bloqueador del fotógrafo amateur con biblioteca caótica no es falta de herramientas — es no saber por dónde empezar. Esta US añade un dashboard que analiza la biblioteca en siete dimensiones con indicadores visuales y acciones directas: cobertura indexación, cobertura clasificación IA, cobertura GPS, duplicados, pares RAW+JPEG, tags pendientes revisión, integridad de archivos.',
+      'Un score global de 0–100 (media ponderada) muestra la salud. El histórico de 30 días permite ver tendencias. La sección "Por hacer" lista las 3 acciones que más mejorarían el score, ordenadas por impacto/esfuerzo.',
+    ],
+    criteria: [
+      {
+        group: 'Dashboard principal',
+        items: [
+          'Ruta <code>/health</code> en sidebar',
+          'Siete tarjetas de métricas: valor, porcentaje, barra progreso, estado (verde/ámbar/rojo)',
+          'Score global 0–100 como media ponderada',
+          'Fecha de último cálculo + botón "Actualizar"',
+        ]
+      },
+      {
+        group: 'Cálculo de métricas',
+        items: [
+          'Métricas ligeras: < 1 segundo',
+          'Métricas con acceso a disco (indexación, integridad): solo si usuario pulsa "Análisis completo", cacheadas 24h',
+        ]
+      },
+      {
+        group: 'Tendencia histórica',
+        items: [
+          'Score y métricas persistidas diariamente',
+          'Mini-gráfico de línea: evolución 30 días',
+          'Indicador: "↑ +3 pts respecto a ayer"',
+        ]
+      },
+      {
+        group: 'Resumen de acciones',
+        items: [
+          'Sección "Por hacer": 3 acciones que más mejorarían score',
+          'Cada acción: descripción, impacto estimado, botón directo',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/health/page.tsx', desc: 'Nuevo — carga métricas', isNew: true },
+      { path: 'src/app/health/HealthClient.tsx', desc: 'Nuevo — tarjetas, gráfico, acciones', isNew: true },
+      { path: 'src/app/api/health/route.ts', desc: 'Nuevo — métricas agregadas', isNew: true },
+      { path: 'src/app/api/health/history/route.ts', desc: 'Nuevo — histórico', isNew: true },
+      { path: 'src/lib/queries/health.ts', desc: 'Nuevo — queries de siete dimensiones', isNew: true },
+      { path: 'src/lib/db.ts', desc: 'Tabla <code>health_snapshots</code> para histórico', isNew: false },
+      { path: 'src/components/Sidebar.tsx', desc: 'Entrada "Salud" con badge de score', isNew: false },
+    ],
+    tech: [
+      'Métricas: <code>SELECT COUNT(*)</code> simples sobre <code>photos</code> y <code>photo_tags</code> — < 100ms incluso con 100k fotos',
+      'Score global: media ponderada; pesos configurables (clasificación e integridad más peso)',
+      'Histórico: INSERT diario; si existe registro hoy, UPDATE',
+      'Gráfico: SVG path server-side o canvas client-side ligero',
+    ],
+    outOfScope: [
+      'Comparación entre catálogos',
+      'Alertas por email',
+      'Exportar informe como PDF',
+      'Benchmarking contra otros usuarios',
+    ]
+  },
+  'US-062': {
+    id: 'US-062',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: '"On This Day" — Memorias del pasado',
+    story: 'Como fotógrafo amateur que tiene fotos de varios años,\nquiero que photoshelf me muestre cada día las fotos que tomé un día como hoy en años anteriores,\npara redescubrir momentos olvidados y sentir que mi biblioteca tiene vida propia.',
+    description: [
+      '"On This Day" convierte una biblioteca estática en algo que el usuario quiere visitar cada día. Google Photos y Apple Photos lo tienen; photoshelf puede ofrecer exactamente lo mismo con total privacidad y de forma local. Cada vez que abre photoshelf, si hay fotos tomadas en la misma fecha (día + mes) en años anteriores, aparece un banner: "Hace 3, 5 y 8 años — 14 fotos".',
+      'Si Ollama está configurado, se puede generar una breve "narrativa del día" contextualizando el conjunto ("En junio de 2021 visitaste Barcelona y estuviste en un festival de música").',
+    ],
+    criteria: [
+      {
+        group: 'Banner en página principal',
+        items: [
+          'Aparece si hay fotos con <code>taken_at</code> = mes+día actual en años anteriores',
+          'Muestra miniaturas (máx 5), años, total de fotos',
+          'Solo si hay ≥ 1 año anterior (no año actual)',
+          'Se puede descartar con X (preferencia en localStorage)',
+          'No aparece si no hay fotos para ese día',
+        ]
+      },
+      {
+        group: 'Página de memorias',
+        items: [
+          'Ruta <code>/memories/today</code> (o <code>/memories?date=MM-DD</code> para cualquier día)',
+          'Fotos agrupadas por año: "2021 · 5 fotos"',
+          'Grid normal dentro de cada año con opciones estándar',
+        ]
+      },
+      {
+        group: 'Navegación temporal',
+        items: [
+          'Flechas ← → para explorar día anterior/siguiente',
+          'Calendario compacto mostrando qué días del año tienen fotos',
+        ]
+      },
+      {
+        group: 'Narrativa IA (opcional)',
+        items: [
+          'Si Ollama disponible y hay ≥ 5 fotos: botón "Generar narrativa"',
+          'Narrativa: 1–2 frases basadas en evento, tags, lugar GPS, año',
+          'Se guarda en DB para no regenerar',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/memories/page.tsx', desc: 'Nuevo — página de memorias', isNew: true },
+      { path: 'src/app/memories/MemoriesClient.tsx', desc: 'Nuevo — grupos por año, navegación', isNew: true },
+      { path: 'src/app/memories/TodayBanner.tsx', desc: 'Nuevo — banner para página principal', isNew: true },
+      { path: 'src/app/api/memories/route.ts', desc: 'Nuevo — fotos del mismo día en otros años', isNew: true },
+      { path: 'src/app/api/memories/narrative/route.ts', desc: 'Nuevo — generación de narrativa IA', isNew: true },
+      { path: 'src/app/(library)/page.tsx', desc: 'Integrar TodayBanner', isNew: false },
+      { path: 'src/lib/queries/memories.ts', desc: 'Nuevo — query <code>WHERE strftime("%m-%d", taken_at)</code>', isNew: true },
+      { path: 'src/components/Sidebar.tsx', desc: 'Entrada "Memorias"', isNew: false },
+    ],
+    tech: [
+      'Query banner: <code>SELECT * FROM photos WHERE strftime("%m-%d", taken_at) = strftime("%m-%d", "now") AND strftime("%Y", taken_at) < strftime("%Y", "now") ORDER BY taken_at DESC LIMIT 20</code> — rápida sin índice especial',
+      'Banner como Server Component separado (no bloquea render principal)',
+      'Narrativa: prompt <code>"Dado que estas fotos de [evento] con tags [X,Y] fueron tomadas en [lugar] en [año], escribe una frase evocadora..."</code>',
+    ],
+    outOfScope: [
+      'Notificaciones push móviles',
+      'Compartir memorias como collage/video',
+      'Memorias semanales/mensuales',
+      'Selección automática de "foto del día"',
+    ]
+  },
+  'US-063': {
+    id: 'US-063',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Búsqueda y filtrado por atributos técnicos EXIF',
+    story: 'Como fotógrafo que quiere entender y mejorar su técnica,\nquiero poder filtrar mi biblioteca por parámetros técnicos como apertura, ISO, velocidad de obturación o focal,\npara estudiar qué configuraciones uso más, encontrar mis mejores fotos en condiciones específicas, y aprender de mis patrones de disparo.',
+    description: [
+      'La biblioteca permite filtrar por año, evento, tag y favoritos, pero nada sobre técnica: "¿cuáles son mis mejores fotos a ISO 3200?", "¿qué fotos disparé con el 50mm?". Estos datos están en BD (extraídos del EXIF durante scan) pero no son accesibles como filtros. Esta US los expone como bloque de filtros técnicos en sidebar y búsqueda con rangos configurables y selección múltiple.',
+      'Dos casos de uso: aprendizaje ("¿cómo me quedan fotos a ISO alto?") y curaduría ("busco bokeh — apertura ≤ f/2.8"). Nueva sección en /stats muestra distribuciones: gráfico de ISOs usados, aperturas frecuentes, focales, porcentaje de fotos "seguras" (velocidad ≥ 1/focal).',
+    ],
+    criteria: [
+      {
+        group: 'Filtros disponibles',
+        items: [
+          '<strong>ISO</strong>: rangos predefinidos o rango libre',
+          '<strong>Apertura</strong>: ≤f/2, f/2.8, f/4, f/5.6–f/8, ≥f/11',
+          '<strong>Velocidad obturación</strong>: ≤1/500s, 1/100–1/500s, 1/30–1/100s, ≥1/30s',
+          '<strong>Focal</strong>: categorías (gran angular ≤28mm, normal 35–50mm, retrato 85mm, tele ≥100mm) o rango libre',
+          '<strong>Cámara/objetivo</strong>: selector de equipos en biblioteca',
+        ]
+      },
+      {
+        group: 'Integración en UI',
+        items: [
+          'Bloque colapsable "Técnico" en sidebar debajo de filtros existentes',
+          'Combinable con todos los filtros existentes',
+          'URL: <code>?iso_max=400&aperture_max=2.8</code>',
+          'Chips activos en topbar',
+        ]
+      },
+      {
+        group: 'Integración en búsqueda',
+        items: [
+          'Barra reconoce queries: "f/1.8", "ISO 3200", "50mm"',
+          'Nueva intención de búsqueda: <code>exif</code> → activa filtros técnicos',
+        ]
+      },
+      {
+        group: 'Estadísticas técnicas',
+        items: [
+          'Página <code>/stats</code> nueva sección "Perfil técnico"',
+          'Distribución ISOs (gráfico barras), aperturas frecuentes (top 5), focales, porcentaje fotos "seguras"',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/components/Sidebar.tsx', desc: 'Bloque colapsable "Técnico"', isNew: false },
+      { path: 'src/components/ExifFilters.tsx', desc: 'Nuevo — componente de filtros técnicos', isNew: true },
+      { path: 'src/lib/queries/photos.ts', desc: 'Añadir condiciones EXIF a buildPhotoFilter', isNew: false },
+      { path: 'src/lib/search/classify.ts', desc: 'Reconocer intención <code>exif</code>', isNew: false },
+      { path: 'src/app/api/stats/technical/route.ts', desc: 'Nuevo — distribuciones técnicas', isNew: true },
+      { path: 'src/app/stats/page.tsx', desc: 'Sección "Perfil técnico"', isNew: false },
+    ],
+    tech: [
+      'Campos EXIF en DB: <code>iso INTEGER, aperture REAL, shutter_speed TEXT, focal_length REAL</code>; verificar que scanner.ts los extrae',
+      'Velocidad obturación: almacenada como string ("1/500"); agregar <code>shutter_speed_seconds REAL</code> durante scan: <code>eval("1/500")</code>',
+      'Filtros SQL: <code>BETWEEN :min AND :max</code> con índices en <code>iso</code>, <code>aperture</code>',
+    ],
+    outOfScope: [
+      'Filtro por objetivo/lens (requiere <code>lens_model</code> EXIF)',
+      'Histograma de exposición',
+      'Sugerencias de configuración',
+      'Comparativa entre períodos',
+    ]
+  },
+  'US-064': {
+    id: 'US-064',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Wizard de organización para biblioteca caótica',
+    story: 'Como fotógrafo amateur que tiene años de fotos sin organizar y no sabe por dónde empezar,\nquiero un asistente guiado que analice mi biblioteca y me proponga un plan paso a paso adaptado a mi situación real,\npara empezar a organizar sin sentirme abrumado y ver progreso desde el primer día.',
+    description: [
+      '"Es demasiado tarde, tengo demasiadas fotos" — excusa número uno que paraliza. El verdadero problema es la motivación inicial: no saber por dónde empezar. Este wizard analiza la biblioteca del usuario y genera un **plan personalizado** dividido en sesiones cortas (30 min). El plan es adaptativo: si hay 50k fotos sin tags pero 90% de cobertura GPS, el plan prioriza tagging y omite geotag.',
+      'Tres fases: (1) Diagnóstico: analiza biblioteca con lenguaje humano. (2) Plan: propone 3–10 "misiones" priorizadas por impacto/esfuerzo, algunas automáticas (lanzar clasificación) y otras manuales (revisar duplicados). (3) Seguimiento: marca misiones completadas, muestra progreso global.',
+    ],
+    criteria: [
+      {
+        group: 'Fase 1 — Diagnóstico',
+        items: [
+          'Pantalla de bienvenida: "Analicemos tu biblioteca"',
+          'Ejecuta diagnóstico de salud con animación de progreso',
+          'Resultado en lenguaje humano: problemas identificados, volumen',
+          '< 5 segundos para mayoría de bibliotecas',
+        ]
+      },
+      {
+        group: 'Fase 2 — Plan',
+        items: [
+          '3–8 "misiones" ordenadas por impacto descendente',
+          'Cada misión: título, descripción, tiempo estimado (ej. "~15 minutos"), dificultad, tipo (automática/manual)',
+          'Misiones automáticas: botón "Hacer ahora"',
+          'Misiones manuales: botón "Empezar" → herramienta correspondiente',
+        ]
+      },
+      {
+        group: 'Catálogo de misiones',
+        items: [
+          '"Escanear fotos no indexadas" (si indexación < 100%)',
+          '"Clasificar fotos sin tags" (si % < 80%)',
+          '"Revisar X grupos de duplicados" (si hay pendientes)',
+          '"Añadir ubicación a Y eventos" (si eventos sin GPS)',
+          '"Revisar X tags IA de baja confianza" (si hay pendientes)',
+          '"Gestionar pares RAW+JPEG" (si hay pares)',
+          '"Verificar integridad" (siempre disponible)',
+        ]
+      },
+      {
+        group: 'Fase 3 — Seguimiento',
+        items: [
+          'Al completar/volver al wizard: misión se marca completada',
+          'Progreso: "3 de 7 completadas · Salud al 68%"',
+          'Se puede reabrir desde sidebar',
+          'Si completa todas: pantalla de celebración con score final',
+        ]
+      }
+    ],
+    dependencies: ['US-061'],
+    components: [
+      { path: 'src/app/wizard/page.tsx', desc: 'Nuevo — estado del wizard', isNew: true },
+      { path: 'src/app/wizard/WizardClient.tsx', desc: 'Nuevo — las tres fases', isNew: true },
+      { path: 'src/app/wizard/DiagnosisStep.tsx', desc: 'Nuevo — Fase 1', isNew: true },
+      { path: 'src/app/wizard/PlanStep.tsx', desc: 'Nuevo — Fase 2', isNew: true },
+      { path: 'src/app/wizard/MissionCard.tsx', desc: 'Nuevo — tarjeta de misión', isNew: true },
+      { path: 'src/app/api/wizard/plan/route.ts', desc: 'Nuevo — genera misiones', isNew: true },
+      { path: 'src/app/api/wizard/missions/[id]/route.ts', desc: 'Nuevo — marca completada', isNew: true },
+      { path: 'src/lib/queries/wizard.ts', desc: 'Nuevo — lógica de priorización', isNew: true },
+      { path: 'src/lib/db.ts', desc: 'Tabla <code>wizard_missions</code>', isNew: false },
+      { path: 'src/components/Sidebar.tsx', desc: 'Entrada "Plan de organización" con badge', isNew: false },
+    ],
+    tech: [
+      'Plan generado server-side: evalúa cada dimensión de health, añade misión si supera umbral de "problema"',
+      'Orden: <code>(impacto * peso) / tiempo_horas</code> — acciones automáticas rápidas primero',
+      'Estimaciones: heurísticas basadas en volumen (ej. n_fotos_sin_tags * 3s por foto)',
+      'Persistencia mínima en DB: qué misiones completadas, fecha',
+    ],
+    outOfScope: [
+      'Entrevista al usuario (¿qué tipo de fotógrafo eres?)',
+      'Gamificación con puntos/badges',
+      'Modo "sesión de 30 minutos" con timer',
+      'Acceso desde app móvil',
+    ]
+  },
+  'US-065': {
+    id: 'US-065',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Importador con asistente de estructura de carpetas',
+    story: 'Como fotógrafo con fotos en carpetas desorganizadas o con estructura no compatible con photoshelf,\nquiero que la app analice mis carpetas actuales y me ayude a reorganizarlas en la estructura <code>AÑO/EVENTO/</code> sin perder nada,\npara poder empezar a usar photoshelf con mi biblioteca existente sin tener que reorganizar manualmente miles de archivos.',
+    description: [
+      'La barrera de entrada más grande de photoshelf es que requiere estructura <code>AÑO/EVENTO/fotos</code>. La mayoría de fotógrafos amateurs no la tienen — tienen carpetas por fecha plana, por lugares, anidadas sin coherencia, o todo mezclado. El importador asistido analiza la estructura existente, propone reorganización compatible, y ejecuta la migración con total seguridad (mueve archivos, nunca borra; genera log para revertir si algo va mal).',
+      'Flujo: (1) usuario apunta al directorio con fotos actuales, (2) sistema analiza y propone mapeo ("Vacaciones Grecia" parece 2019 por EXIF → "2019/Vacaciones-Grecia/"), (3) usuario revisa y ajusta, (4) sistema ejecuta movimientos + scan automático.',
+    ],
+    criteria: [
+      {
+        group: 'Análisis de estructura actual',
+        items: [
+          'Usuario introduce ruta del directorio fuente',
+          'Sistema analiza recursivamente: subdirectorios, cuenta fotos, lee EXIF de muestra (máx 10 por carpeta)',
+          'Identifica tres tipos: <code>year/event/</code> (compatible), <code>event/</code> (propone inferir año), <code>flat</code> (propone agrupar por mes/evento)',
+        ]
+      },
+      {
+        group: 'Propuesta de reorganización',
+        items: [
+          'Tabla de mapeo: "Carpeta actual → Carpeta propuesta"',
+          'Usuario puede editar nombres propuestos directamente',
+          'Carpetas multi-año se dividen: "Fotos/2019 y 2022" → "2019/Fotos-antiguas/" + "2022/Fotos/"',
+          'Contador: "X archivos se moverán, Y carpetas se crearán"',
+          'Opción "Previsualizar en árbol"',
+        ]
+      },
+      {
+        group: 'Ejecución de migración',
+        items: [
+          'Botón "Reorganizar y escanear" lanza migración',
+          'Movimiento de archivos: <code>fs.rename</code> con fallback copy+delete si cross-volume',
+          'Log JSON obligatorio: <code>_migration_log_YYYYMMDD.json</code> en destino con cada movimiento',
+          'Si archivo destino existe: renombra con sufijo "_2" (no sobrescribe)',
+          'Al completar: lanza scan automático',
+          'Si falla a mitad: log permite identificar qué se movió para revertir',
+        ]
+      },
+      {
+        group: 'Seguridad',
+        items: [
+          'Nunca permite que fuente y destino se superpongan (evitar loops)',
+          'Requiere confirmación explícita: pantalla de resumen',
+          'Log de migración obligatorio e imposible de desactivar',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/tools/importer/page.tsx', desc: 'Nuevo — wizard de importación (4 pasos)', isNew: true },
+      { path: 'src/app/tools/importer/ImporterClient.tsx', desc: 'Nuevo — análisis, tabla de mapeo, ejecución', isNew: true },
+      { path: 'src/app/api/importer/analyze/route.ts', desc: 'Nuevo — análisis de estructura', isNew: true },
+      { path: 'src/app/api/importer/execute/route.ts', desc: 'Nuevo — ejecución de migración', isNew: true },
+      { path: 'src/app/api/importer/status/route.ts', desc: 'Nuevo — estado del proceso', isNew: true },
+      { path: 'src/lib/importerAnalyzer.ts', desc: 'Nuevo — lógica de análisis y propuesta', isNew: true },
+      { path: 'src/lib/importerExecutor.ts', desc: 'Nuevo — movimiento de archivos y log', isNew: true },
+    ],
+    tech: [
+      'Análisis: <code>fs.readdir(recursive: true)</code> (Node 18+) o traversal manual; muestra EXIF limitada a 10 por carpeta',
+      'Inferencia de año: <code>exifr.parse</code> en muestra; si ≥ 80% mismo año → usar ese año; si mezcla → dividir',
+      'Movimiento: <code>fs.rename</code> (atómico mismo volumen); cross-volume: <code>fs.copyFile</code> + <code>fs.unlink</code> con verificación',
+      'Log: append-only JSON; cada movimiento antes de ejecutar',
+    ],
+    outOfScope: [
+      'Deshacer automático (solo log manual)',
+      'Importar desde Google Photos, iCloud, Dropbox',
+      'Detectar duplicados entre fuente y destino',
+      'Soporte para catálogos Lightroom',
+    ]
+  },
+  'US-066': {
+    id: 'US-066',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Afinamiento de prompts de Ollama',
+    story: 'Como fotógrafo que usa las funciones de IA (clasificación, búsqueda, proyectos, revisión técnica),\nquiero que cada prompt que envía la app a Ollama esté diseñado con intención y probado contra casos reales,\npara que los resultados sean más fiables, consistentes y fáciles de depurar cuando fallen.',
+    description: [
+      'La app tiene cinco funciones que llaman a Ollama, cada una con su propio prompt escrito ad-hoc. Ninguno ha pasado por evaluación sistemática. Síntomas: <code>classifyPhoto</code> a veces devuelve tags en orden distinto, omite campos; <code>parseSearchQuery</code> sobregenera tags ("fotos bonitas" genera tags de estilo); <code>generateProject</code> no respeta constraints; <code>reviewPhoto</code> devuelve JSON con newlines en valores; <code>photoMatchesConcept</code> es demasiado binario.',
+      'Esta US sistematiza el proceso: documenta el contrato de cada prompt, identifica puntos de fallo, aplica mejoras de prompt engineering contrastadas, y crea script de evaluación manual para verificar calidad.',
+    ],
+    criteria: [
+      {
+        group: 'Inventario y documentación',
+        items: [
+          'Cada función en ollama.ts: comentario de bloque con input, output, taxonomía de tags, limitaciones',
+          'Nuevo: <code>docs/tecnico/08-prompts-ollama.md</code> con ficha de cada prompt: propósito, estructura, ejemplos válido/inválido, historial de cambios',
+        ]
+      },
+      {
+        group: 'Script de evaluación manual',
+        items: [
+          'Nuevo: <code>scripts/eval-prompts.ts</code> ejecutable con <code>npx tsx</code>',
+          'Toma carpeta de fotos o IDs como argumento',
+          'Ejecuta 5 prompts contra fotos, imprime output real vs esperado',
+          'Resumen: N/total prompts que pasan comprobaciones básicas (JSON válido, campos presentes, tags en taxonomía)',
+          'No requiere cambios en código de producción',
+        ]
+      },
+      {
+        group: 'Mejoras a classifyPhoto',
+        items: [
+          'Prompt indica que 6 tags son máximo estricto',
+          'Especifica que si B&W, primer tag SIEMPRE es "b&w"',
+          'Incluye ejemplo negativo: qué NO hacer',
+          'Tasa JSON válido ≥ 95% en script sobre 20 fotos',
+        ]
+      },
+      {
+        group: 'Mejoras a parseSearchQuery',
+        items: [
+          'Instrucción explícita: si query no menciona estilo/género, <code>"tags": []</code>',
+          '2 ejemplos de over-tagging a evitar',
+          'Usa <code>&lt;system&gt; / &lt;user&gt;</code> si modelo lo soporta',
+        ]
+      },
+      {
+        group: 'Mejoras a generateProject',
+        items: [
+          'Hard constraints al principio del prompt (antes de descripción de tarea)',
+          'Instrucción de verificación final: count, IDs, constraint satisfecho',
+          '<code>statement</code>: "exactly 2 sentences" (no "2-3")',
+        ]
+      },
+      {
+        group: 'Mejoras a reviewPhoto',
+        items: [
+          'Instrucción: "Do not use line breaks inside string values"',
+          'Triple-fallback de parseo reduce a single <code>JSON.parse</code> + fallback',
+          'Script verifica ≥ 18/20 respuestas JSON válido sin fallback',
+        ]
+      },
+      {
+        group: 'Mejoras a photoMatchesConcept',
+        items: [
+          'Añade tercer valor: <code>PARTIAL</code> (presente pero no tema principal)',
+          'Retorna <code>{ matches, partial, tags }</code>',
+          'Callers pueden usar <code>partial</code> para menor relevancia',
+          'Actualizar tipo en <code>src/lib/types.ts</code>',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/ollama.ts', desc: 'Mejoras en 5 prompts + simplificación de parseo', isNew: false },
+      { path: 'src/lib/types.ts', desc: 'Actualizar tipo de retorno <code>photoMatchesConcept</code>', isNew: false },
+      { path: 'scripts/eval-prompts.ts', desc: 'Nuevo — script de evaluación manual', isNew: true },
+      { path: 'docs/tecnico/08-prompts-ollama.md', desc: 'Nuevo — ficha técnica de cada prompt', isNew: true },
+    ],
+    tech: [
+      'Prompts de visión: endpoint <code>/api/generate</code> con <code>images</code>',
+      'Modelo actual: <code>llama3.2-vision:11b</code>; documentar si suposiciones específicas',
+      'Timeouts: 30s texto, 120s visión, 180s generateProject — no se tocan en esta US',
+      'Script de evaluación: corre offline si Ollama disponible localmente',
+    ],
+    outOfScope: [
+      'Fine-tuning del modelo con datos propios',
+      'A/B testing automatizado de prompts',
+      'Métricas de calidad persistentes en DB',
+      'Cambio de modelo o proveedor',
+    ]
+  }
+
 };
 
 // ─────────────────────────────────────────────────────────────────
