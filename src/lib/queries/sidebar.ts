@@ -32,7 +32,7 @@ export function getSidebarData(catalogId = 1): SidebarData {
   `).get(catalogId) as { c: number }).c;
 
   const themes   = listThemes(catalogId);
-  const projects = getSidebarProjects(db);
+  const projects = getSidebarProjects();
   const catalogs = listCatalogs();
 
   return { totalPhotos, favoriteCount, untaggedCount, themes, projects, catalogs };
