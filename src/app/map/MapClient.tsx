@@ -40,6 +40,24 @@ export default function MapClient({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<PhotoPoint[]>([]);
   const [panelOpen, setPanelOpen] = useState(false);
+  // US-041: drag-to-expand map panel on mobile (40% → 70%)
+  const [panelHeight, setPanelHeight] = useState(40);
+  const dragStartY = useRef<number | null>(null);
+  const dragStartH = useRef<number>(40);
+
+  function handlePanelDragStart(e: React.TouchEvent) {
+    dragStartY.current = e.touches[0].clientY;
+    dragStartH.current = panelHeight;
+  }
+  function handlePanelDragMove(e: React.TouchEvent) {
+    if (dragStartY.current === null) return;
+    const deltaY = -(e.touches[0].clientY - dragStartY.current);
+    const deltaPercent = (deltaY / window.innerHeight) * 100;
+    setPanelHeight(Math.max(40, Math.min(70, dragStartH.current + deltaPercent)));
+  }
+  function handlePanelDragEnd() {
+    dragStartY.current = null;
+  }
   const [initializing, setInitializing] = useState(true);
   const [loadingYear, setLoadingYear] = useState(false);
   const [activeYear, setActiveYear] = useState<number | null>(initialYear);
@@ -230,7 +248,19 @@ export default function MapClient({
           <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
 
           {panelOpen && selectedPhotos.length > 0 && (
-            <div className="map-panel" onClick={e => e.stopPropagation()}>
+            <div
+              className="map-panel"
+              style={{ '--map-panel-h': `${panelHeight}%` } as React.CSSProperties}
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Drag handle — only visible / functional on mobile */}
+              <div
+                className="map-panel-drag-handle"
+                onTouchStart={handlePanelDragStart}
+                onTouchMove={handlePanelDragMove}
+                onTouchEnd={handlePanelDragEnd}
+                aria-hidden="true"
+              />
               <div className="map-panel-header">
                 <span className="map-panel-title">
                   {selectedPhotos[0].event}
@@ -240,7 +270,7 @@ export default function MapClient({
                     </span>
                   )}
                 </span>
-                <button className="map-panel-close" onClick={() => setPanelOpen(false)} aria-label="Cerrar panel"><IconX size={14} /></button>
+                <button className="map-panel-close" onClick={() => { setPanelOpen(false); setPanelHeight(40); }} aria-label="Cerrar panel"><IconX size={14} /></button>
               </div>
               <div className="map-panel-list">
                 {selectedPhotos.map(photo => (
@@ -272,7 +302,7 @@ export default function MapClient({
       </div>
 
       {panelOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 399 }} onClick={() => setPanelOpen(false)} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 399 }} onClick={() => { setPanelOpen(false); setPanelHeight(40); }} />
       )}
     </div>
   );

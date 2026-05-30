@@ -118,6 +118,16 @@ export function ScanProvider({ children }: { children: React.ReactNode }) {
 
   const visible = state.running || showDone || watcher.classifying;
   const pct = state.total > 0 ? Math.round((state.done / state.total) * 100) : 0;
+
+  // US-041: add body class so CSS can shift the generic toast when scan-toast is visible
+  useEffect(() => {
+    if (visible) {
+      document.body.classList.add('scan-running');
+    } else {
+      document.body.classList.remove('scan-running');
+    }
+    return () => { document.body.classList.remove('scan-running'); };
+  }, [visible]);
   const isAuto = state.running && state.currentEvent.startsWith('Auto-escaneo');
   const classifyPct = watcher.classifyTotal > 0
     ? Math.round((watcher.classifyDone / watcher.classifyTotal) * 100)
