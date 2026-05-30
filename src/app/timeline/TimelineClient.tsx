@@ -289,7 +289,7 @@ export default function TimelineClient({
       />
 
       <div className="main">
-        <div className="topbar">
+        <div className="topbar topbar--timeline">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
               <IconMenu size={20} />
