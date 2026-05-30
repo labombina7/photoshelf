@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu, IconTrash, IconEdit } from '@/components/Icons';
 import { useModal } from '@/components/ModalProvider';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 
@@ -113,6 +114,16 @@ export default function CatalogsClient({
     window.location.href = '/library';
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useHeaderSlot(useMemo(() => (
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
+        <IconMenu size={20} />
+      </button>
+      <span className="header-slot-title">Catálogos</span>
+    </div>
+  ), []));
+
   return (
     <div className="app-shell">
       <Sidebar
@@ -128,15 +139,6 @@ export default function CatalogsClient({
       />
 
       <div className="main">
-        <div className="topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
-              <IconMenu size={20} />
-            </button>
-            <h1 style={{ fontSize: 16, fontWeight: 600, margin: 0 }}>Catálogos</h1>
-          </div>
-        </div>
-
         <div style={{ padding: '24px 32px', maxWidth: 640 }}>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>
             Cada catálogo apunta a una carpeta de fotos independiente. Escribe la ruta completa tal como aparece en el NAS.

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu } from '@/components/Icons';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 import type { StatsData } from './page';
 
@@ -179,6 +180,24 @@ export default function StatsClient({ stats, themes, projects, totalPhotos, favo
 
   const availableYears = byYear.map(y => y.year);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useHeaderSlot(useMemo(() => (
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
+        <IconMenu size={20} />
+      </button>
+      <span className="header-slot-title">Estadísticas</span>
+      <div className="topbar-spacer" />
+      <button
+        className="btn-small"
+        style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+        onClick={() => router.refresh()}
+      >
+        Actualizar
+      </button>
+    </div>
+  ), []));
+
   return (
     <div className="app-shell">
       <Sidebar
@@ -194,23 +213,6 @@ export default function StatsClient({ stats, themes, projects, totalPhotos, favo
       />
 
       <div className="main">
-        <div className="topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
-              <IconMenu size={20} />
-            </button>
-            <div className="topbar-title">Estadísticas</div>
-          </div>
-          <div className="topbar-spacer" />
-          <button
-            className="btn-small"
-            style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
-            onClick={() => router.refresh()}
-          >
-            Actualizar
-          </button>
-        </div>
-
         <div className="content">
           {/* Overview cards */}
           <div className="stats-section">

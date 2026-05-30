@@ -702,11 +702,12 @@ body { padding-top: var(--header-h); }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* Mobile: slot fills header width so zoom controls sit at the right edge */
+/* Mobile: slot fills header width; every slot-content div stretches to fill it.
+   This makes topbar-spacer inside a slot push right-side elements to the edge. */
 @media (max-width: 640px) {
   .app-header-slot { flex: 1; }
-  .header-slot-timeline { flex: 1; }
-  .header-slot-timeline__label { flex: 1; }
+  .app-header-slot > * { flex: 1; }
+  .header-slot-timeline__label { flex: 1; } /* label grows → zoom controls pin right */
 }
 
 .timeline-content { flex: 1; overflow-y: auto; padding: 0; }

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import EmptyState from '@/components/EmptyState';
 import { IconMenu } from '@/components/Icons';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 
 interface Tag {
@@ -41,6 +42,28 @@ export default function TagsClient({ tags, themes, projects, totalPhotos, favori
     return 'sm';
   }
 
+  useHeaderSlot(useMemo(() => (
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú" aria-label="Abrir menú de navegación">
+        <IconMenu size={20} />
+      </button>
+      <span className="header-slot-title">Tags</span>
+      <span className="header-slot-sub">{tags.length} tags</span>
+      <div className="topbar-spacer" />
+      <div className="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+        </svg>
+        <input
+          placeholder="Filtrar tags…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
+    </div>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [tags.length, search]));
+
   return (
     <div className="app-shell">
       <Sidebar
@@ -56,25 +79,6 @@ export default function TagsClient({ tags, themes, projects, totalPhotos, favori
       />
 
       <div className="main">
-        <div className="topbar">
-          <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú" aria-label="Abrir menú de navegación">
-            <IconMenu size={20} />
-          </button>
-          <div className="topbar-title">Tags</div>
-          <span className="topbar-sub">{tags.length} tags</span>
-          <div className="topbar-spacer" />
-          <div className="search-box">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-            </svg>
-            <input
-              placeholder="Filtrar tags…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-            />
-          </div>
-        </div>
-
         <div className="content">
           {filtered.length === 0 ? (
             tags.length === 0 ? (
