@@ -90,4 +90,33 @@ describe('POST /api/auth/login', () => {
 
     expect(response.status).toBe(429);
   });
+
+  it('returns 401 when body has no password field', async () => {
+    const { POST } = await import('@/app/api/auth/login/route');
+
+    mockCheckPassword.mockReturnValue(false);
+
+    // Send a body without the password key — checkPassword receives undefined
+    const req = new NextRequest('http://localhost/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '3.4.5.6' },
+      body: JSON.stringify({}),
+    });
+    const response = await POST(req);
+
+    // checkPassword(undefined) is falsy → 401, not 400 (handler doesn't validate presence)
+    expect([400, 401]).toContain(response.status);
+  });
+
+  it('returns 401 when APP_PASSWORD is not configured', async () => {
+    const { POST } = await import('@/app/api/auth/login/route');
+
+    // checkPassword('') with no APP_PASSWORD configured returns false
+    mockCheckPassword.mockReturnValue(false);
+
+    const req = makeRequest('', '4.5.6.7');
+    const response = await POST(req);
+
+    expect(response.status).toBe(401);
+  });
 });

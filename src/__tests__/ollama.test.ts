@@ -1,168 +1,212 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { extractJsonObject } from '@/lib/ollama/utils';
 
-// ── Helpers that mirror the parsing logic in ollama.ts ──────────────────────
-// We test the JSON-parsing / post-processing layers in isolation,
-// without making real HTTP calls to Ollama.
+// Only fetch and sharp are mocked — all parsing logic runs from the real module.
+vi.mock('sharp', () => ({
+  default: vi.fn(() => ({
+    resize: vi.fn().mockReturnThis(),
+    jpeg: vi.fn().mockReturnThis(),
+    toBuffer: vi.fn().mockResolvedValue(Buffer.from('fake-jpeg')),
+  })),
+}));
 
-function parseSearchResponse(raw: string): { year: number | null; concept: string; tags: string[] } {
-  try {
-    const json = raw.match(/\{[\s\S]*\}/)?.[0] ?? '{}';
-    const parsed = JSON.parse(json);
-    return {
-      year: parsed.year ?? null,
-      concept: parsed.concept ?? '',
-      tags: Array.isArray(parsed.tags) ? parsed.tags : [],
-    };
-  } catch {
-    return { year: null, concept: raw, tags: [] };
-  }
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
+
+function makeFetchResponse(text: string) {
+  return Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ response: text }),
+  });
 }
 
-function parseReviewResponse(raw: string) {
-  try {
-    const json = raw.match(/\{[\s\S]*\}/)?.[0] ?? '{}';
-    const parsed = JSON.parse(json);
-    return {
-      composition: parsed.composition ?? '',
-      light: parsed.light ?? '',
-      strengths: Array.isArray(parsed.strengths) ? parsed.strengths.slice(0, 3) : [],
-      weaknesses: Array.isArray(parsed.weaknesses) ? parsed.weaknesses.slice(0, 3) : [],
-      score: typeof parsed.score === 'number' ? Math.min(10, Math.max(1, Math.round(parsed.score))) : 0,
-      summary: parsed.summary ?? '',
-    };
-  } catch {
-    return { composition: '', light: '', strengths: [], weaknesses: [], score: 0, summary: raw.trim().slice(0, 300) };
-  }
-}
+beforeEach(() => {
+  mockFetch.mockReset();
+});
 
-function parseClassifyTags(raw: string): string[] {
-  return raw
-    .split(',')
-    .map((t: string) => t.trim().toLowerCase().replace(/[^a-z0-9 áéíóúñüàèìòùâêîôûäëïöü\-&]/g, ''))
-    .filter((t: string) => t.length > 0 && t.length < 50)
-    .slice(0, 6);
-}
+// ── extractJsonObject (real implementation) ─────────────────────────────────
 
-// ── parseSearchQuery parsing ────────────────────────────────────────────────
+describe('extractJsonObject', () => {
+  it('extracts a clean JSON object', () => {
+    expect(extractJsonObject('{"year": 2023, "tags": ["travel"]}')).toBe('{"year": 2023, "tags": ["travel"]}');
+  });
 
-describe('parseSearchResponse', () => {
-  it('parses a well-formed JSON response', () => {
-    const raw = '{"year": 2023, "concept": "travel landscapes", "tags": ["landscape", "travel"]}';
-    const result = parseSearchResponse(raw);
+  it('extracts JSON embedded in prose', () => {
+    const raw = 'Here is the result: {"year": null, "concept": "portrait"} done.';
+    expect(extractJsonObject(raw)).toBe('{"year": null, "concept": "portrait"}');
+  });
+
+  it('strips markdown code fences', () => {
+    const raw = '```json\n{"score": 8}\n```';
+    expect(extractJsonObject(raw)).toBe('{"score": 8}');
+  });
+
+  it('returns {} when no opening brace is found', () => {
+    expect(extractJsonObject('no json here at all')).toBe('{}');
+  });
+
+  it('handles empty string input', () => {
+    expect(extractJsonObject('')).toBe('{}');
+  });
+
+  it('handles nested objects correctly', () => {
+    const raw = '{"a": {"b": 1}, "c": 2}';
+    expect(extractJsonObject(raw)).toBe('{"a": {"b": 1}, "c": 2}');
+  });
+
+  it('stops at the correct closing brace with trailing text', () => {
+    const raw = '{"ok": true} extra text';
+    expect(extractJsonObject(raw)).toBe('{"ok": true}');
+  });
+
+  it('handles strings containing braces without breaking depth counting', () => {
+    const raw = '{"msg": "hello {world}"}';
+    expect(extractJsonObject(raw)).toBe('{"msg": "hello {world}"}');
+  });
+});
+
+// ── parseSearchQuery — real parsing, mocked fetch ───────────────────────────
+
+describe('parseSearchQuery', () => {
+  it('parses a well-formed JSON response from Ollama', async () => {
+    const { parseSearchQuery } = await import('@/lib/ollama/search');
+    mockFetch.mockReturnValueOnce(makeFetchResponse(
+      '{"year": 2023, "concept": "travel landscapes", "tags": ["landscape", "travel"]}'
+    ));
+    const result = await parseSearchQuery('paisajes de viaje 2023');
     expect(result.year).toBe(2023);
     expect(result.concept).toBe('travel landscapes');
     expect(result.tags).toEqual(['landscape', 'travel']);
   });
 
-  it('extracts JSON embedded in prose', () => {
-    const raw = 'Here is the result: {"year": null, "concept": "portrait", "tags": ["portrait"]} done.';
-    const result = parseSearchResponse(raw);
+  it('extracts JSON embedded in Ollama prose', async () => {
+    const { parseSearchQuery } = await import('@/lib/ollama/search');
+    mockFetch.mockReturnValueOnce(makeFetchResponse(
+      'Sure! Here you go: {"year": null, "concept": "portrait", "tags": ["portrait"]}'
+    ));
+    const result = await parseSearchQuery('retratos');
     expect(result.year).toBeNull();
     expect(result.concept).toBe('portrait');
     expect(result.tags).toContain('portrait');
   });
 
-  it('returns safe defaults when JSON is missing', () => {
-    const result = parseSearchResponse('no json here at all');
+  it('returns safe defaults when Ollama returns empty string', async () => {
+    const { parseSearchQuery } = await import('@/lib/ollama/search');
+    mockFetch.mockReturnValueOnce(makeFetchResponse(''));
+    const result = await parseSearchQuery('my query');
+    expect(result.year).toBeNull();
+    expect(result.concept).toBe('my query');
+    expect(result.tags).toEqual([]);
+  });
+
+  it('returns safe defaults when JSON is malformed', async () => {
+    const { parseSearchQuery } = await import('@/lib/ollama/search');
+    mockFetch.mockReturnValueOnce(makeFetchResponse('{bad json}}'));
+    const result = await parseSearchQuery('my query');
     expect(result.year).toBeNull();
     expect(result.tags).toEqual([]);
   });
 
-  it('handles malformed JSON gracefully', () => {
-    const result = parseSearchResponse('{bad json}}');
-    expect(result.year).toBeNull();
-    expect(result.tags).toEqual([]);
+  it('throws when Ollama returns a non-ok status (timeout/error propagates)', async () => {
+    const { parseSearchQuery } = await import('@/lib/ollama/search');
+    mockFetch.mockReturnValueOnce(Promise.resolve({ ok: false, status: 503 }));
+    await expect(parseSearchQuery('query')).rejects.toThrow('Ollama error: 503');
   });
 
-  it('coerces missing tags to empty array', () => {
-    const result = parseSearchResponse('{"year": 2020, "concept": "test"}');
+  it('coerces missing tags to empty array', async () => {
+    const { parseSearchQuery } = await import('@/lib/ollama/search');
+    mockFetch.mockReturnValueOnce(makeFetchResponse('{"year": 2020, "concept": "test"}'));
+    const result = await parseSearchQuery('test');
     expect(result.tags).toEqual([]);
   });
 });
 
-// ── reviewPhoto response parsing ────────────────────────────────────────────
+// ── classifyPhoto — real tag parsing, mocked fetch + sharp ──────────────────
 
-describe('parseReviewResponse', () => {
-  const validRaw = JSON.stringify({
-    composition: 'Rule of thirds applied well.',
-    light: 'Soft golden-hour light.',
-    strengths: ['Strong subject', 'Good depth of field'],
-    weaknesses: ['Slight blur on the left edge'],
-    score: 8,
-    summary: 'A strong portrait with excellent light.',
+describe('classifyPhoto', () => {
+  it('parses a clean tag list from Ollama response', async () => {
+    const { classifyPhoto } = await import('@/lib/ollama/classify');
+    mockFetch.mockReturnValueOnce(makeFetchResponse('color, portrait, editorial, work, studio, woman'));
+    const tags = await classifyPhoto('2023/test/photo.jpg', '/photos');
+    expect(tags).toEqual(['color', 'portrait', 'editorial', 'work', 'studio', 'woman']);
   });
 
-  it('parses a complete review response', () => {
-    const r = parseReviewResponse(validRaw);
+  it('strips disallowed characters from tags', async () => {
+    const { classifyPhoto } = await import('@/lib/ollama/classify');
+    mockFetch.mockReturnValueOnce(makeFetchResponse('b&w, street, "editorial"'));
+    const tags = await classifyPhoto('2023/test/photo.jpg', '/photos');
+    expect(tags[0]).toBe('b&w');
+    expect(tags[1]).toBe('street');
+    expect(tags[2]).toBe('editorial');
+  });
+
+  it('limits output to 6 tags', async () => {
+    const { classifyPhoto } = await import('@/lib/ollama/classify');
+    mockFetch.mockReturnValueOnce(makeFetchResponse('a, b, c, d, e, f, g, h'));
+    const tags = await classifyPhoto('2023/test/photo.jpg', '/photos');
+    expect(tags).toHaveLength(6);
+  });
+
+  it('returns empty array when Ollama returns empty response', async () => {
+    const { classifyPhoto } = await import('@/lib/ollama/classify');
+    mockFetch.mockReturnValueOnce(makeFetchResponse(''));
+    const tags = await classifyPhoto('2023/test/photo.jpg', '/photos');
+    expect(tags).toEqual([]);
+  });
+});
+
+// ── reviewPhoto — real JSON parsing, mocked fetch + sharp ───────────────────
+
+describe('reviewPhoto', () => {
+  it('parses a complete review response', async () => {
+    const { reviewPhoto } = await import('@/lib/ollama/review');
+    const payload = JSON.stringify({
+      composition: 'Rule of thirds applied well.',
+      light: 'Soft golden-hour light.',
+      strengths: ['Strong subject', 'Good depth of field'],
+      weaknesses: ['Slight blur on the left edge'],
+      score: 8,
+      summary: 'A strong portrait with excellent light.',
+    });
+    mockFetch.mockReturnValueOnce(makeFetchResponse(payload));
+    const r = await reviewPhoto('2023/test/photo.jpg', '/photos');
     expect(r.score).toBe(8);
     expect(r.summary).toBe('A strong portrait with excellent light.');
     expect(r.strengths).toHaveLength(2);
     expect(r.weaknesses).toHaveLength(1);
   });
 
-  it('clamps score to [1, 10] when a number is present', () => {
-    // score:0 is a number so Math.max(1, 0) → 1
-    expect(parseReviewResponse(JSON.stringify({ score: 0 })).score).toBe(1);
-    expect(parseReviewResponse(JSON.stringify({ score: 11 })).score).toBe(10);
-    expect(parseReviewResponse(JSON.stringify({ score: -5 })).score).toBe(1);
-    // absent score → 0 sentinel (used by UI to hide the score widget)
-    expect(parseReviewResponse(JSON.stringify({ summary: 'ok' })).score).toBe(0);
+  it('clamps score to [1, 10]', async () => {
+    const { reviewPhoto } = await import('@/lib/ollama/review');
+    mockFetch.mockReturnValueOnce(makeFetchResponse(JSON.stringify({ score: 15, summary: 'ok' })));
+    const r = await reviewPhoto('2023/test/photo.jpg', '/photos');
+    expect(r.score).toBe(10);
   });
 
-  it('truncates strengths and weaknesses to 3', () => {
-    const raw = JSON.stringify({
+  it('returns zero score sentinel when score is absent', async () => {
+    const { reviewPhoto } = await import('@/lib/ollama/review');
+    mockFetch.mockReturnValueOnce(makeFetchResponse(JSON.stringify({ summary: 'ok' })));
+    const r = await reviewPhoto('2023/test/photo.jpg', '/photos');
+    expect(r.score).toBe(0);
+  });
+
+  it('returns empty fields when Ollama returns non-JSON text', async () => {
+    const { reviewPhoto } = await import('@/lib/ollama/review');
+    mockFetch.mockReturnValueOnce(makeFetchResponse('I cannot analyze this image.'));
+    const r = await reviewPhoto('2023/test/photo.jpg', '/photos');
+    expect(r.score).toBe(0);
+    expect(r.summary).toBe('');
+  });
+
+  it('truncates strengths and weaknesses to 3', async () => {
+    const { reviewPhoto } = await import('@/lib/ollama/review');
+    mockFetch.mockReturnValueOnce(makeFetchResponse(JSON.stringify({
       strengths: ['a', 'b', 'c', 'd', 'e'],
       weaknesses: ['x', 'y', 'z', 'w'],
       score: 7,
-    });
-    const r = parseReviewResponse(raw);
+    })));
+    const r = await reviewPhoto('2023/test/photo.jpg', '/photos');
     expect(r.strengths).toHaveLength(3);
     expect(r.weaknesses).toHaveLength(3);
-  });
-
-  it('returns empty fields when Ollama returns non-JSON text (no braces)', () => {
-    // regex finds no JSON → falls back to '{}' → parses fine → all fields empty
-    const r = parseReviewResponse('not valid json at all');
-    expect(r.score).toBe(0);
-    expect(r.summary).toBe('');  // catch block NOT reached; fallback is empty string
-  });
-
-  it('returns raw text as summary when JSON.parse throws (malformed braces)', () => {
-    // regex matches something, but JSON.parse throws → catch returns raw text
-    const r = parseReviewResponse('result: { bad: json: here }');
-    expect(r.score).toBe(0);
-    expect(r.summary).toBe('result: { bad: json: here }');
-  });
-});
-
-// ── classifyPhoto tag parsing ────────────────────────────────────────────────
-
-describe('parseClassifyTags', () => {
-  it('parses a clean comma-separated list', () => {
-    const tags = parseClassifyTags('color, portrait, editorial, work, studio, woman');
-    expect(tags).toEqual(['color', 'portrait', 'editorial', 'work', 'studio', 'woman']);
-  });
-
-  it('strips non-allowed characters', () => {
-    const tags = parseClassifyTags('b&w, street, "editorial"');
-    expect(tags[0]).toBe('b&w');
-    expect(tags[1]).toBe('street');
-    expect(tags[2]).toBe('editorial'); // quotes stripped
-  });
-
-  it('limits to 6 tags', () => {
-    const raw = 'a, b, c, d, e, f, g, h';
-    expect(parseClassifyTags(raw)).toHaveLength(6);
-  });
-
-  it('filters out empty and oversized tags', () => {
-    const longTag = 'a'.repeat(55);
-    const tags = parseClassifyTags(`, , ${longTag}, valid`);
-    expect(tags).toEqual(['valid']);
-  });
-
-  it('lowercases all tags', () => {
-    const tags = parseClassifyTags('Color, PORTRAIT');
-    expect(tags).toEqual(['color', 'portrait']);
   });
 });

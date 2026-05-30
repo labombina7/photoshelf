@@ -5,10 +5,10 @@ import { getScanState, updateScanState } from './scanState';
 import { getClassifyState, updateClassifyState } from './classifyState';
 import { getWatcherState, updateWatcherState } from './watcherState';
 import { getDb } from './db';
-import { PHOTOS_PATH } from './config';
+import { PHOTOS_PATH, WATCHER_DEBOUNCE_MS, WATCHER_POLL_MS } from './config';
 import { upsertAiTags } from './db-helpers';
-const DEBOUNCE_MS = 5_000;
-const POLL_MS = 30_000;
+const DEBOUNCE_MS = WATCHER_DEBOUNCE_MS;
+const POLL_MS = WATCHER_POLL_MS;
 
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
