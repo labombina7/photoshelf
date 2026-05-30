@@ -6,6 +6,29 @@ import { resolvePhotoPath } from './config';
 const CACHE_PATH = process.env.CACHE_PATH ?? path.join(process.cwd(), 'data', '.cache');
 const DEFAULT_SIZE = 400;
 
+export async function evictOldThumbnails(maxAgeDays = 30): Promise<void> {
+  const cutoff = Date.now() - maxAgeDays * 86_400_000;
+  let count = 0;
+  let bytes = 0;
+  try {
+    const files = await fs.readdir(CACHE_PATH);
+    await Promise.all(files.map(async (file) => {
+      const filePath = path.join(CACHE_PATH, file);
+      try {
+        const stat = await fs.stat(filePath);
+        if (stat.mtimeMs < cutoff) {
+          await fs.unlink(filePath);
+          count++;
+          bytes += stat.size;
+        }
+      } catch {}
+    }));
+    if (count > 0) {
+      console.info(`[cache] Limpieza: ${count} thumbnails, ${(bytes / 1_048_576).toFixed(1)} MB liberados`);
+    }
+  } catch {}
+}
+
 export async function getThumbnail(
   relativePath: string,
   photosRoot: string,

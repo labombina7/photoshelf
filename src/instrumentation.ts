@@ -20,5 +20,7 @@ export async function register() {
     validateEnvVars();
     const { startWatcher } = await import('./lib/folderWatcher');
     startWatcher().catch(err => console.error('[watcher] Failed to start:', err));
+    const { evictOldThumbnails } = await import('./lib/thumbnail');
+    setImmediate(() => evictOldThumbnails(30).catch(() => {}));
   }
 }

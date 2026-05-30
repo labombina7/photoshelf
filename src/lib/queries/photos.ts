@@ -60,7 +60,13 @@ export function listPhotos(
   }
 
   const catalogId = filters.catalogId ?? 1;
-  const total = (db.prepare('SELECT COUNT(*) as c FROM photos WHERE catalog_id = ?').get(catalogId) as { c: number }).c;
+  const total = (db.prepare(`
+    SELECT COUNT(DISTINCT p.id) as c
+    FROM photos p
+    ${joinSql}
+    WHERE 1=1
+    ${whereSql}
+  `).get(...fp) as { c: number }).c;
   const years = (db.prepare('SELECT DISTINCT year FROM photos WHERE catalog_id = ? ORDER BY year DESC').all(catalogId) as { year: number }[]).map(r => r.year);
 
   return { photos, total, years };

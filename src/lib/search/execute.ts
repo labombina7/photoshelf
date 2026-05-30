@@ -49,13 +49,19 @@ export interface SearchResult {
 
 const PHOTO_LIMIT = 200;
 const PHOTO_COLS  = 'id, filename, year, event, taken_at, is_favorite';
+const HINTS_TTL_MS = 60_000;
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+const hintsCache = new Map<number, { data: ClassifierHints; expiresAt: number }>();
+
 function loadHints(catalogId: number): ClassifierHints {
+  const cached = hintsCache.get(catalogId);
+  if (cached && Date.now() < cached.expiresAt) return cached.data;
+
   const db = getDb();
   const tags = (
-    db.prepare('SELECT name FROM tags ORDER BY name ASC').all() as { name: string }[]
+    db.prepare('SELECT name FROM tags ORDER BY name ASC LIMIT 500').all() as { name: string }[]
   ).map(r => r.name);
 
   const events = (
@@ -66,7 +72,9 @@ function loadHints(catalogId: number): ClassifierHints {
     ).all(catalogId) as { event: string }[]
   ).map(r => r.event);
 
-  return { tags, events };
+  const data = { tags, events };
+  hintsCache.set(catalogId, { data, expiresAt: Date.now() + HINTS_TTL_MS });
+  return data;
 }
 
 function matchingTags(query: string, catalogId: number): TagMatch[] {
