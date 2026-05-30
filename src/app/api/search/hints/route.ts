@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
-import { getDb } from '@/lib/db';
+import { getActiveCatalogId } from '@/lib/catalog-context';
+import { getSearchHints } from '@/lib/queries/search';
 
 /**
  * GET /api/search/hints
@@ -13,22 +14,8 @@ export async function GET() {
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
-    const db = getDb();
-
-    const tags = (
-      db.prepare('SELECT name FROM tags ORDER BY name ASC').all() as { name: string }[]
-    ).map(r => r.name);
-
-    const events = (
-      db
-        .prepare(
-          `SELECT DISTINCT event FROM photos
-           WHERE event IS NOT NULL AND event != ''
-           ORDER BY event ASC`,
-        )
-        .all() as { event: string }[]
-    ).map(r => r.event);
-
+    const catalogId = await getActiveCatalogId();
+    const { tags, events } = getSearchHints(catalogId);
     return NextResponse.json({ tags, events });
   } catch (err) {
     console.error('[search/hints] Error fetching hints:', err);

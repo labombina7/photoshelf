@@ -10,6 +10,7 @@ import { parseSearchQuery, photoMatchesConcept } from '@/lib/ollama';
 import { PHOTOS_PATH } from '@/lib/config';
 import { upsertAiTags } from '@/lib/db-helpers';
 import { getAiSearchState, updateAiSearchState } from '@/lib/aiSearchState';
+import { getAiSearchCandidates, countAiSearchCandidates, getAiSearchPhotosByIds } from '@/lib/queries/search';
 const DEEP_BATCH = 50;
 
 export async function POST(req: NextRequest) {
@@ -30,6 +31,9 @@ export async function POST(req: NextRequest) {
     const db = getDb();
     const { year, concept, tags } = await parseSearchQuery(prompt);
 
+    // catalogId not passed from client on this legacy endpoint — defaults to 1
+    const catalogId = 1;
+
     if (mode === 'quick') {
       if (tags.length === 0) {
         return NextResponse.json({ photos: [], concept, year, mode: 'quick' });
@@ -41,9 +45,9 @@ export async function POST(req: NextRequest) {
         FROM photos p
         JOIN photo_tags pt ON pt.photo_id = p.id
         JOIN tags t ON t.id = pt.tag_id
-        WHERE t.name IN (${placeholders})
+        WHERE t.name IN (${placeholders}) AND p.catalog_id = ?
       `;
-      const params: (string | number)[] = [...tags];
+      const params: (string | number)[] = [...tags, catalogId];
       if (year) { sql += ' AND p.year = ?'; params.push(year); }
       sql += ` GROUP BY p.id HAVING COUNT(DISTINCT t.name) = ${tags.length}`;
       sql += ' ORDER BY p.year DESC, p.event ASC, p.filename ASC LIMIT 200';
@@ -53,19 +57,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Deep search
-    let candidateSql = 'SELECT id, path FROM photos WHERE 1=1';
-    const candidateParams: (string | number)[] = [];
-    if (year) { candidateSql += ' AND year = ?'; candidateParams.push(year); }
-    candidateSql += ' ORDER BY id ASC LIMIT ? OFFSET ?';
-    candidateParams.push(DEEP_BATCH, offset);
-
-    const totalSql = year
-      ? 'SELECT COUNT(*) as c FROM photos WHERE year = ?'
-      : 'SELECT COUNT(*) as c FROM photos';
-    const totalParams = year ? [year] : [];
-    const totalCandidates = (db.prepare(totalSql).get(...totalParams) as { c: number }).c;
-
-    const candidates = db.prepare(candidateSql).all(...candidateParams) as { id: number; path: string }[];
+    const totalCandidates = countAiSearchCandidates(catalogId, year);
+    const candidates = getAiSearchCandidates(catalogId, year, DEEP_BATCH, offset);
 
     const matchedIds: number[] = [];
 
@@ -86,13 +79,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const photos = matchedIds.length > 0
-      ? db.prepare(
-          `SELECT id, path, filename, year, event, taken_at, is_favorite
-           FROM photos WHERE id IN (${matchedIds.map(() => '?').join(',')})
-           ORDER BY year DESC, event ASC`
-        ).all(...matchedIds)
-      : [];
+    const photos = getAiSearchPhotosByIds(matchedIds);
 
     return NextResponse.json({
       photos,

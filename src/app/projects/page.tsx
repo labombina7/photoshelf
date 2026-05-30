@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
-import { getDb, getSidebarProjects } from '@/lib/db';
+import { getDb } from '@/lib/db';
+import { getSidebarProjects } from '@/lib/queries/projects';
 import ProjectsClient from './ProjectsClient';
 import type { Theme } from '@/lib/types';
 
@@ -50,7 +51,7 @@ export default async function ProjectsPage() {
     ORDER BY t.name ASC
   `).all() as { name: string }[]).map(r => r.name);
 
-  const sidebarProjects = getSidebarProjects(db);
+  const sidebarProjects = getSidebarProjects();
 
   return (
     <ProjectsClient

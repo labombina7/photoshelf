@@ -1,6 +1,7 @@
 import { redirect, notFound } from 'next/navigation';
 import { getSession } from '@/lib/session';
-import { getDb, getSidebarProjects } from '@/lib/db';
+import { getDb } from '@/lib/db';
+import { getSidebarProjects } from '@/lib/queries/projects';
 import ProjectDetailClient from './ProjectDetailClient';
 import type { Theme } from '@/lib/types';
 
@@ -34,7 +35,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     GROUP BY th.id ORDER BY th.name ASC
   `).all() as Theme[];
 
-  const sidebarProjects = getSidebarProjects(db);
+  const sidebarProjects = getSidebarProjects();
 
   return (
     <ProjectDetailClient
