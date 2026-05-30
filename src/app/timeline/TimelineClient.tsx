@@ -102,13 +102,7 @@ export default function TimelineClient({
   activeCatalogId = 1,
 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [level, setLevel] = useState<Level>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem('photoshelf_timeline_level');
-      if (stored && LEVELS.includes(stored as Level)) return stored as Level;
-    }
-    return 'month';
-  });
+  const [level, setLevel] = useState<Level>('month');
   const visualZoom = LEVEL_ZOOM[level];
   const [allPhotos, setAllPhotos] = useState<PhotoRow[]>(initialRows);
   const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
@@ -119,6 +113,15 @@ export default function TimelineClient({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const groupRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Restore level from sessionStorage after hydration (avoids SSR/client mismatch)
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('photoshelf_timeline_level');
+      if (stored && LEVELS.includes(stored as Level)) setLevel(stored as Level);
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Persist level choices
   useEffect(() => {
@@ -144,6 +147,10 @@ export default function TimelineClient({
       if (nextCursor) params.set('cursor', nextCursor);
       const res = await fetch(`/api/timeline?${params}`);
       const data = await res.json();
+      if (!res.ok || !Array.isArray(data.groups)) {
+        console.error('[Timeline] fetchMore: unexpected response', data);
+        return;
+      }
       const incoming: PhotoRow[] = (data.groups as Group[]).flatMap(g => g.photos);
       setAllPhotos(prev => [...prev, ...incoming]);
       setNextCursor(data.nextCursor ?? null);
@@ -158,6 +165,8 @@ export default function TimelineClient({
         link.href = `/api/photos/${photo.id}/thumbnail?size=${currentVzConfig.size}`;
         document.head.appendChild(link);
       });
+    } catch (err) {
+      console.error('[Timeline] fetchMore error:', err instanceof Error ? err.message : err);
     } finally {
       setLoading(false);
     }

@@ -70,10 +70,12 @@ function SidebarInner({
   // Swipe-left to close sidebar on mobile
   const swipeTouchStartX = useRef<number | null>(null);
   function handleSidebarTouchStart(e: React.TouchEvent) {
+    if (!e.touches.length) return;
     swipeTouchStartX.current = e.touches[0].clientX;
   }
   function handleSidebarTouchEnd(e: React.TouchEvent) {
     if (swipeTouchStartX.current === null) return;
+    if (!e.changedTouches.length) return;
     const deltaX = e.changedTouches[0].clientX - swipeTouchStartX.current;
     swipeTouchStartX.current = null;
     if (deltaX < -60) closeMobile();
