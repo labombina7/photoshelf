@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu, IconMap, IconX } from '@/components/Icons';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 
 interface PhotoPoint {
@@ -160,12 +161,60 @@ export default function MapClient({
     loadMarkers(activeYear);
   }, [initializing, activeYear, loadMarkers]);
 
-  const handleYearChange = (year: number | null) => {
-    setActiveYear(year);
-  };
-
   const withoutGps = total - visibleCount;
   const showSelector = availableYears.length > 1;
+
+  // Inject controls into the global app-header (same pattern as library/timeline).
+  // useMemo stabilises the JSX reference to avoid render cascades.
+  const slotContent = useMemo(() => (
+    <div className="header-slot-map">
+      <button
+        className="hamburger header-slot-hamburger"
+        onClick={() => setMobileSidebarOpen(true)}
+        title="Menú"
+      >
+        <IconMenu size={20} />
+      </button>
+      <div className="header-slot-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <IconMap size={14} />
+        Mapa
+      </div>
+      {showSelector && (
+        <div className="map-year-selector" role="group" aria-label="Filtrar por año">
+          <button
+            className={`map-year-btn${activeYear === null ? ' active' : ''}`}
+            onClick={() => setActiveYear(null)}
+          >
+            Todos
+          </button>
+          {availableYears.map(year => (
+            <button
+              key={year}
+              className={`map-year-btn${activeYear === year ? ' active' : ''}`}
+              onClick={() => setActiveYear(year)}
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      )}
+      <span className="map-slot-stats">
+        {loadingYear ? (
+          <span>Cargando…</span>
+        ) : (
+          <>
+            {visibleCount.toLocaleString('es')} fotos en el mapa
+            {limitReached && <span title="Se muestran las 5000 más recientes"> · límite alcanzado</span>}
+            {!limitReached && withoutGps > 0 && (
+              <> · <span>{withoutGps.toLocaleString('es')} sin ubicación</span></>
+            )}
+          </>
+        )}
+      </span>
+    </div>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [showSelector, activeYear, availableYears, loadingYear, visibleCount, limitReached, withoutGps]);
+  useHeaderSlot(slotContent);
 
   return (
     <div className="app-shell">
@@ -182,53 +231,6 @@ export default function MapClient({
       />
 
       <div className="main">
-        <div className="topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button className="hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
-              <IconMenu size={20} />
-            </button>
-            <div className="topbar-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <IconMap size={14} />
-              Mapa
-            </div>
-          </div>
-
-          {showSelector && (
-            <div className="map-year-selector" role="group" aria-label="Filtrar por año">
-              <button
-                className={`map-year-btn${activeYear === null ? ' active' : ''}`}
-                onClick={() => handleYearChange(null)}
-              >
-                Todos
-              </button>
-              {availableYears.map(year => (
-                <button
-                  key={year}
-                  className={`map-year-btn${activeYear === year ? ' active' : ''}`}
-                  onClick={() => handleYearChange(year)}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="topbar-spacer" />
-          <div style={{ fontSize: 12, color: 'var(--text-tertiary)', paddingRight: 4 }}>
-            {loadingYear ? (
-              <span>Cargando…</span>
-            ) : (
-              <>
-                {visibleCount.toLocaleString('es')} fotos en el mapa
-                {limitReached && <span title="Se muestran las 5000 más recientes"> · límite alcanzado</span>}
-                {!limitReached && withoutGps > 0 && (
-                  <> · <span>{withoutGps.toLocaleString('es')} sin ubicación</span></>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
         <div style={{ position: 'relative', flex: 1, overflow: 'hidden', isolation: 'isolate' }}>
           {(initializing || loadingYear) && (
             <div style={{
