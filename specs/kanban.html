@@ -558,38 +558,11 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">30</span>
+      <span class="col-count">27</span>
     </div>
     <div class="col-body">
 
       <!-- ── Insights 2026-05-29 ── -->
-
-      <div class="card" tabindex="0" data-id="US-043" onclick="openModal('US-043')">
-        <div class="card-top">
-          <span class="badge badge-us">US-043</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Hardening seguridad — rate limiting IA, middleware y validación catálogo</div>
-        <div class="card-summary">Rate limiting en /ai/review y /ai/search. Middleware universal para todos los endpoints /api/*. Validación de directorio al crear un catálogo.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-045" onclick="openModal('US-045')">
-        <div class="card-top">
-          <span class="badge badge-us">US-045</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Rendimiento — count filtrado, caché de hints y evicción de thumbnails</div>
-        <div class="card-summary">Count de paginación respeta filtros activos. loadHints con TTL de 60s. Script de limpieza de caché de thumbnails con antigüedad > 30 días.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-046" onclick="openModal('US-046')">
-        <div class="card-top">
-          <span class="badge badge-us">US-046</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Capa de repositorio — eliminar SQL inline restante en routes</div>
-        <div class="card-summary">Mover SQL inline de projects, search/hints, search/suggestions y ai/search a <code>src/lib/queries/</code>. Mover getSidebarProjects fuera de db.ts.</div>
-      </div>
 
       <div class="card" tabindex="0" data-id="US-047" onclick="openModal('US-047')">
         <div class="card-top">
@@ -852,9 +825,39 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">34</span>
+      <span class="col-count">47</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="US-043" onclick="openModal('US-043')">
+        <div class="card-top">
+          <span class="badge badge-us">US-043</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-05-30</span>
+        </div>
+        <div class="card-title">Hardening seguridad — rate limiting IA, middleware y validación catálogo</div>
+        <div class="card-summary">aiSearchState para throttling de /ai/review y /ai/search. Middleware ampliado a /api/*. fs.statSync en createCatalog.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-045" onclick="openModal('US-045')">
+        <div class="card-top">
+          <span class="badge badge-us">US-045</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-05-30</span>
+        </div>
+        <div class="card-title">Rendimiento — count filtrado, caché de hints y evicción de thumbnails</div>
+        <div class="card-summary">listPhotos usa COUNT con filtros activos. loadHints con Map+TTL 60s. evictOldThumbnails en arranque vía setImmediate.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-046" onclick="openModal('US-046')">
+        <div class="card-top">
+          <span class="badge badge-us">US-046</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-05-30</span>
+        </div>
+        <div class="card-title">Capa de repositorio — eliminar SQL inline restante en routes</div>
+        <div class="card-summary">queries/search.ts y queries/projects.ts nuevos. Routes de search, projects y ai/search migrados. getSidebarProjects movida fuera de db.ts.</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-041" onclick="openModal('US-041')">
         <div class="card-top">
@@ -1195,6 +1198,136 @@
         <div class="card-summary">Estados vacíos con mensaje contextual y llamada a la acción principal.</div>
       </div>
 
+      <div class="card card-done" tabindex="0" data-id="US-001" onclick="openModal('US-001')">
+        <div class="card-top">
+          <span class="badge badge-us">US-001</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-05-22</span>
+        </div>
+        <div class="card-title">Timeline View</div>
+        <div class="card-summary">Vista cronológica de la biblioteca con agrupación por año/mes y scroll infinito.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-002" onclick="openModal('US-002')">
+        <div class="card-top">
+          <span class="badge badge-us">US-002</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-05-22</span>
+        </div>
+        <div class="card-title">Mapa de Fotos</div>
+        <div class="card-summary">Vista de mapa interactivo que muestra la ubicación geográfica de las fotos con clustering.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-006" onclick="openModal('US-006')">
+        <div class="card-top">
+          <span class="badge badge-us">US-006</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-05-22</span>
+        </div>
+        <div class="card-title">Panel de Estadísticas</div>
+        <div class="card-summary">Dashboard con estadísticas de la biblioteca: fotos por mes, cámaras, lentes, temas IA y distribución geográfica.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-007" onclick="openModal('US-007')">
+        <div class="card-top">
+          <span class="badge badge-us">US-007</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-05-22</span>
+        </div>
+        <div class="card-title">Zoom Visual en la Línea de Tiempo</div>
+        <div class="card-summary">Slider de zoom en la timeline que ajusta la densidad de la cuadrícula de fotos.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-008" onclick="openModal('US-008')">
+        <div class="card-top">
+          <span class="badge badge-us">US-008</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #26 · 2026-05-22</span>
+        </div>
+        <div class="card-title">Optimización de carga de miniaturas en el Timeline</div>
+        <div class="card-summary">Carga lazy de thumbnails con IntersectionObserver. Skeleton placeholders durante la carga. Mejora de rendimiento en bibliotecas grandes.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-009" onclick="openModal('US-009')">
+        <div class="card-top">
+          <span class="badge badge-us">US-009</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">PR #25 · 2026-05-22</span>
+        </div>
+        <div class="card-title">Zoom unificado en la vista Timeline</div>
+        <div class="card-summary">Unificación del control de zoom del timeline: un único slider que afecta a la densidad de cuadrícula de forma consistente.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-009a" onclick="openModal('US-009a')">
+        <div class="card-top">
+          <span class="badge badge-us">US-009a</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">EPIC-001</span>
+        </div>
+        <div class="card-title">Migración de BD: tabla catalogs y catalog_id</div>
+        <div class="card-summary">Creación de tabla <code>catalogs</code> y columna <code>catalog_id</code> en photos. Migración automática al arrancar.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-009b" onclick="openModal('US-009b')">
+        <div class="card-top">
+          <span class="badge badge-us">US-009b</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">EPIC-001</span>
+        </div>
+        <div class="card-title">Contexto de catálogo activo en el servidor</div>
+        <div class="card-summary">Cookie <code>active_catalog_id</code> leída en el servidor. Middleware y helpers para propagar el catálogo activo a todas las queries.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-009c" onclick="openModal('US-009c')">
+        <div class="card-top">
+          <span class="badge badge-us">US-009c</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">EPIC-001</span>
+        </div>
+        <div class="card-title">Filtrado de queries por catalog_id</div>
+        <div class="card-summary">Todas las queries de la capa de repositorio filtran por <code>catalog_id</code>. Aislamiento completo de datos entre catálogos.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-009d" onclick="openModal('US-009d')">
+        <div class="card-top">
+          <span class="badge badge-us">US-009d</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">EPIC-001</span>
+        </div>
+        <div class="card-title">Escaneo vinculado a catálogo específico</div>
+        <div class="card-summary">El escáner de archivos asocia las fotos al catálogo activo durante el escaneo.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-009e" onclick="openModal('US-009e')">
+        <div class="card-top">
+          <span class="badge badge-us">US-009e</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">EPIC-001</span>
+        </div>
+        <div class="card-title">API REST de gestión de catálogos</div>
+        <div class="card-summary">Endpoints CRUD para catálogos: crear, listar, renombrar, eliminar y activar catálogo.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-009f" onclick="openModal('US-009f')">
+        <div class="card-top">
+          <span class="badge badge-us">US-009f</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">EPIC-001</span>
+        </div>
+        <div class="card-title">UI: selector de catálogo en el Sidebar</div>
+        <div class="card-summary">Dropdown en el sidebar para cambiar de catálogo activo. Refleja el nombre del catálogo actual y permite el cambio inmediato.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-009g" onclick="openModal('US-009g')">
+        <div class="card-top">
+          <span class="badge badge-us">US-009g</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">EPIC-001</span>
+        </div>
+        <div class="card-title">UI: página de gestión de catálogos (CRUD)</div>
+        <div class="card-summary">Página <code>/catalogs</code> con listado, creación, renombrado y eliminación de catálogos. Formulario inline.</div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -1223,6 +1356,190 @@
 // Card data — extracted from spec files
 // ─────────────────────────────────────────────────────────────────
 const CARDS = {
+
+  'US-001': {
+    id: 'US-001',
+    type: 'US',
+    column: 'done',
+    effort: 'L',
+    title: 'Timeline View',
+    story: 'Como fotógrafo que gestiona una biblioteca grande,\nquiero ver mis fotos ordenadas cronológicamente,\npara navegar rápidamente por épocas y encontrar fotos por fecha.',
+    description: [
+      'Vista principal de la biblioteca organizada en grupos por año y mes con scroll infinito. Cuadrícula de miniaturas responsiva con agrupación temporal.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Agrupación por año/mes visible', 'Scroll infinito funcional', 'Miniaturas con aspect ratio correcto'] }],
+    dependencies: [], components: [], tech: [], outOfScope: []
+  },
+
+  'US-002': {
+    id: 'US-002',
+    type: 'US',
+    column: 'done',
+    effort: 'L',
+    title: 'Mapa de Fotos',
+    story: 'Como fotógrafo que viaja y toma fotos en distintas ubicaciones,\nquiero ver mis fotos en un mapa interactivo,\npara recordar dónde hice cada foto y explorar mi biblioteca geográficamente.',
+    description: [
+      'Vista de mapa interactivo (Leaflet) con clustering de marcadores. Al hacer clic en un cluster se expande o se hace zoom. Al clicar un marcador individual se muestra la miniatura.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Mapa con clustering de fotos geolocalizadas', 'Click en marcador muestra miniatura', 'Fotos sin GPS no aparecen en el mapa'] }],
+    dependencies: [], components: [], tech: [], outOfScope: []
+  },
+
+  'US-006': {
+    id: 'US-006',
+    type: 'US',
+    column: 'done',
+    effort: 'M',
+    title: 'Panel de Estadísticas',
+    story: 'Como fotógrafo que quiere entender sus hábitos y su biblioteca,\nquiero ver estadísticas visuales de mi colección,\npara conocer mis patrones de fotografía.',
+    description: [
+      'Dashboard con gráficos de: fotos por mes, distribución por cámara, distribución por lente, temas IA más frecuentes y distribución geográfica por país.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Gráficos de fotos por mes', 'Top cámaras y lentes', 'Top temas IA', 'Total de fotos, favoritos y geolocalizadas'] }],
+    dependencies: [], components: [], tech: [], outOfScope: []
+  },
+
+  'US-007': {
+    id: 'US-007',
+    type: 'US',
+    column: 'done',
+    effort: 'S',
+    title: 'Zoom Visual en la Línea de Tiempo',
+    story: 'Como fotógrafo que navega su biblioteca en la línea de tiempo,\nquiero controlar la densidad de la cuadrícula con un slider de zoom,\npara ver más fotos a la vez o verlas más grandes según necesite.',
+    description: [
+      'Slider de zoom en la barra del timeline que ajusta el tamaño de las miniaturas entre 3 y 8 columnas. El valor se persiste en localStorage.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Slider de zoom funcional', 'Rango de 3 a 8 columnas', 'Persiste entre sesiones'] }],
+    dependencies: [], components: [], tech: [], outOfScope: []
+  },
+
+  'US-008': {
+    id: 'US-008',
+    type: 'US',
+    column: 'done',
+    pr: 26,
+    effort: 'M',
+    title: 'Optimización de carga de miniaturas en el Timeline',
+    story: 'Como fotógrafo con una biblioteca grande de miles de imágenes,\nquiero que las miniaturas carguen progresivamente,\npara que la interfaz no se congele al navegar.',
+    description: [
+      'Implementación de IntersectionObserver para carga lazy de miniaturas. Skeleton placeholders animados durante la carga. Evita peticiones simultáneas de miles de imágenes al montar la vista.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Lazy loading con IntersectionObserver', 'Skeletons animados visibles', 'Sin congelado de UI al cargar la vista'] }],
+    dependencies: [], components: [], tech: [], outOfScope: []
+  },
+
+  'US-009': {
+    id: 'US-009',
+    type: 'US',
+    column: 'done',
+    pr: 25,
+    effort: 'S',
+    title: 'Zoom unificado en la vista Timeline',
+    story: 'Como fotógrafo navegando mi biblioteca por el timeline,\nquiero un único control de zoom coherente,\npara que el tamaño de las fotos sea consistente en toda la vista.',
+    description: [
+      'Unificación de los controles de zoom del timeline eliminando duplicidades. Un único slider que afecta de forma uniforme a la densidad de la cuadrícula.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Un único control de zoom', 'Sin duplicados ni inconsistencias', 'Zoom funciona igual en todos los grupos'] }],
+    dependencies: ['US-007'], components: [], tech: [], outOfScope: []
+  },
+
+  'US-009a': {
+    id: 'US-009a',
+    type: 'US',
+    column: 'done',
+    effort: 'S',
+    title: 'Migración de BD: tabla catalogs y catalog_id',
+    story: 'Como desarrollador de photoshelf,\nnecesito la estructura de BD para múltiples catálogos,\npara que el resto de la EPIC-001 pueda construirse sobre ella.',
+    description: [
+      'Creación de tabla <code>catalogs</code> (id, name, path, created_at). Añadir columna <code>catalog_id</code> a la tabla <code>photos</code>. Migración automática al arrancar la app si las tablas no existen.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Tabla catalogs creada', 'Columna catalog_id en photos', 'Migración idempotente al arrancar'] }],
+    dependencies: [], components: [], tech: [], outOfScope: []
+  },
+
+  'US-009b': {
+    id: 'US-009b',
+    type: 'US',
+    column: 'done',
+    effort: 'S',
+    title: 'Contexto de catálogo activo en el servidor',
+    story: 'Como usuario de photoshelf con múltiples catálogos,\nquiero que el servidor sepa qué catálogo tengo activo,\npara que todas las páginas muestren solo las fotos de ese catálogo.',
+    description: [
+      'Cookie <code>active_catalog_id</code> leída en el servidor via iron-session. Helper <code>getActiveCatalogId()</code> disponible en Server Components y route handlers.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Cookie active_catalog_id leída en servidor', 'Helper getActiveCatalogId() disponible', 'Fallback al catálogo por defecto si no hay cookie'] }],
+    dependencies: ['US-009a'], components: [], tech: [], outOfScope: []
+  },
+
+  'US-009c': {
+    id: 'US-009c',
+    type: 'US',
+    column: 'done',
+    effort: 'M',
+    title: 'Filtrado de todas las queries por catalog_id',
+    story: 'Como usuario de photoshelf con múltiples catálogos,\nquiero que cada catálogo muestre solo sus propias fotos,\npara tener un aislamiento completo de datos entre catálogos.',
+    description: [
+      'Todas las funciones de la capa de repositorio (<code>src/lib/queries/</code>) aceptan y filtran por <code>catalog_id</code>. Las vistas y routes pasan el catálogo activo a todas las queries.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Todas las queries filtran por catalog_id', 'Sin datos cruzados entre catálogos', 'Tests de aislamiento pasan'] }],
+    dependencies: ['US-009a', 'US-009b'], components: [], tech: [], outOfScope: []
+  },
+
+  'US-009d': {
+    id: 'US-009d',
+    type: 'US',
+    column: 'done',
+    effort: 'S',
+    title: 'Escaneo vinculado a catálogo específico',
+    story: 'Como usuario de photoshelf con múltiples catálogos,\nquiero que al escanear fotos se vinculen al catálogo activo,\npara que cada catálogo tenga solo sus propias fotos escaneadas.',
+    description: [
+      'El escáner de archivos lee el <code>catalog_id</code> activo al iniciar el escaneo y lo asocia a todas las fotos insertadas durante esa sesión de escaneo.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Escaneo inserta photos con catalog_id correcto', 'Re-escaneo no duplica fotos del mismo catálogo'] }],
+    dependencies: ['US-009a', 'US-009b'], components: [], tech: [], outOfScope: []
+  },
+
+  'US-009e': {
+    id: 'US-009e',
+    type: 'US',
+    column: 'done',
+    effort: 'S',
+    title: 'API REST de gestión de catálogos',
+    story: 'Como usuario de photoshelf,\nquiero poder crear y gestionar catálogos desde la app,\npara organizar mis fotos en colecciones separadas.',
+    description: [
+      'Endpoints en <code>/api/catalogs</code>: GET (listar), POST (crear), PATCH/:id (renombrar), DELETE/:id (eliminar). POST /api/catalogs/active para cambiar el catálogo activo.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['CRUD completo de catálogos via API', 'Cambio de catálogo activo via POST /active', 'Validación de directorio al crear'] }],
+    dependencies: ['US-009a'], components: [], tech: [], outOfScope: []
+  },
+
+  'US-009f': {
+    id: 'US-009f',
+    type: 'US',
+    column: 'done',
+    effort: 'S',
+    title: 'UI: selector de catálogo en el Sidebar',
+    story: 'Como usuario de photoshelf con múltiples catálogos,\nquiero cambiar de catálogo desde el sidebar,\npara alternar rápidamente entre colecciones sin salir de la vista actual.',
+    description: [
+      'Dropdown en el sidebar que muestra el catálogo activo y permite seleccionar otro. Al cambiar, actualiza la cookie y recarga la vista actual.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Dropdown visible en sidebar', 'Cambio de catálogo recarga datos', 'Nombre del catálogo activo visible'] }],
+    dependencies: ['US-009e', 'US-009b'], components: [], tech: [], outOfScope: []
+  },
+
+  'US-009g': {
+    id: 'US-009g',
+    type: 'US',
+    column: 'done',
+    effort: 'M',
+    title: 'UI: página de gestión de catálogos (CRUD)',
+    story: 'Como usuario de photoshelf,\nquiero una página dedicada para gestionar mis catálogos,\npara crear, renombrar y eliminar catálogos con una interfaz clara.',
+    description: [
+      'Página <code>/catalogs</code> con listado de catálogos, formulario inline de creación, botones de renombrar y eliminar. Confirmación modal antes de eliminar.',
+    ],
+    criteria: [{ group: 'Criterios de aceptación', items: ['Listado de catálogos con nombre y ruta', 'Crear catálogo con nombre y directorio', 'Renombrar y eliminar funcionales', 'Confirmación antes de eliminar'] }],
+    dependencies: ['US-009e', 'US-009f'], components: [], tech: [], outOfScope: []
+  },
 
   'EPIC-003': {
     id: 'EPIC-003',
