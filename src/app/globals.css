@@ -690,6 +690,9 @@ body { padding-top: var(--header-h); }
 .event-count { font-size: 11px; color: var(--text-tertiary); }
 
 /* ── Timeline ── */
+/* Timeline: no border-bottom en el topbar — los period headers ya tienen su propia separación */
+.topbar--timeline { border-bottom: none; }
+
 .timeline-content { flex: 1; overflow-y: auto; padding: 0; }
 .timeline-group { padding: 0 28px 24px; }
 .timeline-period-header {
