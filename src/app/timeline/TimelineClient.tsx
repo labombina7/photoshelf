@@ -273,10 +273,10 @@ export default function TimelineClient({
     return () => content.removeEventListener('touchend', handleTouchEnd);
   }, []);
 
-  // Inject controls into the global app-header (matches library page pattern)
-  // On desktop: shows label + zoom controls on the right of the header
-  // On mobile: hamburger + label + zoom controls fill the header (logo/search hidden)
-  useHeaderSlot(
+  // Inject controls into the global app-header (matches library page pattern).
+  // useMemo stabilises the JSX reference: useHeaderSlot's effect only re-fires
+  // when stickyLabel or level actually change, avoiding a render cascade.
+  const headerSlotContent = useMemo(() => (
     <div className="header-slot-timeline">
       <button
         className="hamburger header-slot-hamburger"
@@ -301,7 +301,9 @@ export default function TimelineClient({
         ))}
       </div>
     </div>
-  );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [stickyLabel, level]);
+  useHeaderSlot(headerSlotContent);
 
   const priorityCount = vzConfig.limit / 3;
 

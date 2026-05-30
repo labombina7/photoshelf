@@ -701,7 +701,12 @@ body { padding-top: var(--header-h); }
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 160px;
+}
+/* Mobile: slot fills header width so zoom controls sit at the right edge */
+@media (max-width: 640px) {
+  .app-header-slot { flex: 1; }
+  .header-slot-timeline { flex: 1; }
+  .header-slot-timeline__label { flex: 1; }
 }
 
 .timeline-content { flex: 1; overflow-y: auto; padding: 0; }
