@@ -23,7 +23,8 @@ export interface TimelineResult {
 export function getTimelineRows(limit: number, cursor?: string | null, catalogId = 1): TimelineResult {
   const db = getDb();
 
-  const tagsSql = `(SELECT GROUP_CONCAT(t.name, ', ') FROM (SELECT t.name FROM photo_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.photo_id = p.id LIMIT 3)) AS tags_preview`;
+  // Outer query references 'name' (not 't.name') — the derived table exposes the column without alias
+  const tagsSql = `(SELECT GROUP_CONCAT(name, ', ') FROM (SELECT t.name FROM photo_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.photo_id = p.id LIMIT 3)) AS tags_preview`;
   // Use CASE instead of NULLS LAST (compatible with SQLite < 3.30) and p.id instead of p.created_at
   const orderBy = `CASE WHEN p.taken_at IS NULL THEN 1 ELSE 0 END ASC, p.taken_at DESC, p.id DESC`;
   const rows: TimelinePhotoRow[] = cursor
