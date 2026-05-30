@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
 import { classifyPhoto } from '@/lib/ollama';
@@ -55,29 +55,34 @@ export async function POST(req: NextRequest) {
     completedAt: null,
   });
 
-  // Fire and forget — classify in background
-  (async () => {
+  // after() keeps the execution context alive after the 202 response is sent,
+  // preventing Next.js from aborting the classification mid-run.
+  after(async () => {
     let done = 0;
     let errors = 0;
-    for (const photo of photos) {
-      updateClassifyState({ currentEvent: photo.event, done });
-      try {
-        const tags = await classifyPhoto(photo.path, photosRoot);
-        upsertAiTags(db, photo.id, tags);
-      } catch (err) {
-        errors++;
-        const msg = err instanceof Error ? err.message : String(err);
-        console.error(`[classify] error on photo ${photo.id} (${photo.path}):`, msg);
-        // Save first error to state so the UI can surface it
-        if (errors === 1) updateClassifyState({ firstError: msg });
-        updateClassifyState({ errors });
+    try {
+      for (const photo of photos) {
+        updateClassifyState({ currentEvent: photo.event, done });
+        try {
+          const tags = await classifyPhoto(photo.path, photosRoot);
+          upsertAiTags(db, photo.id, tags);
+        } catch (err) {
+          errors++;
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error(`[classify/year] error on photo ${photo.id} (${photo.path}):`, msg);
+          // Save first error to state so the UI can surface it
+          if (errors === 1) updateClassifyState({ firstError: msg });
+          updateClassifyState({ errors });
+        }
+        done++;
+        updateClassifyState({ done });
       }
-      done++;
-      updateClassifyState({ done });
+      updateClassifyState({ running: false, completedAt: Date.now() });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[classify/year] unexpected error in background task:', msg);
+      updateClassifyState({ running: false, error: msg, completedAt: Date.now() });
     }
-    updateClassifyState({ running: false, completedAt: Date.now() });
-  })().catch((err: Error) => {
-    updateClassifyState({ running: false, error: err.message, completedAt: Date.now() });
   });
 
   return NextResponse.json({ ok: true, total: photos.length }, { status: 202 });
