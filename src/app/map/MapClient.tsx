@@ -229,7 +229,7 @@ export default function MapClient({
           </div>
         </div>
 
-        <div style={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
+        <div style={{ position: 'relative', flex: 1, overflow: 'hidden', isolation: 'isolate' }}>
           {(initializing || loadingYear) && (
             <div style={{
               position: 'absolute', inset: 0, zIndex: 1000,
