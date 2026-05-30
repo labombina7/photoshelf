@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * Lightweight presence check for /api/v1/* routes.
- * Full iron-session validation happens inside each handler via withAuth().
+ * Lightweight presence check for all /api/* routes.
+ * Full iron-session validation happens inside each handler via getSession().
+ * /api/auth/login is excluded — it is the unauthenticated entry point.
  */
 export function middleware(req: NextRequest) {
   const cookie = req.cookies.get('photoshelf_session');
@@ -16,5 +17,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/v1/:path*'],
+  matcher: ['/api/((?!auth/login).*)'],
 };

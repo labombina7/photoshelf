@@ -1,4 +1,5 @@
-import { getDb, getSidebarProjects } from '@/lib/db';
+import { getDb } from '@/lib/db';
+import { getSidebarProjects } from './projects';
 import { listThemes } from './themes';
 import { listCatalogs } from './catalogs';
 import type { ThemeWithCount } from './themes';

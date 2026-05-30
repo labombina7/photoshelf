@@ -1,3 +1,5 @@
+import fs from 'fs';
+import nodePath from 'path';
 import { getDb } from '@/lib/db';
 
 export interface CatalogRow {
@@ -37,6 +39,18 @@ export interface CreateCatalogInput {
 
 export function createCatalog(input: CreateCatalogInput): CatalogRow {
   const { name, path } = input;
+
+  // Validate directory exists and is accessible
+  const resolvedPath = nodePath.resolve(path.trim());
+  let stat: fs.Stats;
+  try {
+    stat = fs.statSync(resolvedPath);
+  } catch {
+    throw new Error('El directorio no existe o no es accesible');
+  }
+  if (!stat.isDirectory()) {
+    throw new Error('El directorio no existe o no es accesible');
+  }
 
   // Validate no overlapping paths
   const existing = listCatalogs();
