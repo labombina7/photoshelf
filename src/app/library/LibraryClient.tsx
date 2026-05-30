@@ -62,7 +62,7 @@ export default function LibraryClient({
   const [toast, setToast] = useState('');
   const [isPending, startTransition] = useTransition();
   // Restore collapsed state from sessionStorage so that navigating back from a photo
-  // detail preserves which groups were open. Falls back to all-collapsed on first visit.
+  // detail preserves which groups were open. Falls back to all-expanded on first visit.
   const allGroupKeys = useMemo(() => groups.map(g => `${g.year}-${g.event}`), [groups]);
   const [collapsed, setCollapsed] = useState<Set<string>>(() => {
     // When viewing a specific event (arrived from folder click), always expand it
@@ -71,8 +71,13 @@ export default function LibraryClient({
       const stored = sessionStorage.getItem('photoshelf_collapsed');
       if (stored) return new Set<string>(JSON.parse(stored) as string[]);
     } catch {}
-    return new Set(allGroupKeys);
+    return new Set<string>();
   });
+
+  // When the event filter changes (soft navigation from sidebar), expand all groups
+  useEffect(() => {
+    if (activeFilters.event) setCollapsed(new Set());
+  }, [activeFilters.event]);
 
   // Keep sessionStorage in sync whenever collapsed changes
   useEffect(() => {
