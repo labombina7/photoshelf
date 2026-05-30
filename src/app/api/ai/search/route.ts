@@ -75,7 +75,9 @@ export async function POST(req: NextRequest) {
           upsertAiTags(db, candidate.id, newTags);
         }
         if (matches) matchedIds.push(candidate.id);
-      } catch { /* skip on error for individual photo */ }
+      } catch (err) {
+        console.error('[ai/search] photo error:', candidate.id, err instanceof Error ? err.message : err);
+      }
     }
 
     const photos = matchedIds.length > 0

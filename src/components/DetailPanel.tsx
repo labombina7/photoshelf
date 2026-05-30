@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   IconX, IconSparkle, IconCheck, IconCalendar,
@@ -28,6 +28,16 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   const [reviewing, setReviewing] = useState(false);
   const [review, setReview] = useState<PhotoReview | null>(null);
   const [reviewError, setReviewError] = useState<string | null>(null);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
+  const errorToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showErrorToast(msg: string) {
+    if (errorToastTimer.current) clearTimeout(errorToastTimer.current);
+    setErrorToast(msg);
+    errorToastTimer.current = setTimeout(() => setErrorToast(null), 4000);
+  }
+
+  useEffect(() => () => { if (errorToastTimer.current) clearTimeout(errorToastTimer.current); }, []);
 
   async function addTag() {
     const name = newTag.trim().toLowerCase();
@@ -45,12 +55,20 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   }
 
   async function removeTag(name: string) {
-    await fetch(`/api/tags/${photo.id}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    });
-    setTags((prev) => prev.filter((t) => t.name !== name));
+    const prevTags = tags;
+    setTags((prev) => prev.filter((t) => t.name !== name)); // optimistic
+    try {
+      const res = await fetch(`/api/tags/${photo.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+    } catch (err) {
+      console.error('[DetailPanel] removeTag failed:', err instanceof Error ? err.message : err);
+      setTags(prevTags); // rollback
+      showErrorToast('No se pudo eliminar la etiqueta. Inténtalo de nuevo.');
+    }
   }
 
   async function classify() {
@@ -102,16 +120,24 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   }
 
   async function toggleTheme(themeId: number) {
+    const prevThemeIds = assignedThemeIds;
     const next = new Set(assignedThemeIds);
     if (next.has(themeId)) next.delete(themeId);
     else next.add(themeId);
-    setAssignedThemeIds(next);
-    await fetch(`/api/photo-themes/${photo.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ themeIds: Array.from(next) }),
-    });
-    router.refresh();
+    setAssignedThemeIds(next); // optimistic
+    try {
+      const res = await fetch(`/api/photo-themes/${photo.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themeIds: Array.from(next) }),
+      });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+      router.refresh();
+    } catch (err) {
+      console.error('[DetailPanel] toggleTheme failed:', err instanceof Error ? err.message : err);
+      setAssignedThemeIds(prevThemeIds); // rollback
+      showErrorToast('No se pudo actualizar la temática. Inténtalo de nuevo.');
+    }
   }
 
   async function toggleFavorite() {
@@ -344,6 +370,19 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Inline error toast for optimistic update failures */}
+      {errorToast && (
+        <div style={{
+          position: 'sticky', bottom: 8, margin: '8px 8px 0',
+          padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+          background: '#fff3f3', border: '1px solid #fca5a5',
+          fontSize: 12, color: '#b91c1c', lineHeight: 1.4,
+          animation: 'toastIn 0.2s ease',
+        }}>
+          {errorToast}
         </div>
       )}
     </div>
