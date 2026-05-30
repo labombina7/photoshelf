@@ -22,6 +22,20 @@ export const MIME_TYPES: Record<string, string> = {
 
 export const FALLBACK_MIME = 'application/octet-stream';
 
+// ── Ollama timeouts ───────────────────────────────────────────────────────────
+export const OLLAMA_TIMEOUT_TEXT_MS     = 30_000;
+export const OLLAMA_TIMEOUT_VISION_MS   = 120_000;
+export const OLLAMA_TIMEOUT_CLASSIFY_MS = 180_000;
+export const OLLAMA_IMAGE_SIZE          = 512;
+
+// ── Folder watcher ────────────────────────────────────────────────────────────
+export const WATCHER_DEBOUNCE_MS = 5_000;
+export const WATCHER_POLL_MS     = 30_000;
+
+// ── Auth rate limiting ────────────────────────────────────────────────────────
+export const AUTH_RATE_LIMIT_ATTEMPTS  = 10;
+export const AUTH_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1_000;
+
 /**
  * Resolves a relative photo path against photosRoot and validates it doesn't escape the root.
  * Throws an error if the resolved path is outside photosRoot (path traversal attempt).

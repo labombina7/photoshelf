@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession, checkPassword } from '@/lib/session';
+import { AUTH_RATE_LIMIT_ATTEMPTS, AUTH_RATE_LIMIT_WINDOW_MS } from '@/lib/config';
 
-// In-memory rate limiter: max 10 attempts per IP in a 15-minute window
-const WINDOW_MS = 15 * 60 * 1000;
-const MAX_ATTEMPTS = 10;
+const WINDOW_MS = AUTH_RATE_LIMIT_WINDOW_MS;
+const MAX_ATTEMPTS = AUTH_RATE_LIMIT_ATTEMPTS;
 
 interface RateEntry {
   count: number;

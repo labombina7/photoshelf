@@ -1,5 +1,7 @@
 # Feature: Refactorización de ollama.ts en submódulos y centralización de constantes
 
+> Estado: ✅ Desplegada
+
 ## Historia de usuario
 
 Como desarrollador de photoshelf,

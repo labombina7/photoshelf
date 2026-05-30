@@ -1,5 +1,7 @@
 # Feature: Tests de integración para routes API críticas y refactor de ollama.test.ts
 
+> Estado: ✅ Desplegada
+
 ## Historia de usuario
 
 Como desarrollador de photoshelf,
