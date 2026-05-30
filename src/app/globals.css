@@ -1411,11 +1411,27 @@ body { padding-top: var(--header-h); }
 .stats-year-select:focus { border-color: var(--text); }
 
 /* ── Map ── */
+/* Header slot for map page */
+.header-slot-map {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Stats text: secondary info, hidden on narrow screens */
+.map-slot-stats {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .map-slot-stats { display: none; }
+}
+
 .map-year-selector {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-left: 12px;
+  margin-left: 0; /* was 12px in standalone topbar; gap on header-slot-map handles spacing now */
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
