@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
 import { reviewPhoto } from '@/lib/ollama';
+import { isTimeoutError } from '@/lib/ollama/client';
 import { PHOTOS_PATH } from '@/lib/config';
 import { getAiSearchState, updateAiSearchState } from '@/lib/aiSearchState';
 
@@ -29,7 +30,9 @@ export async function POST(_req: NextRequest, { params }: { params: Promise<{ ph
     const review = await reviewPhoto(photo.path, photo.catalog_path);
     return NextResponse.json(review);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
+    const message = isTimeoutError(err)
+      ? 'Ollama tardó demasiado en responder (timeout). El modelo puede estar cargando o la imagen es muy compleja.'
+      : err instanceof Error ? err.message : 'Unknown error';
     console.error('[review] reviewPhoto failed:', message);
     return NextResponse.json({ error: message }, { status: 500 });
   } finally {

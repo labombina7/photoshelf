@@ -2,6 +2,11 @@ import { OLLAMA_TIMEOUT_TEXT_MS, OLLAMA_TIMEOUT_VISION_MS } from '@/lib/config';
 
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
 
+export function isTimeoutError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  return err.name === 'TimeoutError' || err.name === 'AbortError' || err.message.includes('timed out');
+}
+
 async function checkOllamaResponse(res: Response): Promise<void> {
   if (!res.ok) {
     let detail = '';

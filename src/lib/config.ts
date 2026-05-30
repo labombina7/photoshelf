@@ -24,8 +24,8 @@ export const FALLBACK_MIME = 'application/octet-stream';
 
 // ── Ollama timeouts ───────────────────────────────────────────────────────────
 export const OLLAMA_TIMEOUT_TEXT_MS     = 30_000;
-export const OLLAMA_TIMEOUT_VISION_MS   = 120_000;
-export const OLLAMA_TIMEOUT_CLASSIFY_MS = 180_000;
+export const OLLAMA_TIMEOUT_VISION_MS   = 300_000;  // 5 min — vision models are slow on consumer hardware
+export const OLLAMA_TIMEOUT_CLASSIFY_MS = 300_000;  // 5 min — same reason
 export const OLLAMA_IMAGE_SIZE          = 512;
 
 // ── Folder watcher ────────────────────────────────────────────────────────────
