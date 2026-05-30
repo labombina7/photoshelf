@@ -142,6 +142,36 @@ export default function CatalogsClient({
             Cada catálogo apunta a una carpeta de fotos independiente. Escribe la ruta completa tal como aparece en el NAS.
           </p>
 
+          {/* Add new catalog — at the top so it's accessible on mobile without scrolling */}
+          <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: 24, marginBottom: 24 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Añadir catálogo</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <input
+                className="tag-input"
+                placeholder="Nombre (p.ej. Archivo 2010–2015)"
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                style={{ width: '100%' }}
+              />
+              <input
+                className="tag-input"
+                placeholder="Ruta de la carpeta (p.ej. /volume1/homes/javi/MobileBackup)"
+                value={newPath}
+                onChange={e => setNewPath(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') createCatalog(); }}
+                style={{ width: '100%' }}
+              />
+              {createError && (
+                <div style={{ fontSize: 12, color: 'var(--danger, #e05252)' }}>{createError}</div>
+              )}
+              <div>
+                <button className="btn-small" onClick={createCatalog} disabled={isPending}>
+                  Crear catálogo
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Catalog list */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32 }}>
             {catalogs.map(cat => (
@@ -223,35 +253,6 @@ export default function CatalogsClient({
             ))}
           </div>
 
-          {/* Add new catalog */}
-          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 24 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Añadir catálogo</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <input
-                className="tag-input"
-                placeholder="Nombre (p.ej. Archivo 2010–2015)"
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                style={{ width: '100%' }}
-              />
-              <input
-                className="tag-input"
-                placeholder="Ruta de la carpeta (p.ej. /volume1/homes/javi/MobileBackup)"
-                value={newPath}
-                onChange={e => setNewPath(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') createCatalog(); }}
-                style={{ width: '100%' }}
-              />
-              {createError && (
-                <div style={{ fontSize: 12, color: 'var(--danger, #e05252)' }}>{createError}</div>
-              )}
-              <div>
-                <button className="btn-small" onClick={createCatalog} disabled={isPending}>
-                  Crear catálogo
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

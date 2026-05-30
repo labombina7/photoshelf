@@ -1281,6 +1281,8 @@ body { padding-top: var(--header-h); }
   /* ── Toasts — bottom full width ── */
   .scan-toast { bottom: 16px; left: 12px; right: 12px; width: auto; }
   .toast { bottom: 16px; right: 12px; left: 12px; text-align: center; }
+  /* When scan-toast is visible, shift generic toast up to avoid overlap */
+  .scan-running .toast { bottom: 96px; }
 
   /* ── Dialog modal ── */
   .dialog-modal { width: calc(100vw - 32px); }
@@ -1468,8 +1470,18 @@ body { padding-top: var(--header-h); }
 .map-panel-event { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
 .map-panel-link { font-size: 11px; color: var(--accent); font-weight: 500; }
 
+/* Drag handle — hidden on desktop, shown on mobile */
+.map-panel-drag-handle {
+  display: none;
+}
 @media (max-width: 768px) {
-  .map-panel { width: 100%; top: auto; height: 55%; border-left: none; border-top: 1px solid var(--border); }
+  .map-panel { width: 100%; top: auto; height: var(--map-panel-h, 40%); border-left: none; border-top: 1px solid var(--border); }
+  .map-panel-drag-handle {
+    display: block; width: 36px; height: 4px;
+    background: var(--border2, #dbd9d4); border-radius: 2px;
+    margin: 8px auto 2px; cursor: ns-resize; flex-shrink: 0;
+    touch-action: none;
+  }
 }
 
 /* ── Detail panel visibility wrappers ── */

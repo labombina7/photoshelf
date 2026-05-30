@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconChevronDown, IconCheck } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
@@ -66,6 +66,18 @@ function SidebarInner({
 
   const isMobileOpen = mobileOpen || eventOpen;
   function closeMobile() { setEventOpen(false); onMobileClose?.(); }
+
+  // Swipe-left to close sidebar on mobile
+  const swipeTouchStartX = useRef<number | null>(null);
+  function handleSidebarTouchStart(e: React.TouchEvent) {
+    swipeTouchStartX.current = e.touches[0].clientX;
+  }
+  function handleSidebarTouchEnd(e: React.TouchEvent) {
+    if (swipeTouchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - swipeTouchStartX.current;
+    swipeTouchStartX.current = null;
+    if (deltaX < -60) closeMobile();
+  }
 
   const activeCatalog = catalogs.find(c => c.id === activeCatalogId);
 
@@ -145,7 +157,13 @@ function SidebarInner({
   return (
     <>
       {isMobileOpen && <div className="sidebar-overlay" onClick={closeMobile} />}
-    <aside className={`sidebar${isMobileOpen ? ' mobile-open' : ''}`} role="navigation" aria-label="Navegación principal">
+    <aside
+      className={`sidebar${isMobileOpen ? ' mobile-open' : ''}`}
+      role="navigation"
+      aria-label="Navegación principal"
+      onTouchStart={handleSidebarTouchStart}
+      onTouchEnd={handleSidebarTouchEnd}
+    >
       <div className="sidebar-section">
         <div className="sidebar-section-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           Biblioteca
