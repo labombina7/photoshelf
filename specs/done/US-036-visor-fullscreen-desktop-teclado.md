@@ -133,3 +133,5 @@ Añadir un **modo visor fullscreen** que:
 
 - El usuario puede navegar por todas sus fotos sin salir del visor usando solo el teclado.
 - El visor se abre y cierra en < 100 ms (sin peticiones de red adicionales — la imagen ya está cargada).
+
+> Estado: ✅ Desplegada — cubierta por US-051 (modo presentación slideshow, implementado en PR #95 el 2026-05-31). El overlay fullscreen, navegación ←→ por teclado, tecla Escape y flechas flotantes quedaron implementados como base del slideshow.
