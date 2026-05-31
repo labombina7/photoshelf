@@ -2121,7 +2121,11 @@ body { padding-top: var(--header-h); }
   background: var(--surface-raised); color: var(--text-secondary);
   font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer;
   transition: background 0.12s, color 0.12s;
-  white-space: nowrap;
+  white-space: nowrap; flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
 }
 .btn-slideshow:hover { background: var(--border); color: var(--text); }
+@media (max-width: 640px) {
+  .btn-slideshow { padding: 6px; gap: 0; }
+  .btn-slideshow-label { display: none; }
+}

@@ -223,7 +223,7 @@ export default function LibraryClient({
             title="Presentación (P)"
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-            Presentación
+            <span className="btn-slideshow-label">Presentación</span>
           </button>
         )}
 
