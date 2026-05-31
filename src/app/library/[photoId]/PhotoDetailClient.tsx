@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import DetailPanel from '@/components/DetailPanel';
 import BottomSheet from '@/components/BottomSheet';
+import Slideshow from '@/components/Slideshow';
 import { IconChevronLeft, IconChevronRight, IconMenu, IconX } from '@/components/Icons';
 import type { PhotoDetail, Theme } from '@/lib/types';
 
@@ -16,6 +17,7 @@ interface Props {
   nextId: number | null;
   photoIndex: number;
   photoTotal: number;
+  siblingIds: number[];
   navSearch: string;
   backHref: string;
   backLabel: string;
@@ -35,6 +37,7 @@ export default function PhotoDetailClient({
   nextId,
   photoIndex,
   photoTotal,
+  siblingIds,
   navSearch,
   backHref,
   backLabel,
@@ -51,6 +54,8 @@ export default function PhotoDetailClient({
   // US-035: sheet starts closed on mobile; HUD starts visible
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [hudVisible, setHudVisible] = useState(true);
+  const [slideshowOpen, setSlideshowOpen] = useState(false);
+  const slideshowStartIndex = siblingIds.indexOf(photo.id);
 
   // US-040: resolve back href/label from sessionStorage (preserves origin URL exactly)
   const [resolvedBackHref, setResolvedBackHref] = useState(backHref);
@@ -86,6 +91,8 @@ export default function PhotoDetailClient({
         router.push(`/library/${prevId}${navSearch}`);
       } else if (e.key === 'ArrowRight' && nextId) {
         router.push(`/library/${nextId}${navSearch}`);
+      } else if (e.key === 'p' || e.key === 'P') {
+        setSlideshowOpen(v => !v);
       }
     }
     window.addEventListener('keydown', handleKeyDown);
@@ -155,6 +162,13 @@ export default function PhotoDetailClient({
   return (
     // US-035: detail-viewer-shell used by CSS to hide .main on ≤640px
     <div className="app-shell detail-viewer-shell">
+      {slideshowOpen && siblingIds.length > 0 && (
+        <Slideshow
+          photoIds={siblingIds}
+          startIndex={slideshowStartIndex >= 0 ? slideshowStartIndex : 0}
+          onClose={() => setSlideshowOpen(false)}
+        />
+      )}
       {/* Sidebar drawer (mobile) / static (desktop) */}
       <Sidebar
         themes={sidebarThemes}
@@ -205,19 +219,31 @@ export default function PhotoDetailClient({
             <IconX size={20} />
           </button>
           <span className="photo-viewer-counter">{photoIndex} / {photoTotal}</span>
-          <button
-            className="photo-viewer-btn photo-viewer-btn--info"
-            onTouchStart={(e) => e.stopPropagation()}
-            onTouchEnd={(e) => { e.stopPropagation(); setMobileSheetOpen(true); setHudVisible(true); }}
-            onClick={handleMobileInfoOpen}
-            aria-label="Información de la foto"
-          >
+          <div style={{ display: 'flex', justifySelf: 'end', gap: 0 }}>
+            <button
+              className="photo-viewer-btn"
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => { e.stopPropagation(); setSlideshowOpen(true); }}
+              onClick={(e) => { e.stopPropagation(); setSlideshowOpen(true); }}
+              aria-label="Iniciar presentación"
+              title="Presentación (P)"
+            >
+              <svg width={18} height={18} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+            </button>
+            <button
+              className="photo-viewer-btn photo-viewer-btn--info"
+              onTouchStart={(e) => e.stopPropagation()}
+              onTouchEnd={(e) => { e.stopPropagation(); setMobileSheetOpen(true); setHudVisible(true); }}
+              onClick={handleMobileInfoOpen}
+              aria-label="Información de la foto"
+            >
             <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="8" />
               <line x1="12" y1="12" x2="12" y2="16" />
             </svg>
-          </button>
+            </button>
+          </div>
         </div>
 
         {/* Navigation: prev arrow */}
@@ -275,6 +301,14 @@ export default function PhotoDetailClient({
           <span className="detail-filename">{photo.filename}</span>
 
           <div className="detail-nav">
+            <button
+              className="btn-icon"
+              onClick={() => setSlideshowOpen(true)}
+              title="Presentación (P)"
+              aria-label="Iniciar presentación"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+            </button>
             <span className="detail-counter">{photoIndex} / {photoTotal}</span>
             {prevId ? (
               <Link href={`/library/${prevId}${navSearch}`} className="btn-icon">

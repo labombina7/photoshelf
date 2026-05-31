@@ -582,14 +582,6 @@
         <div class="card-summary">Modo selección múltiple en biblioteca (Shift+click, checkboxes). Botón "Descargar selección" genera ZIP streaming con los originales.</div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-051" onclick="openModal('US-051')">
-        <div class="card-top">
-          <span class="badge badge-us">US-051</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Modo presentación — slideshow automático</div>
-        <div class="card-summary">Avance automático configurable (3s/5s/10s/30s) con crossfade. HUD mínimo con play/pausa, barra de progreso y contador. Tecla P para activar.</div>
-      </div>
 
       <div class="card" tabindex="0" data-id="US-052" onclick="openModal('US-052')">
         <div class="card-top">
@@ -719,6 +711,15 @@
         <div class="card-summary">Analiza carpetas existentes, infiere el año por EXIF y propone reorganización a AÑO/EVENTO/. Ejecuta movimientos con log reversible y lanza scan automático. Elimina la barrera de entrada principal.</div>
       </div>
 
+      <div class="card" tabindex="0" data-id="US-067" onclick="openModal('US-067')">
+        <div class="card-top">
+          <span class="badge badge-us">US-067</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Navegación por teclado en grid y toggle de favoritos</div>
+        <div class="card-summary">Navegar el grid de fotos con flechas de teclado, marcar como favorita con espacio/F, e icono de estrella en thumbnails que refleja el estado favorito con toggle por click.</div>
+      </div>
+
       <div class="card" tabindex="0" data-id="US-066" onclick="openModal('US-066')">
         <div class="card-top">
           <span class="badge badge-us">US-066</span>
@@ -810,6 +811,15 @@
       <span class="col-count">49</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="US-051" onclick="openModal('US-051')">
+        <div class="card-top">
+          <span class="badge badge-us">US-051</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-05-31</span>
+        </div>
+        <div class="card-title">Modo presentación — slideshow automático</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-047" onclick="openModal('US-047')">
         <div class="card-top">
@@ -4557,6 +4567,53 @@ const CARDS = {
       'Detectar duplicados entre fuente y destino',
       'Soporte para catálogos Lightroom',
     ]
+  },
+  'US-067': {
+    id: 'US-067',
+    type: 'US',
+    column: 'todo',
+    effort: 'S',
+    title: 'Navegación por teclado en grid y toggle de favoritos',
+    story: 'Como usuario que revisa su biblioteca de fotos,\nquiero poder recorrer el grid con las flechas del teclado y marcar fotos como favoritas pulsando espacio,\npara poder curar mi colección rápidamente sin usar el ratón.',
+    description: [
+      'Todas las vistas con <code>PhotoGrid</code> (library, tags, search, timeline, projects) reciben navegación por teclado: flechas para moverse entre fotos, espacio o F para toggle de favorito. La foto enfocada muestra un anillo de selección.',
+      'Los thumbnails muestran un icono ★ en la esquina superior derecha cuando la foto es favorita. Al hacer hover sobre una foto no favorita, aparece una estrella semitransparente. Click en la estrella toglea favorito sin abrir el detalle.',
+    ],
+    criteria: [
+      {
+        group: 'Navegación por teclado',
+        items: [
+          'Flechas ←→↑↓ mueven el foco entre fotos respetando columnas del grid',
+          'La foto enfocada muestra un anillo de selección visible (outline con color de acento)',
+          'El grid hace scroll automático para mantener la foto enfocada visible',
+          'Las flechas no hacen scroll de página mientras el grid tiene foco',
+          'Si no hay foto enfocada al pulsar flecha, se enfoca la primera foto',
+          'Las teclas no interfieren cuando el foco está en un input u otro elemento interactivo',
+        ]
+      },
+      {
+        group: 'Toggle de favorito',
+        items: [
+          'Espacio o F toglea el favorito de la foto enfocada',
+          'Llama a PATCH /api/photos/{id} con { is_favorite: boolean }',
+          'Actualiza el estado local de forma optimista (sin recargar página)',
+          'Si el API falla, revierte el cambio local y muestra error',
+        ]
+      },
+      {
+        group: 'Icono de estrella en thumbnail',
+        items: [
+          'Fotos favoritas muestran ★ rellena en esquina superior derecha (color dorado)',
+          'Fotos no favoritas muestran estrella semitransparente al hacer hover',
+          'Click en la estrella toglea favorito sin navegar al detalle',
+          'Funciona en todas las vistas que usan PhotoGrid',
+        ]
+      },
+    ],
+    files: [
+      'src/components/PhotoGrid.tsx',
+      'src/app/globals.css',
+    ],
   },
   'US-066': {
     id: 'US-066',

@@ -67,6 +67,7 @@ export default async function PhotoDetailPage({
       nextId={nextId}
       photoIndex={idx + 1}
       photoTotal={siblings.length}
+      siblingIds={siblings.map(s => s.id)}
       navSearch={navSearch}
       backHref={backHref}
       backLabel={backLabel}

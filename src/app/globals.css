@@ -2009,3 +2009,99 @@ body { padding-top: var(--header-h); }
 .search-save-theme-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .search-save-theme-btn:not(:disabled):hover { background: #333; }
 .search-save-theme-msg { font-size: 12px; color: var(--tag-auto-color); }
+
+/* ── Slideshow — US-051 ──────────────────────────────────────────── */
+.slideshow-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: #000;
+  display: flex; align-items: center; justify-content: center;
+  cursor: none;
+}
+.slideshow-overlay:hover { cursor: default; }
+
+.slideshow-photo-wrap {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.slideshow-img {
+  position: absolute;
+  max-width: 100%; max-height: 100dvh;
+  object-fit: contain;
+  transition: opacity 0.5s ease;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.slideshow-img--active  { opacity: 1; z-index: 1; }
+.slideshow-img--inactive { opacity: 0; z-index: 0; }
+
+/* Progress bar */
+.slideshow-progress-wrap {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  z-index: 10;
+  background: rgba(255,255,255,0.15);
+  transition: opacity 0.22s ease;
+}
+.slideshow-progress-fill {
+  height: 100%; background: rgba(255,255,255,0.75);
+  transition: width 100ms linear;
+}
+
+/* HUD */
+.slideshow-hud {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
+  padding: 32px 20px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%);
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.slideshow-hud-inner {
+  display: flex; align-items: center; gap: 8px;
+  justify-content: center;
+  pointer-events: all;
+  flex-wrap: wrap;
+}
+.slideshow-hud--hidden { opacity: 0; pointer-events: none !important; }
+
+.slideshow-btn {
+  background: rgba(255,255,255,0.12); border: none; cursor: pointer;
+  color: #fff; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 8px; min-width: 40px; min-height: 40px;
+  font-family: inherit; font-size: 15px;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.slideshow-btn:hover { background: rgba(255,255,255,0.22); }
+.slideshow-btn--close { background: rgba(255,255,255,0.08); }
+
+.slideshow-counter {
+  color: rgba(255,255,255,0.8); font-size: 13px; font-weight: 600;
+  white-space: nowrap; padding: 0 4px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+
+.slideshow-interval-group {
+  display: flex; gap: 2px; align-items: center;
+  background: rgba(255,255,255,0.08); border-radius: 6px; padding: 2px;
+}
+.slideshow-interval-btn {
+  background: none; border: none; cursor: pointer;
+  color: rgba(255,255,255,0.65); font-family: inherit; font-size: 12px; font-weight: 500;
+  padding: 5px 9px; border-radius: 4px; transition: background 0.12s, color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.slideshow-interval-btn:hover { color: #fff; background: rgba(255,255,255,0.12); }
+.slideshow-interval-btn.active { color: #fff; background: rgba(255,255,255,0.22); }
+
+/* "Presentación" button in library toolbar */
+.btn-slideshow {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border: none; border-radius: var(--radius-sm);
+  background: var(--surface-raised); color: var(--text-secondary);
+  font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-slideshow:hover { background: var(--border); color: var(--text); }
