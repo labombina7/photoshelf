@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
 import { IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
+import Slideshow from '@/components/Slideshow';
 import { useHeaderSlot } from '@/components/HeaderSlot';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
@@ -88,6 +89,22 @@ export default function LibraryClient({
   const [localClassifying, setLocalClassifying] = useState(false);
   const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [slideshowIds, setSlideshowIds] = useState<number[] | null>(null);
+
+  async function openSlideshow() {
+    const params = new URLSearchParams();
+    if (activeFilters.year) params.set('year', activeFilters.year);
+    if (activeFilters.event) params.set('event', activeFilters.event);
+    if (activeFilters.theme) params.set('theme', activeFilters.theme);
+    if (activeFilters.favorite) params.set('favorite', activeFilters.favorite);
+    if (activeFilters.untagged) params.set('untagged', activeFilters.untagged);
+    if (activeFilters.q) params.set('q', activeFilters.q);
+    params.set('limit', '5000');
+    const res = await fetch(`/api/photos?${params.toString()}`);
+    const data = await res.json() as { photos: { id: number }[] };
+    const ids = data.photos.map(p => p.id);
+    if (ids.length > 0) setSlideshowIds(ids);
+  }
 
   // Keep localClassifying in sync: clear it when the server confirms done
   useEffect(() => {
@@ -96,6 +113,20 @@ export default function LibraryClient({
 
   // If navigated to a specific event, always use list mode
   const effectiveViewMode = activeFilters.event ? 'list' : viewMode;
+
+  // P key to open slideshow
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === 'p' || e.key === 'P') {
+        if (slideshowIds) setSlideshowIds(null);
+        else void openSlideshow();
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slideshowIds]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -184,6 +215,18 @@ export default function LibraryClient({
         <span className="header-slot-title">{title}</span>
         <span className="header-slot-sub">{filteredTotal.toLocaleString('es')} fotos</span>
 
+        {/* Presentación */}
+        {filteredTotal > 0 && (
+          <button
+            className="btn-slideshow"
+            onClick={openSlideshow}
+            title="Presentación (P)"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+            Presentación
+          </button>
+        )}
+
         {/* Vista toggle */}
         {canToggleView && (
           <div className="view-toggle">
@@ -210,6 +253,13 @@ export default function LibraryClient({
 
   return (
     <div className="app-shell">
+      {slideshowIds && (
+        <Slideshow
+          photoIds={slideshowIds}
+          startIndex={0}
+          onClose={() => setSlideshowIds(null)}
+        />
+      )}
       <Sidebar
         themes={themes}
         projects={projects}
