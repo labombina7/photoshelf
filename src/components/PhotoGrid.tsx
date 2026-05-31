@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconSparkle } from '@/components/Icons';
 import EmptyState from '@/components/EmptyState';
 import { useClassify } from '@/components/ClassifyProvider';
@@ -66,6 +65,7 @@ function EventGroupBlock({
   showYear: boolean;
 }) {
   const PAGE_SIZE = 60;
+  const router = useRouter();
   const [photos, setPhotos] = useState<PhotoWithTags[] | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
@@ -77,6 +77,11 @@ function EventGroupBlock({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  // true when the device has a precise pointer (mouse/trackpad) → selection mode
+  const isPointerFine = useRef(false);
+  useEffect(() => {
+    isPointerFine.current = window.matchMedia('(pointer: fine)').matches;
+  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -123,6 +128,18 @@ function EventGroupBlock({
       .catch(() => setLoading(false));
   }, [isCollapsed, photos, group, activeFilters]);
 
+  // ── Navegación al detalle ────────────────────────────────────────────────
+
+  function navigateTo(photoId: number) {
+    try {
+      sessionStorage.setItem('photoshelf_detail_origin', JSON.stringify({
+        href: window.location.pathname + window.location.search,
+        label: 'Biblioteca',
+      }));
+    } catch {}
+    router.push(`/library/${photoId}${currentParams ? `?${currentParams}` : ''}`);
+  }
+
   // ── Keyboard navigation ──────────────────────────────────────────────────
 
   function getGridCols(): number {
@@ -136,7 +153,7 @@ function EventGroupBlock({
     if (visiblePhotos.length === 0) return;
 
     // Only act on navigation/favorite keys
-    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'f', 'F'].includes(e.key)) return;
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'f', 'F', 'Enter', 'Escape'].includes(e.key)) return;
 
     // Don't hijack if focus is on an input or interactive element inside the grid
     const tag = (e.target as HTMLElement).tagName;
@@ -162,6 +179,11 @@ function EventGroupBlock({
       const idx = current < 0 ? 0 : current;
       const photo = visiblePhotos[idx];
       if (photo) toggleFavorite(photo.id, idx);
+    } else if (e.key === 'Enter') {
+      const photo = visiblePhotos[current < 0 ? 0 : current];
+      if (photo) navigateTo(photo.id);
+    } else if (e.key === 'Escape') {
+      setFocusedIndex(null);
     }
   }
 
@@ -312,19 +334,25 @@ function EventGroupBlock({
               const isFocused = focusedIndex === idx;
               const isFav = !!photo.is_favorite;
               return (
-                <Link
+                <div
                   key={photo.id}
-                  href={`/library/${photo.id}${currentParams ? `?${currentParams}` : ''}`}
                   className={`photo-item${isFocused ? ' photo-item--focused' : ''}`}
+                  role="button"
+                  tabIndex={-1}
                   onClick={() => {
-                    try {
-                      sessionStorage.setItem('photoshelf_detail_origin', JSON.stringify({
-                        href: window.location.pathname + window.location.search,
-                        label: 'Biblioteca',
-                      }));
-                    } catch {}
+                    if (isPointerFine.current) {
+                      // Desktop/ratón: seleccionar con un clic
+                      setFocusedIndex(idx);
+                      gridRef.current?.focus();
+                    } else {
+                      // Táctil: navegar directamente
+                      navigateTo(photo.id);
+                    }
                   }}
-                  onMouseEnter={() => setFocusedIndex(idx)}
+                  onDoubleClick={() => {
+                    // Doble clic en desktop: navegar al detalle
+                    if (isPointerFine.current) navigateTo(photo.id);
+                  }}
                 >
                   <div className="photo-skeleton" aria-hidden="true" />
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -360,7 +388,7 @@ function EventGroupBlock({
                       ))}
                     </div>
                   )}
-                </Link>
+                </div>
               );
             })}
           </div>
