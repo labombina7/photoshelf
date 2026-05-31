@@ -55,7 +55,11 @@ export default function PhotoDetailClient({
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
   const [hudVisible, setHudVisible] = useState(true);
   const [slideshowOpen, setSlideshowOpen] = useState(false);
+  const slideshowOpenRef = useRef(false);
   const slideshowStartIndex = siblingIds.indexOf(photo.id);
+
+  // Keep ref in sync with state so the keydown handler always sees the current value
+  useEffect(() => { slideshowOpenRef.current = slideshowOpen; }, [slideshowOpen]);
 
   // US-040: resolve back href/label from sessionStorage (preserves origin URL exactly)
   const [resolvedBackHref, setResolvedBackHref] = useState(backHref);
@@ -87,7 +91,7 @@ export default function PhotoDetailClient({
       ) {
         return;
       }
-      if (slideshowOpen) return; // flechas y Escape los gestiona Slideshow
+      if (slideshowOpenRef.current) return; // flechas y Escape los gestiona Slideshow
       if (e.key === 'ArrowLeft' && prevId) {
         router.push(`/library/${prevId}${navSearch}`);
       } else if (e.key === 'ArrowRight' && nextId) {
@@ -98,7 +102,7 @@ export default function PhotoDetailClient({
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [prevId, nextId, navSearch, router, slideshowOpen]);
+  }, [prevId, nextId, navSearch, router]);
 
   // Reset state when photo changes
   useEffect(() => {
