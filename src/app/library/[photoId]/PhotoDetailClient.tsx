@@ -87,6 +87,7 @@ export default function PhotoDetailClient({
       ) {
         return;
       }
+      if (slideshowOpen) return; // flechas y Escape los gestiona Slideshow
       if (e.key === 'ArrowLeft' && prevId) {
         router.push(`/library/${prevId}${navSearch}`);
       } else if (e.key === 'ArrowRight' && nextId) {
@@ -97,7 +98,7 @@ export default function PhotoDetailClient({
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [prevId, nextId, navSearch, router]);
+  }, [prevId, nextId, navSearch, router, slideshowOpen]);
 
   // Reset state when photo changes
   useEffect(() => {

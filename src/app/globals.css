@@ -793,6 +793,26 @@ body { padding-top: var(--header-h); }
 }
 .photo-item img.loaded { opacity: 1; }
 .photo-item:hover img { transform: scale(1.02); }
+.photo-item--focused { outline: 2px solid var(--accent); outline-offset: -2px; z-index: 1; }
+
+/* ── Star button ── */
+.photo-star {
+  position: absolute; top: 6px; right: 6px;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.35); border: none; border-radius: 50%;
+  cursor: pointer; color: rgba(255,255,255,0.5);
+  opacity: 0; transition: opacity 0.15s, color 0.15s, background 0.15s;
+  padding: 0; z-index: 2;
+}
+.photo-item:hover .photo-star,
+.photo-item--focused .photo-star { opacity: 1; }
+.photo-star--active {
+  opacity: 1; color: #f5c518;
+  background: rgba(0,0,0,0.45);
+}
+.photo-star:hover { background: rgba(0,0,0,0.6); color: #f5c518; }
+
 .photo-overlay {
   position: absolute; inset: 0;
   background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.45) 100%);
