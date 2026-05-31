@@ -8,6 +8,21 @@ import EmptyState from '@/components/EmptyState';
 import { useClassify } from '@/components/ClassifyProvider';
 import type { Photo, Tag } from '@/lib/types';
 
+function IconStar({ filled, className }: { filled: boolean; className?: string }) {
+  return (
+    <svg
+      className={className}
+      width="16" height="16" viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  );
+}
+
 interface PhotoWithTags extends Photo {
   tags: Tag[];
 }
@@ -60,6 +75,8 @@ function EventGroupBlock({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -105,6 +122,96 @@ function EventGroupBlock({
       .then(data => { setPhotos(data.photos); setLoading(false); })
       .catch(() => setLoading(false));
   }, [isCollapsed, photos, group, activeFilters]);
+
+  // ── Keyboard navigation ──────────────────────────────────────────────────
+
+  function getGridCols(): number {
+    if (!gridRef.current) return 1;
+    const cols = getComputedStyle(gridRef.current).gridTemplateColumns.split(' ').length;
+    return Math.max(1, cols);
+  }
+
+  function handleGridKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    const visiblePhotos = photos?.slice(0, visible) ?? [];
+    if (visiblePhotos.length === 0) return;
+
+    // Only act on navigation/favorite keys
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ', 'f', 'F'].includes(e.key)) return;
+
+    // Don't hijack if focus is on an input or interactive element inside the grid
+    const tag = (e.target as HTMLElement).tagName;
+    if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(tag) && e.key !== ' ' && e.key !== 'f' && e.key !== 'F') return;
+
+    e.preventDefault();
+
+    const current = focusedIndex ?? -1;
+    const cols = getGridCols();
+    const total = visiblePhotos.length;
+
+    if (e.key === 'ArrowRight') {
+      setFocusedIndex(Math.min(current + 1, total - 1) < 0 ? 0 : Math.min(current + 1, total - 1));
+    } else if (e.key === 'ArrowLeft') {
+      setFocusedIndex(current <= 0 ? 0 : current - 1);
+    } else if (e.key === 'ArrowDown') {
+      const next = current + cols;
+      setFocusedIndex(next >= total ? current : next < 0 ? 0 : next);
+    } else if (e.key === 'ArrowUp') {
+      const prev = current - cols;
+      setFocusedIndex(prev < 0 ? (current < 0 ? 0 : current) : prev);
+    } else if (e.key === ' ' || e.key === 'f' || e.key === 'F') {
+      const idx = current < 0 ? 0 : current;
+      const photo = visiblePhotos[idx];
+      if (photo) toggleFavorite(photo.id, idx);
+    }
+  }
+
+  // Scroll focused photo into view
+  useEffect(() => {
+    if (focusedIndex === null || !gridRef.current) return;
+    const items = gridRef.current.querySelectorAll<HTMLElement>('.photo-item');
+    items[focusedIndex]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [focusedIndex]);
+
+  // ── Toggle favorito ──────────────────────────────────────────────────────
+
+  async function toggleFavorite(photoId: number, visibleIdx: number) {
+    if (!photos) return;
+
+    // Find photo in full photos array by id (not just visible slice)
+    const fullIdx = photos.findIndex(p => p.id === photoId);
+    if (fullIdx === -1) return;
+
+    const current = photos[fullIdx].is_favorite;
+    const newValue = current ? 0 : 1;
+
+    // Optimistic update
+    setPhotos(prev => {
+      if (!prev) return prev;
+      const updated = [...prev];
+      updated[fullIdx] = { ...updated[fullIdx], is_favorite: newValue };
+      return updated;
+    });
+
+    try {
+      const res = await fetch(`/api/photos/${photoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_favorite: !!newValue }),
+      });
+      if (!res.ok) throw new Error('API error');
+    } catch {
+      // Revert on error
+      setPhotos(prev => {
+        if (!prev) return prev;
+        const reverted = [...prev];
+        reverted[fullIdx] = { ...reverted[fullIdx], is_favorite: current };
+        return reverted;
+      });
+    }
+
+    // Keep focus on the toggled item (it might have shifted if filtering)
+    setFocusedIndex(visibleIdx);
+  }
 
   async function handleClassify(e: React.MouseEvent) {
     e.stopPropagation?.();
@@ -187,19 +294,28 @@ function EventGroupBlock({
       </div>
       {!isCollapsed && (
         <>
-          <div className="photo-grid">
+          <div
+            ref={gridRef}
+            className="photo-grid"
+            tabIndex={0}
+            onKeyDown={handleGridKeyDown}
+            onBlur={() => setFocusedIndex(null)}
+            style={{ outline: 'none' }}
+          >
             {loading && (
               <div style={{ gridColumn: '1/-1', padding: '20px', color: 'var(--text-tertiary)', fontSize: 13 }}>
                 Cargando fotos…
               </div>
             )}
-            {photos?.slice(0, visible).map((photo) => {
+            {photos?.slice(0, visible).map((photo, idx) => {
               const previewTags = photo.tags.slice(0, 2);
+              const isFocused = focusedIndex === idx;
+              const isFav = !!photo.is_favorite;
               return (
                 <Link
                   key={photo.id}
                   href={`/library/${photo.id}${currentParams ? `?${currentParams}` : ''}`}
-                  className="photo-item"
+                  className={`photo-item${isFocused ? ' photo-item--focused' : ''}`}
                   onClick={() => {
                     try {
                       sessionStorage.setItem('photoshelf_detail_origin', JSON.stringify({
@@ -208,6 +324,7 @@ function EventGroupBlock({
                       }));
                     } catch {}
                   }}
+                  onMouseEnter={() => setFocusedIndex(idx)}
                 >
                   <div className="photo-skeleton" aria-hidden="true" />
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -222,6 +339,18 @@ function EventGroupBlock({
                     }}
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
+                  {/* Star icon */}
+                  <button
+                    className={`photo-star${isFav ? ' photo-star--active' : ''}`}
+                    aria-label={isFav ? 'Quitar de favoritas' : 'Marcar como favorita'}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleFavorite(photo.id, idx);
+                    }}
+                  >
+                    <IconStar filled={isFav} />
+                  </button>
                   {previewTags.length > 0 && (
                     <div className="photo-overlay">
                       {previewTags.map((tag) => (
