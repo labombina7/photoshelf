@@ -339,10 +339,12 @@ function EventGroupBlock({
                   className={`photo-item${isFocused ? ' photo-item--focused' : ''}`}
                   role="button"
                   tabIndex={-1}
+                  onMouseEnter={() => { if (isPointerFine.current) setFocusedIndex(idx); }}
                   onClick={() => {
                     if (isPointerFine.current) {
-                      // Desktop/ratón: seleccionar con un clic (sin mover el scroll)
                       setFocusedIndex(idx);
+                      // Focus sin scroll para que las flechas funcionen
+                      gridRef.current?.focus({ preventScroll: true });
                     } else {
                       // Táctil: navegar directamente
                       navigateTo(photo.id);
