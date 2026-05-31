@@ -341,9 +341,8 @@ function EventGroupBlock({
                   tabIndex={-1}
                   onClick={() => {
                     if (isPointerFine.current) {
-                      // Desktop/ratón: seleccionar con un clic
+                      // Desktop/ratón: seleccionar con un clic (sin mover el scroll)
                       setFocusedIndex(idx);
-                      gridRef.current?.focus();
                     } else {
                       // Táctil: navegar directamente
                       navigateTo(photo.id);
