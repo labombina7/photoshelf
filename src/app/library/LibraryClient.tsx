@@ -7,7 +7,7 @@ import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
 import { IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
 import Slideshow from '@/components/Slideshow';
-import { useHeaderSlot } from '@/components/HeaderSlot';
+import { useHeaderSlot, useHeaderSlotLeft } from '@/components/HeaderSlot';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -183,8 +183,8 @@ export default function LibraryClient({
   const showClassifyYear = !!activeYear && !activeFilters.event && !fav && !themeId;
   const canToggleView = !activeFilters.event && !fav;
 
-  // ── Inyectar contenido contextual en el AppHeader ──────────────────────────
-  useHeaderSlot(
+  // ── Slot izquierda: hamburger (mobile) + back + título + contador ──────────
+  useHeaderSlotLeft(
     useMemo(() => (
       <div className="header-slot-library">
         {/* Mobile: hamburger para abrir sidebar */}
@@ -214,7 +214,15 @@ export default function LibraryClient({
         {/* Título + contador */}
         <span className="header-slot-title">{title}</span>
         <span className="header-slot-sub">{filteredTotal.toLocaleString('es')} fotos</span>
+      </div>
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    ), [title, filteredTotal, activeFilters.event, activeYear]),
+  );
 
+  // ── Slot derecha: Presentación + vista toggle ───────────────────────────────
+  useHeaderSlot(
+    useMemo(() => (
+      <div className="header-slot-library">
         {/* Presentación */}
         {filteredTotal > 0 && (
           <button
@@ -248,7 +256,7 @@ export default function LibraryClient({
         )}
       </div>
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [title, filteredTotal, canToggleView, effectiveViewMode, activeFilters.event, activeYear]),
+    ), [filteredTotal, canToggleView, effectiveViewMode]),
   );
 
   return (

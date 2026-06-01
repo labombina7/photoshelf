@@ -26,7 +26,7 @@ async function fetchHints(): Promise<ClassifierHints> {
 
 export default function AppHeader() {
   const router   = useRouter();
-  const { slot } = useContext(HeaderSlotCtx);
+  const { slot, slotLeft } = useContext(HeaderSlotCtx);
   const inputRef       = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const formRef        = useRef<HTMLFormElement>(null);
@@ -172,8 +172,8 @@ export default function AppHeader() {
           <span className="app-header-logo-text">photoshelf</span>
         </div>
 
-        {/* Slot contextual — izquierda del buscador */}
-        {slot && <div className="app-header-slot">{slot}</div>}
+        {/* Slot izquierda — contexto de navegación (carpeta, fotos…) */}
+        {slotLeft && <div className="app-header-slot">{slotLeft}</div>}
 
         {/* Desktop search */}
         <form
@@ -216,6 +216,8 @@ export default function AppHeader() {
           />
         </form>
 
+        {/* Slot derecha — controles contextuales (presentación, vista…) */}
+        {slot && <div className="app-header-slot">{slot}</div>}
         <div className="app-header-actions" />
       </header>
 

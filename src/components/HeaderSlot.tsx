@@ -22,19 +22,25 @@ import {
 interface HeaderSlotCtxValue {
   slot: ReactNode;
   setSlot: (node: ReactNode) => void;
+  slotLeft: ReactNode;
+  setSlotLeft: (node: ReactNode) => void;
 }
 
 export const HeaderSlotCtx = createContext<HeaderSlotCtxValue>({
   slot: null,
   setSlot: () => {},
+  slotLeft: null,
+  setSlotLeft: () => {},
 });
 
 export function HeaderSlotProvider({ children }: { children: ReactNode }) {
   const [slot, setSlotState] = useState<ReactNode>(null);
+  const [slotLeft, setSlotLeftState] = useState<ReactNode>(null);
   const setSlot = useCallback((node: ReactNode) => setSlotState(node), []);
+  const setSlotLeft = useCallback((node: ReactNode) => setSlotLeftState(node), []);
 
   return (
-    <HeaderSlotCtx.Provider value={{ slot, setSlot }}>
+    <HeaderSlotCtx.Provider value={{ slot, setSlot, slotLeft, setSlotLeft }}>
       {children}
     </HeaderSlotCtx.Provider>
   );
@@ -50,6 +56,16 @@ export function useHeaderSlot(content: ReactNode) {
   useEffect(() => {
     setSlot(content);
     return () => setSlot(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content]);
+}
+
+export function useHeaderSlotLeft(content: ReactNode) {
+  const { setSlotLeft } = useContext(HeaderSlotCtx);
+
+  useEffect(() => {
+    setSlotLeft(content);
+    return () => setSlotLeft(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 }
