@@ -11,6 +11,9 @@ import { PHOTOS_PATH } from './config';
 
 const PHOTO_EXTS = new Set(['.jpg', '.jpeg', '.png', '.heic', '.webp', '.tif', '.tiff', '.avif', '.gif']);
 
+// Directories to skip — Synology NAS metadata, macOS internals, quarantine folder
+const SKIP_DIRS = new Set(['@eaDir', '@Recently-Snapshot', '#recycle', '.@__thumb', '@tmp', '.DS_Store', '_quarantine']);
+
 // ── Walk disk recursively, yield photo file paths ────────────────────────────
 
 function walkDir(dir: string): string[] {
@@ -22,6 +25,7 @@ function walkDir(dir: string): string[] {
     return results;
   }
   for (const e of entries) {
+    if (SKIP_DIRS.has(e.name) || e.name.startsWith('.')) continue;
     const full = path.join(dir, e.name);
     if (e.isDirectory()) {
       results.push(...walkDir(full));
