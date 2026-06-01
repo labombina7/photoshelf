@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { IconChevronLeft, IconChevronRight, IconSparkle, IconCalendar } from '@/components/Icons';
 import Sidebar from '@/components/Sidebar';
@@ -166,12 +165,11 @@ export default function MemoriesClient({
                 <div className="memories-photo-grid">
                   {yearGroup.photos.map(photo => (
                     <div key={photo.id} className="memories-photo-cell">
-                      <Image
-                        src={`/api/photos/${photo.id}/thumbnail`}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/api/photos/${photo.id}/thumbnail?size=200`}
                         alt={photo.filename}
-                        fill
-                        sizes="(max-width: 768px) 33vw, 20vw"
-                        style={{ objectFit: 'cover' }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                       />
                     </div>
                   ))}
