@@ -84,7 +84,7 @@ body {
   padding: 0 12px;
   height: 34px;
   transition: border-color 0.15s, box-shadow 0.15s;
-  margin: 0 auto;
+  margin-right: auto;
 }
 .app-header-search:focus-within {
   border-color: #b0ada8;

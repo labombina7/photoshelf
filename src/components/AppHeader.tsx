@@ -172,6 +172,9 @@ export default function AppHeader() {
           <span className="app-header-logo-text">photoshelf</span>
         </div>
 
+        {/* Slot contextual — izquierda del buscador */}
+        {slot && <div className="app-header-slot">{slot}</div>}
+
         {/* Desktop search */}
         <form
           ref={formRef}
@@ -213,8 +216,6 @@ export default function AppHeader() {
           />
         </form>
 
-        {/* Slot + actions */}
-        {slot && <div className="app-header-slot">{slot}</div>}
         <div className="app-header-actions" />
       </header>
 
