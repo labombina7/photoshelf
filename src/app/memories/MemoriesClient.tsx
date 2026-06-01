@@ -104,7 +104,7 @@ export default function MemoriesClient({
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="app-layout">
+    <div className="app-shell">
       <Sidebar
         themes={themes}
         projects={projects}
@@ -116,7 +116,7 @@ export default function MemoriesClient({
         catalogs={catalogs}
         activeCatalogId={activeCatalogId}
       />
-      <div className="app-content">
+      <div className="main">
         <div className="memories-page">
           <div className="memories-header">
             <button className="memories-nav-btn" onClick={() => goTo(-1)} disabled={loading}>
@@ -184,3 +184,4 @@ export default function MemoriesClient({
     </div>
   );
 }
+
