@@ -50,14 +50,15 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const banner  = getMemoriesBannerData(catalogId);
 
   return (
-    <>
-      <TodayBanner
-        hasMemories={banner.hasMemories}
-        total={banner.total}
-        yearList={banner.yearList}
-        previewPhotos={banner.previewPhotos}
-      />
-      <LibraryClient
+    <LibraryClient
+      bannerSlot={
+        <TodayBanner
+          hasMemories={banner.hasMemories}
+          total={banner.total}
+          yearList={banner.yearList}
+          previewPhotos={banner.previewPhotos}
+        />
+      }
       groups={groups}
       total={sidebar.totalPhotos}
       filteredTotal={filteredTotal}
@@ -71,6 +72,5 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       catalogs={sidebar.catalogs}
       activeCatalogId={catalogId}
     />
-    </>
   );
 }

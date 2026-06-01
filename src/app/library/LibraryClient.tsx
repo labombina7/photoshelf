@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useMemo, useEffect } from 'react';
+import { useState, useTransition, useMemo, useEffect, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
@@ -42,6 +42,7 @@ interface LibraryClientProps {
   activeFilters: ActiveFilters;
   catalogs?: CatalogRow[];
   activeCatalogId?: number;
+  bannerSlot?: React.ReactNode;
 }
 
 export default function LibraryClient({
@@ -57,6 +58,7 @@ export default function LibraryClient({
   activeFilters,
   catalogs = [],
   activeCatalogId = 1,
+  bannerSlot,
 }: LibraryClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -261,6 +263,7 @@ export default function LibraryClient({
       />
 
       <div className="main">
+        {bannerSlot}
         <div className="content">
           {years.length > 1 && (
             <>
