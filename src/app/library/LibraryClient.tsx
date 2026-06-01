@@ -183,11 +183,10 @@ export default function LibraryClient({
   const showClassifyYear = !!activeYear && !activeFilters.event && !fav && !themeId;
   const canToggleView = !activeFilters.event && !fav;
 
-  // ── Slot izquierda: hamburger (mobile) + back + título + contador ──────────
+  // ── Slot izquierda: solo hamburger en mobile ───────────────────────────────
   useHeaderSlotLeft(
     useMemo(() => (
       <div className="header-slot-library">
-        {/* Mobile: hamburger para abrir sidebar */}
         <button
           className="hamburger header-slot-hamburger"
           onClick={() => setMobileSidebarOpen(true)}
@@ -195,28 +194,9 @@ export default function LibraryClient({
         >
           <IconMenu size={18} />
         </button>
-
-        {/* Back button cuando se está dentro de un evento */}
-        {activeFilters.event && (
-          <button
-            className="back-btn"
-            onClick={() => {
-              const params = new URLSearchParams();
-              if (activeYear) params.set('year', activeYear);
-              router.push(`/library?${params.toString()}`);
-            }}
-            title="Volver a carpetas"
-          >
-            ←
-          </button>
-        )}
-
-        {/* Título + contador */}
-        <span className="header-slot-title">{title}</span>
-        <span className="header-slot-sub">{filteredTotal.toLocaleString('es')} fotos</span>
       </div>
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [title, filteredTotal, activeFilters.event, activeYear]),
+    ), []),
   );
 
   // ── Slot derecha: Presentación + vista toggle ───────────────────────────────
@@ -355,7 +335,14 @@ export default function LibraryClient({
 
           <div style={{ opacity: isPending ? 0 : 1, transition: 'opacity 120ms ease' }}>
           {effectiveViewMode === 'folders' ? (
-            <FolderGrid groups={groups} showYear={!activeYear} />
+            <>
+              {activeYear && (
+                <p className="folder-summary">
+                  {groups.length.toLocaleString('es')} álbumes · {filteredTotal.toLocaleString('es')} fotos
+                </p>
+              )}
+              <FolderGrid groups={groups} showYear={!activeYear} />
+            </>
           ) : (
             <>
               {groups.length > 1 && (

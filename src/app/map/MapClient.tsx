@@ -175,45 +175,9 @@ export default function MapClient({
       >
         <IconMenu size={20} />
       </button>
-      <div className="header-slot-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <IconMap size={14} />
-        Mapa
-      </div>
-      {showSelector && (
-        <div className="map-year-selector" role="group" aria-label="Filtrar por año">
-          <button
-            className={`map-year-btn${activeYear === null ? ' active' : ''}`}
-            onClick={() => setActiveYear(null)}
-          >
-            Todos
-          </button>
-          {availableYears.map(year => (
-            <button
-              key={year}
-              className={`map-year-btn${activeYear === year ? ' active' : ''}`}
-              onClick={() => setActiveYear(year)}
-            >
-              {year}
-            </button>
-          ))}
-        </div>
-      )}
-      <span className="map-slot-stats">
-        {loadingYear ? (
-          <span>Cargando…</span>
-        ) : (
-          <>
-            {visibleCount.toLocaleString('es')} fotos en el mapa
-            {limitReached && <span title="Se muestran las 5000 más recientes"> · límite alcanzado</span>}
-            {!limitReached && withoutGps > 0 && (
-              <> · <span>{withoutGps.toLocaleString('es')} sin ubicación</span></>
-            )}
-          </>
-        )}
-      </span>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [showSelector, activeYear, availableYears, loadingYear, visibleCount, limitReached, withoutGps]);
+  ), []);
   useHeaderSlot(slotContent);
 
   return (
@@ -231,6 +195,46 @@ export default function MapClient({
       />
 
       <div className="main">
+        {/* Barra de título + filtros de año — debajo del header, encima del mapa */}
+        <div className="map-toolbar">
+          <div className="map-toolbar-title">
+            <IconMap size={14} />
+            Mapa
+          </div>
+          {showSelector && (
+            <div className="map-year-selector" role="group" aria-label="Filtrar por año">
+              <button
+                className={`map-year-btn${activeYear === null ? ' active' : ''}`}
+                onClick={() => setActiveYear(null)}
+              >
+                Todos
+              </button>
+              {availableYears.map(year => (
+                <button
+                  key={year}
+                  className={`map-year-btn${activeYear === year ? ' active' : ''}`}
+                  onClick={() => setActiveYear(year)}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          )}
+          <span className="map-slot-stats">
+            {loadingYear ? (
+              <span>Cargando…</span>
+            ) : (
+              <>
+                {visibleCount.toLocaleString('es')} fotos en el mapa
+                {limitReached && <span title="Se muestran las 5000 más recientes"> · límite alcanzado</span>}
+                {!limitReached && withoutGps > 0 && (
+                  <> · <span>{withoutGps.toLocaleString('es')} sin ubicación</span></>
+                )}
+              </>
+            )}
+          </span>
+        </div>
+
         <div style={{ position: 'relative', flex: 1, overflow: 'hidden', isolation: 'isolate' }}>
           {(initializing || loadingYear) && (
             <div style={{

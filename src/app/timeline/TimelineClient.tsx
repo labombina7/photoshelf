@@ -285,9 +285,6 @@ export default function TimelineClient({
       >
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title header-slot-timeline__label">
-        {stickyLabel || 'Línea de tiempo'}
-      </span>
       <div className="timeline-zoom-controls">
         {LEVELS.map(l => (
           <button
