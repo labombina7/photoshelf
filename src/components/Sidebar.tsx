@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck } from './Icons';
+import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck, IconShield, IconHeartbeat } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -56,6 +56,21 @@ function SidebarInner({
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [eventOpen,   setEventOpen]   = useState(false);
+  const [orphanCount, setOrphanCount] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/integrity/status')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data && !data.running) {
+          fetch('/api/integrity/report')
+            .then(r => r.ok ? r.json() : null)
+            .then(rep => { if (rep) setOrphanCount(rep.meta.orphans ?? 0); })
+            .catch(() => {});
+        }
+      })
+      .catch(() => {});
+  }, [pathname]);
 
   // Listen for event-based open requests (e.g. from pages that can't pass props)
   useEffect(() => {
@@ -416,6 +431,32 @@ function SidebarInner({
         >
           <IconStats size={14} />
           Estadísticas
+        </Link>
+        <Link
+          href="/health"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/health' ? 'active' : ''}`}
+        >
+          <IconHeartbeat size={14} />
+          Salud
+        </Link>
+        <Link
+          href="/tools/integrity"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/tools/integrity' ? 'active' : ''}`}
+          style={{ position: 'relative' }}
+        >
+          <IconShield size={14} />
+          Integridad
+          {orphanCount > 0 && (
+            <span style={{
+              marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9,
+              background: '#e67e22', color: '#fff', fontSize: 10, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
+            }}>
+              {orphanCount}
+            </span>
+          )}
         </Link>
         <Link
           href="/settings/catalogs"

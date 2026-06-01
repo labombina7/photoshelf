@@ -97,6 +97,8 @@ function initSchema(db: Database.Database) {
 
   // ── EPIC-001 migration: catalogs table + catalog_id column ────────────────
   migrateEpic001(db);
+  migrateIntegrity(db);
+  migrateHealthSnapshots(db);
 }
 
 function migrateEpic001(db: Database.Database) {
@@ -198,4 +200,39 @@ function migrateUniquePath(db: Database.Database) {
   }
 
   console.log('[db] Migration UNIQUE(path, catalog_id) complete.');
+}
+
+function migrateIntegrity(db: Database.Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS integrity_reports (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      type        TEXT NOT NULL CHECK(type IN ('orphan', 'unindexed', 'corrupt')),
+      path        TEXT NOT NULL,
+      photo_id    INTEGER,
+      error_msg   TEXT,
+      detected_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_integrity_type ON integrity_reports(type);
+    CREATE INDEX IF NOT EXISTS idx_integrity_at   ON integrity_reports(detected_at);
+  `);
+}
+
+function migrateHealthSnapshots(db: Database.Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS health_snapshots (
+      date         TEXT PRIMARY KEY,
+      score        INTEGER NOT NULL,
+      metrics_json TEXT NOT NULL
+    );
+  `);
+}
+
+// ── integrity badge: unresolved orphan count ──────────────────────────────────
+export function getOrphanCount(): number {
+  const db = getDb();
+  const row = db.prepare(
+    `SELECT COUNT(*) as n FROM integrity_reports WHERE type = 'orphan'`
+  ).get() as { n: number };
+  return row.n;
 }
