@@ -221,6 +221,23 @@
     .card-done { opacity: 0.7; }
     .card-done:hover { opacity: 1; }
 
+    /* ── Drag & drop ────────────────────────────────────────── */
+    .card[draggable="true"] { cursor: grab; }
+    .card[draggable="true"]:active { cursor: grabbing; }
+    .card.dragging {
+      opacity: 0.35;
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    .drag-placeholder {
+      height: 4px;
+      background: var(--accent);
+      border-radius: 4px;
+      margin: 0 2px;
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+    .col-body.drag-active { background: rgba(167,139,250,0.04); border-radius: 0 0 12px 12px; }
+
     .date-badge { font-size: 10px; color: var(--muted2); margin-left: auto; }
 
     /* click indicator */
@@ -675,14 +692,6 @@
         <div class="card-summary">7 métricas: indexación, clasificación IA, GPS, duplicados, pares RAW, tags pendientes, integridad. Score 0-100 con tendencia histórica. Acciones directas desde cada métrica.</div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-062" onclick="openModal('US-062')">
-        <div class="card-top">
-          <span class="badge badge-us">US-062</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">"On This Day" — Memorias del pasado</div>
-        <div class="card-summary">Banner diario con fotos tomadas un día como hoy en años anteriores. Página /memories con grupos por año. Narrativa IA opcional (Ollama). Convierte la app en algo que el usuario visita cada día.</div>
-      </div>
 
       <div class="card" tabindex="0" data-id="US-063" onclick="openModal('US-063')">
         <div class="card-top">
@@ -799,9 +808,18 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">49</span>
+      <span class="col-count">50</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="US-062" onclick="openModal('US-062')">
+        <div class="card-top">
+          <span class="badge badge-us">US-062</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-01</span>
+        </div>
+        <div class="card-title">"On This Day" — Memorias del pasado</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-051" onclick="openModal('US-051')">
         <div class="card-top">
@@ -4285,7 +4303,7 @@ const CARDS = {
   'US-062': {
     id: 'US-062',
     type: 'US',
-    column: 'todo',
+    column: 'done',
     effort: 'M',
     title: '"On This Day" — Memorias del pasado',
     story: 'Como fotógrafo amateur que tiene fotos de varios años,\nquiero que photoshelf me muestre cada día las fotos que tomé un día como hoy en años anteriores,\npara redescubrir momentos olvidados y sentir que mi biblioteca tiene vida propia.',
@@ -4857,6 +4875,115 @@ document.querySelectorAll('.card[tabindex]').forEach(card => {
     }
   });
 });
+
+// ─────────────────────────────────────────────────────────────────
+// Drag & Drop — reordering cards within a column, persisted in localStorage
+// ─────────────────────────────────────────────────────────────────
+(function initDragDrop() {
+  const STORAGE_KEY = 'photoshelf-kanban-order';
+  let draggedCard = null;
+  let placeholder = null;
+
+  function getOrder() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; }
+  }
+
+  function saveOrder() {
+    const order = {};
+    document.querySelectorAll('.col-body').forEach(col => {
+      const colEl = col.closest('.column');
+      const colName = colEl.querySelector('.col-header h2').textContent.trim();
+      order[colName] = Array.from(col.querySelectorAll('.card[data-id]')).map(c => c.dataset.id);
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(order));
+  }
+
+  function restoreOrder() {
+    const order = getOrder();
+    Object.entries(order).forEach(([colName, ids]) => {
+      const colHeader = Array.from(document.querySelectorAll('.col-header h2'))
+        .find(h => h.textContent.trim() === colName);
+      if (!colHeader) return;
+      const colBody = colHeader.closest('.column').querySelector('.col-body');
+      ids.forEach(id => {
+        const card = colBody.querySelector(`.card[data-id="${id}"]`);
+        if (card) colBody.appendChild(card);
+      });
+    });
+  }
+
+  function makePlaceholder() {
+    const el = document.createElement('div');
+    el.className = 'drag-placeholder';
+    return el;
+  }
+
+  function getInsertPosition(colBody, clientY) {
+    const cards = Array.from(colBody.querySelectorAll('.card[data-id]:not(.dragging)'));
+    for (const card of cards) {
+      const rect = card.getBoundingClientRect();
+      if (clientY < rect.top + rect.height / 2) return card;
+    }
+    return null; // insert at end
+  }
+
+  function setupCard(card) {
+    card.setAttribute('draggable', 'true');
+
+    card.addEventListener('dragstart', e => {
+      draggedCard = card;
+      placeholder = makePlaceholder();
+      setTimeout(() => card.classList.add('dragging'), 0);
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', card.dataset.id);
+    });
+
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      placeholder && placeholder.remove();
+      placeholder = null;
+      draggedCard = null;
+      document.querySelectorAll('.col-body').forEach(b => b.classList.remove('drag-active'));
+      saveOrder();
+    });
+  }
+
+  function setupColumn(colBody) {
+    colBody.addEventListener('dragover', e => {
+      if (!draggedCard) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      colBody.classList.add('drag-active');
+
+      const before = getInsertPosition(colBody, e.clientY);
+      if (before) {
+        colBody.insertBefore(placeholder, before);
+      } else {
+        colBody.appendChild(placeholder);
+      }
+    });
+
+    colBody.addEventListener('dragleave', e => {
+      if (!colBody.contains(e.relatedTarget)) {
+        colBody.classList.remove('drag-active');
+      }
+    });
+
+    colBody.addEventListener('drop', e => {
+      e.preventDefault();
+      if (!draggedCard || !placeholder) return;
+      colBody.insertBefore(draggedCard, placeholder);
+      placeholder.remove();
+      placeholder = makePlaceholder(); // keep ref alive for dragend cleanup
+      colBody.classList.remove('drag-active');
+    });
+  }
+
+  document.querySelectorAll('.card[data-id]').forEach(setupCard);
+  document.querySelectorAll('.col-body').forEach(setupColumn);
+
+  restoreOrder();
+})();
 </script>
 
 </body>

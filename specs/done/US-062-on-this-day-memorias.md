@@ -1,5 +1,7 @@
 # Feature: "On This Day" — Memorias del pasado
 
+> Estado: ✅ Desplegada — 2026-06-01
+
 ## Historia de usuario
 
 Como fotógrafo amateur que tiene fotos de varios años,

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconChevronDown, IconCheck } from './Icons';
+import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -222,6 +222,15 @@ function SidebarInner({
         >
           <IconMap size={14} />
           Mapa
+        </Link>
+
+        <Link
+          href="/memories"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/memories' ? 'active' : ''}`}
+        >
+          <IconCalendar size={14} />
+          Un día como hoy
         </Link>
 
         <Link
