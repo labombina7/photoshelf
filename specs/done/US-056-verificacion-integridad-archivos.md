@@ -1,3 +1,5 @@
+> Estado: ✅ Desplegada
+
 # Feature: Verificación de integridad y salud de archivos
 
 ## Historia de usuario

@@ -1,3 +1,5 @@
+> Estado: ✅ Desplegada
+
 # Feature: Dashboard de salud de la biblioteca
 
 ## Historia de usuario
