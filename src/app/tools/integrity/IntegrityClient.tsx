@@ -176,8 +176,10 @@ export default function IntegrityClient({
   const [includeCorrupt, setIncludeCorrupt] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [starting, setStarting] = useState(false);
 
   const isRunning = status?.running ?? false;
+  const buttonBusy = starting || isRunning;
 
   const fetchReport = useCallback(async () => {
     const res = await fetch('/api/integrity/report');
@@ -209,11 +211,13 @@ export default function IntegrityClient({
 
   const startScan = async () => {
     setMessage(null);
+    setStarting(true);
     const res = await fetch('/api/integrity/scan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ includeCorrupt }),
     });
+    setStarting(false);
     if (res.ok) {
       setStatus(s => ({ ...(s ?? {} as StatusResponse), running: true, phase: 'orphans', checked: 0, total: 0, orphansFound: 0, unindexedFound: 0, corruptFound: 0, error: null, completedAt: null }));
       fetchStatus();
@@ -307,17 +311,17 @@ export default function IntegrityClient({
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
               <button
                 onClick={startScan}
-                disabled={isRunning}
+                disabled={buttonBusy}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 7,
                   padding: '8px 16px', borderRadius: 'var(--radius-sm)',
                   border: 'none', background: 'var(--accent)', color: '#fff',
                   fontFamily: 'inherit', fontSize: 13, fontWeight: 500,
-                  cursor: isRunning ? 'not-allowed' : 'pointer', opacity: isRunning ? 0.6 : 1,
+                  cursor: buttonBusy ? 'not-allowed' : 'pointer', opacity: buttonBusy ? 0.6 : 1,
                 }}
               >
-                {isRunning ? <span className="spinner" aria-hidden="true" /> : <IconShield size={14} />}
-                {isRunning ? 'Analizando…' : 'Verificar integridad'}
+                {buttonBusy ? <span className="spinner" aria-hidden="true" /> : <IconShield size={14} />}
+                {starting ? 'Iniciando…' : isRunning ? 'Analizando…' : 'Verificar integridad'}
               </button>
 
               <label style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer' }}>
@@ -325,7 +329,7 @@ export default function IntegrityClient({
                   type="checkbox"
                   checked={includeCorrupt}
                   onChange={e => setIncludeCorrupt(e.target.checked)}
-                  disabled={isRunning}
+                  disabled={buttonBusy}
                 />
                 Incluir verificación de cabecera (más lento)
               </label>
