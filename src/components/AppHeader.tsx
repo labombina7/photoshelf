@@ -172,8 +172,8 @@ export default function AppHeader() {
           <span className="app-header-logo-text">photoshelf</span>
         </div>
 
-        {/* Slot izquierda — contexto de navegación (carpeta, fotos…) */}
-        {slotLeft && <div className="app-header-slot">{slotLeft}</div>}
+        {/* Slot izquierda — siempre en DOM para mantener grid estable */}
+        <div className="app-header-slot-left">{slotLeft}</div>
 
         {/* Desktop search */}
         <form
@@ -216,8 +216,8 @@ export default function AppHeader() {
           />
         </form>
 
-        {/* Slot derecha — controles contextuales (presentación, vista…) */}
-        {slot && <div className="app-header-slot">{slot}</div>}
+        {/* Slot derecha — siempre en DOM para mantener grid estable */}
+        <div className="app-header-slot-right">{slot}</div>
         <div className="app-header-actions" />
       </header>
 
