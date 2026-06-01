@@ -6,3 +6,4 @@ export * from './timeline';
 export * from './stats';
 export * from './sidebar';
 export * from './catalog';
+export * from './memories';

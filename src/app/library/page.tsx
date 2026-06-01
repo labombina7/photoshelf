@@ -4,7 +4,9 @@ import { hasPhotosForYear, getYears } from '@/lib/queries/photos';
 import { listGroups } from '@/lib/queries/groups';
 import { getSidebarData } from '@/lib/queries/sidebar';
 import { getActiveCatalogId } from '@/lib/catalog-context';
+import { getMemoriesBannerData } from '@/lib/queries/memories';
 import LibraryClient from './LibraryClient';
+import TodayBanner from '@/app/memories/TodayBanner';
 
 interface SearchParams {
   year?: string;   // absent = redirect to current year; 'all' = show every year explicitly
@@ -45,9 +47,17 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
 
   const years   = getYears(catalogId);
   const sidebar = getSidebarData(catalogId);
+  const banner  = getMemoriesBannerData(catalogId);
 
   return (
-    <LibraryClient
+    <>
+      <TodayBanner
+        hasMemories={banner.hasMemories}
+        total={banner.total}
+        yearList={banner.yearList}
+        previewPhotos={banner.previewPhotos}
+      />
+      <LibraryClient
       groups={groups}
       total={sidebar.totalPhotos}
       filteredTotal={filteredTotal}
@@ -61,5 +71,6 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       catalogs={sidebar.catalogs}
       activeCatalogId={catalogId}
     />
+    </>
   );
 }
