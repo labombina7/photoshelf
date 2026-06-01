@@ -17,18 +17,17 @@ export interface MemoriesResult {
  * Returns photos taken on the same month-day in previous years.
  * date format: "MM-DD" (e.g. "06-01")
  */
-export function getMemoriesForDate(date: string, catalogId = 1): MemoriesResult {
+export function getMemoriesForDate(date: string, _catalogId = 1): MemoriesResult {
   const db = getDb();
   const currentYear = new Date().getFullYear();
 
   const rows = db.prepare(`
     SELECT *
     FROM photos
-    WHERE catalog_id = ?
-      AND strftime('%m-%d', taken_at) = ?
+    WHERE strftime('%m-%d', taken_at) = ?
       AND CAST(strftime('%Y', taken_at) AS INTEGER) < ?
     ORDER BY taken_at DESC
-  `).all(catalogId, date, currentYear) as Photo[];
+  `).all(date, currentYear) as Photo[];
 
   const byYear = new Map<number, Photo[]>();
   for (const photo of rows) {
@@ -45,7 +44,7 @@ export function getMemoriesForDate(date: string, catalogId = 1): MemoriesResult 
 }
 
 /** Returns a compact preview (max 5 photos) for the banner. */
-export function getMemoriesBannerData(catalogId = 1): {
+export function getMemoriesBannerData(_catalogId = 1): {
   hasMemories: boolean;
   total: number;
   yearList: number[];
@@ -61,12 +60,11 @@ export function getMemoriesBannerData(catalogId = 1): {
   const rows = db.prepare(`
     SELECT id, filename, taken_at
     FROM photos
-    WHERE catalog_id = ?
-      AND strftime('%m-%d', taken_at) = ?
+    WHERE strftime('%m-%d', taken_at) = ?
       AND CAST(strftime('%Y', taken_at) AS INTEGER) < ?
     ORDER BY taken_at DESC
     LIMIT 20
-  `).all(catalogId, date, currentYear) as (Pick<Photo, 'id' | 'filename'> & { taken_at: string | null })[];
+  `).all(date, currentYear) as (Pick<Photo, 'id' | 'filename'> & { taken_at: string | null })[];
 
   if (rows.length === 0) {
     return { hasMemories: false, total: 0, yearList: [], previewPhotos: [] };
