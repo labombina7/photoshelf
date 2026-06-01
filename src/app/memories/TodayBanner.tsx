@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { IconCalendar, IconX } from '@/components/Icons';
 
 interface BannerPhoto {
@@ -68,12 +67,11 @@ export default function TodayBanner({ hasMemories, total, yearList, previewPhoto
           <div className="memories-banner-thumbs">
             {previewPhotos.map(p => (
               <div key={p.id} className="memories-banner-thumb">
-                <Image
-                  src={`/api/photos/${p.id}/thumbnail`}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/api/photos/${p.id}/thumbnail?size=80`}
                   alt={p.filename}
-                  fill
-                  sizes="40px"
-                  style={{ objectFit: 'cover' }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
               </div>
             ))}

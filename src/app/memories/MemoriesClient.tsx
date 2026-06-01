@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IconChevronLeft, IconChevronRight, IconSparkle, IconCalendar } from '@/components/Icons';
 import Sidebar from '@/components/Sidebar';
@@ -62,7 +63,6 @@ export default function MemoriesClient({
   const [generatingYear, setGeneratingYear] = useState<number | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-
   const loadDate = useCallback(async (newDate: string) => {
     setLoading(true);
     try {
@@ -116,13 +116,13 @@ export default function MemoriesClient({
         activeCatalogId={activeCatalogId}
       />
       <div className="main">
-        <div className="memories-page">
-          <div className="memories-header">
+        <div className="memories-content">
+          <div className="memories-date-nav">
             <button className="memories-nav-btn" onClick={() => goTo(-1)} disabled={loading}>
               <IconChevronLeft size={16} />
             </button>
-            <div className="memories-header-center">
-              <IconCalendar size={16} />
+            <div className="memories-date-center">
+              <IconCalendar size={15} />
               <h1 className="memories-title">{formatDateLabel(date)}</h1>
             </div>
             <button className="memories-nav-btn" onClick={() => goTo(1)} disabled={loading}>
@@ -142,7 +142,7 @@ export default function MemoriesClient({
           {!loading && data.years.map(yearGroup => {
             const diff = currentYear - yearGroup.year;
             return (
-              <div key={yearGroup.year} className="memories-year-group">
+              <div key={yearGroup.year} className="memories-year-section">
                 <div className="memories-year-header">
                   <span className="memories-year-label">{yearGroup.year}</span>
                   <span className="memories-year-sub">
@@ -164,14 +164,18 @@ export default function MemoriesClient({
                 )}
                 <div className="memories-photo-grid">
                   {yearGroup.photos.map(photo => (
-                    <div key={photo.id} className="memories-photo-cell">
+                    <Link
+                      key={photo.id}
+                      href={`/library/${photo.id}`}
+                      className="memories-photo-cell"
+                    >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`/api/photos/${photo.id}/thumbnail?size=200`}
+                        src={`/api/photos/${photo.id}/thumbnail?size=300`}
                         alt={photo.filename}
                         onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                       />
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -182,4 +186,3 @@ export default function MemoriesClient({
     </div>
   );
 }
-
