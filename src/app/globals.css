@@ -174,9 +174,7 @@ body {
   .app-header-actions     { display: none; }
   .app-header-slot-left   { grid-column: 1; }
   .app-header-slot-right  { grid-column: 2; }
-  /* Presentación: mostrar texto en mobile */
-  .btn-slideshow { padding: 6px 12px; gap: 6px; }
-  .btn-slideshow-label { display: inline; }
+  /* Presentación: label visible — sobreescrito más abajo, ver regla junto a .btn-slideshow */
   /* Show hamburger button injected into header slot from pages (search, etc.) */
   .header-slot-hamburger {
     display: flex; align-items: center; justify-content: center;
@@ -2167,6 +2165,6 @@ body { padding-top: var(--header-h); }
 }
 .btn-slideshow:hover { background: var(--border); color: var(--text); }
 @media (max-width: 640px) {
-  .btn-slideshow { padding: 6px; gap: 0; }
-  .btn-slideshow-label { display: none; }
+  .btn-slideshow { padding: 6px 12px; gap: 6px; }
+  .btn-slideshow-label { display: inline; }
 }
