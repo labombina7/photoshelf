@@ -97,6 +97,15 @@ export function getPhotoPath(id: number): string | null {
   return row?.path ?? null;
 }
 
+// ── US-063: list distinct cameras ─────────────────────────────────────────────
+
+export function listCameras(catalogId: number): string[] {
+  const rows = getDb().prepare(
+    `SELECT DISTINCT camera FROM photos WHERE camera IS NOT NULL AND catalog_id = ? ORDER BY camera`
+  ).all(catalogId) as { camera: string }[];
+  return rows.map(r => r.camera);
+}
+
 // ── Mutations ─────────────────────────────────────────────────────────────────
 
 export function setFavorite(id: number, value: boolean): void {

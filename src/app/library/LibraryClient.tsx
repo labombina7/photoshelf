@@ -43,6 +43,7 @@ interface LibraryClientProps {
   catalogs?: CatalogRow[];
   activeCatalogId?: number;
   bannerSlot?: React.ReactNode;
+  cameras?: string[];
 }
 
 export default function LibraryClient({
@@ -59,6 +60,7 @@ export default function LibraryClient({
   catalogs = [],
   activeCatalogId = 1,
   bannerSlot,
+  cameras = [],
 }: LibraryClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -260,6 +262,7 @@ export default function LibraryClient({
         onMobileClose={() => setMobileSidebarOpen(false)}
         catalogs={catalogs}
         activeCatalogId={activeCatalogId}
+        cameras={cameras}
       />
 
       <div className="main">

@@ -99,6 +99,7 @@ function initSchema(db: Database.Database) {
   migrateEpic001(db);
   migrateIntegrity(db);
   migrateHealthSnapshots(db);
+  migrateExif(db);
 }
 
 function migrateEpic001(db: Database.Database) {
@@ -225,6 +226,28 @@ function migrateHealthSnapshots(db: Database.Database) {
       score        INTEGER NOT NULL,
       metrics_json TEXT NOT NULL
     );
+  `);
+}
+
+function migrateExif(db: Database.Database) {
+  const columns = [
+    'ALTER TABLE photos ADD COLUMN iso INTEGER',
+    'ALTER TABLE photos ADD COLUMN aperture REAL',
+    'ALTER TABLE photos ADD COLUMN shutter_speed_seconds REAL',
+    'ALTER TABLE photos ADD COLUMN focal_length REAL',
+  ];
+  for (const sql of columns) {
+    try {
+      db.exec(sql);
+    } catch {
+      // Column already exists — safe to ignore
+    }
+  }
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_photos_iso       ON photos(iso);
+    CREATE INDEX IF NOT EXISTS idx_photos_aperture  ON photos(aperture);
+    CREATE INDEX IF NOT EXISTS idx_photos_focal     ON photos(focal_length);
   `);
 }
 

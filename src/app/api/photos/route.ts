@@ -21,8 +21,20 @@ export async function GET(req: NextRequest) {
     const limit    = parseInt(sp.get('limit') ?? '200', 10);
     const offset   = (page - 1) * limit;
 
+    const iso_min       = sp.get('iso_min');
+    const iso_max       = sp.get('iso_max');
+    const aperture_min  = sp.get('aperture_min');
+    const aperture_max  = sp.get('aperture_max');
+    const shutter_min   = sp.get('shutter_min');
+    const shutter_max   = sp.get('shutter_max');
+    const focal_min     = sp.get('focal_min');
+    const focal_max     = sp.get('focal_max');
+    const camera        = sp.get('camera');
+
     const { photos, total, years } = listPhotos(
-      { year, event, theme, tag, favorite, untagged, q, catalogId },
+      { year, event, theme, tag, favorite, untagged, q, catalogId,
+        iso_min, iso_max, aperture_min, aperture_max,
+        shutter_min, shutter_max, focal_min, focal_max, camera },
       { limit, offset },
     );
 

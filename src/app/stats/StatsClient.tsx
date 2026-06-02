@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu } from '@/components/Icons';
@@ -167,9 +167,24 @@ interface Props {
   activeCatalogId?: number;
 }
 
+interface TechnicalStats {
+  iso: { range: string; count: number }[];
+  aperture: { value: string; count: number }[];
+  focal: { range: string; count: number }[];
+  topCameras: { camera: string; count: number }[];
+}
+
 export default function StatsClient({ stats, themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs = [], activeCatalogId = 1 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [techStats, setTechStats] = useState<TechnicalStats | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    fetch('/api/stats/technical')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setTechStats(data); })
+      .catch(() => {});
+  }, []);
   const { overview, byYear, byMonth, selectedYear, cameras, tags, byHour } = stats;
 
   const yearRange = overview.minYear && overview.maxYear
@@ -321,6 +336,94 @@ export default function StatsClient({ stats, themes, projects, totalPhotos, favo
               </div>
             )}
           </div>
+
+          {/* Technical profile */}
+          {techStats && (techStats.iso.some(r => r.count > 0) || techStats.topCameras.length > 0) && (
+            <div className="stats-section">
+              <div className="stats-section-title">Perfil técnico</div>
+              <div className="stats-two-col">
+                {techStats.iso.some(r => r.count > 0) && (
+                  <div className="stats-section">
+                    <div className="stats-section-title" style={{ fontSize: 13 }}>Distribución ISO</div>
+                    <div className="stats-chart-wrap">
+                      {techStats.iso.map(r => {
+                        const maxCount = Math.max(...techStats.iso.map(x => x.count), 1);
+                        return (
+                          <div key={r.range} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                            <span style={{ width: 90, fontSize: 12, color: 'var(--text-secondary)', flexShrink: 0 }}>{r.range}</span>
+                            <div style={{ flex: 1, height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+                              <div style={{ width: `${(r.count / maxCount) * 100}%`, height: '100%', background: 'var(--tag-auto-color)', borderRadius: 4 }} />
+                            </div>
+                            <span style={{ width: 40, fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'right' }}>{fmtNum(r.count)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {techStats.focal.some(r => r.count > 0) && (
+                  <div className="stats-section">
+                    <div className="stats-section-title" style={{ fontSize: 13 }}>Distancia focal</div>
+                    <div className="stats-chart-wrap">
+                      {techStats.focal.map(r => {
+                        const maxCount = Math.max(...techStats.focal.map(x => x.count), 1);
+                        return (
+                          <div key={r.range} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                            <span style={{ width: 130, fontSize: 12, color: 'var(--text-secondary)', flexShrink: 0 }}>{r.range}</span>
+                            <div style={{ flex: 1, height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+                              <div style={{ width: `${(r.count / maxCount) * 100}%`, height: '100%', background: '#e8a45a', borderRadius: 4 }} />
+                            </div>
+                            <span style={{ width: 40, fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'right' }}>{fmtNum(r.count)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {techStats.aperture.length > 0 && (
+                  <div className="stats-section">
+                    <div className="stats-section-title" style={{ fontSize: 13 }}>Apertura más usada</div>
+                    <div className="stats-chart-wrap">
+                      {techStats.aperture.map(r => {
+                        const maxCount = Math.max(...techStats.aperture.map(x => x.count), 1);
+                        return (
+                          <div key={r.value} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                            <span style={{ width: 50, fontSize: 12, color: 'var(--text-secondary)', flexShrink: 0 }}>{r.value}</span>
+                            <div style={{ flex: 1, height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+                              <div style={{ width: `${(r.count / maxCount) * 100}%`, height: '100%', background: '#7eb8c9', borderRadius: 4 }} />
+                            </div>
+                            <span style={{ width: 40, fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'right' }}>{fmtNum(r.count)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {techStats.topCameras.length > 0 && (
+                  <div className="stats-section">
+                    <div className="stats-section-title" style={{ fontSize: 13 }}>Top cámaras</div>
+                    <div className="stats-chart-wrap">
+                      {techStats.topCameras.map(r => {
+                        const maxCount = Math.max(...techStats.topCameras.map(x => x.count), 1);
+                        return (
+                          <div key={r.camera} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                            <span style={{ width: 130, fontSize: 12, color: 'var(--text-secondary)', flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.camera}</span>
+                            <div style={{ flex: 1, height: 8, background: 'var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+                              <div style={{ width: `${(r.count / maxCount) * 100}%`, height: '100%', background: 'var(--tag-auto-color)', borderRadius: 4 }} />
+                            </div>
+                            <span style={{ width: 40, fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'right' }}>{fmtNum(r.count)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

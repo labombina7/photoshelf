@@ -8,6 +8,7 @@ import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
+import ExifFilters, { type ExifFilterValues } from './ExifFilters';
 
 function shortenPath(p: string): string {
   if (!p) return '';
@@ -29,6 +30,7 @@ interface SidebarProps {
   onMobileClose?: () => void;
   catalogs?: CatalogRow[];
   activeCatalogId?: number;
+  cameras?: string[];
 }
 
 function SidebarInner({
@@ -41,6 +43,7 @@ function SidebarInner({
   onMobileClose,
   catalogs = [],
   activeCatalogId = 1,
+  cameras = [],
 }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -56,6 +59,7 @@ function SidebarInner({
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [eventOpen,   setEventOpen]   = useState(false);
+  const [exifFilters, setExifFilters] = useState<ExifFilterValues>({});
   const [orphanCount, setOrphanCount] = useState(0);
 
   useEffect(() => {
@@ -171,6 +175,17 @@ function SidebarInner({
     closeMobile();
   }
 
+  function handleExifChange(filters: ExifFilterValues) {
+    setExifFilters(filters);
+    const params = new URLSearchParams(searchParams.toString());
+    // Clear existing exif params
+    ['iso_max', 'aperture_max', 'focal_min', 'focal_max', 'camera'].forEach(k => params.delete(k));
+    for (const [k, v] of Object.entries(filters)) {
+      if (v) params.set(k, v);
+    }
+    router.push(`/library?${params.toString()}`);
+  }
+
   return (
     <>
       {isMobileOpen && <div className="sidebar-overlay" onClick={closeMobile} />}
@@ -278,6 +293,14 @@ function SidebarInner({
           <IconTag />
           Tags
         </Link>
+
+        {totalPhotos > 0 && (
+          <ExifFilters
+            cameras={cameras}
+            activeFilters={exifFilters}
+            onChange={handleExifChange}
+          />
+        )}
       </div>
 
       <div className="sidebar-section">

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
-import { hasPhotosForYear, getYears } from '@/lib/queries/photos';
+import { hasPhotosForYear, getYears, listCameras } from '@/lib/queries/photos';
 import { listGroups } from '@/lib/queries/groups';
 import { getSidebarData } from '@/lib/queries/sidebar';
 import { getActiveCatalogId } from '@/lib/catalog-context';
@@ -48,6 +48,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const years   = getYears(catalogId);
   const sidebar = getSidebarData(catalogId);
   const banner  = getMemoriesBannerData(catalogId);
+  const cameras = listCameras(catalogId);
 
   return (
     <LibraryClient
@@ -71,6 +72,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       projects={sidebar.projects}
       catalogs={sidebar.catalogs}
       activeCatalogId={catalogId}
+      cameras={cameras}
     />
   );
 }

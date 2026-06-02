@@ -17,6 +17,10 @@ interface ScannedPhoto {
   exposure: string | null;
   gps_lat: number | null;
   gps_lon: number | null;
+  iso: number | null;
+  aperture: number | null;
+  shutter_speed_seconds: number | null;
+  focal_length: number | null;
   catalog_id: number;
 }
 
@@ -32,20 +36,28 @@ export async function scanLibrary(
   const upsert = db.prepare(`
     INSERT INTO photos
       (path, filename, year, event, size_bytes, width, height,
-       taken_at, camera, exposure, gps_lat, gps_lon, catalog_id, scanned_at)
+       taken_at, camera, exposure, gps_lat, gps_lon,
+       iso, aperture, shutter_speed_seconds, focal_length,
+       catalog_id, scanned_at)
     VALUES
       (@path, @filename, @year, @event, @size_bytes, @width, @height,
-       @taken_at, @camera, @exposure, @gps_lat, @gps_lon, @catalog_id, datetime('now'))
+       @taken_at, @camera, @exposure, @gps_lat, @gps_lon,
+       @iso, @aperture, @shutter_speed_seconds, @focal_length,
+       @catalog_id, datetime('now'))
     ON CONFLICT(path, catalog_id) DO UPDATE SET
-      scanned_at = excluded.scanned_at,
-      size_bytes = excluded.size_bytes,
-      width      = COALESCE(photos.width, excluded.width),
-      height     = COALESCE(photos.height, excluded.height),
-      taken_at   = COALESCE(photos.taken_at, excluded.taken_at),
-      camera     = COALESCE(photos.camera, excluded.camera),
-      exposure   = COALESCE(photos.exposure, excluded.exposure),
-      gps_lat    = COALESCE(photos.gps_lat, excluded.gps_lat),
-      gps_lon    = COALESCE(photos.gps_lon, excluded.gps_lon)
+      scanned_at             = excluded.scanned_at,
+      size_bytes             = excluded.size_bytes,
+      width                  = COALESCE(photos.width, excluded.width),
+      height                 = COALESCE(photos.height, excluded.height),
+      taken_at               = COALESCE(photos.taken_at, excluded.taken_at),
+      camera                 = COALESCE(photos.camera, excluded.camera),
+      exposure               = COALESCE(photos.exposure, excluded.exposure),
+      gps_lat                = COALESCE(photos.gps_lat, excluded.gps_lat),
+      gps_lon                = COALESCE(photos.gps_lon, excluded.gps_lon),
+      iso                    = COALESCE(photos.iso, excluded.iso),
+      aperture               = COALESCE(photos.aperture, excluded.aperture),
+      shutter_speed_seconds  = COALESCE(photos.shutter_speed_seconds, excluded.shutter_speed_seconds),
+      focal_length           = COALESCE(photos.focal_length, excluded.focal_length)
   `);
 
   const insertBatch = db.transaction((items: ScannedPhoto[]) => {
@@ -152,6 +164,10 @@ async function extractExif(filePath: string): Promise<{
   exposure: string | null;
   gps_lat: number | null;
   gps_lon: number | null;
+  iso: number | null;
+  aperture: number | null;
+  shutter_speed_seconds: number | null;
+  focal_length: number | null;
 }> {
   try {
     const exifr = await import('exifr');
@@ -190,6 +206,10 @@ async function extractExif(filePath: string): Promise<{
       exposure,
       gps_lat: data.latitude ?? null,
       gps_lon: data.longitude ?? null,
+      iso: data.ISO ?? null,
+      aperture: data.FNumber ?? null,
+      shutter_speed_seconds: data.ExposureTime ?? null,
+      focal_length: data.FocalLength ?? null,
     };
   } catch {
     return emptyExif();
@@ -201,5 +221,6 @@ function emptyExif() {
     width: null, height: null,
     taken_at: null, camera: null,
     exposure: null, gps_lat: null, gps_lon: null,
+    iso: null, aperture: null, shutter_speed_seconds: null, focal_length: null,
   };
 }

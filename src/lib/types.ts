@@ -10,6 +10,10 @@ export interface Photo {
   taken_at: string | null;
   camera: string | null;
   exposure: string | null;
+  iso: number | null;
+  aperture: number | null;
+  shutter_speed_seconds: number | null;
+  focal_length: number | null;
   gps_lat: number | null;
   gps_lon: number | null;
   is_favorite: number;

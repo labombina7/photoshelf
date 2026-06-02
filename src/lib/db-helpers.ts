@@ -30,6 +30,16 @@ export interface PhotoFilters {
   q?: string | null;
   /** EPIC-001: filter by catalog. Defaults to 1 (Principal) if not specified. */
   catalogId?: number | null;
+  /** US-063: technical EXIF filters */
+  iso_min?: string | null;
+  iso_max?: string | null;
+  aperture_min?: string | null;
+  aperture_max?: string | null;
+  shutter_min?: string | null;
+  shutter_max?: string | null;
+  focal_min?: string | null;
+  focal_max?: string | null;
+  camera?: string | null;
 }
 
 /**
@@ -53,7 +63,9 @@ export interface PhotoFilterResult {
 }
 
 export function buildPhotoFilter(filters: PhotoFilters): PhotoFilterResult {
-  const { year, event, theme, tag, favorite, untagged, q, catalogId } = filters;
+  const { year, event, theme, tag, favorite, untagged, q, catalogId,
+          iso_min, iso_max, aperture_min, aperture_max,
+          shutter_min, shutter_max, focal_min, focal_max, camera } = filters;
 
   const joinParts: string[] = [];
   const joinParams: (string | number)[] = [];
@@ -97,6 +109,18 @@ export function buildPhotoFilter(filters: PhotoFilters): PhotoFilterResult {
   if (event)    { whereParts.push('p.event = ?');      whereParams.push(event); }
   if (favorite) { whereParts.push('p.is_favorite = 1'); }
   if (untagged) { whereParts.push('_ptun.photo_id IS NULL'); }
+
+  // US-063: EXIF technical filters
+  if (iso_min)       { whereParts.push('p.iso >= ?');                    whereParams.push(parseFloat(iso_min)); }
+  if (iso_max)       { whereParts.push('p.iso <= ?');                    whereParams.push(parseFloat(iso_max)); }
+  if (aperture_min)  { whereParts.push('p.aperture >= ?');               whereParams.push(parseFloat(aperture_min)); }
+  if (aperture_max)  { whereParts.push('p.aperture <= ?');               whereParams.push(parseFloat(aperture_max)); }
+  if (shutter_min)   { whereParts.push('p.shutter_speed_seconds >= ?');  whereParams.push(parseFloat(shutter_min)); }
+  if (shutter_max)   { whereParts.push('p.shutter_speed_seconds <= ?');  whereParams.push(parseFloat(shutter_max)); }
+  if (focal_min)     { whereParts.push('p.focal_length >= ?');           whereParams.push(parseFloat(focal_min)); }
+  if (focal_max)     { whereParts.push('p.focal_length <= ?');           whereParams.push(parseFloat(focal_max)); }
+  if (camera)        { whereParts.push('p.camera LIKE ?');               whereParams.push(`%${camera}%`); }
+
   if (q) {
     whereParts.push('(p.filename LIKE ? OR p.event LIKE ? OR _tq.name LIKE ?)');
     const like = `%${q}%`;
