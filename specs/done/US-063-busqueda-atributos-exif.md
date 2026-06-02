@@ -1,5 +1,7 @@
 # Feature: Búsqueda y filtrado por atributos técnicos EXIF
 
+> Estado: ✅ Desplegada — 2026-06-02
+
 ## Historia de usuario
 
 Como fotógrafo que quiere entender y mejorar su técnica,

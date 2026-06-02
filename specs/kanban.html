@@ -674,14 +674,6 @@
         <div class="card-summary">Capa 1: extrae topónimo del nombre de carpeta → geocodifica con Nominatim. Capa 2: algoritmo de "viaje" por duración + análisis visual Ollama. Propuestas con confianza para revisión.</div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-063" onclick="openModal('US-063')">
-        <div class="card-top">
-          <span class="badge badge-us">US-063</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Filtrado por atributos técnicos EXIF</div>
-        <div class="card-summary">Filtros de ISO, apertura, velocidad y focal en el sidebar. Integración con el clasificador de búsqueda (f/1.8, ISO 3200, 50mm). Sección "Perfil técnico" en estadísticas.</div>
-      </div>
 
       <div class="card" tabindex="0" data-id="US-064" onclick="openModal('US-064')">
         <div class="card-top">
@@ -789,9 +781,18 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">52</span>
+      <span class="col-count">53</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="US-063" onclick="openModal('US-063')">
+        <div class="card-top">
+          <span class="badge badge-us">US-063</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-02</span>
+        </div>
+        <div class="card-title">Filtrado por atributos técnicos EXIF</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-061" onclick="openModal('US-061')">
         <div class="card-top">
@@ -4371,7 +4372,7 @@ const CARDS = {
   'US-063': {
     id: 'US-063',
     type: 'US',
-    column: 'todo',
+    column: 'done',
     effort: 'M',
     title: 'Búsqueda y filtrado por atributos técnicos EXIF',
     story: 'Como fotógrafo que quiere entender y mejorar su técnica,\nquiero poder filtrar mi biblioteca por parámetros técnicos como apertura, ISO, velocidad de obturación o focal,\npara estudiar qué configuraciones uso más, encontrar mis mejores fotos en condiciones específicas, y aprender de mis patrones de disparo.',
