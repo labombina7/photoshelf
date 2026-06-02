@@ -357,20 +357,7 @@ function EventGroupBlock({
                   role="button"
                   tabIndex={-1}
                   onMouseEnter={() => { if (isPointerFine.current) setFocusedIndex(idx); }}
-                  onClick={() => {
-                    if (isPointerFine.current) {
-                      setFocusedIndex(idx);
-                      // Focus sin scroll para que las flechas funcionen
-                      gridRef.current?.focus({ preventScroll: true });
-                    } else {
-                      // Táctil: navegar directamente
-                      navigateTo(photo.id);
-                    }
-                  }}
-                  onDoubleClick={() => {
-                    // Doble clic en desktop: navegar al detalle
-                    if (isPointerFine.current) navigateTo(photo.id);
-                  }}
+                  onClick={() => navigateTo(photo.id)}
                 >
                   <div className="photo-skeleton" aria-hidden="true" />
                   {/* eslint-disable-next-line @next/next/no-img-element */}
