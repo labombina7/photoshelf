@@ -6,6 +6,7 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck, IconShield, IconHeartbeat } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 import ExifFilters, { type ExifFilterValues } from './ExifFilters';
@@ -50,6 +51,7 @@ function SidebarInner({
   const router = useRouter();
   const { running, startScan, watcher, toggleWatcher } = useScan();
   const { confirm, alert } = useModal();
+  const { track } = useAnalytics();
   const [showNewTheme, setShowNewTheme] = useState(false);
   const [newThemeName, setNewThemeName] = useState('');
   const [newThemeColor, setNewThemeColor] = useState('#e8a45a');
@@ -175,6 +177,16 @@ function SidebarInner({
     closeMobile();
   }
 
+  function handleFilterClick(filterType: string, filterValue: string) {
+    track('sidebar_filter_applied', { filter_type: filterType, filter_value: filterValue });
+    closeMobile();
+  }
+
+  function handleClearFilters() {
+    track('sidebar_filter_cleared');
+    closeMobile();
+  }
+
   function handleExifChange(filters: ExifFilterValues) {
     setExifFilters(filters);
     const params = new URLSearchParams(searchParams.toString());
@@ -183,6 +195,8 @@ function SidebarInner({
     for (const [k, v] of Object.entries(filters)) {
       if (v) params.set(k, v);
     }
+    const hasFilters = Object.values(filters).some(Boolean);
+    if (hasFilters) track('sidebar_filter_applied', { filter_type: 'exif', filter_value: JSON.stringify(filters) });
     router.push(`/library?${params.toString()}`);
   }
 
@@ -228,7 +242,7 @@ function SidebarInner({
 
         <Link
           href="/library"
-          onClick={handleNavClick}
+          onClick={handleClearFilters}
           className={`sidebar-item ${pathname === '/library' && !activeTheme && !activeFav ? 'active' : ''}`}
         >
           <IconViewGrid />
@@ -265,7 +279,7 @@ function SidebarInner({
 
         <Link
           href="/library?favorite=1"
-          onClick={handleNavClick}
+          onClick={() => handleFilterClick('favorite', '1')}
           className={`sidebar-item ${activeFav ? 'active' : ''}`}
         >
           <IconStar />
@@ -276,7 +290,7 @@ function SidebarInner({
         {untaggedCount > 0 && (
           <Link
             href="/library?untagged=1"
-            onClick={handleNavClick}
+            onClick={() => handleFilterClick('untagged', '1')}
             className={`sidebar-item ${searchParams.get('untagged') ? 'active' : ''}`}
           >
             <IconTagEmpty />
@@ -344,7 +358,7 @@ function SidebarInner({
             >
               <Link
                 href={`/library?theme=${theme.id}`}
-                onClick={handleNavClick}
+                onClick={() => handleFilterClick('theme', theme.name)}
                 className={`sidebar-item ${activeTheme === String(theme.id) ? 'active' : ''}`}
                 style={{ flex: 1, minWidth: 0 }}
               >

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconSparkle } from '@/components/Icons';
 import EmptyState from '@/components/EmptyState';
 import { useClassify } from '@/components/ClassifyProvider';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import type { Photo, Tag } from '@/lib/types';
 
 function IconStar({ filled, className }: { filled: boolean; className?: string }) {
@@ -75,6 +76,7 @@ function EventGroupBlock({
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
   const { done: classifyDone, total: classifyTotal } = useClassify();
+  const { track } = useAnalytics();
   const [classifying, setClassifying] = useState(false);
   const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number; errors?: number } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -142,6 +144,7 @@ function EventGroupBlock({
   // ── Navegación al detalle ────────────────────────────────────────────────
 
   function navigateTo(photoId: number) {
+    track('photo_opened', { photo_id: photoId, source: 'grid' });
     try {
       sessionStorage.setItem('photoshelf_detail_origin', JSON.stringify({
         href: window.location.pathname + window.location.search,
@@ -217,6 +220,8 @@ function EventGroupBlock({
     const current = photos[fullIdx].is_favorite;
     const newValue = current ? 0 : 1;
 
+    track('photo_favorited', { photo_id: photoId, action: newValue ? 'add' : 'remove' });
+
     // Optimistic update
     setPhotos(prev => {
       if (!prev) return prev;
@@ -248,6 +253,7 @@ function EventGroupBlock({
 
   async function handleClassify(e: React.MouseEvent) {
     e.stopPropagation?.();
+    track('ai_classify_triggered');
     setClassifying(true);
     setClassifyResult(null);
     try {

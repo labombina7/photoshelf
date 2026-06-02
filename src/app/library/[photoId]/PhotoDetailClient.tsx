@@ -8,6 +8,7 @@ import DetailPanel from '@/components/DetailPanel';
 import BottomSheet from '@/components/BottomSheet';
 import Slideshow from '@/components/Slideshow';
 import { IconChevronLeft, IconChevronRight, IconMenu, IconX } from '@/components/Icons';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import type { PhotoDetail, Theme } from '@/lib/types';
 
 interface Props {
@@ -50,6 +51,7 @@ export default function PhotoDetailClient({
   activeCatalogId = 1,
 }: Props) {
   const router = useRouter();
+  const { track } = useAnalytics();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   // US-035: sheet starts closed on mobile; HUD starts visible
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
@@ -354,6 +356,7 @@ export default function PhotoDetailClient({
               download={photo.filename}
               className="download-original-btn"
               title="Descargar original"
+              onClick={() => track('photo_downloaded', { photo_id: photo.id })}
             >
               Descargar original{photo.size_bytes ? ` (${(photo.size_bytes / 1024 / 1024).toFixed(1)} MB)` : ''}
             </a>

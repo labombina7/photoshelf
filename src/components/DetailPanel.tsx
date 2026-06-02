@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import {
   IconX, IconSparkle, IconCheck, IconCalendar,
   IconCamera, IconMap, IconFile, IconAperture, IconStar, IconEye,
@@ -17,6 +18,7 @@ interface DetailPanelProps {
 
 export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   const router = useRouter();
+  const { track } = useAnalytics();
   const [tags, setTags] = useState(photo.tags);
   const [assignedThemeIds, setAssignedThemeIds] = useState<Set<number>>(
     new Set(photo.themes.map((t) => t.id))
@@ -56,6 +58,8 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
 
   async function removeTag(name: string) {
     const prevTags = tags;
+    const removedTag = tags.find(t => t.name === name);
+    if (removedTag?.source === 'ai') track('ai_tag_reviewed', { action: 'reject' });
     setTags((prev) => prev.filter((t) => t.name !== name)); // optimistic
     try {
       const res = await fetch(`/api/tags/${photo.id}`, {
@@ -72,6 +76,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   }
 
   async function classify() {
+    track('ai_classify_triggered');
     setClassifying(true);
     setClassifyError(null);
     try {
@@ -143,6 +148,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   async function toggleFavorite() {
     const next = !isFavorite;
     setIsFavorite(next);
+    track('photo_favorited', { photo_id: photo.id, action: next ? 'add' : 'remove' });
     await fetch(`/api/photos/${photo.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },

@@ -5,6 +5,7 @@ import { ScanProvider } from '@/components/ScanProvider';
 import { ClassifyProvider } from '@/components/ClassifyProvider';
 import AppHeader from '@/components/AppHeader';
 import { HeaderSlotProvider } from '@/components/HeaderSlot';
+import { AnalyticsProvider } from '@/components/AnalyticsProvider';
 
 export const metadata: Metadata = {
   title: 'photoshelf',
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <AnalyticsProvider />
         <HeaderSlotProvider>
           <AppHeader />
           <ModalProvider>
