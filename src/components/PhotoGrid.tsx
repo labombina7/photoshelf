@@ -39,6 +39,11 @@ interface ActiveFilters {
   favorite?: string;
   untagged?: string;
   q?: string;
+  iso_max?: string;
+  aperture_max?: string;
+  focal_min?: string;
+  focal_max?: string;
+  camera?: string;
 }
 
 interface PhotoGridProps {
@@ -108,25 +113,31 @@ function EventGroupBlock({
     return () => observer.disconnect();
   }, [loadMore]);
 
+  // Reset photos when the URL params change (e.g. EXIF filters applied)
+  const prevParamsRef = useRef(currentParams);
+  useEffect(() => {
+    if (prevParamsRef.current !== currentParams) {
+      prevParamsRef.current = currentParams;
+      setPhotos(null);
+    }
+  }, [currentParams]);
+
   useEffect(() => {
     if (isCollapsed || photos !== null) return;
     setLoading(true);
     setVisible(PAGE_SIZE);
-    const params = new URLSearchParams();
+    // Use currentParams as base so EXIF and other URL filters are included,
+    // then override with the specific group's year/event and set a high limit.
+    const params = new URLSearchParams(currentParams);
     params.set('year', String(group.year));
     params.set('event', group.event);
-    if (activeFilters.theme) params.set('theme', activeFilters.theme);
-    if (activeFilters.tag) params.set('tag', activeFilters.tag);
-    if (activeFilters.favorite) params.set('favorite', activeFilters.favorite);
-    if (activeFilters.untagged) params.set('untagged', activeFilters.untagged);
-    if (activeFilters.q) params.set('q', activeFilters.q);
     params.set('limit', '2000');
 
     fetch(`/api/photos?${params.toString()}`)
       .then(r => r.json())
       .then(data => { setPhotos(data.photos); setLoading(false); })
       .catch(() => setLoading(false));
-  }, [isCollapsed, photos, group, activeFilters]);
+  }, [isCollapsed, photos, group, currentParams]);
 
   // ── Navegación al detalle ────────────────────────────────────────────────
 

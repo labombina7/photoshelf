@@ -15,6 +15,12 @@ interface SearchParams {
   favorite?: string;
   untagged?: string;
   q?: string;
+  // EXIF filters
+  iso_max?: string;
+  aperture_max?: string;
+  focal_min?: string;
+  focal_max?: string;
+  camera?: string;
 }
 
 export default async function LibraryPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -26,7 +32,8 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
 
   // 'year=all' means the user explicitly chose "Todos los años" — skip redirect.
   // No year param at all (fresh entry) → redirect to current year if photos exist for it.
-  if (!sp.year && !sp.event && !sp.theme && !sp.favorite && !sp.untagged && !sp.q) {
+  if (!sp.year && !sp.event && !sp.theme && !sp.favorite && !sp.untagged && !sp.q &&
+      !sp.iso_max && !sp.aperture_max && !sp.focal_min && !sp.focal_max && !sp.camera) {
     const currentYear = new Date().getFullYear();
     if (hasPhotosForYear(currentYear, catalogId)) {
       redirect(`/library?year=${currentYear}`);
@@ -37,12 +44,17 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const effectiveYear = sp.year && sp.year !== 'all' ? sp.year : undefined;
 
   const { groups, total: filteredTotal } = listGroups({
-    year:     effectiveYear,
-    event:    sp.event,
-    theme:    sp.theme,
-    favorite: sp.favorite,
-    untagged: sp.untagged,
-    q:        sp.q,
+    year:         effectiveYear,
+    event:        sp.event,
+    theme:        sp.theme,
+    favorite:     sp.favorite,
+    untagged:     sp.untagged,
+    q:            sp.q,
+    iso_max:      sp.iso_max,
+    aperture_max: sp.aperture_max,
+    focal_min:    sp.focal_min,
+    focal_max:    sp.focal_max,
+    camera:       sp.camera,
   }, catalogId);
 
   const years   = getYears(catalogId);
@@ -68,7 +80,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}
       activeYear={effectiveYear ?? null}
-      activeFilters={{ year: effectiveYear, event: sp.event, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q }}
+      activeFilters={{ year: effectiveYear, event: sp.event, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q, iso_max: sp.iso_max, aperture_max: sp.aperture_max, focal_min: sp.focal_min, focal_max: sp.focal_max, camera: sp.camera }}
       projects={sidebar.projects}
       catalogs={sidebar.catalogs}
       activeCatalogId={catalogId}

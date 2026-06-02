@@ -27,6 +27,11 @@ interface ActiveFilters {
   favorite?: string;
   untagged?: string;
   q?: string;
+  iso_max?: string;
+  aperture_max?: string;
+  focal_min?: string;
+  focal_max?: string;
+  camera?: string;
 }
 
 interface LibraryClientProps {
