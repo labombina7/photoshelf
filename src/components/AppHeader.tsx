@@ -9,6 +9,7 @@ import { classifyQuery } from '@/lib/search/classifier';
 import type { ClassifierHints } from '@/lib/search/classifier';
 import { HeaderSlotCtx } from './HeaderSlot';
 import SearchDropdown from './SearchDropdown';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 // ─── Hints fetch (lazy, once per mount) ──────────────────────────────────────
 
@@ -39,6 +40,7 @@ export default function AppHeader() {
   const [searchShortcut,   setSearchShortcut]   = useState('⌘K');
 
   const { recent, push: pushHistory, clear: clearHistory } = useSearchHistory();
+  const { track } = useAnalytics();
 
   // Load hints once on mount
   useEffect(() => {
@@ -111,6 +113,7 @@ export default function AppHeader() {
     if (!q.trim()) return;
     const intent = classifyQuery(q, hints);
     pushHistory(q, intent.type);
+    track('search_performed', { query_length: q.trim().length, intent: intent.type });
     router.push(`/search?q=${encodeURIComponent(q)}&intent=${intent.type}`);
     setDropdownOpen(false);
     setFocusedIndex(-1);

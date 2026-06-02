@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IconSparkle, IconMenu } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import type { SearchResult, SearchPhotoRow, TagMatch, EventMatch } from '@/lib/search/execute';
 
 // ─── Sync header ──────────────────────────────────────────────────────────────
@@ -19,11 +20,18 @@ function HeaderQuerySync({ query }: { query: string }) {
 // ─── Photo grid ───────────────────────────────────────────────────────────────
 
 function SearchPhotoGrid({ photos }: { photos: SearchPhotoRow[] }) {
+  const { track } = useAnalytics();
   if (photos.length === 0) return null;
   return (
     <div className="photo-grid">
       {photos.map(photo => (
-        <Link key={photo.id} href={`/library/${photo.id}`} className="photo-item" aria-label={photo.filename}>
+        <Link
+          key={photo.id}
+          href={`/library/${photo.id}`}
+          className="photo-item"
+          aria-label={photo.filename}
+          onClick={() => track('search_result_clicked', { photo_id: photo.id })}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={`/api/photos/${photo.id}/thumbnail?size=300`} alt={photo.filename} loading="lazy" />
         </Link>
