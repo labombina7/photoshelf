@@ -181,8 +181,12 @@ async function extractExif(filePath: string): Promise<{
 
     if (!data) return emptyExif();
 
-    const camera =
-      [data.Make, data.Model].filter(Boolean).join(' ').trim() || null;
+    const make  = (data.Make  ?? '').trim();
+    const model = (data.Model ?? '').trim();
+    // Evitar duplicación cuando el Model ya incluye la marca (ej. "Canon EOS 6D" con Make "Canon")
+    const camera = model
+      ? (make && !model.toLowerCase().startsWith(make.toLowerCase()) ? `${make} ${model}` : model)
+      : (make || null);
 
     let exposure: string | null = null;
     const parts: string[] = [];
