@@ -99,10 +99,16 @@ export function getPhotoPath(id: number): string | null {
 
 // ── US-063: list distinct cameras ─────────────────────────────────────────────
 
-export function listCameras(catalogId: number): string[] {
+export function listCameras(catalogId: number, year?: string): string[] {
+  const params: (number | string)[] = [catalogId];
+  let yearClause = '';
+  if (year && year !== 'all') {
+    yearClause = ' AND year = ?';
+    params.push(parseInt(year, 10));
+  }
   const rows = getDb().prepare(
-    `SELECT DISTINCT camera FROM photos WHERE camera IS NOT NULL AND catalog_id = ? ORDER BY camera`
-  ).all(catalogId) as { camera: string }[];
+    `SELECT DISTINCT camera FROM photos WHERE camera IS NOT NULL AND catalog_id = ?${yearClause} ORDER BY camera`
+  ).all(...params) as { camera: string }[];
   return rows.map(r => r.camera);
 }
 

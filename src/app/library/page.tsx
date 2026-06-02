@@ -60,7 +60,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
   const years   = getYears(catalogId);
   const sidebar = getSidebarData(catalogId);
   const banner  = getMemoriesBannerData(catalogId);
-  const cameras = listCameras(catalogId);
+  const cameras = listCameras(catalogId, effectiveYear);
 
   return (
     <LibraryClient
