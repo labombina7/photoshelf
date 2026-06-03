@@ -9,7 +9,7 @@ export function initAnalytics() {
 
   if (process.env.NODE_ENV === 'development') return;
 
-  amplitude.init(apiKey, { defaultTracking: false, autocapture: false });
+  amplitude.init(apiKey, { defaultTracking: false, autocapture: false, fetchRemoteConfig: false });
 }
 
 export function track(event: string, props?: Record<string, unknown>) {
