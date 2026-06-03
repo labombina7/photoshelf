@@ -4,6 +4,7 @@ import { scanLibrary } from '@/lib/scanner';
 import { getScanState, updateScanState } from '@/lib/scanState';
 import { getActiveCatalogId } from '@/lib/catalog-context';
 import { getCatalogById } from '@/lib/queries/catalogs';
+import { prewarmThumbnails } from '@/lib/thumbnail';
 import fs from 'fs/promises';
 
 export const maxDuration = 300;
@@ -54,6 +55,7 @@ export async function POST() {
       }, catalogId);
       console.log(`[scan] Completado — añadidas: ${result.added}, total: ${result.total}`);
       updateScanState({ running: false, completedAt: Date.now() });
+      await prewarmThumbnails(catalog.path, catalogId);
     } catch (err) {
       console.error('[scan] Error:', err);
       updateScanState({ running: false, error: (err as Error).message, completedAt: Date.now() });
