@@ -2,9 +2,11 @@ import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
 import { resolvePhotoPath } from './config';
+import { getDb } from './db';
 
 const CACHE_PATH = process.env.CACHE_PATH ?? path.join(process.cwd(), 'data', '.cache');
 const DEFAULT_SIZE = 400;
+const GRID_SIZE = 200;
 
 export async function evictOldThumbnails(maxAgeDays = 30): Promise<void> {
   const cutoff = Date.now() - maxAgeDays * 86_400_000;
@@ -72,12 +74,50 @@ export async function getThumbnail(
     ? { width: size, height: size, fit: 'inside' as const }
     : { width: size, height: size, fit: 'cover' as const, position: 'attention' as const };
 
+  // Smaller thumbnails use lower quality — saves bandwidth with negligible visual loss at grid sizes
+  const quality = size <= GRID_SIZE ? 65 : 80;
   const buffer = await sharp(inputBuffer)
     .rotate() // honour EXIF orientation
     .resize(resizeOptions)
-    .webp({ quality: 80 })
+    .webp({ quality })
     .toBuffer();
 
   await fs.writeFile(cachePath, buffer);
   return { buffer, contentType: 'image/webp' };
+}
+
+// Pre-generates grid thumbnails for all photos in a catalog so the first
+// external-network visitor doesn't pay the generation cost per image.
+export async function prewarmThumbnails(
+  photosRoot: string,
+  catalogId: number,
+  concurrency = 3,
+): Promise<void> {
+  const db = getDb();
+  const photos = db.prepare('SELECT path FROM photos WHERE catalog_id = ?').all(catalogId) as { path: string }[];
+
+  console.info(`[prewarm] Iniciando para ${photos.length} fotos del catálogo ${catalogId}`);
+  let done = 0;
+  let errors = 0;
+
+  // Process with bounded concurrency to avoid overwhelming the server
+  const queue = [...photos];
+  async function worker() {
+    while (queue.length > 0) {
+      const photo = queue.shift();
+      if (!photo) break;
+      try {
+        await getThumbnail(photo.path, photosRoot, GRID_SIZE, 'cover');
+      } catch {
+        errors++;
+      }
+      done++;
+      if (done % 50 === 0) {
+        console.info(`[prewarm] ${done}/${photos.length} (${errors} errores)`);
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: concurrency }, worker));
+  console.info(`[prewarm] Completado: ${done - errors} thumbnails generados, ${errors} errores`);
 }
