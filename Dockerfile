@@ -9,6 +9,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+ARG NEXT_PUBLIC_AMPLITUDE_API_KEY
+ENV NEXT_PUBLIC_AMPLITUDE_API_KEY=$NEXT_PUBLIC_AMPLITUDE_API_KEY
 RUN npm run build && ls .next/standalone
 
 FROM node:20-slim AS runner
