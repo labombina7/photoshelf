@@ -107,7 +107,7 @@ export default function SmartAlbumsClient({
   }
 
   return (
-    <>
+    <div className="app-shell">
       <Sidebar
         themes={themes}
         projects={projects}
@@ -121,7 +121,7 @@ export default function SmartAlbumsClient({
         onMobileClose={() => setMobileOpen(false)}
       />
 
-      <main className="main-content" style={{ padding: '24px 32px' }}>
+      <main className="main" style={{ padding: '24px 32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button
@@ -238,6 +238,6 @@ export default function SmartAlbumsClient({
           onClose={() => setEditingAlbum(null)}
         />
       )}
-    </>
+    </div>
   );
 }

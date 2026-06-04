@@ -81,7 +81,7 @@ export default function SmartAlbumDetailClient({
   })();
 
   return (
-    <>
+    <div className="app-shell">
       <Sidebar
         themes={themes}
         projects={projects}
@@ -147,6 +147,6 @@ export default function SmartAlbumDetailClient({
           onClose={() => setShowBuilder(false)}
         />
       )}
-    </>
+    </div>
   );
 }
