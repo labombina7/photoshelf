@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { listPhotos } from '@/lib/queries/photos';
-import { getSmartAlbumById } from '@/lib/queries/smartAlbums';
-import { rulesFromJson, buildSmartAlbumQuery } from '@/lib/smartAlbumQuery';
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -33,22 +31,11 @@ export async function GET(req: NextRequest) {
     const focal_max     = sp.get('focal_max');
     const camera        = sp.get('camera');
 
-    const smartAlbumId = sp.get('smartAlbumId');
-    let extra: import('@/lib/queries/photos').ExtraFilter | undefined;
-    if (smartAlbumId) {
-      const album = getSmartAlbumById(parseInt(smartAlbumId, 10));
-      if (album) {
-        const rules = rulesFromJson(album.rules);
-        extra = buildSmartAlbumQuery(rules, catalogId, { skipCatalogFilter: true });
-      }
-    }
-
     const { photos, total, years } = listPhotos(
       { year, event, theme, tag, favorite, untagged, q, catalogId,
         iso_min, iso_max, aperture_min, aperture_max,
         shutter_min, shutter_max, focal_min, focal_max, camera },
       { limit, offset },
-      extra,
     );
 
     return NextResponse.json({ photos, total, years });

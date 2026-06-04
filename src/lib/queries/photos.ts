@@ -17,22 +17,12 @@ export interface PhotoListResult {
 
 // ── List / filter ─────────────────────────────────────────────────────────────
 
-export interface ExtraFilter {
-  joinSql: string;
-  whereSql: string;
-  params: (string | number)[];
-}
-
 export function listPhotos(
   filters: PhotoFilters,
   pagination: { limit: number; offset: number },
-  extra?: ExtraFilter,
 ): PhotoListResult {
   const db = getDb();
-  const base = buildPhotoFilter(filters);
-  const joinSql  = [base.joinSql,  extra?.joinSql  ?? ''].join('\n  ');
-  const whereSql = [base.whereSql, extra?.whereSql ?? ''].join('\n  ');
-  const fp = [...base.params, ...(extra?.params ?? [])];
+  const { joinSql, whereSql, params: fp } = buildPhotoFilter(filters);
   const { limit, offset } = pagination;
 
   const rows = db.prepare(`

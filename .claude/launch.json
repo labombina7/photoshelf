@@ -8,6 +8,12 @@
       "port": 3000
     },
     {
+      "name": "photoshelf-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "port": 3000
+    },
+    {
       "name": "docs",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "docs", "-p", "8080", "--no-clipboard"],

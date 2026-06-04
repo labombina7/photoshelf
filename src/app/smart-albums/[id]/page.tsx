@@ -2,7 +2,7 @@ import { redirect, notFound } from 'next/navigation';
 import { getSession } from '@/lib/session';
 import { getActiveCatalogId } from '@/lib/catalog-context';
 import { getSidebarData } from '@/lib/queries/sidebar';
-import { getSmartAlbumById, getSmartAlbumGroups } from '@/lib/queries/smartAlbums';
+import { getSmartAlbumById, getSmartAlbumPhotos } from '@/lib/queries/smartAlbums';
 import { rulesFromJson } from '@/lib/smartAlbumQuery';
 import SmartAlbumDetailClient from './SmartAlbumDetailClient';
 
@@ -17,12 +17,14 @@ export default async function SmartAlbumDetailPage({ params }: { params: Promise
   const catalogId = await getActiveCatalogId();
   const sidebar = getSidebarData(catalogId);
   const rules = rulesFromJson(album.rules);
-  const { groups, total } = getSmartAlbumGroups(rules, catalogId);
+  const { rows, hasMore, nextCursor, total } = getSmartAlbumPhotos(rules, catalogId, 120);
 
   return (
     <SmartAlbumDetailClient
       album={album}
-      groups={groups}
+      initialPhotos={rows}
+      initialHasMore={hasMore}
+      initialNextCursor={nextCursor}
       total={total}
       themes={sidebar.themes}
       totalPhotos={sidebar.totalPhotos}

@@ -1,22 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
-import PhotoGrid from '@/components/PhotoGrid';
 import { IconEdit, IconMenu } from '@/components/Icons';
 import SmartAlbumBuilder from '../SmartAlbumBuilder';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 import type { AlbumRule } from '@/lib/smartAlbumQuery';
-
-interface EventGroup {
-  year: number;
-  event: string;
-  count: number;
-  thumbnail_id: number;
-}
+import type { AlbumPhotoRow } from '@/lib/queries/smartAlbums';
 
 interface AlbumData {
   id: number;
@@ -27,7 +20,9 @@ interface AlbumData {
 
 interface SmartAlbumDetailClientProps {
   album: AlbumData;
-  groups: EventGroup[];
+  initialPhotos: AlbumPhotoRow[];
+  initialHasMore: boolean;
+  initialNextCursor: string | null;
   total: number;
   themes: Theme[];
   totalPhotos: number;
@@ -39,9 +34,13 @@ interface SmartAlbumDetailClientProps {
   activeCatalogId: number;
 }
 
+const THUMB_SIZE = 200;
+
 export default function SmartAlbumDetailClient({
   album,
-  groups,
+  initialPhotos,
+  initialHasMore,
+  initialNextCursor,
   total,
   themes,
   totalPhotos,
@@ -53,18 +52,42 @@ export default function SmartAlbumDetailClient({
   activeCatalogId,
 }: SmartAlbumDetailClientProps) {
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [photos, setPhotos] = useState<AlbumPhotoRow[]>(initialPhotos);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [nextCursor, setNextCursor] = useState<string | null>(initialNextCursor);
+  const [loading, setLoading] = useState(false);
   const [showBuilder, setShowBuilder] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-  function handleToggle(key: string) {
-    setCollapsed(prev => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  }
+  const fetchMore = useCallback(async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (nextCursor) params.set('cursor', nextCursor);
+      const res = await fetch(`/api/smart-albums/${album.id}/photos?${params}`);
+      const data = await res.json() as { rows: AlbumPhotoRow[]; hasMore: boolean; nextCursor: string | null };
+      setPhotos(prev => [...prev, ...data.rows]);
+      setHasMore(data.hasMore);
+      setNextCursor(data.nextCursor);
+    } catch (err) {
+      console.error('[SmartAlbumDetail] fetchMore error:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, hasMore, nextCursor, album.id]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) fetchMore(); },
+      { rootMargin: '600px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [fetchMore]);
 
   async function handleSave(name: string, rules: AlbumRule[]) {
     await fetch(`/api/smart-albums/${album.id}`, {
@@ -102,7 +125,6 @@ export default function SmartAlbumDetailClient({
               className="mobile-menu-btn"
               onClick={() => setMobileOpen(true)}
               aria-label="Abrir menú"
-              style={{ display: 'none' }}
             >
               <IconMenu size={20} />
             </button>
@@ -129,13 +151,63 @@ export default function SmartAlbumDetailClient({
             </div>
           </div>
 
-          <PhotoGrid
-            groups={groups}
-            collapsed={collapsed}
-            onToggle={handleToggle}
-            activeFilters={{}}
-            extraParams={{ smartAlbumId: String(album.id) }}
-          />
+          {photos.length === 0 ? (
+            <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '64px 0' }}>
+              <p style={{ margin: 0, fontSize: 15 }}>Ninguna foto cumple las reglas de este álbum</p>
+            </div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(auto-fill, minmax(${THUMB_SIZE}px, 1fr))`,
+              gap: 4,
+            }}>
+              {photos.map(photo => (
+                <Link
+                  key={photo.id}
+                  href={`/library/${photo.id}`}
+                  style={{ display: 'block', aspectRatio: '1', overflow: 'hidden', background: 'var(--surface)', borderRadius: 2, position: 'relative' }}
+                  onClick={() => {
+                    try {
+                      sessionStorage.setItem('photoshelf_detail_origin', JSON.stringify({
+                        href: window.location.pathname,
+                        label: album.name,
+                      }));
+                    } catch {}
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/api/photos/${photo.id}/thumbnail?size=${THUMB_SIZE}`}
+                    alt={photo.filename}
+                    loading="lazy"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                  {photo.tags_preview && (
+                    <div style={{
+                      position: 'absolute', bottom: 0, left: 0, right: 0,
+                      background: 'linear-gradient(transparent, rgba(0,0,0,0.55))',
+                      padding: '12px 6px 4px',
+                      display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'flex-end',
+                    }}>
+                      {photo.tags_preview.split(', ').slice(0, 2).map(tag => (
+                        <span key={tag} style={{
+                          background: 'rgba(0,0,0,0.45)', color: '#fff', fontSize: 10,
+                          padding: '1px 5px', borderRadius: 3,
+                        }}>{tag}</span>
+                      ))}
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div ref={sentinelRef} style={{ height: 1 }} />
+          {loading && (
+            <div style={{ textAlign: 'center', padding: 24, color: 'var(--text-tertiary)' }}>
+              <span className="spinner dark" />
+            </div>
+          )}
         </div>
       </div>
 

@@ -30,18 +30,14 @@ export interface QueryFragments {
 }
 
 /**
- * Translates validated album rules into safe SQL fragments.
- * Uses a whitelist of fields and bind parameters — no string interpolation of user data.
+ * Translates validated album rules into safe SQL WHERE fragments using EXISTS subqueries.
+ * All params are WHERE-level so they compose safely with any base query's JOIN+WHERE params.
+ * No JOINs are emitted — this avoids param-ordering issues when used as an extra filter.
  */
 export function buildSmartAlbumQuery(rawRules: AlbumRule[], catalogId = 1, options?: { skipCatalogFilter?: boolean }): QueryFragments {
   const rules = validateRules(rawRules);
-  const joinParts: string[] = [];
-  const joinParams: (string | number)[] = [];
   const whereParts: string[] = options?.skipCatalogFilter ? [] : ['p.catalog_id = ?'];
   const whereParams: (string | number)[] = options?.skipCatalogFilter ? [] : [catalogId];
-
-  let tagJoinIdx = 0;
-  let themeJoinIdx = 0;
 
   for (const rule of rules) {
     if (rule.field === 'year') {
@@ -56,48 +52,39 @@ export function buildSmartAlbumQuery(rawRules: AlbumRule[], catalogId = 1, optio
         whereParams.push(parseInt(rule.value, 10));
       }
     } else if (rule.field === 'tag' && rule.op === 'contains' && rule.value) {
-      const alias = `_ptag${tagJoinIdx}`;
-      const talias = `_ttag${tagJoinIdx}`;
-      joinParts.push(
-        `JOIN photo_tags ${alias} ON ${alias}.photo_id = p.id` +
-        ` JOIN tags ${talias} ON ${talias}.id = ${alias}.tag_id AND ${talias}.name = ?`
+      whereParts.push(
+        'EXISTS (SELECT 1 FROM photo_tags _pt JOIN tags _t ON _t.id = _pt.tag_id WHERE _pt.photo_id = p.id AND _t.name = ?)'
       );
-      joinParams.push(rule.value);
-      tagJoinIdx++;
+      whereParams.push(rule.value);
     } else if (rule.field === 'theme' && rule.op === 'eq' && rule.value) {
-      const alias = `_pth${themeJoinIdx}`;
-      joinParts.push(`JOIN photo_themes ${alias} ON ${alias}.photo_id = p.id AND ${alias}.theme_id = ?`);
-      joinParams.push(parseInt(rule.value, 10));
-      themeJoinIdx++;
+      whereParts.push(
+        'EXISTS (SELECT 1 FROM photo_themes _pth WHERE _pth.photo_id = p.id AND _pth.theme_id = ?)'
+      );
+      whereParams.push(parseInt(rule.value, 10));
     } else if (rule.field === 'favorite') {
-      if (rule.op === 'is_true') {
-        whereParts.push('p.is_favorite = 1');
-      } else if (rule.op === 'is_false') {
-        whereParts.push('p.is_favorite = 0');
-      }
+      if (rule.op === 'is_true')  whereParts.push('p.is_favorite = 1');
+      if (rule.op === 'is_false') whereParts.push('p.is_favorite = 0');
     } else if (rule.field === 'camera' && rule.op === 'contains' && rule.value) {
       whereParts.push('p.camera LIKE ?');
       whereParams.push(`%${rule.value}%`);
     } else if (rule.field === 'no_tags' && rule.op === 'is_empty') {
-      joinParts.push('LEFT JOIN photo_tags _ptno ON _ptno.photo_id = p.id');
-      whereParts.push('_ptno.photo_id IS NULL');
+      whereParts.push('NOT EXISTS (SELECT 1 FROM photo_tags _ptno WHERE _ptno.photo_id = p.id)');
     }
   }
 
   return {
-    joinSql:  joinParts.join('\n  '),
+    joinSql:  '',
     whereSql: whereParts.map(c => `AND ${c}`).join('\n  '),
-    params:   [...joinParams, ...whereParams],
+    params:   whereParams,
   };
 }
 
 export function countSmartAlbumPhotos(rules: AlbumRule[], catalogId = 1): number {
   const db = getDb();
-  const { joinSql, whereSql, params } = buildSmartAlbumQuery(rules, catalogId);
+  const { whereSql, params } = buildSmartAlbumQuery(rules, catalogId);
   const row = db.prepare(`
     SELECT COUNT(DISTINCT p.id) as c
     FROM photos p
-    ${joinSql}
     WHERE 1=1
     ${whereSql}
   `).get(...params) as { c: number };

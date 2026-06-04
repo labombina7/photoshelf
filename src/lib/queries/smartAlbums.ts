@@ -1,6 +1,5 @@
 import { getDb } from '@/lib/db';
 import { buildSmartAlbumQuery, rulesFromJson, type AlbumRule } from '@/lib/smartAlbumQuery';
-import type { EventGroupRow } from './groups';
 
 export interface SmartAlbumRow {
   id: number;
@@ -20,11 +19,10 @@ export function listSmartAlbums(catalogId = 1): SmartAlbumWithCount[] {
 
   return albums.map(album => {
     const rules = rulesFromJson(album.rules);
-    const { joinSql, whereSql, params } = buildSmartAlbumQuery(rules, catalogId);
+    const { whereSql, params } = buildSmartAlbumQuery(rules, catalogId);
     const row = db.prepare(`
       SELECT COUNT(DISTINCT p.id) as c, MIN(p.id) as cover_id
       FROM photos p
-      ${joinSql}
       WHERE 1=1
       ${whereSql}
     `).get(...params) as { c: number; cover_id: number | null };
@@ -36,21 +34,54 @@ export function getSmartAlbumById(id: number): SmartAlbumRow | null {
   return getDb().prepare('SELECT * FROM smart_albums WHERE id = ?').get(id) as SmartAlbumRow | null;
 }
 
-export function getSmartAlbumGroups(rules: AlbumRule[], catalogId = 1): { groups: EventGroupRow[]; total: number } {
+export interface AlbumPhotoRow {
+  id: number;
+  filename: string;
+  taken_at: string | null;
+  tags_preview: string | null;
+}
+
+export interface AlbumPhotosResult {
+  rows: AlbumPhotoRow[];
+  hasMore: boolean;
+  nextCursor: string | null;
+  total: number;
+}
+
+export function getSmartAlbumPhotos(rules: AlbumRule[], catalogId = 1, limit = 120, cursor?: string | null): AlbumPhotosResult {
   const db = getDb();
-  const { joinSql, whereSql, params } = buildSmartAlbumQuery(rules, catalogId);
+  const { whereSql, params } = buildSmartAlbumQuery(rules, catalogId);
+  const tagsSql = `(SELECT GROUP_CONCAT(t.name, ', ') FROM photo_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.photo_id = p.id LIMIT 3) AS tags_preview`;
+  const orderBy = `CASE WHEN p.taken_at IS NULL THEN 1 ELSE 0 END ASC, p.taken_at DESC, p.id DESC`;
 
-  const groups = db.prepare(`
-    SELECT p.year, p.event, COUNT(DISTINCT p.id) as count, MIN(p.id) as thumbnail_id
-    FROM photos p
-    ${joinSql}
-    WHERE 1=1
-    ${whereSql}
-    GROUP BY p.year, p.event ORDER BY p.year DESC, p.event ASC
-  `).all(...params) as EventGroupRow[];
+  const rows: AlbumPhotoRow[] = cursor
+    ? db.prepare(`
+        SELECT p.id, p.filename, p.taken_at, ${tagsSql}
+        FROM photos p
+        WHERE 1=1 ${whereSql}
+        AND (p.taken_at IS NULL OR p.taken_at < ?)
+        ORDER BY ${orderBy} LIMIT ?
+      `).all(...params, cursor, limit + 1) as AlbumPhotoRow[]
+    : db.prepare(`
+        SELECT p.id, p.filename, p.taken_at, ${tagsSql}
+        FROM photos p
+        WHERE 1=1 ${whereSql}
+        ORDER BY ${orderBy} LIMIT ?
+      `).all(...params, limit + 1) as AlbumPhotoRow[];
 
-  const total = groups.reduce((sum, g) => sum + g.count, 0);
-  return { groups, total };
+  const hasMore = rows.length > limit;
+  const page = hasMore ? rows.slice(0, limit) : rows;
+  let nextCursor: string | null = null;
+  if (hasMore) {
+    const lastDated = [...page].reverse().find(r => r.taken_at !== null);
+    nextCursor = lastDated?.taken_at ?? null;
+  }
+
+  const totalRow = db.prepare(`
+    SELECT COUNT(DISTINCT p.id) as c FROM photos p WHERE 1=1 ${whereSql}
+  `).get(...params) as { c: number };
+
+  return { rows: page, hasMore, nextCursor, total: totalRow.c };
 }
 
 export function createSmartAlbum(name: string, rules: AlbumRule[]): number {

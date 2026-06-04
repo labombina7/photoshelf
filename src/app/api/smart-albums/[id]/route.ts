@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getActiveCatalogId } from '@/lib/catalog-context';
-import { getSmartAlbumById, updateSmartAlbum, deleteSmartAlbum, getSmartAlbumGroups } from '@/lib/queries/smartAlbums';
-import { rulesFromJson, type AlbumRule } from '@/lib/smartAlbumQuery';
+import { getSmartAlbumById, updateSmartAlbum, deleteSmartAlbum } from '@/lib/queries/smartAlbums';
+import type { AlbumRule } from '@/lib/smartAlbumQuery';
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -13,10 +13,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   if (!album) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   try {
-    const catalogId = await getActiveCatalogId();
-    const rules = rulesFromJson(album.rules);
-    const { groups, total } = getSmartAlbumGroups(rules, catalogId);
-    return NextResponse.json({ album, groups, total });
+    return NextResponse.json({ album });
   } catch (err) {
     console.error('[smart-albums/id] GET error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
