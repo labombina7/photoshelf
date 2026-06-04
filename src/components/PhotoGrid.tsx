@@ -53,6 +53,7 @@ interface PhotoGridProps {
   onToggle: (key: string) => void;
   activeFilters: ActiveFilters;
   showYear?: boolean;
+  extraParams?: Record<string, string>;
 }
 
 function EventGroupBlock({
@@ -407,9 +408,15 @@ function EventGroupBlock({
   );
 }
 
-export default function PhotoGrid({ groups, collapsed, onToggle, activeFilters, showYear = false }: PhotoGridProps) {
+export default function PhotoGrid({ groups, collapsed, onToggle, activeFilters, showYear = false, extraParams }: PhotoGridProps) {
   const searchParams = useSearchParams();
-  const currentParams = searchParams.toString();
+  const baseParams = searchParams.toString();
+  const currentParams = (() => {
+    if (!extraParams) return baseParams;
+    const p = new URLSearchParams(baseParams);
+    for (const [k, v] of Object.entries(extraParams)) p.set(k, v);
+    return p.toString();
+  })();
 
   if (groups.length === 0) {
     return (

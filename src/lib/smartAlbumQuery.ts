@@ -33,12 +33,12 @@ export interface QueryFragments {
  * Translates validated album rules into safe SQL fragments.
  * Uses a whitelist of fields and bind parameters — no string interpolation of user data.
  */
-export function buildSmartAlbumQuery(rawRules: AlbumRule[], catalogId = 1): QueryFragments {
+export function buildSmartAlbumQuery(rawRules: AlbumRule[], catalogId = 1, options?: { skipCatalogFilter?: boolean }): QueryFragments {
   const rules = validateRules(rawRules);
   const joinParts: string[] = [];
   const joinParams: (string | number)[] = [];
-  const whereParts: string[] = ['p.catalog_id = ?'];
-  const whereParams: (string | number)[] = [catalogId];
+  const whereParts: string[] = options?.skipCatalogFilter ? [] : ['p.catalog_id = ?'];
+  const whereParams: (string | number)[] = options?.skipCatalogFilter ? [] : [catalogId];
 
   let tagJoinIdx = 0;
   let themeJoinIdx = 0;

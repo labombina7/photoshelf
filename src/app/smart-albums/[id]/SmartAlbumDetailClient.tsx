@@ -134,6 +134,7 @@ export default function SmartAlbumDetailClient({
             collapsed={collapsed}
             onToggle={handleToggle}
             activeFilters={{}}
+            extraParams={{ smartAlbumId: String(album.id) }}
           />
         </div>
       </div>
