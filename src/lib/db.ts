@@ -100,6 +100,7 @@ function initSchema(db: Database.Database) {
   migrateIntegrity(db);
   migrateHealthSnapshots(db);
   migrateExif(db);
+  migrateSmartAlbums(db);
 }
 
 function migrateEpic001(db: Database.Database) {
@@ -248,6 +249,17 @@ function migrateExif(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_photos_iso       ON photos(iso);
     CREATE INDEX IF NOT EXISTS idx_photos_aperture  ON photos(aperture);
     CREATE INDEX IF NOT EXISTS idx_photos_focal     ON photos(focal_length);
+  `);
+}
+
+function migrateSmartAlbums(db: Database.Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS smart_albums (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      name       TEXT NOT NULL,
+      rules      TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
   `);
 }
 

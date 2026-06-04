@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck, IconShield, IconHeartbeat } from './Icons';
+import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck, IconShield, IconHeartbeat, IconSmartAlbum } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -24,6 +24,7 @@ function shortenPath(p: string): string {
 interface SidebarProps {
   themes: Theme[];
   projects?: { id: number; title: string }[];
+  smartAlbums?: { id: number; name: string }[];
   totalPhotos: number;
   favoriteCount?: number;
   untaggedCount?: number;
@@ -37,6 +38,7 @@ interface SidebarProps {
 function SidebarInner({
   themes,
   projects = [],
+  smartAlbums = [],
   totalPhotos,
   favoriteCount = 0,
   untaggedCount = 0,
@@ -454,6 +456,35 @@ function SidebarInner({
             <Link href="/projects" onClick={handleNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
               <IconPlus size={13} />
               Nuevo proyecto
+            </Link>
+          </div>
+        )}
+      </div>
+
+      <div className="sidebar-section">
+        <Link
+          href="/smart-albums"
+          onClick={handleNavClick}
+          className="sidebar-section-label sidebar-section-label--link"
+        >
+          Álbumes
+        </Link>
+        {smartAlbums.map(a => (
+          <Link
+            key={a.id}
+            href={`/smart-albums/${a.id}`}
+            onClick={handleNavClick}
+            className={`sidebar-item ${pathname === `/smart-albums/${a.id}` ? 'active' : ''}`}
+          >
+            <IconSmartAlbum size={14} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
+          </Link>
+        ))}
+        {smartAlbums.length === 0 && (
+          <div className="sidebar-item" style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }}>
+            <Link href="/smart-albums" onClick={handleNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
+              <IconPlus size={13} />
+              Nuevo álbum
             </Link>
           </div>
         )}
