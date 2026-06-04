@@ -2,6 +2,7 @@ import { getDb } from '@/lib/db';
 import { getSidebarProjects } from './projects';
 import { listThemes } from './themes';
 import { listCatalogs } from './catalogs';
+import { getSidebarSmartAlbums } from './smartAlbums';
 import type { ThemeWithCount } from './themes';
 import type { CatalogRow } from './catalogs';
 
@@ -12,6 +13,7 @@ export interface SidebarData {
   themes: ThemeWithCount[];
   projects: { id: number; title: string }[];
   catalogs: CatalogRow[];
+  smartAlbums: { id: number; name: string }[];
 }
 
 /**
@@ -31,9 +33,10 @@ export function getSidebarData(catalogId = 1): SidebarData {
     AND NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id)
   `).get(catalogId) as { c: number }).c;
 
-  const themes   = listThemes(catalogId);
-  const projects = getSidebarProjects();
-  const catalogs = listCatalogs();
+  const themes       = listThemes(catalogId);
+  const projects     = getSidebarProjects();
+  const catalogs     = listCatalogs();
+  const smartAlbums  = getSidebarSmartAlbums();
 
-  return { totalPhotos, favoriteCount, untaggedCount, themes, projects, catalogs };
+  return { totalPhotos, favoriteCount, untaggedCount, themes, projects, catalogs, smartAlbums };
 }
