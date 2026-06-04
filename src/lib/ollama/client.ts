@@ -34,7 +34,7 @@ export async function callOllama(prompt: string, timeoutMs = OLLAMA_TIMEOUT_TEXT
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'llama3.2-vision:11b',
+        model: 'llava:7b',
         prompt,
         stream: false,
         options: { temperature: 0 },
@@ -56,7 +56,7 @@ export async function callOllamaVision(prompt: string, imageBase64: string, time
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'llama3.2-vision:11b',
+        model: 'llava:7b',
         prompt,
         images: [imageBase64],
         stream: false,
