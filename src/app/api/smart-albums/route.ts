@@ -27,7 +27,8 @@ export async function POST(req: NextRequest) {
     if (!body.name?.trim()) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
-    const id = createSmartAlbum(body.name.trim(), body.rules ?? []);
+    const catalogId = await getActiveCatalogId();
+    const id = createSmartAlbum(body.name.trim(), body.rules ?? [], catalogId);
     return NextResponse.json({ id }, { status: 201 });
   } catch (err) {
     console.error('[smart-albums] POST error:', err);

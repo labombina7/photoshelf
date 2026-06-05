@@ -18,7 +18,7 @@ export interface SmartAlbumWithCount extends SmartAlbumRow {
 export function listSmartAlbums(catalogId = 1): SmartAlbumWithCount[] {
   const db = getDb();
   const albums = db.prepare(
-    'SELECT * FROM smart_albums WHERE catalog_id IS NULL OR catalog_id = ? ORDER BY created_at DESC'
+    'SELECT * FROM smart_albums WHERE catalog_id = ? ORDER BY created_at DESC'
   ).all(catalogId) as SmartAlbumRow[];
 
   return albums.map(album => {
@@ -88,10 +88,10 @@ export function getSmartAlbumPhotos(rules: AlbumRule[], catalogId = 1, limit = 1
   return { rows: page, hasMore, nextCursor, total: totalRow.c };
 }
 
-export function createSmartAlbum(name: string, rules: AlbumRule[]): number {
+export function createSmartAlbum(name: string, rules: AlbumRule[], catalogId = 1): number {
   const result = getDb().prepare(
-    'INSERT INTO smart_albums (name, rules) VALUES (?, ?)'
-  ).run(name, JSON.stringify(rules));
+    'INSERT INTO smart_albums (name, rules, catalog_id) VALUES (?, ?, ?)'
+  ).run(name, JSON.stringify(rules), catalogId);
   return result.lastInsertRowid as number;
 }
 
@@ -111,7 +111,7 @@ export function deleteSmartAlbum(id: number): void {
 
 export function getSidebarSmartAlbums(catalogId = 1): { id: number; name: string }[] {
   return getDb().prepare(
-    'SELECT id, name FROM smart_albums WHERE catalog_id IS NULL OR catalog_id = ? ORDER BY created_at DESC'
+    'SELECT id, name FROM smart_albums WHERE catalog_id = ? ORDER BY created_at DESC'
   ).all(catalogId) as { id: number; name: string }[];
 }
 
