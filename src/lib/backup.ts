@@ -22,7 +22,7 @@ export async function runBackup(): Promise<BackupResult> {
     if (match === 'T') return '-';
     if (match === ':') return '';
     return match;
-  }).slice(0, 15); // YYYYMMdd-HHmmss
+  }).slice(0, 17); // YYYY-MM-DD-HHmmss
 
   const dbDest = path.join(BACKUP_PATH, `photoshelf-${stamp}.db`);
   const jsonDest = path.join(BACKUP_PATH, `photoshelf-${stamp}-tags.json`);
