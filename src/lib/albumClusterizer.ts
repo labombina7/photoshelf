@@ -9,41 +9,52 @@ export interface AlbumCluster {
   rules: AlbumRule[];
 }
 
-// Two photos more than 14 days apart → different event
-const GAP_MS = 14 * 24 * 60 * 60 * 1000;
-
-// Clusters with fewer photos than this get merged into adjacent cluster
-const MIN_PHOTOS = 5;
+// Within a month: gap larger than this → split into two clusters
+const INTRA_MONTH_GAP_MS = 10 * 24 * 60 * 60 * 1000; // 10 days
+// Sub-cluster must have at least this many photos to be worth splitting
+const MIN_SPLIT_PHOTOS = 8;
 
 const SPANISH_MONTHS = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 
-function suggestName(dateFrom: string, dateTo: string): string {
+function monthKey(isoDate: string): string {
+  // "2026-01-15T..." → "2026-01"
+  return isoDate.slice(0, 7);
+}
+
+function suggestName(dateFrom: string, dateTo: string, isSubCluster = false): string {
   const from = new Date(dateFrom + 'T12:00:00Z');
-  const to   = new Date(dateTo   + 'T12:00:00Z');
   const year  = from.getFullYear();
   const month = from.getMonth();
   const day   = from.getDate();
 
-  // Known holidays
+  // Known holidays — keep specific
   if (month === 11 && day >= 24 && day <= 26) return `Navidad ${year}`;
   if (month === 0  && day >= 5  && day <= 6)  return `Reyes ${year}`;
   if (month === 0  && day >= 1  && day <= 3)  return `Año Nuevo ${year}`;
 
   const fromLabel = SPANISH_MONTHS[month];
+  const to   = new Date(dateTo + 'T12:00:00Z');
 
-  // Same month → "Mes Año"
-  if (from.getFullYear() === to.getFullYear() && from.getMonth() === to.getMonth()) {
-    return `${fromLabel} ${year}`;
+  if (!isSubCluster) {
+    // Same month → "Mes Año"
+    if (from.getFullYear() === to.getFullYear() && from.getMonth() === to.getMonth()) {
+      return `${fromLabel} ${year}`;
+    }
+    const toLabel = SPANISH_MONTHS[to.getMonth()];
+    const toYear  = to.getFullYear();
+    if (year === toYear) return `${fromLabel}–${toLabel} ${year}`;
+    return `${fromLabel} ${year}–${toLabel} ${toYear}`;
   }
 
-  // Cross-month → "Mes–Mes Año"
-  const toLabel = SPANISH_MONTHS[to.getMonth()];
-  const toYear  = to.getFullYear();
-  if (year === toYear) return `${fromLabel}–${toLabel} ${year}`;
-  return `${fromLabel} ${year}–${toLabel} ${toYear}`;
+  // Sub-cluster within a month: show day range
+  const fromDay = from.getDate();
+  const toDay   = to.getDate();
+  if (fromDay <= 15 && toDay <= 15) return `Principios de ${fromLabel} ${year}`;
+  if (fromDay > 15  && toDay > 15)  return `Finales de ${fromLabel} ${year}`;
+  return `${fromLabel} ${year}`;
 }
 
 export function clusterPhotos(catalogId: number): AlbumCluster[] {
@@ -58,69 +69,73 @@ export function clusterPhotos(catalogId: number): AlbumCluster[] {
 
   if (rows.length === 0) return [];
 
-  // ── Step 1: raw gap-based split ──────────────────────────────────────────
-  const raw: { start: string; end: string; count: number }[] = [];
-  let clusterStart = rows[0].taken_at;
-  let clusterEnd   = rows[0].taken_at;
-  let count = 1;
+  // ── Step 1: group by year+month ──────────────────────────────────────────
+  const byMonth = new Map<string, string[]>();
+  for (const { taken_at } of rows) {
+    const key = monthKey(taken_at);
+    if (!byMonth.has(key)) byMonth.set(key, []);
+    byMonth.get(key)!.push(taken_at);
+  }
 
-  for (let i = 1; i < rows.length; i++) {
-    const prev = new Date(rows[i - 1].taken_at).getTime();
-    const curr = new Date(rows[i].taken_at).getTime();
-    if (curr - prev > GAP_MS) {
-      raw.push({ start: clusterStart, end: clusterEnd, count });
-      clusterStart = rows[i].taken_at;
-      count = 1;
+  // ── Step 2: within each month, split on large internal gaps ─────────────
+  const clusters: { start: string; end: string; count: number; sub: boolean }[] = [];
+
+  for (const [, photos] of byMonth) {
+    // photos are already sorted ASC
+    const subGroups: { start: string; end: string; count: number }[] = [];
+    let sgStart = photos[0];
+    let sgEnd   = photos[0];
+    let sgCount = 1;
+
+    for (let i = 1; i < photos.length; i++) {
+      const gap = new Date(photos[i]).getTime() - new Date(photos[i - 1]).getTime();
+      if (gap > INTRA_MONTH_GAP_MS) {
+        subGroups.push({ start: sgStart, end: sgEnd, count: sgCount });
+        sgStart = photos[i];
+        sgCount = 1;
+      } else {
+        sgCount++;
+      }
+      sgEnd = photos[i];
+    }
+    subGroups.push({ start: sgStart, end: sgEnd, count: sgCount });
+
+    // Only split if BOTH halves are big enough — otherwise keep as one month
+    const worthy = subGroups.filter(sg => sg.count >= MIN_SPLIT_PHOTOS);
+    if (worthy.length >= 2) {
+      for (const sg of worthy) {
+        clusters.push({ ...sg, sub: true });
+      }
+      // Tiny sub-groups get merged into the nearest worthy one
+      for (const sg of subGroups.filter(sg => sg.count < MIN_SPLIT_PHOTOS)) {
+        const nearest = worthy.reduce((best, w) =>
+          Math.abs(new Date(w.start).getTime() - new Date(sg.start).getTime()) <
+          Math.abs(new Date(best.start).getTime() - new Date(sg.start).getTime()) ? w : best
+        );
+        const idx = clusters.findIndex(c => c.start === nearest.start);
+        if (idx >= 0) {
+          clusters[idx].count += sg.count;
+          if (sg.end > clusters[idx].end) clusters[idx].end = sg.end;
+          if (sg.start < clusters[idx].start) clusters[idx].start = sg.start;
+        }
+      }
     } else {
-      count++;
-    }
-    clusterEnd = rows[i].taken_at;
-  }
-  raw.push({ start: clusterStart, end: clusterEnd, count });
-
-  // ── Step 2: merge small clusters into the nearest neighbour ─────────────
-  const merged: { start: string; end: string; count: number }[] = [...raw];
-  let changed = true;
-  while (changed) {
-    changed = false;
-    for (let i = 0; i < merged.length; i++) {
-      if (merged[i].count < MIN_PHOTOS && merged.length > 1) {
-        // Merge with previous if available, else with next
-        const target = i > 0 ? i - 1 : i + 1;
-        const a = merged[Math.min(i, target)];
-        const b = merged[Math.max(i, target)];
-        merged.splice(Math.min(i, target), 2, {
-          start: a.start,
-          end:   b.end,
-          count: a.count + b.count,
-        });
-        changed = true;
-        break;
-      }
+      // Whole month as one cluster
+      const allPhotos = photos;
+      clusters.push({
+        start: allPhotos[0],
+        end:   allPhotos[allPhotos.length - 1],
+        count: allPhotos.length,
+        sub:   false,
+      });
     }
   }
 
-  // ── Step 3: same-month clusters → merge ─────────────────────────────────
-  let sameMonthChanged = true;
-  while (sameMonthChanged) {
-    sameMonthChanged = false;
-    for (let i = 0; i < merged.length - 1; i++) {
-      const a = new Date(merged[i].start);
-      const b = new Date(merged[i + 1].start);
-      if (a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth()) {
-        merged.splice(i, 2, {
-          start: merged[i].start,
-          end:   merged[i + 1].end,
-          count: merged[i].count + merged[i + 1].count,
-        });
-        sameMonthChanged = true;
-        break;
-      }
-    }
-  }
+  // Sort by start date
+  clusters.sort((a, b) => a.start.localeCompare(b.start));
 
-  // ── Step 4: build result ─────────────────────────────────────────────────
-  return merged.map(c => {
+  // ── Step 3: build result ─────────────────────────────────────────────────
+  return clusters.map(c => {
     const dateFrom = c.start.slice(0, 10);
     const dateTo   = c.end.slice(0, 10);
     const endOfDay = `${dateTo}T23:59:59.999Z`;
@@ -130,6 +145,12 @@ export function clusterPhotos(catalogId: number): AlbumCluster[] {
       { field: 'taken_before', op: 'lte', value: endOfDay },
     ];
 
-    return { name: suggestName(dateFrom, dateTo), dateFrom, dateTo, photoCount: c.count, rules };
+    return {
+      name: suggestName(dateFrom, dateTo, c.sub),
+      dateFrom,
+      dateTo,
+      photoCount: c.count,
+      rules,
+    };
   });
 }
