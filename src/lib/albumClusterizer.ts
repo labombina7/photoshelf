@@ -7,150 +7,166 @@ export interface AlbumCluster {
   dateTo: string;
   photoCount: number;
   rules: AlbumRule[];
+  source: 'event_match' | 'fallback'; // matched a known event or fallback grouping
 }
 
-// Within a month: gap larger than this → split into two clusters
-const INTRA_MONTH_GAP_MS = 10 * 24 * 60 * 60 * 1000; // 10 days
-// Sub-cluster must have at least this many photos to be worth splitting
-const MIN_SPLIT_PHOTOS = 8;
+// ── Cross-catalog event matching ─────────────────────────────────────────────
+
+interface KnownEvent {
+  name: string;       // e.g. "Vacaciones-Grecia"
+  firstAt: string;    // ISO
+  lastAt: string;     // ISO
+}
+
+function getKnownEvents(excludeCatalogId: number): KnownEvent[] {
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT event, MIN(taken_at) as first_at, MAX(taken_at) as last_at
+    FROM photos
+    WHERE catalog_id != ?
+      AND taken_at IS NOT NULL
+      AND event IS NOT NULL AND event != ''
+    GROUP BY catalog_id, year, event
+    HAVING COUNT(*) >= 3
+    ORDER BY first_at ASC
+  `).all(excludeCatalogId) as { event: string; first_at: string; last_at: string }[];
+
+  return rows.map(r => ({
+    name: r.event.replace(/-/g, ' '),
+    firstAt: r.first_at,
+    lastAt:  r.last_at,
+  }));
+}
+
+// Expand event window by N days on each side to catch nearby iPhone photos
+const EVENT_MARGIN_MS = 2 * 24 * 60 * 60 * 1000;
+
+// ── Fallback: contiguous-day grouping for unmatched photos ───────────────────
+// Gap larger than this between consecutive unmatched photos → new fallback group
+const FALLBACK_GAP_MS = 21 * 24 * 60 * 60 * 1000; // 3 weeks
+const FALLBACK_MIN_PHOTOS = 10;
 
 const SPANISH_MONTHS = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
 ];
 
-function monthKey(isoDate: string): string {
-  // "2026-01-15T..." → "2026-01"
-  return isoDate.slice(0, 7);
-}
-
-function suggestName(dateFrom: string, dateTo: string, isSubCluster = false): string {
+function fallbackName(dateFrom: string, dateTo: string): string {
   const from = new Date(dateFrom + 'T12:00:00Z');
+  const to   = new Date(dateTo   + 'T12:00:00Z');
+  const month = SPANISH_MONTHS[from.getMonth()];
   const year  = from.getFullYear();
-  const month = from.getMonth();
-  const day   = from.getDate();
-
-  // Known holidays — keep specific
-  if (month === 11 && day >= 24 && day <= 26) return `Navidad ${year}`;
-  if (month === 0  && day >= 5  && day <= 6)  return `Reyes ${year}`;
-  if (month === 0  && day >= 1  && day <= 3)  return `Año Nuevo ${year}`;
-
-  const fromLabel = SPANISH_MONTHS[month];
-  const to   = new Date(dateTo + 'T12:00:00Z');
-
-  if (!isSubCluster) {
-    // Same month → "Mes Año"
-    if (from.getFullYear() === to.getFullYear() && from.getMonth() === to.getMonth()) {
-      return `${fromLabel} ${year}`;
-    }
-    const toLabel = SPANISH_MONTHS[to.getMonth()];
-    const toYear  = to.getFullYear();
-    if (year === toYear) return `${fromLabel}–${toLabel} ${year}`;
-    return `${fromLabel} ${year}–${toLabel} ${toYear}`;
+  if (from.getFullYear() === to.getFullYear() && from.getMonth() === to.getMonth()) {
+    return `${month} ${year}`;
   }
-
-  // Sub-cluster within a month: show day range
-  const fromDay = from.getDate();
-  const toDay   = to.getDate();
-  if (fromDay <= 15 && toDay <= 15) return `Principios de ${fromLabel} ${year}`;
-  if (fromDay > 15  && toDay > 15)  return `Finales de ${fromLabel} ${year}`;
-  return `${fromLabel} ${year}`;
+  const toMonth = SPANISH_MONTHS[to.getMonth()];
+  const toYear  = to.getFullYear();
+  return year === toYear ? `${month}–${toMonth} ${year}` : `${month} ${year}–${toMonth} ${toYear}`;
 }
+
+// ── Main export ───────────────────────────────────────────────────────────────
 
 export function clusterPhotos(catalogId: number): AlbumCluster[] {
   const db = getDb();
 
-  const rows = db.prepare(`
+  const allPhotos = db.prepare(`
     SELECT taken_at
     FROM photos
     WHERE catalog_id = ? AND taken_at IS NOT NULL
     ORDER BY taken_at ASC
   `).all(catalogId) as { taken_at: string }[];
 
-  if (rows.length === 0) return [];
+  if (allPhotos.length === 0) return [];
 
-  // ── Step 1: group by year+month ──────────────────────────────────────────
-  const byMonth = new Map<string, string[]>();
-  for (const { taken_at } of rows) {
-    const key = monthKey(taken_at);
-    if (!byMonth.has(key)) byMonth.set(key, []);
-    byMonth.get(key)!.push(taken_at);
-  }
+  const knownEvents = getKnownEvents(catalogId);
+  const useCrossMatch = knownEvents.length > 0;
 
-  // ── Step 2: within each month, split on large internal gaps ─────────────
-  const clusters: { start: string; end: string; count: number; sub: boolean }[] = [];
+  // ── Path A: cross-catalog matching ────────────────────────────────────────
+  if (useCrossMatch) {
+    const matched = new Set<string>(); // ISO strings already assigned
+    const eventClusters: AlbumCluster[] = [];
 
-  for (const [, photos] of byMonth) {
-    // photos are already sorted ASC
-    const subGroups: { start: string; end: string; count: number }[] = [];
-    let sgStart = photos[0];
-    let sgEnd   = photos[0];
-    let sgCount = 1;
+    for (const ev of knownEvents) {
+      const windowStart = new Date(new Date(ev.firstAt).getTime() - EVENT_MARGIN_MS).toISOString();
+      const windowEnd   = new Date(new Date(ev.lastAt ).getTime() + EVENT_MARGIN_MS).toISOString();
 
-    for (let i = 1; i < photos.length; i++) {
-      const gap = new Date(photos[i]).getTime() - new Date(photos[i - 1]).getTime();
-      if (gap > INTRA_MONTH_GAP_MS) {
-        subGroups.push({ start: sgStart, end: sgEnd, count: sgCount });
-        sgStart = photos[i];
-        sgCount = 1;
-      } else {
-        sgCount++;
-      }
-      sgEnd = photos[i];
-    }
-    subGroups.push({ start: sgStart, end: sgEnd, count: sgCount });
+      const photos = allPhotos.filter(
+        p => p.taken_at >= windowStart && p.taken_at <= windowEnd
+      );
+      if (photos.length === 0) continue;
 
-    // Only split if BOTH halves are big enough — otherwise keep as one month
-    const worthy = subGroups.filter(sg => sg.count >= MIN_SPLIT_PHOTOS);
-    if (worthy.length >= 2) {
-      for (const sg of worthy) {
-        clusters.push({ ...sg, sub: true });
-      }
-      // Tiny sub-groups get merged into the nearest worthy one
-      for (const sg of subGroups.filter(sg => sg.count < MIN_SPLIT_PHOTOS)) {
-        const nearest = worthy.reduce((best, w) =>
-          Math.abs(new Date(w.start).getTime() - new Date(sg.start).getTime()) <
-          Math.abs(new Date(best.start).getTime() - new Date(sg.start).getTime()) ? w : best
-        );
-        const idx = clusters.findIndex(c => c.start === nearest.start);
-        if (idx >= 0) {
-          clusters[idx].count += sg.count;
-          if (sg.end > clusters[idx].end) clusters[idx].end = sg.end;
-          if (sg.start < clusters[idx].start) clusters[idx].start = sg.start;
-        }
-      }
-    } else {
-      // Whole month as one cluster
-      const allPhotos = photos;
-      clusters.push({
-        start: allPhotos[0],
-        end:   allPhotos[allPhotos.length - 1],
-        count: allPhotos.length,
-        sub:   false,
+      photos.forEach(p => matched.add(p.taken_at));
+
+      const dateFrom = photos[0].taken_at.slice(0, 10);
+      const dateTo   = photos[photos.length - 1].taken_at.slice(0, 10);
+      const endOfDay = `${dateTo}T23:59:59.999Z`;
+
+      eventClusters.push({
+        name:       ev.name,
+        dateFrom,
+        dateTo,
+        photoCount: photos.length,
+        source:     'event_match',
+        rules: [
+          { field: 'taken_after',  op: 'gte', value: photos[0].taken_at },
+          { field: 'taken_before', op: 'lte', value: endOfDay },
+        ],
       });
     }
+
+    // ── Fallback for unmatched photos ────────────────────────────────────────
+    const unmatched = allPhotos.filter(p => !matched.has(p.taken_at));
+    const fallbackClusters = buildFallbackClusters(unmatched);
+
+    return [...eventClusters, ...fallbackClusters]
+      .sort((a, b) => a.dateFrom.localeCompare(b.dateFrom));
   }
 
-  // Sort by start date
-  clusters.sort((a, b) => a.start.localeCompare(b.start));
+  // ── Path B: no other catalogs → pure fallback ─────────────────────────────
+  return buildFallbackClusters(allPhotos);
+}
 
-  // ── Step 3: build result ─────────────────────────────────────────────────
-  return clusters.map(c => {
-    const dateFrom = c.start.slice(0, 10);
-    const dateTo   = c.end.slice(0, 10);
-    const endOfDay = `${dateTo}T23:59:59.999Z`;
+function buildFallbackClusters(
+  photos: { taken_at: string }[]
+): AlbumCluster[] {
+  if (photos.length === 0) return [];
 
-    const rules: AlbumRule[] = [
-      { field: 'taken_after',  op: 'gte', value: c.start },
-      { field: 'taken_before', op: 'lte', value: endOfDay },
-    ];
+  // Gap-based grouping with a large threshold (3 weeks)
+  const groups: { start: string; end: string; count: number }[] = [];
+  let gStart = photos[0].taken_at;
+  let gEnd   = photos[0].taken_at;
+  let count  = 1;
 
-    return {
-      name: suggestName(dateFrom, dateTo, c.sub),
-      dateFrom,
-      dateTo,
-      photoCount: c.count,
-      rules,
-    };
-  });
+  for (let i = 1; i < photos.length; i++) {
+    const gap = new Date(photos[i].taken_at).getTime() - new Date(photos[i - 1].taken_at).getTime();
+    if (gap > FALLBACK_GAP_MS) {
+      groups.push({ start: gStart, end: gEnd, count });
+      gStart = photos[i].taken_at;
+      count = 1;
+    } else {
+      count++;
+    }
+    gEnd = photos[i].taken_at;
+  }
+  groups.push({ start: gStart, end: gEnd, count });
+
+  // Drop tiny groups (< MIN_PHOTOS) — these are isolated stray photos
+  return groups
+    .filter(g => g.count >= FALLBACK_MIN_PHOTOS)
+    .map(g => {
+      const dateFrom = g.start.slice(0, 10);
+      const dateTo   = g.end.slice(0, 10);
+      const endOfDay = `${dateTo}T23:59:59.999Z`;
+      return {
+        name:       fallbackName(dateFrom, dateTo),
+        dateFrom,
+        dateTo,
+        photoCount: g.count,
+        source:     'fallback' as const,
+        rules: [
+          { field: 'taken_after' as const,  op: 'gte' as const, value: g.start },
+          { field: 'taken_before' as const, op: 'lte' as const, value: endOfDay },
+        ],
+      };
+    });
 }

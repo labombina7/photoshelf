@@ -87,7 +87,10 @@ export default function OrganizeClient({ catalogId, catalogName, clusters: initi
           </button>
           <h1 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>Organizar "{catalogName}"</h1>
           <p style={{ margin: '6px 0 0', color: 'var(--text-secondary)', fontSize: 14 }}>
-            Photoshelf ha detectado {initialClusters.length} grupos de fotos. Revisa los nombres y confirma para crear los smart albums.
+            {initialClusters.some(c => c.source === 'event_match')
+              ? `${initialClusters.filter(c => c.source === 'event_match').length} grupos coinciden con eventos de otros catálogos${initialClusters.some(c => c.source === 'fallback') ? ` + ${initialClusters.filter(c => c.source === 'fallback').length} grupos sin coincidencia` : ''}.`
+              : `Photoshelf ha detectado ${initialClusters.length} grupos de fotos por actividad.`}
+            {' '}Revisa los nombres y confirma.
           </p>
         </div>
 
@@ -144,6 +147,9 @@ export default function OrganizeClient({ catalogId, catalogName, clusters: initi
                   />
                   <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
                     {formatDateRange(c.dateFrom, c.dateTo)} · {c.photoCount.toLocaleString('es')} fotos
+                    {c.source === 'event_match' && (
+                      <span style={{ marginLeft: 6, color: 'var(--text-tertiary)', fontStyle: 'italic' }}>· coincide con otro catálogo</span>
+                    )}
                   </span>
                 </div>
               </div>
