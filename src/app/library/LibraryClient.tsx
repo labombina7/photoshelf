@@ -150,11 +150,11 @@ export default function LibraryClient({
     router.push(`/library?${params.toString()}`);
   }
 
-  async function handleClassifyYear() {
+  async function handleClassifyYear(force = false) {
     if (!activeYear) return;
     setLocalClassifying(true);
     try {
-      await startClassify(parseInt(activeYear, 10));
+      await startClassify(parseInt(activeYear, 10), force);
     } catch (err) {
       setLocalClassifying(false);
       await alert(err instanceof Error ? err.message : 'Error al iniciar la clasificación', {
@@ -320,7 +320,7 @@ export default function LibraryClient({
             <div className="collapse-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
               <button
                 className="collapse-btn classify-year-btn"
-                onClick={handleClassifyYear}
+                onClick={() => handleClassifyYear(false)}
                 disabled={showYearProgress}
                 style={{ flexShrink: 0 }}
               >
@@ -329,6 +329,18 @@ export default function LibraryClient({
                   ? 'Clasificando…'
                   : `Clasificar año ${activeYear}`}
               </button>
+              {!showYearProgress && (
+                <button
+                  className="collapse-btn"
+                  onClick={() => handleClassifyYear(true)}
+                  disabled={showYearProgress}
+                  style={{ flexShrink: 0, opacity: 0.7 }}
+                  title="Borra los tags de IA existentes y reclasifica todas las fotos del año"
+                >
+                  <IconSparkle size={11} />
+                  Reclasificar
+                </button>
+              )}
               {showYearProgress && (
                 <span className="classify-inline-progress">
                   <span className="classify-inline-track">

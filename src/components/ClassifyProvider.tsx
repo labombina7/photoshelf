@@ -13,7 +13,7 @@ interface ClassifyState {
 }
 
 interface ClassifyContextValue extends ClassifyState {
-  startClassify: (year: number) => Promise<void>;
+  startClassify: (year: number, force?: boolean) => Promise<void>;
 }
 
 const ClassifyContext = createContext<ClassifyContextValue>({
@@ -64,11 +64,11 @@ export function ClassifyProvider({ children }: { children: React.ReactNode }) {
     return () => { active = false; clearInterval(interval); };
   }, [router]);
 
-  async function startClassify(year: number): Promise<void> {
+  async function startClassify(year: number, force = false): Promise<void> {
     const res = await fetch('/api/ai/classify/year', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ year }),
+      body: JSON.stringify({ year, force }),
     });
     if (!res.ok) {
       const data = await res.json();

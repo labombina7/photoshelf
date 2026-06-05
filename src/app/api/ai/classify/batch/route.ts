@@ -20,18 +20,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { year, event } = await req.json();
+  const { year, event, force } = await req.json();
   const catalogId = session.catalogId ?? 1;
   const catalog = getCatalogById(catalogId);
   const photosRoot = catalog?.path ?? PHOTOS_PATH;
 
   const db = getDb();
 
-  let sql = `
-    SELECT p.id, p.path FROM photos p
-    WHERE p.catalog_id = ?
-      AND NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id AND pt.source = 'ai')
-  `;
+  let sql = `SELECT p.id, p.path FROM photos p WHERE p.catalog_id = ?`;
+  if (!force) {
+    sql += ` AND NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id AND pt.source = 'ai')`;
+  }
   const params: (string | number)[] = [catalogId];
 
   if (year) { sql += ' AND p.year = ?'; params.push(parseInt(year, 10)); }
@@ -62,8 +61,13 @@ export async function POST(req: NextRequest) {
   let errors = 0;
   let firstError: string | null = null;
 
+  const deleteAiTags = db.prepare(`
+    DELETE FROM photo_tags WHERE photo_id = ? AND source = 'ai'
+  `);
+
   for (const photo of photos) {
     try {
+      if (force) deleteAiTags.run(photo.id);
       const tags = await classifyPhoto(photo.path, photosRoot);
       upsertAiTags(db, photo.id, tags);
       processed++;

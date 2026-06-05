@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { year } = await req.json();
+  const { year, force } = await req.json();
   if (!year) return NextResponse.json({ error: 'year is required' }, { status: 400 });
 
   const catalogId = session.catalogId ?? 1;
@@ -29,15 +29,11 @@ export async function POST(req: NextRequest) {
 
   const db = getDb();
 
-  // Fetch all unclassified photos for the year in the active catalog
-  const photos = db.prepare(`
-    SELECT p.id, p.path, p.event
-    FROM photos p
-    WHERE p.year = ?
-      AND p.catalog_id = ?
-      AND NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id AND pt.source = 'ai')
-    ORDER BY p.event ASC, p.filename ASC
-  `).all(parseInt(year, 10), catalogId) as { id: number; path: string; event: string }[];
+  const photosSql = force
+    ? `SELECT p.id, p.path, p.event FROM photos p WHERE p.year = ? AND p.catalog_id = ? ORDER BY p.event ASC, p.filename ASC`
+    : `SELECT p.id, p.path, p.event FROM photos p WHERE p.year = ? AND p.catalog_id = ? AND NOT EXISTS (SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id AND pt.source = 'ai') ORDER BY p.event ASC, p.filename ASC`;
+
+  const photos = db.prepare(photosSql).all(parseInt(year, 10), catalogId) as { id: number; path: string; event: string }[];
 
   if (photos.length === 0) {
     return NextResponse.json({ ok: true, message: 'No hay fotos pendientes de clasificar' }, { status: 200 });
@@ -60,10 +56,12 @@ export async function POST(req: NextRequest) {
   after(async () => {
     let done = 0;
     let errors = 0;
+    const deleteAiTags = db.prepare(`DELETE FROM photo_tags WHERE photo_id = ? AND source = 'ai'`);
     try {
       for (const photo of photos) {
         updateClassifyState({ currentEvent: photo.event, done });
         try {
+          if (force) deleteAiTags.run(photo.id);
           const tags = await classifyPhoto(photo.path, photosRoot);
           upsertAiTags(db, photo.id, tags);
         } catch (err) {

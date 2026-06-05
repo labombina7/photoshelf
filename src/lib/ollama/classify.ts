@@ -1,24 +1,37 @@
 import { callOllamaVision } from './client';
-import { readPhotoAsJpegBase64 } from './image';
+import { readPhotoAsJpegBase64, detectIsBlackAndWhite } from './image';
 
 export async function classifyPhoto(relativePath: string, photosRoot: string): Promise<string[]> {
-  const base64 = await readPhotoAsJpegBase64(relativePath, photosRoot);
+  const [base64, isBW] = await Promise.all([
+    readPhotoAsJpegBase64(relativePath, photosRoot),
+    detectIsBlackAndWhite(relativePath, photosRoot),
+  ]);
 
   const raw = await callOllamaVision(
-    `Analyze this photo and reply with ONLY comma-separated tags in this exact order:
-1. "b&w" or "color"
-2. Up to 2 photography styles from this list: portrait, landscape, street, fashion, editorial, architecture, macro, product, documentary, wildlife, travel, sport, abstract
-3. One genre from this list: personal, work, travel, event, nature
-4. 1 or 2 specific tags about the main subject or mood
+    `Look at this photo and reply with ONLY a comma-separated list of 3 to 5 tags in English.
 
-No explanations. No numbering. No extra words. Maximum 6 tags total.
-Example: color, portrait, editorial, work, studio, woman`,
+Tags should describe:
+- The main subject (person, mountain, dog, building, food...)
+- The setting or context (indoor, outdoor, beach, city, forest, studio...)
+- The mood or moment if distinctive (celebration, sunset, sport, night...)
+
+Rules:
+- Lowercase only
+- No generic words like "photo", "image", "picture"
+- No colors
+- Be specific, not abstract
+- Only real visible content, no guesses
+
+Reply with tags only, nothing else.
+Example: portrait, outdoor, elderly man, park, autumn`,
     base64
   );
 
-  return raw
+  const aiTags = raw
     .split(',')
     .map((t: string) => t.trim().toLowerCase().replace(/[^a-z0-9 áéíóúñüàèìòùâêîôûäëïöü\-&]/g, ''))
     .filter((t: string) => t.length > 0 && t.length < 50)
-    .slice(0, 6);
+    .slice(0, 5);
+
+  return [isBW ? 'b&w' : 'color', ...aiTags];
 }
