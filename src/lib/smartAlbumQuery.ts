@@ -1,6 +1,6 @@
 import { getDb } from '@/lib/db';
 
-export type RuleField = 'year' | 'tag' | 'theme' | 'favorite' | 'camera' | 'no_tags';
+export type RuleField = 'year' | 'tag' | 'theme' | 'favorite' | 'camera' | 'no_tags' | 'taken_after' | 'taken_before';
 export type RuleOp = 'eq' | 'gte' | 'lte' | 'contains' | 'is_true' | 'is_false' | 'is_empty';
 
 export interface AlbumRule {
@@ -9,7 +9,7 @@ export interface AlbumRule {
   value?: string;
 }
 
-const ALLOWED_FIELDS: Set<string> = new Set(['year', 'tag', 'theme', 'favorite', 'camera', 'no_tags']);
+const ALLOWED_FIELDS: Set<string> = new Set(['year', 'tag', 'theme', 'favorite', 'camera', 'no_tags', 'taken_after', 'taken_before']);
 const ALLOWED_OPS: Set<string> = new Set(['eq', 'gte', 'lte', 'contains', 'is_true', 'is_false', 'is_empty']);
 
 function validateRules(rules: unknown[]): AlbumRule[] {
@@ -69,6 +69,12 @@ export function buildSmartAlbumQuery(rawRules: AlbumRule[], catalogId = 1, optio
       whereParams.push(`%${rule.value}%`);
     } else if (rule.field === 'no_tags' && rule.op === 'is_empty') {
       whereParts.push('NOT EXISTS (SELECT 1 FROM photo_tags _ptno WHERE _ptno.photo_id = p.id)');
+    } else if (rule.field === 'taken_after' && rule.value) {
+      whereParts.push('p.taken_at >= ?');
+      whereParams.push(rule.value);
+    } else if (rule.field === 'taken_before' && rule.value) {
+      whereParts.push('p.taken_at <= ?');
+      whereParams.push(rule.value);
     }
   }
 
@@ -119,6 +125,10 @@ export function describeRules(rules: AlbumRule[]): string {
       parts.push(`Cámara: ${rule.value}`);
     } else if (rule.field === 'no_tags') {
       parts.push('Sin tags');
+    } else if (rule.field === 'taken_after') {
+      parts.push(`Desde ${rule.value?.slice(0, 10)}`);
+    } else if (rule.field === 'taken_before') {
+      parts.push(`Hasta ${rule.value?.slice(0, 10)}`);
     }
   }
   return parts.length > 0 ? parts.join(' · ') : 'Sin filtros';

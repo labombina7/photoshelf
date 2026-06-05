@@ -6,6 +6,8 @@ export interface SmartAlbumRow {
   name: string;
   rules: string;
   created_at: string;
+  source: 'manual' | 'auto';
+  catalog_id: number | null;
 }
 
 export interface SmartAlbumWithCount extends SmartAlbumRow {
@@ -107,4 +109,25 @@ export function deleteSmartAlbum(id: number): void {
 
 export function getSidebarSmartAlbums(): { id: number; name: string }[] {
   return getDb().prepare('SELECT id, name FROM smart_albums ORDER BY created_at DESC').all() as { id: number; name: string }[];
+}
+
+export function createAutoAlbum(name: string, rules: AlbumRule[], catalogId: number): number {
+  const result = getDb().prepare(
+    "INSERT INTO smart_albums (name, rules, source, catalog_id) VALUES (?, ?, 'auto', ?)"
+  ).run(name, JSON.stringify(rules), catalogId);
+  return result.lastInsertRowid as number;
+}
+
+export function deleteAutoAlbumsForCatalog(catalogId: number): number {
+  const result = getDb().prepare(
+    "DELETE FROM smart_albums WHERE source = 'auto' AND catalog_id = ?"
+  ).run(catalogId);
+  return result.changes;
+}
+
+export function hasAutoAlbums(catalogId: number): boolean {
+  const row = getDb().prepare(
+    "SELECT COUNT(*) as n FROM smart_albums WHERE source = 'auto' AND catalog_id = ?"
+  ).get(catalogId) as { n: number };
+  return row.n > 0;
 }
