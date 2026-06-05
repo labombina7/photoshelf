@@ -11,6 +11,7 @@ services:
       CACHE_PATH: /data/.cache
       DB_PATH: /data/photoshelf.db
       OLLAMA_URL: ${OLLAMA_URL:-http://192.168.1.135:11434}
+      BACKUP_PATH: ${BACKUP_PATH:-/data/backups}
     volumes:
       - /volume1:/volume1:ro          # NAS completo en solo lectura — permite múltiples catálogos sin re-configurar
       - ${DATA_PATH:-/volume1/homes/javi/photoshelf-data}:/data
