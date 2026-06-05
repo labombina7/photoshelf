@@ -102,6 +102,7 @@ function initSchema(db: Database.Database) {
   migrateExif(db);
   migrateSmartAlbums(db);
   migrateJobQueue(db);
+  migrateBackupConfig(db);
 }
 
 function migrateEpic001(db: Database.Database) {
@@ -294,6 +295,19 @@ function migrateSmartAlbums(db: Database.Database) {
   try {
     db.exec(`ALTER TABLE smart_albums ADD COLUMN catalog_id INTEGER`);
   } catch { /* already exists */ }
+}
+
+function migrateBackupConfig(db: Database.Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS backup_config (
+      id                  INTEGER PRIMARY KEY CHECK (id = 1),
+      auto_enabled        INTEGER NOT NULL DEFAULT 0,
+      auto_interval_days  INTEGER NOT NULL DEFAULT 7,
+      last_backup_at      TEXT,
+      last_backup_db_path TEXT
+    );
+    INSERT OR IGNORE INTO backup_config (id) VALUES (1);
+  `);
 }
 
 // ── integrity badge: unresolved orphan count ──────────────────────────────────

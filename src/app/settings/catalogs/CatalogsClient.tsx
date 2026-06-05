@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useMemo } from 'react';
+import { useState, useTransition, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu, IconTrash, IconEdit } from '@/components/Icons';
@@ -8,6 +8,16 @@ import { useModal } from '@/components/ModalProvider';
 import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
+
+interface BackupStatus {
+  last_backup_at: string | null;
+  last_backup_db_path: string | null;
+  auto_enabled: boolean;
+  auto_interval_days: number;
+  next_backup_at: string | null;
+}
+
+const INTERVAL_OPTIONS = [1, 3, 7, 14, 30];
 
 interface Props {
   catalogs: CatalogRow[];
@@ -42,6 +52,19 @@ export default function CatalogsClient({
   const [createError, setCreateError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
+
+  // Backup state
+  const [backupStatus, setBackupStatus] = useState<BackupStatus | null>(null);
+  const [backupRunning, setBackupRunning] = useState(false);
+  const [backupError, setBackupError] = useState<string | null>(null);
+  const [backupSuccess, setBackupSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/backup/status')
+      .then(r => r.json())
+      .then(d => setBackupStatus(d as BackupStatus))
+      .catch(() => null);
+  }, []);
 
   async function refresh() {
     const res = await fetch('/api/catalogs');
@@ -112,6 +135,57 @@ export default function CatalogsClient({
     });
     // Hard navigation — bypasses Next.js router cache and re-reads session cookie
     window.location.href = '/library';
+  }
+
+  async function runBackupNow() {
+    setBackupRunning(true);
+    setBackupError(null);
+    setBackupSuccess(null);
+    try {
+      const res = await fetch('/api/backup', { method: 'POST' });
+      const data = await res.json() as { db_path?: string; db_size_bytes?: number; error?: string };
+      if (!res.ok) {
+        setBackupError(data.error ?? 'Error al crear el backup');
+      } else {
+        const mb = ((data.db_size_bytes ?? 0) / 1024 / 1024).toFixed(1);
+        setBackupSuccess(`Backup creado (${mb} MB)`);
+        const s = await fetch('/api/backup/status').then(r => r.json()) as BackupStatus;
+        setBackupStatus(s);
+      }
+    } catch {
+      setBackupError('Error de red al crear el backup');
+    } finally {
+      setBackupRunning(false);
+    }
+  }
+
+  async function updateBackupConfig(patch: { auto_enabled?: boolean; auto_interval_days?: number }) {
+    try {
+      const res = await fetch('/api/backup/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patch),
+      });
+      if (res.ok) {
+        const s = await res.json() as BackupStatus;
+        setBackupStatus(s);
+      }
+    } catch {
+      // silent — UI already reflects optimistic state
+    }
+  }
+
+  function formatDate(iso: string | null): string {
+    if (!iso) return 'Nunca';
+    return new Date(iso + (iso.endsWith('Z') ? '' : 'Z')).toLocaleString('es-ES', {
+      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+  }
+
+  function formatPath(p: string | null): string {
+    if (!p) return '';
+    const parts = p.split('/');
+    return parts[parts.length - 1] ?? p;
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -253,6 +327,100 @@ export default function CatalogsClient({
                 )}
               </div>
             ))}
+          </div>
+
+          {/* ── Backup block ─────────────────────────────────────────── */}
+          <div style={{
+            borderTop: '1px solid var(--border)',
+            paddingTop: 24,
+          }}>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Backup de base de datos</div>
+            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>
+              Guarda una copia de todos los tags, favoritos y proyectos. Los últimos 10 backups se conservan automáticamente.
+            </div>
+
+            {/* Last backup info */}
+            <div style={{ fontSize: 12, color: 'var(--text-tertiary)', marginBottom: 14 }}>
+              {backupStatus ? (
+                <>
+                  Último backup: <span style={{ color: 'var(--text-secondary)' }}>{formatDate(backupStatus.last_backup_at)}</span>
+                  {backupStatus.last_backup_db_path && (
+                    <span style={{ marginLeft: 6, opacity: 0.6 }}>· {formatPath(backupStatus.last_backup_db_path)}</span>
+                  )}
+                </>
+              ) : (
+                <span style={{ opacity: 0.5 }}>Cargando…</span>
+              )}
+            </div>
+
+            {/* Manual backup button */}
+            <div style={{ marginBottom: 20 }}>
+              <button
+                className="btn-small"
+                onClick={runBackupNow}
+                disabled={backupRunning}
+                style={{ minWidth: 160 }}
+              >
+                {backupRunning ? 'Creando backup…' : 'Crear backup ahora'}
+              </button>
+              {backupError && (
+                <div style={{ marginTop: 6, fontSize: 12, color: 'var(--danger, #e05252)' }}>{backupError}</div>
+              )}
+              {backupSuccess && (
+                <div style={{ marginTop: 6, fontSize: 12, color: 'var(--success, #4ade80)' }}>{backupSuccess}</div>
+              )}
+            </div>
+
+            {/* Auto backup toggle */}
+            {backupStatus && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
+                  <input
+                    type="checkbox"
+                    checked={backupStatus.auto_enabled}
+                    onChange={e => {
+                      const enabled = e.target.checked;
+                      setBackupStatus(s => s ? { ...s, auto_enabled: enabled } : s);
+                      updateBackupConfig({ auto_enabled: enabled });
+                    }}
+                    style={{ accentColor: 'var(--accent)', width: 15, height: 15 }}
+                  />
+                  <span style={{ fontSize: 13 }}>Backup automático</span>
+                </label>
+
+                {backupStatus.auto_enabled && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 25, fontSize: 13 }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Cada</span>
+                    <select
+                      value={backupStatus.auto_interval_days}
+                      onChange={e => {
+                        const days = Number(e.target.value);
+                        setBackupStatus(s => s ? { ...s, auto_interval_days: days } : s);
+                        updateBackupConfig({ auto_interval_days: days });
+                      }}
+                      style={{
+                        background: 'var(--surface-2, var(--border))',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-sm)',
+                        color: 'var(--text)',
+                        fontSize: 13,
+                        padding: '3px 8px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {INTERVAL_OPTIONS.map(d => (
+                        <option key={d} value={d}>{d} {d === 1 ? 'día' : 'días'}</option>
+                      ))}
+                    </select>
+                    {backupStatus.next_backup_at && (
+                      <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+                        · próximo {formatDate(backupStatus.next_backup_at)}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
         </div>
