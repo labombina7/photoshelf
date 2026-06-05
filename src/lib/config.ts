@@ -22,6 +22,11 @@ export const MIME_TYPES: Record<string, string> = {
 
 export const FALLBACK_MIME = 'application/octet-stream';
 
+// ── Classify parallelism ─────────────────────────────────────────────────────
+// Requires OLLAMA_NUM_PARALLEL=2 set in the Ollama server environment.
+// Safe upper bound for M1 16GB with llava:7b (~4.5GB VRAM + ~1GB KV cache per slot).
+export const CLASSIFY_BATCH_SIZE = 2;
+
 // ── Ollama timeouts ───────────────────────────────────────────────────────────
 export const OLLAMA_TIMEOUT_TEXT_MS     = 30_000;
 export const OLLAMA_TIMEOUT_VISION_MS   = 300_000;  // 5 min — vision models are slow on consumer hardware

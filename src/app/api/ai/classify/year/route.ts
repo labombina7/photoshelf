@@ -3,7 +3,7 @@ import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
 import { classifyPhoto } from '@/lib/ollama';
 import { getClassifyState, updateClassifyState } from '@/lib/classifyState';
-import { PHOTOS_PATH } from '@/lib/config';
+import { PHOTOS_PATH, CLASSIFY_BATCH_SIZE } from '@/lib/config';
 import { upsertAiTags } from '@/lib/db-helpers';
 import { getCatalogById } from '@/lib/queries/catalogs';
 
@@ -58,21 +58,28 @@ export async function POST(req: NextRequest) {
     let errors = 0;
     const deleteAiTags = db.prepare(`DELETE FROM photo_tags WHERE photo_id = ? AND source = 'ai'`);
     try {
-      for (const photo of photos) {
-        updateClassifyState({ currentEvent: photo.event, done });
-        try {
-          if (force) deleteAiTags.run(photo.id);
-          const tags = await classifyPhoto(photo.path, photosRoot);
-          upsertAiTags(db, photo.id, tags);
-        } catch (err) {
-          errors++;
-          const msg = err instanceof Error ? err.message : String(err);
-          console.error(`[classify/year] error on photo ${photo.id} (${photo.path}):`, msg);
-          // Save first error to state so the UI can surface it
-          if (errors === 1) updateClassifyState({ firstError: msg });
-          updateClassifyState({ errors });
+      for (let i = 0; i < photos.length; i += CLASSIFY_BATCH_SIZE) {
+        const batch = photos.slice(i, i + CLASSIFY_BATCH_SIZE);
+        updateClassifyState({ currentEvent: batch[0].event, done });
+        const results = await Promise.allSettled(
+          batch.map(async (photo) => {
+            if (force) deleteAiTags.run(photo.id);
+            const tags = await classifyPhoto(photo.path, photosRoot);
+            upsertAiTags(db, photo.id, tags);
+          })
+        );
+        for (const result of results) {
+          if (result.status === 'fulfilled') {
+            done++;
+          } else {
+            errors++;
+            const msg = result.reason instanceof Error ? result.reason.message : String(result.reason);
+            console.error(`[classify/year] error in batch starting at ${i}:`, msg);
+            if (errors === 1) updateClassifyState({ firstError: msg });
+            updateClassifyState({ errors });
+            done++;
+          }
         }
-        done++;
         updateClassifyState({ done });
       }
       updateClassifyState({ running: false, completedAt: Date.now() });
