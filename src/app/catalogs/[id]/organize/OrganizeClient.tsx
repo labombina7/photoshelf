@@ -9,6 +9,7 @@ interface Props {
   catalogName: string;
   clusters: AlbumCluster[];
   alreadyOrganized: boolean;
+  otherCatalogsExist: boolean;
 }
 
 function formatDateRange(from: string, to: string): string {
@@ -22,12 +23,30 @@ function formatDateRange(from: string, to: string): string {
   return `${f.toLocaleDateString('es', opts)} – ${t.toLocaleDateString('es', opts)}`;
 }
 
-export default function OrganizeClient({ catalogId, catalogName, clusters: initialClusters, alreadyOrganized }: Props) {
+export default function OrganizeClient({ catalogId, catalogName, clusters: initialClusters, alreadyOrganized, otherCatalogsExist }: Props) {
   const router = useRouter();
   const [clusters, setClusters] = useState(initialClusters.map((c, i) => ({ ...c, key: i, enabled: true })));
   const [saving, setSaving] = useState(false);
   const [undoing, setUndoing] = useState(false);
+  const [loadingClusters, setLoadingClusters] = useState(false);
+  const [crossCatalog, setCrossCatalog] = useState(otherCatalogsExist);
   const [error, setError] = useState('');
+
+  async function handleCrossCatalogChange(value: boolean) {
+    setCrossCatalog(value);
+    setLoadingClusters(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/catalogs/${catalogId}/suggest-albums?crossCatalog=${value}`);
+      if (!res.ok) throw new Error((await res.json()).error);
+      const data = await res.json() as { clusters: AlbumCluster[] };
+      setClusters(data.clusters.map((c, i) => ({ ...c, key: i, enabled: true })));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al cargar sugerencias');
+    } finally {
+      setLoadingClusters(false);
+    }
+  }
 
   const enabledCount = clusters.filter(c => c.enabled).length;
   const totalPhotos = clusters.filter(c => c.enabled).reduce((s, c) => s + c.photoCount, 0);
@@ -94,6 +113,31 @@ export default function OrganizeClient({ catalogId, catalogName, clusters: initi
           </p>
         </div>
 
+        {/* Cross-catalog option */}
+        {otherCatalogsExist && (
+          <label style={{
+            display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer',
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)', padding: '12px 16px',
+          }}>
+            <input
+              type="checkbox"
+              checked={crossCatalog}
+              disabled={loadingClusters}
+              onChange={e => handleCrossCatalogChange(e.target.checked)}
+              style={{ marginTop: 2, width: 15, height: 15, flexShrink: 0, cursor: 'pointer' }}
+            />
+            <div>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 500 }}>
+                Buscar coincidencias en otros catálogos
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--text-secondary)' }}>
+                Si tienes eventos organizados en otro catálogo, se usarán sus fechas para nombrar los álbumes automáticamente.
+              </p>
+            </div>
+          </label>
+        )}
+
         {/* Already organized notice */}
         {alreadyOrganized && (
           <div style={{
@@ -115,7 +159,11 @@ export default function OrganizeClient({ catalogId, catalogName, clusters: initi
         )}
 
         {/* Clusters list */}
-        {clusters.length === 0 ? (
+        {loadingClusters ? (
+          <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-secondary)', fontSize: 13 }}>
+            Analizando fotos…
+          </div>
+        ) : clusters.length === 0 ? (
           <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius)', padding: 32, textAlign: 'center', color: 'var(--text-secondary)', fontSize: 14 }}>
             No hay fotos con fecha EXIF en este catálogo. Escanea primero las fotos.
           </div>

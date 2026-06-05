@@ -11,11 +11,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const catalogId = parseInt(id, 10);
   if (isNaN(catalogId)) return NextResponse.json({ error: 'Invalid catalog id' }, { status: 400 });
 
+  const crossCatalog = req.nextUrl.searchParams.get('crossCatalog') !== 'false';
+
   try {
     const catalog = getCatalogById(catalogId);
     if (!catalog) return NextResponse.json({ error: 'Catalog not found' }, { status: 404 });
 
-    const clusters = clusterPhotos(catalogId);
+    const clusters = clusterPhotos(catalogId, crossCatalog);
     return NextResponse.json({ clusters });
   } catch (err) {
     console.error('[suggest-albums] Error:', err);

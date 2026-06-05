@@ -66,7 +66,7 @@ function fallbackName(dateFrom: string, dateTo: string): string {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export function clusterPhotos(catalogId: number): AlbumCluster[] {
+export function clusterPhotos(catalogId: number, useCrossMatch = true): AlbumCluster[] {
   const db = getDb();
 
   const allPhotos = db.prepare(`
@@ -78,11 +78,11 @@ export function clusterPhotos(catalogId: number): AlbumCluster[] {
 
   if (allPhotos.length === 0) return [];
 
-  const knownEvents = getKnownEvents(catalogId);
-  const useCrossMatch = knownEvents.length > 0;
+  const knownEvents = useCrossMatch ? getKnownEvents(catalogId) : [];
+  const hasCrossMatches = knownEvents.length > 0;
 
   // ── Path A: cross-catalog matching ────────────────────────────────────────
-  if (useCrossMatch) {
+  if (hasCrossMatches) {
     const matched = new Set<string>(); // ISO strings already assigned
     const eventClusters: AlbumCluster[] = [];
 
