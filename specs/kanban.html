@@ -575,9 +575,29 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">25</span>
+      <span class="col-count">27</span>
     </div>
     <div class="col-body">
+
+      <!-- ── Jobs & rendimiento 2026-06-05 ── -->
+
+      <div class="card" tabindex="0" data-id="US-071" onclick="openModal('US-071')">
+        <div class="card-top">
+          <span class="badge badge-us">US-071</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Cola de jobs persistente y auto-reanudable</div>
+        <div class="card-summary">Tabla job_queue en SQLite. El worker retoma jobs in_progress al arrancar. Botón bloqueado con estado "En cola" / "En progreso…". Enlace "Ver origen" en el panel /jobs.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-070" onclick="openModal('US-070')">
+        <div class="card-top">
+          <span class="badge badge-us">US-070</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Clasificación Ollama en paralelo (N=2 en M1)</div>
+        <div class="card-summary">OLLAMA_NUM_PARALLEL=2 + lotes de 2 con Promise.allSettled en classify/batch y classify/year. Mejora esperada 30-50%. Benchmark previo obligatorio.</div>
+      </div>
 
       <!-- ── Insights 2026-05-29 ── -->
 
@@ -4789,6 +4809,93 @@ const CARDS = {
     ],
     tech: ['Sharp pixel analysis para b&w (sin IA)', 'llava:7b — 100% GPU en M1, ~20-30s/foto', 'Detección b&w y preparación de imagen en Promise.all (paralelo)'],
     outOfScope: ['Fine-tuning del modelo', 'Normalización de sinónimos', 'Reclasificación por evento individual desde PhotoGrid']
+  },
+
+  'US-070': {
+    id: 'US-070', type: 'US', column: 'todo', effort: 'S',
+    title: 'Clasificación Ollama en paralelo (N=2 en M1)',
+    story: 'Como fotógrafo con una biblioteca grande,\nquiero que la clasificación IA tarde menos,\npara procesar más fotos en el mismo tiempo sin saturar el equipo.',
+    description: [
+      'Actualmente la clasificación es secuencial: una foto a la vez. Ollama soporta concurrencia interna mediante <code>OLLAMA_NUM_PARALLEL</code> — el modelo se carga una sola vez en GPU y cada request comparte los pesos pero tiene su propio KV cache.',
+      'En el M1 16GB con llava:7b (~4.5GB en VRAM unificada) hay margen para N=2 de forma segura (~1GB de KV cache por request). N=3 ya presiona el límite; N=4 arriesga swap y degrada el rendimiento.',
+      'La ganancia no es 2x porque la GPU sigue siendo el cuello de botella (procesa batches de forma intercalada), pero se solapa la preparación de imagen del request siguiente con la inferencia del anterior. Mejora realista: <strong>30-50%</strong> de reducción en tiempo total.',
+      'No hay NAS ni instancias remotas de Ollama — el modelo corre siempre en el M1 local.',
+    ],
+    criteria: [
+      { group: 'Configuración Ollama', items: [
+        'OLLAMA_NUM_PARALLEL=2 documentado en README / .env.example',
+        'photoshelf no arranca Ollama — solo documenta el flag para que el usuario lo configure',
+      ]},
+      { group: 'Cliente (photoshelf)', items: [
+        'classify/batch y classify/year envían requests en lotes de 2 con Promise.allSettled',
+        'Barra de progreso sigue funcionando correctamente con lotes paralelos',
+        'Si un request falla, no aborta el lote — solo marca esa foto como error y continúa',
+        'force=true (reclasificación) también usa lotes de 2',
+      ]},
+      { group: 'Benchmark previo', items: [
+        '10 fotos en N=1 vs N=2 — medir tiempo total y comprobar que los tags tienen calidad equivalente',
+        'Si N=2 degrada calidad o genera timeouts, revertir a N=1 sin cambio de API',
+      ]},
+    ],
+    dependencies: ['US-069'],
+    components: [
+      { path: 'src/lib/ollama/classify.ts', desc: 'Lotes de 2 con Promise.allSettled' },
+      { path: 'src/app/api/ai/classify/batch/route.ts', desc: 'Procesamiento en lotes paralelos' },
+      { path: 'src/app/api/ai/classify/year/route.ts', desc: 'Idem para clasificación por año' },
+    ],
+    tech: ['OLLAMA_NUM_PARALLEL=2 (env de Ollama, no de Next.js)', 'Promise.allSettled por lotes de 2', 'Benchmark manual con time + Activity Monitor GPU'],
+    outOfScope: ['Ollama en NAS u otro host remoto', 'N configurable desde la UI', 'Cola de prioridad entre fotos', 'N=3 o superior']
+  },
+
+  'US-071': {
+    id: 'US-071', type: 'US', column: 'todo', effort: 'M',
+    title: 'Cola de jobs persistente y auto-reanudable',
+    story: 'Como fotógrafo que lanza clasificaciones largas,\nquiero poder encolar trabajos y reanudarlos automáticamente tras un reinicio,\npara no perder el progreso ni tener que recordar qué había lanzado.',
+    description: [
+      'Actualmente el estado de un job vive en memoria: si el servidor se reinicia (deploy, nueva feature) hay que volver a la pantalla correcta y relanzar manualmente desde cero.',
+      'Esta US introduce una tabla <code>job_queue</code> en SQLite como única fuente de verdad. El worker arranca, detecta jobs <code>in_progress</code> o <code>pending</code> y los retoma automáticamente — sin intervención del usuario.',
+      'La reanudación de reclasificaciones (<code>force=true</code>) funciona comparando el <code>started_at</code> del job con el <code>created_at</code> de los tags: los tags con timestamp posterior al inicio del job ya fueron procesados en este run; los anteriores aún no.',
+      'El panel <code>/jobs</code> es la ventana a esa tabla: cola pendiente, job activo con progreso y historial reciente.',
+    ],
+    criteria: [
+      { group: 'Cola persistente', items: [
+        'Tabla job_queue: id, type, payload (JSON), status, started_at, processed, total, error_count, created_at',
+        'Estados: pending → in_progress → completed | failed',
+        'Al hacer clic en "Clasificar" se crea un registro pending — no se lanza directamente',
+        'El worker procesa un job a la vez; el siguiente empieza cuando el anterior termina',
+      ]},
+      { group: 'Auto-reanudación', items: [
+        'Al arrancar el servidor, el worker busca jobs in_progress o pending y los retoma',
+        'Para force=false: salta fotos que ya tienen ai_tags — comportamiento actual',
+        'Para force=true: salta fotos cuyos tags tienen created_at >= job.started_at (ya procesadas en este run)',
+        'El job retomado no reinicia el contador — continúa desde processed actual',
+      ]},
+      { group: 'Feedback en el punto de origen', items: [
+        'El botón que disparó el job se deshabilita y muestra "En cola" al encolar',
+        'Cambia a "En progreso…" cuando el worker empieza ese job (polling del job_id)',
+        'Al recargar la página, el botón recupera el estado correcto si el job sigue activo',
+        'Si ya hay un job pending/in_progress para esa carpeta/año, el botón aparece bloqueado al cargar',
+      ]},
+      { group: 'Panel /jobs', items: [
+        'Lista de jobs: tipo, estado, progreso %, errores, inicio',
+        'Enlace "Ver origen" en cada job → lleva a la vista desde la que se encoló (derivado del payload, sin campo extra en BD)',
+        'Actualización automática cada 3s',
+        'Botón "Cancelar" para jobs pending o in_progress',
+        'Jobs completados/fallidos se conservan 48h',
+      ]},
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/queries/jobs.ts', desc: 'CRUD de job_queue en SQLite' },
+      { path: 'src/lib/worker.ts', desc: 'Singleton worker: consume la cola, gestiona reanudación' },
+      { path: 'src/app/api/ai/classify/batch/route.ts', desc: 'Encola el job en lugar de ejecutar directamente' },
+      { path: 'src/app/api/ai/classify/year/route.ts', desc: 'Idem' },
+      { path: 'src/app/api/jobs/route.ts', desc: 'GET lista de jobs, POST para encolar' },
+      { path: 'src/app/api/jobs/[id]/route.ts', desc: 'DELETE para cancelar' },
+      { path: 'src/app/jobs/page.tsx', desc: 'Panel /jobs con polling' },
+    ],
+    tech: ['SQLite job_queue como fuente de verdad', 'Singleton worker en módulo Node (sobrevive HMR en prod)', 'started_at para reanudación de reclasificaciones', 'Polling cada 3s en el panel'],
+    outOfScope: ['Cola multi-usuario', 'Prioridad entre jobs', 'Notificaciones push', 'Múltiples workers en paralelo']
   }
 
 };

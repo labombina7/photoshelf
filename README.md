@@ -65,6 +65,16 @@ docker volume rm photoshelf_photoshelf_data
 | `OLLAMA_URL` | URL de la instancia Ollama | `http://192.168.1.135:11434` |
 | `DATA_PATH` | Ruta host para DB y caché | `/volume1/homes/javi/photoshelf-data` |
 
+### Concurrencia Ollama (clasificación paralela)
+
+photoshelf clasifica fotos en lotes de 2 en paralelo. Para que Ollama acepte esos requests simultáneos hay que arrancar el servidor con:
+
+```bash
+OLLAMA_NUM_PARALLEL=2 ollama serve
+```
+
+Valor recomendado para **M1 16GB con llava:7b**: `2`. No subir a 3 o más — el KV cache adicional presiona la memoria unificada y puede activar swap, empeorando el rendimiento.
+
 ---
 
 ## Desarrollo local
