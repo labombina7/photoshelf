@@ -3,8 +3,10 @@ import { classifyPhoto } from './ollama';
 import { generateProject } from './ollama';
 import { upsertAiTags } from './db-helpers';
 import { CLASSIFY_BATCH_SIZE } from './config';
-import { getNextJob, updateJob, purgeOldJobs, type JobRow } from './queries/jobs';
+import { getNextJob, updateJob, purgeOldJobs, createJob, type JobRow } from './queries/jobs';
 import { getProjectCandidates, createProject, setProjectPhotos } from './queries/projects';
+import { isAutoBackupDue } from './queries/backup';
+import { runBackup } from './backup';
 
 interface ClassifyPayload {
   type: 'classify_year' | 'classify_batch';
@@ -28,18 +30,34 @@ interface GenerateProjectPayload {
   originUrl: string;
 }
 
-type JobPayload = ClassifyPayload | GenerateProjectPayload;
+interface BackupPayload {
+  type: 'backup';
+}
+
+type JobPayload = ClassifyPayload | GenerateProjectPayload | BackupPayload;
 
 const g = globalThis as typeof globalThis & { __photoshelf_worker_running?: boolean };
 
 export function ensureWorkerRunning(): void {
   if (g.__photoshelf_worker_running) return;
   g.__photoshelf_worker_running = true;
+  scheduleAutoBackupIfDue();
   workerLoop().catch((err) => {
     console.error('[worker] Fatal error, will retry in 5s:', err);
     g.__photoshelf_worker_running = false;
     setTimeout(ensureWorkerRunning, 5_000);
   });
+}
+
+function scheduleAutoBackupIfDue(): void {
+  try {
+    if (!isAutoBackupDue()) return;
+    const id = `backup-auto-${Date.now()}`;
+    createJob(id, 'backup', JSON.stringify({ type: 'backup' }), 1);
+    console.log('[worker] Auto-backup scheduled:', id);
+  } catch (err) {
+    console.error('[worker] Failed to schedule auto-backup:', err);
+  }
 }
 
 async function workerLoop(): Promise<void> {
@@ -63,6 +81,8 @@ async function runJob(job: JobRow): Promise<void> {
       await runClassifyJob(job, payload as ClassifyPayload, startedAt);
     } else if (payload.type === 'generate_project') {
       await runGenerateProjectJob(job, payload as GenerateProjectPayload);
+    } else if (payload.type === 'backup') {
+      await runBackupJob(job);
     } else {
       throw new Error(`Unknown job type: ${(payload as JobPayload).type}`);
     }
@@ -190,6 +210,12 @@ function smartSample<T extends { event: string; tags: string[] }>(all: T[], max:
     remaining -= Math.min(quota, sorted.length);
   });
   return result.slice(0, max);
+}
+
+async function runBackupJob(job: JobRow): Promise<void> {
+  updateJob(job.id, { total: 1 });
+  const result = await runBackup();
+  updateJob(job.id, { status: 'completed', processed: 1, result: JSON.stringify(result) });
 }
 
 function sleep(ms: number): Promise<void> {

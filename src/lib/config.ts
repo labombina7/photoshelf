@@ -2,6 +2,10 @@ import path from 'path';
 
 export const PHOTOS_PATH = process.env.PHOTOS_PATH ?? '/photos';
 
+const _dbPath = process.env.DB_PATH ?? path.join(process.cwd(), 'data', 'photoshelf.db');
+export const BACKUP_PATH = process.env.BACKUP_PATH ?? path.join(path.dirname(_dbPath), 'backups');
+export const BACKUP_MAX_KEEP = 10;
+
 /**
  * Canonical MIME type map for all image formats supported by photoshelf.
  * Use this instead of local switch/object definitions in route handlers.

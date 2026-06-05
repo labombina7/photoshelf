@@ -575,28 +575,19 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">27</span>
+      <span class="col-count">26</span>
     </div>
     <div class="col-body">
 
-      <!-- ── Jobs & rendimiento 2026-06-05 ── -->
+      <!-- ── Backup & resiliencia 2026-06-05 ── -->
 
-      <div class="card" tabindex="0" data-id="US-071" onclick="openModal('US-071')">
+      <div class="card" tabindex="0" data-id="US-072" onclick="openModal('US-072')">
         <div class="card-top">
-          <span class="badge badge-us">US-071</span>
+          <span class="badge badge-us">US-072</span>
           <span class="effort effort-m">M</span>
         </div>
-        <div class="card-title">Cola de jobs persistente y auto-reanudable</div>
-        <div class="card-summary">Tabla job_queue en SQLite. El worker retoma jobs in_progress al arrancar. Botón bloqueado con estado "En cola" / "En progreso…". Enlace "Ver origen" en el panel /jobs.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-070" onclick="openModal('US-070')">
-        <div class="card-top">
-          <span class="badge badge-us">US-070</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Clasificación Ollama en paralelo (N=2 en M1)</div>
-        <div class="card-summary">OLLAMA_NUM_PARALLEL=2 + lotes de 2 con Promise.allSettled en classify/batch y classify/year. Mejora esperada 30-50%. Benchmark previo obligatorio.</div>
+        <div class="card-title">Backup de la base de datos desde la app</div>
+        <div class="card-summary">Botón en gestión de catálogos para lanzar backup manual. Toggle de backup automático cada X días. Genera .db (VACUUM INTO) + JSON de tags/proyectos. Conserva los 10 últimos backups.</div>
       </div>
 
       <!-- ── Insights 2026-05-29 ── -->
@@ -793,7 +784,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">56</span>
+      <span class="col-count">58</span>
     </div>
     <div class="col-body">
 
@@ -804,6 +795,24 @@
           <span class="date-badge">2026-06-04</span>
         </div>
         <div class="card-title">Álbumes inteligentes</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-071" onclick="openModal('US-071')">
+        <div class="card-top">
+          <span class="badge badge-us">US-071</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-05</span>
+        </div>
+        <div class="card-title">Cola de jobs persistente y auto-reanudable</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-070" onclick="openModal('US-070')">
+        <div class="card-top">
+          <span class="badge badge-us">US-070</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-05</span>
+        </div>
+        <div class="card-title">Clasificación Ollama en paralelo (N=2 en M1)</div>
       </div>
 
       <div class="card card-done" tabindex="0" data-id="US-069" onclick="openModal('US-069')">
