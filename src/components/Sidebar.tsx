@@ -601,6 +601,14 @@ function SidebarInner({
           )}
         </Link>
         <Link
+          href="/tools/roadmap"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/tools/roadmap' ? 'active' : ''}`}
+        >
+          <IconCalendar size={14} />
+          Roadmap
+        </Link>
+        <Link
           href="/settings/catalogs"
           onClick={handleNavClick}
           className={`sidebar-item ${pathname === '/settings/catalogs' ? 'active' : ''}`}
