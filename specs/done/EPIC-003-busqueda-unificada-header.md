@@ -1,5 +1,7 @@
 # EPIC-003: Búsqueda unificada en el header
 
+> Estado: ✅ Desplegada
+
 > **Estado: 🗂 Planificada**
 
 ---

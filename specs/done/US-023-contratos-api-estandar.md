@@ -1,5 +1,7 @@
 # Feature: Contratos de API — envelope estándar, errores y versionado
 
+> Estado: ✅ Desplegada
+
 ## Historia de usuario
 
 Como desarrollador de una app iOS que consume la API de photoshelf,

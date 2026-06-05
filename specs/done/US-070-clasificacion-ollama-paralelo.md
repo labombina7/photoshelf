@@ -1,6 +1,6 @@
 # US-070 — Clasificación Ollama en paralelo (N=2 en M1)
 
-> Estado: ⚙️ Implementada — pendiente benchmark manual (N=1 vs N=2 con 10 fotos)
+> Estado: ✅ Desplegada
 
 ## Historia de usuario
 

@@ -1,5 +1,7 @@
 # US-072 — Backup de la base de datos desde la app
 
+> Estado: ✅ Desplegada
+
 ## Resumen
 
 El usuario puede lanzar un backup de `photoshelf.db` directamente desde la sección de gestión de catálogos, tanto de forma manual como programada cada X días. El backup genera un archivo `.db` comprimido y un JSON de tags/proyectos como seguro adicional.

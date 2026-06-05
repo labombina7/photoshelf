@@ -1,5 +1,11 @@
 # US-069 — Búsqueda con scope: vistas y catálogos
 
+> Estado: ✅ Desplegada
+
+> Estado: ✅ Desplegada
+
+# US-069 — Búsqueda con scope: vistas y catálogos
+
 ## Resumen
 
 El buscador actual es global: devuelve resultados de toda la biblioteca sin tener en cuenta en qué vista o catálogo está el usuario. Esta historia añade un **selector de scope** al buscador para que el usuario pueda acotar la búsqueda a:
