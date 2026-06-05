@@ -51,12 +51,26 @@ function describeRules(rulesJson: string): string {
       if (r.field === 'favorite') return r.op === 'is_true' ? 'Favoritas' : 'No favoritas';
       if (r.field === 'camera') return `Cámara: ${r.value}`;
       if (r.field === 'no_tags') return 'Sin tags';
+      if (r.field === 'taken_after') return `Desde ${r.value?.slice(0, 10)}`;
+      if (r.field === 'taken_before') return `Hasta ${r.value?.slice(0, 10)}`;
       return '';
     }).filter(Boolean);
     return parts.join(' · ') || 'Sin filtros';
   } catch {
     return 'Sin filtros';
   }
+}
+
+type SortKey = 'date_desc' | 'date_asc' | 'name_asc' | 'photos_desc';
+
+function sortAlbums(albums: AlbumItem[], key: SortKey): AlbumItem[] {
+  return [...albums].sort((a, b) => {
+    if (key === 'date_desc') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    if (key === 'date_asc')  return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    if (key === 'name_asc')  return a.name.localeCompare(b.name, 'es');
+    if (key === 'photos_desc') return b.photo_count - a.photo_count;
+    return 0;
+  });
 }
 
 export default function SmartAlbumsClient({
@@ -78,6 +92,7 @@ export default function SmartAlbumsClient({
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingAlbum, setEditingAlbum] = useState<AlbumItem | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>('date_desc');
 
   async function handleCreate(name: string, rules: AlbumRule[]) {
     const res = await fetch('/api/smart-albums', {
@@ -177,19 +192,30 @@ export default function SmartAlbumsClient({
             </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
-            {initialAlbums.map(album => (
-              <div
-                key={album.id}
-                style={{
-                  background: 'var(--surface)', borderRadius: 'var(--radius)',
-                  border: '1px solid var(--border)', overflow: 'hidden',
-                  display: 'flex', flexDirection: 'column',
-                }}
+          <>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+              <select
+                className="tag-input"
+                style={{ fontSize: 12, padding: '4px 8px' }}
+                value={sortKey}
+                onChange={e => setSortKey(e.target.value as SortKey)}
               >
-                <Link
-                  href={`/smart-albums/${album.id}`}
-                  style={{ display: 'block', textDecoration: 'none' }}
+                <option value="date_desc">Más recientes primero</option>
+                <option value="date_asc">Más antiguos primero</option>
+                <option value="name_asc">Nombre A–Z</option>
+                <option value="photos_desc">Más fotos primero</option>
+              </select>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 16 }}>
+              {sortAlbums(initialAlbums, sortKey).map(album => (
+                <div
+                  key={album.id}
+                  style={{
+                    background: 'var(--surface)', borderRadius: 'var(--radius)',
+                    border: '1px solid var(--border)', overflow: 'hidden',
+                    display: 'flex', flexDirection: 'column', cursor: 'pointer',
+                  }}
+                  onClick={() => router.push(`/smart-albums/${album.id}`)}
                 >
                   <div style={{
                     height: 140, background: 'var(--bg)',
@@ -207,42 +233,39 @@ export default function SmartAlbumsClient({
                       <IconSmartAlbum size={40} />
                     )}
                   </div>
-                </Link>
-                <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                    <Link
-                      href={`/smart-albums/${album.id}`}
-                      style={{ textDecoration: 'none', color: 'var(--text)', fontWeight: 600, fontSize: 14, flex: 1 }}
-                    >
-                      {album.name}
-                    </Link>
-                    <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
-                      <button
-                        onClick={() => setEditingAlbum(album)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 3, borderRadius: 4 }}
-                        title="Editar reglas"
-                      >
-                        <IconEdit size={13} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(album)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 3, borderRadius: 4 }}
-                        title="Eliminar álbum"
-                      >
-                        <IconTrash size={13} />
-                      </button>
+                  <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                      <span style={{ color: 'var(--text)', fontWeight: 600, fontSize: 14, flex: 1 }}>
+                        {album.name}
+                      </span>
+                      <div style={{ display: 'flex', gap: 2, flexShrink: 0 }}>
+                        <button
+                          onClick={e => { e.stopPropagation(); setEditingAlbum(album); }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 3, borderRadius: 4 }}
+                          title="Editar reglas"
+                        >
+                          <IconEdit size={13} />
+                        </button>
+                        <button
+                          onClick={e => { e.stopPropagation(); handleDelete(album); }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 3, borderRadius: 4 }}
+                          title="Eliminar álbum"
+                        >
+                          <IconTrash size={13} />
+                        </button>
+                      </div>
                     </div>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>
+                      {describeRules(album.rules)}
+                    </p>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>
+                      {album.photo_count.toLocaleString('es')} fotos
+                    </p>
                   </div>
-                  <p style={{ margin: 0, fontSize: 12, color: 'var(--text-tertiary)', lineHeight: 1.4 }}>
-                    {describeRules(album.rules)}
-                  </p>
-                  <p style={{ margin: 0, fontSize: 12, color: 'var(--text-secondary)' }}>
-                    {album.photo_count.toLocaleString('es')} fotos
-                  </p>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </main>
 
