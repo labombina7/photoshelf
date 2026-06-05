@@ -43,12 +43,14 @@ function RuleRow({
         onChange={e => {
           const field = e.target.value as RuleField;
           const defaults: Record<RuleField, AlbumRule> = {
-            year:     { field: 'year',     op: 'eq',      value: String(new Date().getFullYear()) },
-            tag:      { field: 'tag',      op: 'contains', value: '' },
-            theme:    { field: 'theme',    op: 'eq',      value: themes[0] ? String(themes[0].id) : '' },
-            favorite: { field: 'favorite', op: 'is_true' },
-            camera:   { field: 'camera',   op: 'contains', value: '' },
-            no_tags:  { field: 'no_tags',  op: 'is_empty' },
+            year:         { field: 'year',         op: 'eq',       value: String(new Date().getFullYear()) },
+            tag:          { field: 'tag',           op: 'contains', value: '' },
+            theme:        { field: 'theme',         op: 'eq',       value: themes[0] ? String(themes[0].id) : '' },
+            favorite:     { field: 'favorite',      op: 'is_true' },
+            camera:       { field: 'camera',        op: 'contains', value: '' },
+            no_tags:      { field: 'no_tags',       op: 'is_empty' },
+            taken_after:  { field: 'taken_after',   op: 'gte',      value: '' },
+            taken_before: { field: 'taken_before',  op: 'lte',      value: '' },
           };
           onChange(defaults[field]);
         }}
