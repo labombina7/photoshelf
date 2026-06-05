@@ -94,7 +94,7 @@ export default function LibraryClient({
     try { sessionStorage.setItem('photoshelf_collapsed', JSON.stringify(Array.from(collapsed))); } catch {}
   }, [collapsed]);
   const [viewMode, setViewMode] = useState<'list' | 'folders'>('folders');
-  const { running: classifyingYear, done: classifyDone, total: classifyTotal, startClassify } = useClassify();
+  const { running: classifyingYear, pending: classifyPending, done: classifyDone, total: classifyTotal, startClassify } = useClassify();
   const [localClassifying, setLocalClassifying] = useState(false);
   const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -115,10 +115,10 @@ export default function LibraryClient({
     if (ids.length > 0) setSlideshowIds(ids);
   }
 
-  // Keep localClassifying in sync: clear it when the server confirms done
+  // Keep localClassifying in sync: clear it when server confirms no active job
   useEffect(() => {
-    if (localClassifying && !classifyingYear) setLocalClassifying(false);
-  }, [classifyingYear, localClassifying]);
+    if (localClassifying && !classifyingYear && !classifyPending) setLocalClassifying(false);
+  }, [classifyingYear, classifyPending, localClassifying]);
 
   // If navigated to a specific event, always use list mode
   const effectiveViewMode = activeFilters.event ? 'list' : viewMode;
@@ -163,7 +163,7 @@ export default function LibraryClient({
     }
   }
 
-  const showYearProgress = localClassifying || classifyingYear;
+  const showYearProgress = localClassifying || classifyingYear || classifyPending;
 
   const allKeys = allGroupKeys;
   const allCollapsed = collapsed.size === allKeys.length;
@@ -325,7 +325,9 @@ export default function LibraryClient({
                 style={{ flexShrink: 0 }}
               >
                 <IconSparkle size={11} />
-                {showYearProgress
+                {classifyPending && !classifyingYear
+                  ? 'En cola…'
+                  : classifyingYear
                   ? 'Clasificando…'
                   : `Clasificar año ${activeYear}`}
               </button>
@@ -341,7 +343,7 @@ export default function LibraryClient({
                   Reclasificar
                 </button>
               )}
-              {showYearProgress && (
+              {showYearProgress && classifyingYear && (
                 <span className="classify-inline-progress">
                   <span className="classify-inline-track">
                     {classifyTotal > 0 && classifyDone > 0

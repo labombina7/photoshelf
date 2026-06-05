@@ -131,6 +131,23 @@ function SidebarInner({
   const [eventOpen,   setEventOpen]   = useState(false);
   const [exifFilters, setExifFilters] = useState<ExifFilterValues>({});
   const [orphanCount, setOrphanCount] = useState(0);
+  const [activeJobCount, setActiveJobCount] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+    async function pollJobs() {
+      try {
+        const res = await fetch('/api/jobs');
+        if (!res.ok || !mounted) return;
+        const data = await res.json() as { jobs: { status: string }[] };
+        const count = data.jobs.filter(j => j.status === 'pending' || j.status === 'in_progress').length;
+        if (mounted) setActiveJobCount(count);
+      } catch { /* ignore */ }
+    }
+    pollJobs();
+    const interval = setInterval(pollJobs, 3000);
+    return () => { mounted = false; clearInterval(interval); };
+  }, []);
 
   useEffect(() => {
     fetch('/api/integrity/status')
@@ -531,6 +548,24 @@ function SidebarInner({
 
       <div className="sidebar-section">
         <div className="sidebar-section-label">Herramientas</div>
+        <Link
+          href="/jobs"
+          onClick={handleNavClick}
+          className={`sidebar-item ${pathname === '/jobs' ? 'active' : ''}`}
+        >
+          <IconCalendar size={14} />
+          Cola de trabajos
+          {activeJobCount > 0 && (
+            <span style={{
+              marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9,
+              background: '#3b82f6', color: '#fff', fontSize: 10, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px',
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}>
+              {activeJobCount}
+            </span>
+          )}
+        </Link>
         <Link
           href="/stats"
           onClick={handleNavClick}
