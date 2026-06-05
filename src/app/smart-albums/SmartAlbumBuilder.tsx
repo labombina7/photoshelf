@@ -21,7 +21,11 @@ const FIELD_LABELS: Record<RuleField, string> = {
   favorite: 'Favorita',
   camera: 'Cámara',
   no_tags: 'Sin tags',
+  taken_after: 'Desde fecha',
+  taken_before: 'Hasta fecha',
 };
+
+const USER_FIELDS: RuleField[] = ['year', 'tag', 'theme', 'favorite', 'camera', 'no_tags'];
 
 function RuleRow({
   rule,
@@ -55,7 +59,7 @@ function RuleRow({
           onChange(defaults[field]);
         }}
       >
-        {(Object.keys(FIELD_LABELS) as RuleField[]).map(f => (
+        {USER_FIELDS.map(f => (
           <option key={f} value={f}>{FIELD_LABELS[f]}</option>
         ))}
       </select>
