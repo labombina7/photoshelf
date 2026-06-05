@@ -18,28 +18,47 @@ interface KnownEvent {
   lastAt: string;     // ISO
 }
 
+// Dates before this are considered corrupted EXIF (scanned film, bad metadata…)
+const MIN_VALID_DATE = '1990-01-01';
+
 function getKnownEvents(excludeCatalogId: number): KnownEvent[] {
   const db = getDb();
   const rows = db.prepare(`
-    SELECT event, MIN(taken_at) as first_at, MAX(taken_at) as last_at
+    SELECT event,
+           MIN(taken_at) as first_at,
+           MAX(taken_at) as last_at
     FROM photos
     WHERE catalog_id != ?
       AND taken_at IS NOT NULL
+      AND taken_at > ?
       AND event IS NOT NULL AND event != ''
     GROUP BY catalog_id, year, event
     HAVING COUNT(*) >= 3
     ORDER BY first_at ASC
-  `).all(excludeCatalogId) as { event: string; first_at: string; last_at: string }[];
+  `).all(excludeCatalogId, MIN_VALID_DATE) as { event: string; first_at: string; last_at: string }[];
 
   return rows.map(r => ({
-    name: r.event.replace(/-/g, ' '),
+    name: cleanEventName(r.event),
     firstAt: r.first_at,
     lastAt:  r.last_at,
   }));
 }
 
+function cleanEventName(raw: string): string {
+  // Replace separators with spaces
+  let name = raw.replace(/[_-]/g, ' ').trim();
+  // Strip leading 6-digit (YYYYMM) or 8-digit (YYYYMMDD) numeric prefixes
+  name = name.replace(/^\d{6,8}\s*/, '').trim();
+  // Collapse multiple spaces
+  name = name.replace(/\s+/g, ' ');
+  return name || raw; // fallback to original if empty after cleaning
+}
+
 // Expand event window by N days on each side to catch nearby iPhone photos
-const EVENT_MARGIN_MS = 2 * 24 * 60 * 60 * 1000;
+const EVENT_MARGIN_MS = 3 * 24 * 60 * 60 * 1000;
+
+// Minimum photos in a cross-catalog matched cluster to be worth creating
+const CROSS_MATCH_MIN_PHOTOS = 3;
 
 // ── Fallback: contiguous-day grouping for unmatched photos ───────────────────
 // Gap larger than this between consecutive unmatched photos → new fallback group
@@ -72,9 +91,9 @@ export function clusterPhotos(catalogId: number, useCrossMatch = true): AlbumClu
   const allPhotos = db.prepare(`
     SELECT taken_at
     FROM photos
-    WHERE catalog_id = ? AND taken_at IS NOT NULL
+    WHERE catalog_id = ? AND taken_at IS NOT NULL AND taken_at > ?
     ORDER BY taken_at ASC
-  `).all(catalogId) as { taken_at: string }[];
+  `).all(catalogId, MIN_VALID_DATE) as { taken_at: string }[];
 
   if (allPhotos.length === 0) return [];
 
@@ -93,7 +112,7 @@ export function clusterPhotos(catalogId: number, useCrossMatch = true): AlbumClu
       const photos = allPhotos.filter(
         p => p.taken_at >= windowStart && p.taken_at <= windowEnd
       );
-      if (photos.length === 0) continue;
+      if (photos.length < CROSS_MATCH_MIN_PHOTOS) continue;
 
       photos.forEach(p => matched.add(p.taken_at));
 
