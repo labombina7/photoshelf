@@ -103,18 +103,33 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
           tags: selectedTags.length > 0 ? selectedTags : undefined,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error ?? 'Error generando proyecto'); return; }
-      setShowNew(false);
-      router.push(`/projects/${data.id}`);
+      const data = await res.json() as { jobId?: string; error?: string };
+      if (!res.ok) { setError(data.error ?? 'Error generando proyecto'); setGenerating(false); return; }
+      if (!data.jobId) { setError('Respuesta inesperada del servidor'); setGenerating(false); return; }
+
+      // Poll until the job completes
+      const jobId = data.jobId;
+      const poll = setInterval(async () => {
+        try {
+          const jr = await fetch(`/api/jobs/${jobId}`);
+          if (!jr.ok) return;
+          const job = await jr.json() as { status: string; result?: string; error_last?: string };
+          if (job.status === 'completed' && job.result) {
+            clearInterval(poll);
+            setGenerating(false);
+            setShowNew(false);
+            const result = JSON.parse(job.result) as { id: number };
+            router.push(`/projects/${result.id}`);
+          } else if (job.status === 'failed' || job.status === 'cancelled') {
+            clearInterval(poll);
+            setGenerating(false);
+            setError(job.error_last ?? 'Error generando proyecto');
+          }
+        } catch { /* ignore */ }
+      }, 2000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
-      if (msg.includes('timeout') || msg.includes('AbortError')) {
-        setError('Timeout: Ollama tardó demasiado. Prueba con un scope más pequeño o menos fotos.');
-      } else {
-        setError('Error de conexión. Comprueba que Ollama está activo en el Mac.');
-      }
-    } finally {
+      setError(msg || 'Error de conexión. Comprueba que Ollama está activo en el Mac.');
       setGenerating(false);
     }
   }

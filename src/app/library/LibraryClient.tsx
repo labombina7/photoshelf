@@ -94,7 +94,9 @@ export default function LibraryClient({
     try { sessionStorage.setItem('photoshelf_collapsed', JSON.stringify(Array.from(collapsed))); } catch {}
   }, [collapsed]);
   const [viewMode, setViewMode] = useState<'list' | 'folders'>('folders');
-  const { running: classifyingYear, pending: classifyPending, done: classifyDone, total: classifyTotal, startClassify } = useClassify();
+  const { running: classifyingYear, pending: classifyPending, year: classifyActiveYear, done: classifyDone, total: classifyTotal, startClassify } = useClassify();
+  // Only show progress for the year currently being classified
+  const isThisYearActive = (classifyingYear || classifyPending) && classifyActiveYear === (activeYear ? parseInt(activeYear, 10) : null);
   const [localClassifying, setLocalClassifying] = useState(false);
   const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -115,10 +117,10 @@ export default function LibraryClient({
     if (ids.length > 0) setSlideshowIds(ids);
   }
 
-  // Keep localClassifying in sync: clear it when server confirms no active job
+  // Keep localClassifying in sync: clear it when server confirms this year's job is done
   useEffect(() => {
-    if (localClassifying && !classifyingYear && !classifyPending) setLocalClassifying(false);
-  }, [classifyingYear, classifyPending, localClassifying]);
+    if (localClassifying && !isThisYearActive) setLocalClassifying(false);
+  }, [isThisYearActive, localClassifying]);
 
   // If navigated to a specific event, always use list mode
   const effectiveViewMode = activeFilters.event ? 'list' : viewMode;
@@ -163,7 +165,7 @@ export default function LibraryClient({
     }
   }
 
-  const showYearProgress = localClassifying || classifyingYear || classifyPending;
+  const showYearProgress = localClassifying || isThisYearActive;
 
   const allKeys = allGroupKeys;
   const allCollapsed = collapsed.size === allKeys.length;

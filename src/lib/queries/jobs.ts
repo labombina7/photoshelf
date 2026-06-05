@@ -10,6 +10,7 @@ export interface JobRow {
   total: number;
   error_count: number;
   error_last: string | null;
+  result: string | null;
   created_at: string;
 }
 
@@ -47,7 +48,7 @@ export function listJobs(limit = 20): JobRow[] {
   ).all(limit) as JobRow[];
 }
 
-export function updateJob(id: string, patch: Partial<Pick<JobRow, 'status' | 'started_at' | 'processed' | 'total' | 'error_count' | 'error_last'>>): void {
+export function updateJob(id: string, patch: Partial<Pick<JobRow, 'status' | 'started_at' | 'processed' | 'total' | 'error_count' | 'error_last' | 'result'>>): void {
   const entries = Object.entries(patch).filter(([, v]) => v !== undefined);
   if (entries.length === 0) return;
   const setClauses = entries.map(([k]) => `${k} = ?`).join(', ');
