@@ -83,6 +83,41 @@ export function renameCatalog(id: number, name: string): CatalogRow {
   return { ...catalog, name: name.trim() };
 }
 
+export function updateCatalogPath(id: number, path: string): CatalogRow {
+  const db = getDb();
+  const catalog = getCatalogById(id);
+  if (!catalog) throw new Error(`Catálogo ${id} no encontrado`);
+
+  const trimmed = path.trim();
+
+  // Validate directory exists
+  const resolvedPath = nodePath.resolve(trimmed);
+  let stat: fs.Stats;
+  try {
+    stat = fs.statSync(resolvedPath);
+  } catch {
+    throw new Error('El directorio no existe o no es accesible');
+  }
+  if (!stat.isDirectory()) {
+    throw new Error('El directorio no existe o no es accesible');
+  }
+
+  // Validate no overlapping paths with other catalogs
+  const existing = listCatalogs();
+  for (const cat of existing) {
+    if (cat.id === id) continue;
+    if (cat.path === trimmed) {
+      throw new Error(`Ya existe un catálogo con la ruta "${trimmed}"`);
+    }
+    if (trimmed.startsWith(cat.path + '/') || cat.path.startsWith(trimmed + '/')) {
+      throw new Error(`La ruta "${trimmed}" se solapa con el catálogo "${cat.name}" (${cat.path})`);
+    }
+  }
+
+  db.prepare('UPDATE catalogs SET path = ? WHERE id = ?').run(trimmed, id);
+  return { ...catalog, path: trimmed };
+}
+
 export function deleteCatalog(id: number): void {
   if (id === 1) throw new Error('No se puede eliminar el catálogo Principal');
 
