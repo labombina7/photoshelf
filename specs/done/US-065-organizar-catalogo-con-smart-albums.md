@@ -1,5 +1,7 @@
 # Feature: Organización automática de catálogos no estructurados via smart albums
 
+> Estado: ✅ Desplegada
+
 ## Historia de usuario
 
 Como fotógrafo con un catálogo de fotos sin estructura coherente (ej. backup automático del móvil con carpetas `01/`, `02/`...),
