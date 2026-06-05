@@ -36,7 +36,7 @@ export function getSidebarData(catalogId = 1): SidebarData {
   const themes       = listThemes(catalogId);
   const projects     = getSidebarProjects();
   const catalogs     = listCatalogs();
-  const smartAlbums  = getSidebarSmartAlbums();
+  const smartAlbums  = getSidebarSmartAlbums(catalogId);
 
   return { totalPhotos, favoriteCount, untaggedCount, themes, projects, catalogs, smartAlbums };
 }

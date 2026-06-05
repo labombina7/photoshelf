@@ -17,7 +17,9 @@ export interface SmartAlbumWithCount extends SmartAlbumRow {
 
 export function listSmartAlbums(catalogId = 1): SmartAlbumWithCount[] {
   const db = getDb();
-  const albums = db.prepare('SELECT * FROM smart_albums ORDER BY created_at DESC').all() as SmartAlbumRow[];
+  const albums = db.prepare(
+    'SELECT * FROM smart_albums WHERE catalog_id IS NULL OR catalog_id = ? ORDER BY created_at DESC'
+  ).all(catalogId) as SmartAlbumRow[];
 
   return albums.map(album => {
     const rules = rulesFromJson(album.rules);
@@ -107,8 +109,10 @@ export function deleteSmartAlbum(id: number): void {
   getDb().prepare('DELETE FROM smart_albums WHERE id = ?').run(id);
 }
 
-export function getSidebarSmartAlbums(): { id: number; name: string }[] {
-  return getDb().prepare('SELECT id, name FROM smart_albums ORDER BY created_at DESC').all() as { id: number; name: string }[];
+export function getSidebarSmartAlbums(catalogId = 1): { id: number; name: string }[] {
+  return getDb().prepare(
+    'SELECT id, name FROM smart_albums WHERE catalog_id IS NULL OR catalog_id = ? ORDER BY created_at DESC'
+  ).all(catalogId) as { id: number; name: string }[];
 }
 
 export function createAutoAlbum(name: string, rules: AlbumRule[], catalogId: number): number {

@@ -141,14 +141,23 @@ export default function SmartAlbumsClient({
             </button>
             <h1 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>Álbumes inteligentes</h1>
           </div>
-          <button
-            className="btn-small"
-            onClick={() => setShowBuilder(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-          >
-            <IconPlus size={13} />
-            Nuevo álbum
-          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              className="btn-small"
+              style={{ background: 'var(--border)', color: 'var(--text)' }}
+              onClick={() => router.push(`/catalogs/${activeCatalogId}/organize`)}
+            >
+              Organizar con smart albums
+            </button>
+            <button
+              className="btn-small"
+              onClick={() => setShowBuilder(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+            >
+              <IconPlus size={13} />
+              Nuevo álbum
+            </button>
+          </div>
         </div>
 
         {(isUnstructured || alreadyOrganized) && (
