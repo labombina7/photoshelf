@@ -11,6 +11,72 @@ import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 import ExifFilters, { type ExifFilterValues } from './ExifFilters';
 
+const ALBUMS_VISIBLE = 5;
+
+function SmartAlbumsSidebarSection({
+  smartAlbums,
+  pathname,
+  onNavClick,
+}: {
+  smartAlbums: { id: number; name: string }[];
+  pathname: string;
+  onNavClick: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const hasActive = smartAlbums.some(a => pathname === `/smart-albums/${a.id}`);
+
+  // Auto-expand if the active album is beyond the visible fold
+  const activeIdx = smartAlbums.findIndex(a => pathname === `/smart-albums/${a.id}`);
+  const shouldAutoExpand = activeIdx >= ALBUMS_VISIBLE;
+  const isExpanded = expanded || shouldAutoExpand;
+
+  const visible = isExpanded ? smartAlbums : smartAlbums.slice(0, ALBUMS_VISIBLE);
+  const hidden  = smartAlbums.length - ALBUMS_VISIBLE;
+
+  return (
+    <div className="sidebar-section">
+      <Link
+        href="/smart-albums"
+        onClick={onNavClick}
+        className="sidebar-section-label sidebar-section-label--link"
+      >
+        Álbumes
+      </Link>
+      {visible.map(a => (
+        <Link
+          key={a.id}
+          href={`/smart-albums/${a.id}`}
+          onClick={onNavClick}
+          className={`sidebar-item ${pathname === `/smart-albums/${a.id}` ? 'active' : ''}`}
+        >
+          <IconSmartAlbum size={14} />
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
+        </Link>
+      ))}
+      {smartAlbums.length === 0 && (
+        <div className="sidebar-item" style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }}>
+          <Link href="/smart-albums" onClick={onNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
+            <IconPlus size={13} />
+            Nuevo álbum
+          </Link>
+        </div>
+      )}
+      {smartAlbums.length > ALBUMS_VISIBLE && (
+        <button
+          onClick={() => setExpanded(e => !e)}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--text-tertiary)', fontSize: '12px',
+            padding: '4px 8px 4px 28px', textAlign: 'left', width: '100%',
+          }}
+        >
+          {isExpanded ? 'Ver menos ↑' : `+${hidden} más`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function shortenPath(p: string): string {
   if (!p) return '';
   const s = p.replace(/^\/(?:Users|home)\/[^/]+/, '~');
@@ -461,34 +527,7 @@ function SidebarInner({
         )}
       </div>
 
-      <div className="sidebar-section">
-        <Link
-          href="/smart-albums"
-          onClick={handleNavClick}
-          className="sidebar-section-label sidebar-section-label--link"
-        >
-          Álbumes
-        </Link>
-        {smartAlbums.map(a => (
-          <Link
-            key={a.id}
-            href={`/smart-albums/${a.id}`}
-            onClick={handleNavClick}
-            className={`sidebar-item ${pathname === `/smart-albums/${a.id}` ? 'active' : ''}`}
-          >
-            <IconSmartAlbum size={14} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
-          </Link>
-        ))}
-        {smartAlbums.length === 0 && (
-          <div className="sidebar-item" style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }}>
-            <Link href="/smart-albums" onClick={handleNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
-              <IconPlus size={13} />
-              Nuevo álbum
-            </Link>
-          </div>
-        )}
-      </div>
+      <SmartAlbumsSidebarSection smartAlbums={smartAlbums} pathname={pathname} onNavClick={handleNavClick} />
 
       <div className="sidebar-section">
         <div className="sidebar-section-label">Herramientas</div>
