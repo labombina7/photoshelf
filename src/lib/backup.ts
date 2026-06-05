@@ -18,6 +18,17 @@ export async function runBackup(): Promise<BackupResult> {
     fs.mkdirSync(BACKUP_PATH, { recursive: true });
   }
 
+  // Verify write permission before attempting VACUUM INTO
+  // Common failure: BACKUP_PATH points to a read-only mount (e.g. /volume1 in Docker)
+  try {
+    fs.accessSync(BACKUP_PATH, fs.constants.W_OK);
+  } catch {
+    throw new Error(
+      `BACKUP_PATH "${BACKUP_PATH}" no tiene permisos de escritura. ` +
+      `Si estás en Docker, usa /data/backups en lugar de una ruta bajo /volume1.`
+    );
+  }
+
   const stamp = new Date().toISOString().replace(/[-:T]/g, match => {
     if (match === 'T') return '-';
     if (match === ':') return '';
