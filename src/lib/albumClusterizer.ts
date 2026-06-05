@@ -89,11 +89,11 @@ export function clusterPhotos(catalogId: number, useCrossMatch = true): AlbumClu
   const db = getDb();
 
   const allPhotos = db.prepare(`
-    SELECT taken_at
+    SELECT id, taken_at
     FROM photos
     WHERE catalog_id = ? AND taken_at IS NOT NULL AND taken_at > ?
     ORDER BY taken_at ASC
-  `).all(catalogId, MIN_VALID_DATE) as { taken_at: string }[];
+  `).all(catalogId, MIN_VALID_DATE) as { id: number; taken_at: string }[];
 
   if (allPhotos.length === 0) return [];
 
@@ -102,7 +102,7 @@ export function clusterPhotos(catalogId: number, useCrossMatch = true): AlbumClu
 
   // ── Path A: cross-catalog matching ────────────────────────────────────────
   if (hasCrossMatches) {
-    const matched = new Set<string>(); // ISO strings already assigned
+    const matched = new Set<number>(); // photo IDs already assigned
     const eventClusters: AlbumCluster[] = [];
 
     for (const ev of knownEvents) {
@@ -110,11 +110,11 @@ export function clusterPhotos(catalogId: number, useCrossMatch = true): AlbumClu
       const windowEnd   = new Date(new Date(ev.lastAt ).getTime() + EVENT_MARGIN_MS).toISOString();
 
       const photos = allPhotos.filter(
-        p => p.taken_at >= windowStart && p.taken_at <= windowEnd
+        p => !matched.has(p.id) && p.taken_at >= windowStart && p.taken_at <= windowEnd
       );
       if (photos.length < CROSS_MATCH_MIN_PHOTOS) continue;
 
-      photos.forEach(p => matched.add(p.taken_at));
+      photos.forEach(p => matched.add(p.id));
 
       const dateFrom = photos[0].taken_at.slice(0, 10);
       const dateTo   = photos[photos.length - 1].taken_at.slice(0, 10);
@@ -134,7 +134,7 @@ export function clusterPhotos(catalogId: number, useCrossMatch = true): AlbumClu
     }
 
     // ── Fallback for unmatched photos ────────────────────────────────────────
-    const unmatched = allPhotos.filter(p => !matched.has(p.taken_at));
+    const unmatched = allPhotos.filter(p => !matched.has(p.id));
     const fallbackClusters = buildFallbackClusters(unmatched);
 
     return [...eventClusters, ...fallbackClusters]
