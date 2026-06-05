@@ -3,13 +3,19 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+export type ClassifyStatus = 'idle' | 'pending' | 'in_progress';
+
 interface ClassifyState {
+  status: ClassifyStatus;
+  /** true when status is in_progress (backward compat) */
   running: boolean;
+  /** true when status is pending (job enqueued, not started yet) */
+  pending: boolean;
   year: number | null;
-  currentEvent: string;
   done: number;
   total: number;
   error: string | null;
+  jobId: string | null;
 }
 
 interface ClassifyContextValue extends ClassifyState {
@@ -17,12 +23,14 @@ interface ClassifyContextValue extends ClassifyState {
 }
 
 const ClassifyContext = createContext<ClassifyContextValue>({
+  status: 'idle',
   running: false,
+  pending: false,
   year: null,
-  currentEvent: '',
   done: 0,
   total: 0,
   error: null,
+  jobId: null,
   startClassify: async () => {},
 });
 
@@ -33,14 +41,16 @@ export function useClassify() {
 export function ClassifyProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [state, setState] = useState<ClassifyState>({
+    status: 'idle',
     running: false,
+    pending: false,
     year: null,
-    currentEvent: '',
     done: 0,
     total: 0,
     error: null,
+    jobId: null,
   });
-  const wasRunningRef = useRef(false);
+  const wasActiveRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -49,13 +59,32 @@ export function ClassifyProvider({ children }: { children: React.ReactNode }) {
       try {
         const res = await fetch('/api/ai/classify/status');
         if (!res.ok || !active) return;
-        const data: ClassifyState = await res.json();
-        setState(data);
+        const data = await res.json() as {
+          status: ClassifyStatus;
+          running: boolean;
+          pending: boolean;
+          year: number | null;
+          done: number;
+          total: number;
+          error: string | null;
+          jobId: string | null;
+        };
+        setState({
+          status: data.status ?? 'idle',
+          running: data.running ?? false,
+          pending: data.pending ?? false,
+          year: data.year,
+          done: data.done,
+          total: data.total,
+          error: data.error,
+          jobId: data.jobId,
+        });
 
-        if (wasRunningRef.current && !data.running) {
+        const isActive = data.running || data.pending;
+        if (wasActiveRef.current && !isActive) {
           router.refresh();
         }
-        wasRunningRef.current = data.running;
+        wasActiveRef.current = isActive;
       } catch { /* ignore */ }
     }
 
@@ -74,6 +103,8 @@ export function ClassifyProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json();
       throw new Error(data.error ?? 'Error al iniciar la clasificación');
     }
+    // Optimistic update so the button reacts immediately
+    setState(s => ({ ...s, status: 'pending', pending: true, running: false, year }));
   }
 
   return (

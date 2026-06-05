@@ -101,6 +101,7 @@ function initSchema(db: Database.Database) {
   migrateHealthSnapshots(db);
   migrateExif(db);
   migrateSmartAlbums(db);
+  migrateJobQueue(db);
 }
 
 function migrateEpic001(db: Database.Database) {
@@ -250,6 +251,28 @@ function migrateExif(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_photos_aperture  ON photos(aperture);
     CREATE INDEX IF NOT EXISTS idx_photos_focal     ON photos(focal_length);
   `);
+}
+
+function migrateJobQueue(db: Database.Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS job_queue (
+      id          TEXT PRIMARY KEY,
+      type        TEXT NOT NULL,
+      payload     TEXT NOT NULL,
+      status      TEXT NOT NULL DEFAULT 'pending',
+      started_at  TEXT,
+      processed   INTEGER NOT NULL DEFAULT 0,
+      total       INTEGER NOT NULL DEFAULT 0,
+      error_count INTEGER NOT NULL DEFAULT 0,
+      error_last  TEXT,
+      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_job_queue_status ON job_queue(status, created_at);
+  `);
+  // Add created_at to photo_tags for resumption of force=true jobs
+  try {
+    db.exec(`ALTER TABLE photo_tags ADD COLUMN created_at TEXT DEFAULT (datetime('now'))`);
+  } catch { /* already exists */ }
 }
 
 function migrateSmartAlbums(db: Database.Database) {
