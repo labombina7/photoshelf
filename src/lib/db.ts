@@ -273,6 +273,10 @@ function migrateJobQueue(db: Database.Database) {
   try {
     db.exec(`ALTER TABLE photo_tags ADD COLUMN created_at TEXT DEFAULT (datetime('now'))`);
   } catch { /* already exists */ }
+  // Add result column for jobs that produce a value (e.g. generate_project)
+  try {
+    db.exec(`ALTER TABLE job_queue ADD COLUMN result TEXT`);
+  } catch { /* already exists */ }
 }
 
 function migrateSmartAlbums(db: Database.Database) {

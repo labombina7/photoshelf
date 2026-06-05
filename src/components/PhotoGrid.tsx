@@ -4,7 +4,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconChevronDown, IconChevronUp, IconSparkle } from '@/components/Icons';
 import EmptyState from '@/components/EmptyState';
-import { useClassify } from '@/components/ClassifyProvider';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import type { Photo, Tag } from '@/lib/types';
 
@@ -75,9 +74,10 @@ function EventGroupBlock({
   const [photos, setPhotos] = useState<PhotoWithTags[] | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
-  const { done: classifyDone, total: classifyTotal } = useClassify();
   const { track } = useAnalytics();
   const [classifying, setClassifying] = useState(false);
+  const [classifyJobId, setClassifyJobId] = useState<string | null>(null);
+  const [classifyProgress, setClassifyProgress] = useState<{ done: number; total: number } | null>(null);
   const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number; errors?: number } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -251,21 +251,50 @@ function EventGroupBlock({
     setFocusedIndex(visibleIdx);
   }
 
+  // Poll job progress when a classify/batch job is queued
+  useEffect(() => {
+    if (!classifyJobId) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/jobs/${classifyJobId}`);
+        if (!res.ok) return;
+        const job = await res.json() as { status: string; processed: number; total: number; error_count: number };
+        setClassifyProgress({ done: job.processed, total: job.total });
+        if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
+          clearInterval(interval);
+          setClassifyJobId(null);
+          setClassifying(false);
+          setClassifyProgress(null);
+          setClassifyResult({ processed: job.processed, total: job.total, errors: job.error_count });
+          setPhotos(null);
+        }
+      } catch { /* ignore */ }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [classifyJobId]);
+
   async function handleClassify(e: React.MouseEvent) {
     e.stopPropagation?.();
     track('ai_classify_triggered');
     setClassifying(true);
     setClassifyResult(null);
+    setClassifyProgress(null);
     try {
       const res = await fetch('/api/ai/classify/batch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ year: group.year, event: group.event }),
       });
-      const data = await res.json();
-      setClassifyResult(data);
-      setPhotos(null); // reload photos to show new tags
-    } finally {
+      const data = await res.json() as { jobId?: string; total?: number; processed?: number; errors?: number };
+      if (data.jobId) {
+        setClassifyJobId(data.jobId);
+        // classifying stays true — polling will clear it
+      } else {
+        // No photos to classify
+        setClassifyResult({ processed: data.processed ?? 0, total: data.total ?? 0 });
+        setClassifying(false);
+      }
+    } catch {
       setClassifying(false);
     }
   }
@@ -286,12 +315,12 @@ function EventGroupBlock({
         {classifying && (
           <span className="classify-inline-progress">
             <span className="classify-inline-track">
-              {classifyTotal > 0 && classifyDone > 0
-                ? <span className="classify-inline-fill" style={{ width: `${Math.round((classifyDone / classifyTotal) * 100)}%` }} />
+              {classifyProgress && classifyProgress.done > 0
+                ? <span className="classify-inline-fill" style={{ width: `${Math.round((classifyProgress.done / classifyProgress.total) * 100)}%` }} />
                 : <span className="classify-inline-pulse" />}
             </span>
-            {classifyTotal > 0 && classifyDone > 0 && (
-              <span className="classify-inline-count">({classifyDone}/{classifyTotal})</span>
+            {classifyProgress && classifyProgress.done > 0 && (
+              <span className="classify-inline-count">({classifyProgress.done}/{classifyProgress.total})</span>
             )}
           </span>
         )}
