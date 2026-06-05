@@ -711,14 +711,6 @@
         <div class="card-summary">Auditar, documentar y mejorar los 5 prompts que llaman a Ollama (classify, search, project, review, concept). Script de evaluación manual + corrección de fallos conocidos por función.</div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-068" onclick="openModal('US-068')">
-        <div class="card-top">
-          <span class="badge badge-us">US-068</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Analytics de producto con Amplitude</div>
-        <div class="card-summary">Integrar Amplitude para registrar eventos clave: navegación, filtros, búsqueda, fotos abiertas/favoritas/descargadas, e IA. Hook centralizado useAnalytics. Sin datos personales ni queries literales.</div>
-      </div>
 
       <!-- ── US previas ── -->
 
@@ -781,7 +773,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">54</span>
+      <span class="col-count">56</span>
     </div>
     <div class="col-body">
 
@@ -792,6 +784,24 @@
           <span class="date-badge">2026-06-04</span>
         </div>
         <div class="card-title">Álbumes inteligentes</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-069" onclick="openModal('US-069')">
+        <div class="card-top">
+          <span class="badge badge-us">US-069</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-05</span>
+        </div>
+        <div class="card-title">Mejoras clasificación IA — b&w, prompt y reclasificación</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-068" onclick="openModal('US-068')">
+        <div class="card-top">
+          <span class="badge badge-us">US-068</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-03</span>
+        </div>
+        <div class="card-title">Analytics de producto con Amplitude</div>
       </div>
 
       <div class="card card-done" tabindex="0" data-id="US-063" onclick="openModal('US-063')">
@@ -4734,6 +4744,51 @@ const CARDS = {
       'Métricas de calidad persistentes en DB',
       'Cambio de modelo o proveedor',
     ]
+  },
+
+  'US-068': {
+    id: 'US-068', type: 'US', column: 'done', effort: 'S',
+    title: 'Analytics de producto con Amplitude',
+    story: 'Como equipo de producto,\nquiero registrar eventos clave de uso en Amplitude,\npara entender cómo se usa la app y tomar decisiones basadas en datos.',
+    description: [
+      'Integración de Amplitude SDK en el cliente. Hook centralizado <code>useAnalytics</code> que expone <code>track(event, props)</code> y gestiona el ciclo de vida del SDK. Eventos registrados: navegación entre secciones, filtros aplicados, búsquedas, fotos abiertas/favoritas, clasificaciones IA iniciadas.',
+      'Sin datos personales, sin queries literales de búsqueda. Servidor EU. ✅ Desplegada en PR #110 el 2026-06-03.',
+    ],
+    criteria: [
+      { group: 'SDK', items: ['Amplitude inicializado con API key via env var <code>NEXT_PUBLIC_AMPLITUDE_API_KEY</code>', 'Servidor EU configurado', 'fetchRemoteConfig deshabilitado (incompatible con Legacy API Key)'] },
+      { group: 'Eventos', items: ['Navegación entre secciones', 'Filtros de sidebar aplicados/limpiados', 'Foto abierta en detalle', 'Favorito toggleado', 'Clasificación IA iniciada', 'Búsqueda ejecutada'] },
+      { group: 'Privacidad', items: ['Sin datos personales', 'Sin queries literales', 'Sin paths de archivos'] },
+    ],
+    dependencies: [], components: [
+      { path: 'src/hooks/useAnalytics.ts', desc: 'Hook centralizado — track(), inicialización SDK', isNew: true },
+    ], tech: ['Amplitude Browser SDK 2.x', 'NEXT_PUBLIC_AMPLITUDE_API_KEY como build-arg en Docker'], outOfScope: ['Dashboards en Amplitude', 'A/B testing', 'Funnels automáticos']
+  },
+
+  'US-069': {
+    id: 'US-069', type: 'US', column: 'done', effort: 'M',
+    title: 'Mejoras clasificación IA — b&w, prompt y reclasificación',
+    story: 'Como fotógrafo que usa los tags para buscar y filtrar,\nquiero que la clasificación automática sea más precisa y corregible,\npara poder confiar en los tags generados por IA.',
+    description: [
+      'Tres mejoras independientes al pipeline de clasificación: (1) detección b&w por análisis de saturación de píxeles con Sharp — determinista, 100% fiable, no depende del modelo; (2) rediseño del prompt — más simple y libre, sin estructura rígida ni listas ordenadas que confundían a llava:7b; (3) botón de reclasificación que borra tags de IA existentes y reclasifica.',
+      'También: cambio de modelo de <code>llama3.2-vision:11b</code> (arquitectura mllama no soportada) a <code>llava:7b</code> que carga correctamente con 100% GPU en M1. ✅ Desplegada el 2026-06-05.',
+    ],
+    criteria: [
+      { group: 'Detección b&w', items: ['Sharp analiza saturación media (muestra 200x200px)', 'Umbral: avg saturation < 0.08 → b&w', 'No depende del modelo — corre antes de llamar a Ollama', 'Fotos sepia, viradas, alto contraste detectadas correctamente'] },
+      { group: 'Prompt', items: ['Sin orden forzado ni listas predefinidas', 'Pide 3-5 tags descriptivos en inglés', 'Ejemplos concretos de tags buenos y malos', 'No pide b&w/color (ya lo detecta Sharp)'] },
+      { group: 'Reclasificación', items: ['Parámetro force=true en /api/ai/classify/batch y /year', 'Con force=true: borra tags source=ai antes de reclasificar', 'Tags manuales (source=manual) nunca se tocan', 'Botón "Reclasificar" junto a "Clasificar año X" en la biblioteca'] },
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/ollama/image.ts', desc: 'Nueva función detectIsBlackAndWhite() con Sharp' },
+      { path: 'src/lib/ollama/classify.ts', desc: 'Prompt rediseñado, b&w via Sharp en paralelo con base64' },
+      { path: 'src/lib/ollama/client.ts', desc: 'Modelo cambiado a llava:7b' },
+      { path: 'src/app/api/ai/classify/batch/route.ts', desc: 'Parámetro force para reclasificación' },
+      { path: 'src/app/api/ai/classify/year/route.ts', desc: 'Parámetro force para reclasificación' },
+      { path: 'src/components/ClassifyProvider.tsx', desc: 'startClassify acepta force opcional' },
+      { path: 'src/app/library/LibraryClient.tsx', desc: 'Botón "Reclasificar" junto a "Clasificar año"' },
+    ],
+    tech: ['Sharp pixel analysis para b&w (sin IA)', 'llava:7b — 100% GPU en M1, ~20-30s/foto', 'Detección b&w y preparación de imagen en Promise.all (paralelo)'],
+    outOfScope: ['Fine-tuning del modelo', 'Normalización de sinónimos', 'Reclasificación por evento individual desde PhotoGrid']
   }
 
 };
