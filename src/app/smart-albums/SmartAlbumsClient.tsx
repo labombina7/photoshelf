@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconSmartAlbum, IconPlus, IconTrash, IconEdit, IconMenu } from '@/components/Icons';
 import SmartAlbumBuilder from './SmartAlbumBuilder';
+import UnstructuredCatalogBanner from '@/components/UnstructuredCatalogBanner';
 import { useModal } from '@/components/ModalProvider';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
@@ -30,6 +31,9 @@ interface SmartAlbumsClientProps {
   smartAlbums: { id: number; name: string }[];
   catalogs: CatalogRow[];
   activeCatalogId: number;
+  catalogName: string;
+  isUnstructured: boolean;
+  alreadyOrganized: boolean;
 }
 
 function describeRules(rulesJson: string): string {
@@ -65,6 +69,9 @@ export default function SmartAlbumsClient({
   smartAlbums,
   catalogs,
   activeCatalogId,
+  catalogName,
+  isUnstructured,
+  alreadyOrganized,
 }: SmartAlbumsClientProps) {
   const router = useRouter();
   const { confirm } = useModal();
@@ -143,6 +150,14 @@ export default function SmartAlbumsClient({
             Nuevo álbum
           </button>
         </div>
+
+        {(isUnstructured || alreadyOrganized) && (
+          <UnstructuredCatalogBanner
+            catalogId={activeCatalogId}
+            catalogName={catalogName}
+            alreadyOrganized={alreadyOrganized}
+          />
+        )}
 
         {initialAlbums.length === 0 ? (
           <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', padding: '64px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>

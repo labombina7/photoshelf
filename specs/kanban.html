@@ -689,8 +689,8 @@
           <span class="badge badge-us">US-065</span>
           <span class="effort effort-l">L</span>
         </div>
-        <div class="card-title">Importador con asistente de estructura de carpetas</div>
-        <div class="card-summary">Analiza carpetas existentes, infiere el año por EXIF y propone reorganización a AÑO/EVENTO/. Ejecuta movimientos con log reversible y lanza scan automático. Elimina la barrera de entrada principal.</div>
+        <div class="card-title">Organización automática de catálogos no estructurados</div>
+        <div class="card-summary">Detecta catálogos sin estructura AÑO/EVENTO/ (ej. backup del móvil) y propone smart albums generados por clustering EXIF. No mueve ficheros — organización virtual sin tocar el filesystem.</div>
       </div>
 
       <div class="card" tabindex="0" data-id="US-067" onclick="openModal('US-067')">
@@ -4538,72 +4538,72 @@ const CARDS = {
     type: 'US',
     column: 'todo',
     effort: 'L',
-    title: 'Importador con asistente de estructura de carpetas',
-    story: 'Como fotógrafo con fotos en carpetas desorganizadas o con estructura no compatible con photoshelf,\nquiero que la app analice mis carpetas actuales y me ayude a reorganizarlas en la estructura <code>AÑO/EVENTO/</code> sin perder nada,\npara poder empezar a usar photoshelf con mi biblioteca existente sin tener que reorganizar manualmente miles de archivos.',
+    title: 'Organización automática de catálogos no estructurados',
+    story: 'Como fotógrafo con un catálogo de fotos sin estructura coherente (ej. backup automático del móvil con carpetas 01/, 02/...),\nquiero que photoshelf detecte que el catálogo no está organizado y me ofrezca generar smart albums automáticamente a partir de los metadatos EXIF,\npara poder navegar y encontrar mis fotos sin tener que reorganizar el filesystem.',
     description: [
-      'La barrera de entrada más grande de photoshelf es que requiere estructura <code>AÑO/EVENTO/fotos</code>. La mayoría de fotógrafos amateurs no la tienen — tienen carpetas por fecha plana, por lugares, anidadas sin coherencia, o todo mezclado. El importador asistido analiza la estructura existente, propone reorganización compatible, y ejecuta la migración con total seguridad (mueve archivos, nunca borra; genera log para revertir si algo va mal).',
-      'Flujo: (1) usuario apunta al directorio con fotos actuales, (2) sistema analiza y propone mapeo ("Vacaciones Grecia" parece 2019 por EXIF → "2019/Vacaciones-Grecia/"), (3) usuario revisa y ajusta, (4) sistema ejecuta movimientos + scan automático.',
+      'Algunos catálogos no pueden ni deben reorganizarse físicamente — por ejemplo, un directorio gestionado por un NAS como backup del carrete del móvil. Photoshelf detecta si un catálogo carece de estructura <code>AÑO/EVENTO/</code> y ofrece organizarlo mediante smart albums generados a partir de los datos EXIF ya indexados.',
+      'Flujo: (1) se detecta catálogo no estructurado y aparece banner, (2) el sistema agrupa fotos por clustering temporal/GPS desde BD, (3) usuario revisa y renombra los álbumes propuestos, (4) se crean los smart albums — sin tocar el filesystem en ningún momento.',
     ],
     criteria: [
       {
-        group: 'Análisis de estructura actual',
+        group: 'Detección de catálogo no estructurado',
         items: [
-          'Usuario introduce ruta del directorio fuente',
-          'Sistema analiza recursivamente: subdirectorios, cuenta fotos, lee EXIF de muestra (máx 10 por carpeta)',
-          'Identifica tres tipos: <code>year/event/</code> (compatible), <code>event/</code> (propone inferir año), <code>flat</code> (propone agrupar por mes/evento)',
+          'Al escanear, el sistema evalúa si las carpetas raíz siguen el patrón AÑO (4 dígitos 1900-2100)',
+          'Si menos del 50% son años, el catálogo se marca como "no estructurado"',
+          'Aparece banner persistente: "Este catálogo no tiene estructura de eventos. ¿Organizar con smart albums?"',
+          'El banner desaparece solo si el usuario genera los álbumes o lo descarta explícitamente',
         ]
       },
       {
-        group: 'Propuesta de reorganización',
+        group: 'Propuesta de smart albums',
         items: [
-          'Tabla de mapeo: "Carpeta actual → Carpeta propuesta"',
-          'Usuario puede editar nombres propuestos directamente',
-          'Carpetas multi-año se dividen: "Fotos/2019 y 2022" → "2019/Fotos-antiguas/" + "2022/Fotos/"',
-          'Contador: "X archivos se moverán, Y carpetas se crearán"',
-          'Opción "Previsualizar en árbol"',
+          'El sistema usa datos EXIF ya en BD — no re-lee ficheros',
+          'Clustering temporal: gap de más de 3 días entre fotos consecutivas = nuevo álbum',
+          'Nombre sugerido por fecha: "Enero 2026", "Semana Santa 2025", etc.',
+          'Si hay GPS con clusters geográficos, se añade lugar al nombre: "Enero 2026 · Roma"',
+          'Lista editable: nombre, rango de fechas, número de fotos',
+          'Usuario puede renombrar, fusionar o eliminar álbumes propuestos',
         ]
       },
       {
-        group: 'Ejecución de migración',
+        group: 'Creación de smart albums',
         items: [
-          'Botón "Reorganizar y escanear" lanza migración',
-          'Movimiento de archivos: <code>fs.rename</code> con fallback copy+delete si cross-volume',
-          'Log JSON obligatorio: <code>_migration_log_YYYYMMDD.json</code> en destino con cada movimiento',
-          'Si archivo destino existe: renombra con sufijo "_2" (no sobrescribe)',
-          'Al completar: lanza scan automático',
-          'Si falla a mitad: log permite identificar qué se movió para revertir',
+          'Al confirmar, se crean smart albums con reglas <code>date_range</code> para ese catálogo',
+          'Los álbumes generados se marcan con <code>source: auto</code>',
+          'No sobreescribe smart albums ya existentes en el catálogo',
+          'Opción "Deshacer organización automática" elimina todos los álbumes generados',
         ]
       },
       {
         group: 'Seguridad',
         items: [
-          'Nunca permite que fuente y destino se superpongan (evitar loops)',
-          'Requiere confirmación explícita: pantalla de resumen',
-          'Log de migración obligatorio e imposible de desactivar',
+          'No se modifica ningún fichero del filesystem en ningún momento',
+          'Los smart albums generados pueden eliminarse individualmente o todos a la vez',
         ]
       }
     ],
     dependencies: [],
     components: [
-      { path: 'src/app/tools/importer/page.tsx', desc: 'Nuevo — wizard de importación (4 pasos)', isNew: true },
-      { path: 'src/app/tools/importer/ImporterClient.tsx', desc: 'Nuevo — análisis, tabla de mapeo, ejecución', isNew: true },
-      { path: 'src/app/api/importer/analyze/route.ts', desc: 'Nuevo — análisis de estructura', isNew: true },
-      { path: 'src/app/api/importer/execute/route.ts', desc: 'Nuevo — ejecución de migración', isNew: true },
-      { path: 'src/app/api/importer/status/route.ts', desc: 'Nuevo — estado del proceso', isNew: true },
-      { path: 'src/lib/importerAnalyzer.ts', desc: 'Nuevo — lógica de análisis y propuesta', isNew: true },
-      { path: 'src/lib/importerExecutor.ts', desc: 'Nuevo — movimiento de archivos y log', isNew: true },
+      { path: 'src/components/UnstructuredCatalogBanner.tsx', desc: 'Nuevo — banner con CTA organizar', isNew: true },
+      { path: 'src/app/catalogs/[id]/organize/page.tsx', desc: 'Nuevo — vista de revisión de propuesta', isNew: true },
+      { path: 'src/app/api/catalogs/[id]/analyze-structure/route.ts', desc: 'Nuevo — detección de estructura', isNew: true },
+      { path: 'src/app/api/catalogs/[id]/suggest-albums/route.ts', desc: 'Nuevo — propuesta de clustering', isNew: true },
+      { path: 'src/app/api/catalogs/[id]/auto-organize/route.ts', desc: 'Nuevo — creación de smart albums', isNew: true },
+      { path: 'src/lib/catalogStructureAnalyzer.ts', desc: 'Nuevo — detección de estructura', isNew: true },
+      { path: 'src/lib/albumClusterizer.ts', desc: 'Nuevo — clustering temporal/geográfico desde BD', isNew: true },
     ],
     tech: [
-      'Análisis: <code>fs.readdir(recursive: true)</code> (Node 18+) o traversal manual; muestra EXIF limitada a 10 por carpeta',
-      'Inferencia de año: <code>exifr.parse</code> en muestra; si ≥ 80% mismo año → usar ese año; si mezcla → dividir',
-      'Movimiento: <code>fs.rename</code> (atómico mismo volumen); cross-volume: <code>fs.copyFile</code> + <code>fs.unlink</code> con verificación',
-      'Log: append-only JSON; cada movimiento antes de ejecutar',
+      'Clustering: ordenar por <code>taken_at</code>, nuevo cluster cuando gap > 3 días entre fotos consecutivas',
+      'Nombres: si el cluster cae en fechas conocidas (Navidad, Semana Santa) usar ese nombre; si no, "Mes Año"',
+      'Smart albums generados usan reglas <code>date_range</code> existentes — no se necesita nuevo tipo de regla',
+      'Campo <code>source</code> añadido a tabla <code>smart_albums</code>: <code>manual | auto</code>',
     ],
     outOfScope: [
-      'Deshacer automático (solo log manual)',
+      'Reorganización física del filesystem (descartada por diseño)',
       'Importar desde Google Photos, iCloud, Dropbox',
-      'Detectar duplicados entre fuente y destino',
-      'Soporte para catálogos Lightroom',
+      'Detección de duplicados entre catálogos',
+      'Clustering por personas (face recognition)',
+      'Umbral de clustering configurable en UI',
     ]
   },
   'US-067': {

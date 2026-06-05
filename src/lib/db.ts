@@ -261,6 +261,12 @@ function migrateSmartAlbums(db: Database.Database) {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
   `);
+  try {
+    db.exec(`ALTER TABLE smart_albums ADD COLUMN source TEXT NOT NULL DEFAULT 'manual'`);
+  } catch { /* already exists */ }
+  try {
+    db.exec(`ALTER TABLE smart_albums ADD COLUMN catalog_id INTEGER`);
+  } catch { /* already exists */ }
 }
 
 // ── integrity badge: unresolved orphan count ──────────────────────────────────
