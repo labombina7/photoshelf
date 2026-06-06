@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
-import { useHeaderSlot } from '@/components/AppHeader';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import { IconMenu } from '@/components/Icons';
 
 interface Theme { id: number; name: string; count: number }
