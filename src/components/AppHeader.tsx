@@ -16,10 +16,10 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 async function fetchHints(): Promise<ClassifierHints> {
   try {
     const res = await fetch('/api/search/hints', { credentials: 'same-origin' });
-    if (!res.ok) return { tags: [], events: [] };
+    if (!res.ok) return { tags: [], events: [], smartAlbums: [], projects: [] };
     return res.json() as Promise<ClassifierHints>;
   } catch {
-    return { tags: [], events: [] };
+    return { tags: [], events: [], smartAlbums: [], projects: [] };
   }
 }
 
@@ -33,7 +33,7 @@ export default function AppHeader() {
   const formRef        = useRef<HTMLFormElement>(null);
 
   const [value,            setValue]            = useState('');
-  const [hints,            setHints]            = useState<ClassifierHints>({ tags: [], events: [] });
+  const [hints,            setHints]            = useState<ClassifierHints>({ tags: [], events: [], smartAlbums: [], projects: [] });
   const [dropdownOpen,     setDropdownOpen]     = useState(false);
   const [focusedIndex,     setFocusedIndex]     = useState(-1);
   const [mobileSheetOpen,  setMobileSheetOpen]  = useState(false);

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { IconSparkle, IconMenu } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
 import { useAnalytics } from '@/hooks/useAnalytics';
-import type { SearchResult, SearchPhotoRow, TagMatch, EventMatch } from '@/lib/search/execute';
+import type { SearchResult, SearchPhotoRow, TagMatch, EventMatch, SmartAlbumMatch, ProjectMatch } from '@/lib/search/execute';
 
 // ─── Sync header ──────────────────────────────────────────────────────────────
 
@@ -70,6 +70,44 @@ function EventsSection({ events }: { events: EventMatch[] }) {
             <Link href={`/library?year=${ev.year}&event=${encodeURIComponent(ev.event)}`}>
               <span className="search-event-name">{ev.event}</span>
               <span className="search-event-meta">{ev.year} · {ev.count} foto{ev.count !== 1 ? 's' : ''}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function SmartAlbumsSection({ smartAlbums }: { smartAlbums: SmartAlbumMatch[] }) {
+  if (smartAlbums.length === 0) return null;
+  return (
+    <section className="search-results-section">
+      <h2 className="search-results-section-title">Carpetas inteligentes</h2>
+      <ul className="search-events-list">
+        {smartAlbums.map(album => (
+          <li key={album.id} className="search-event-item">
+            <Link href={`/smart-albums/${album.id}`}>
+              <span className="search-event-name">📂 {album.name}</span>
+              <span className="search-event-meta">{album.photo_count} foto{album.photo_count !== 1 ? 's' : ''}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function ProjectsSection({ projects }: { projects: ProjectMatch[] }) {
+  if (projects.length === 0) return null;
+  return (
+    <section className="search-results-section">
+      <h2 className="search-results-section-title">Proyectos</h2>
+      <ul className="search-events-list">
+        {projects.map(project => (
+          <li key={project.id} className="search-event-item">
+            <Link href={`/projects/${project.id}`}>
+              <span className="search-event-name">🗂️ {project.title}</span>
+              <span className="search-event-meta">{project.photo_count} foto{project.photo_count !== 1 ? 's' : ''}</span>
             </Link>
           </li>
         ))}
@@ -239,10 +277,10 @@ function EmptyResult({ query, isAI }: { query: string; isAI: boolean }) {
 
 export default function SearchClient({ result }: { result: SearchResult }) {
   const router = useRouter();
-  const { query, intent, isAI, aiConcept, photos, tags, events, total, duration_ms } = result;
+  const { query, intent, isAI, aiConcept, photos, tags, events, smartAlbums, projects, total, duration_ms } = result;
 
   const hasSections = (photos.length > 0 ? 1 : 0) + (tags.length > 0 ? 1 : 0) + (events.length > 0 ? 1 : 0) > 1;
-  const isEmpty     = total === 0 && tags.length === 0 && events.length === 0;
+  const isEmpty     = total === 0 && tags.length === 0 && events.length === 0 && smartAlbums.length === 0 && projects.length === 0;
 
   // ── Slot mobile: botón atrás + título ───────────────────────────────────────
   useHeaderSlot(useMemo(() => (
@@ -309,6 +347,8 @@ export default function SearchClient({ result }: { result: SearchResult }) {
 
           <TagsSection tags={tags} />
           <EventsSection events={events} />
+          <SmartAlbumsSection smartAlbums={smartAlbums} />
+          <ProjectsSection projects={projects} />
 
           {/* Save as theme — only for AI results */}
           {isAI && <SaveThemePanel photoIds={photos.map(p => p.id)} />}

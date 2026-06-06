@@ -1,5 +1,7 @@
 # US-073 — Búsqueda extendida: carpetas inteligentes y proyectos del portfolio
 
+> Estado: ✅ Desplegada
+
 ## Resumen
 
 El buscador actual clasifica y devuelve resultados basándose únicamente en **eventos**, **temáticas** y **tags**. Las **carpetas inteligentes** (smart albums) y los **proyectos del portfolio** son entidades de primera clase en Photoshelf pero están completamente excluidas del motor de búsqueda: ni aparecen como sugerencias, ni el clasificador las reconoce, ni se devuelven como resultados directos.

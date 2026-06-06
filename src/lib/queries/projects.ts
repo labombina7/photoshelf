@@ -81,6 +81,30 @@ export interface ProjectCandidate {
   tag_list: string | null;
 }
 
+export interface ProjectSearchPhoto {
+  id: number;
+  filename: string;
+  year: number;
+  event: string;
+  taken_at: string | null;
+  is_favorite: number;
+}
+
+/**
+ * Devuelve las fotos de un proyecto en formato compatible con SearchPhotoRow.
+ * Usado por el motor de búsqueda (US-073).
+ */
+export function getProjectSearchPhotos(projectId: number, limit = 200): ProjectSearchPhoto[] {
+  return getDb().prepare(`
+    SELECT p.id, p.filename, p.year, p.event, p.taken_at, p.is_favorite
+    FROM project_photos pp
+    JOIN photos p ON p.id = pp.photo_id
+    WHERE pp.project_id = ?
+    ORDER BY pp.position ASC
+    LIMIT ?
+  `).all(projectId, limit) as ProjectSearchPhoto[];
+}
+
 export function getProjectCandidates(
   scopeType: 'year' | 'event' | 'theme' | 'all',
   scopeValue?: string,
