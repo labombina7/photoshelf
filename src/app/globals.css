@@ -53,19 +53,19 @@ body {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: grid;
-  grid-template-columns: var(--sidebar-w) auto auto minmax(0, 480px) 1fr auto auto;
+  /* logo | search | 1fr spacer | nav-modules | slot-right | slot-left */
+  grid-template-columns: var(--sidebar-w) minmax(0, 480px) 1fr auto auto auto;
   column-gap: 12px;
   align-items: center;
   padding: 0 20px;
   z-index: 100;
 }
 .app-header-logo       { grid-column: 1; }
-.app-header-nav        { grid-column: 2; }
-.app-header-slot-left  { grid-column: 3; min-width: 0; }
-.app-header-search     { grid-column: 4; }
-/* col 5 = spacer 1fr */
-.app-header-slot-right { grid-column: 6; }
-.app-header-actions    { grid-column: 7; }
+.app-header-search     { grid-column: 2; }
+/* col 3 = spacer 1fr */
+.app-header-nav        { grid-column: 4; }
+.app-header-slot-right { grid-column: 5; }
+.app-header-slot-left  { grid-column: 6; min-width: 0; }
 
 /* Logo */
 .app-header-logo {
@@ -116,12 +116,8 @@ body {
   border-radius: 1px;
 }
 
-/* ── Wrapper para páginas con FilterBar ── */
-.page-with-filterbar {
-  display: contents; /* no afecta al layout normal */
-}
-/* Sidebar dentro de la página de catálogo: baja el sticky para no solapar FilterBar */
-.page-with-filterbar .sidebar {
+/* Sidebar en la vista de catálogo (con FilterBar encima) */
+.app-shell--with-filterbar > .sidebar {
   top: calc(var(--header-h) + var(--filter-bar-h, 44px));
   height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px));
 }
