@@ -219,6 +219,8 @@ export default function LibraryClient({
         onViewModeChange={handleViewModeChange}
         onSlideshow={openSlideshow}
       />
+      {/* Banner sticky — fuera del app-shell para evitar overflow:hidden de .main */}
+      {bannerSlot && <div className="library-banner-sticky">{bannerSlot}</div>}
       <div className="app-shell app-shell--with-filterbar">
         {slideshowIds && (
           <Slideshow
@@ -239,7 +241,6 @@ export default function LibraryClient({
         />
 
         <div className="main">
-        {bannerSlot}
         <div className="content">
           {/* Classify-year button is shown in both views */}
           {showClassifyYear && (
