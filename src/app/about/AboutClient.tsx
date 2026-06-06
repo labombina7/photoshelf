@@ -20,10 +20,11 @@ interface Props {
 
 const LINKS = [
   {
-    href: '/about/docs',
+    href: '/docs/index.html',
     label: 'Documentación',
-    description: 'Especificaciones de todas las historias de usuario — pendientes y completadas.',
-    icon: '📄',
+    description: 'Documentación funcional y técnica completa — arquitectura, API, componentes, despliegue.',
+    icon: '📖',
+    external: true,
   },
   {
     href: '/tools/roadmap',
@@ -32,9 +33,15 @@ const LINKS = [
     icon: '🗺',
   },
   {
+    href: '/about/docs',
+    label: 'Especificaciones',
+    description: 'Historias de usuario detalladas — pendientes y completadas.',
+    icon: '📄',
+  },
+  {
     href: '/specs/kanban.html',
-    label: 'Kanban (pantalla completa)',
-    description: 'Abre el kanban en modo standalone, sin el layout de la app.',
+    label: 'Kanban (standalone)',
+    description: 'Abre el kanban en pantalla completa, sin el layout de la app.',
     icon: '⛶',
     external: true,
   },
