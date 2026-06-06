@@ -5,12 +5,11 @@ import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { useHeaderSlot } from '@/components/HeaderSlot';
 import { IconMenu } from '@/components/Icons';
-
-interface Theme { id: number; name: string; count: number }
-interface CatalogRow { id: number; name: string; path: string }
+import type { ThemeWithCount } from '@/lib/queries/themes';
+import type { CatalogRow } from '@/lib/queries/catalogs';
 
 interface Props {
-  themes: Theme[];
+  themes: ThemeWithCount[];
   projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
