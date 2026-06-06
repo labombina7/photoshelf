@@ -8,17 +8,23 @@
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 
 export type SearchIntent =
-  | { type: 'year';     year: number }
-  | { type: 'tag';      name: string }
-  | { type: 'event';    name: string }
-  | { type: 'fulltext'; query: string }
-  | { type: 'ai';       query: string };
+  | { type: 'year';        year: number }
+  | { type: 'tag';         name: string }
+  | { type: 'event';       name: string }
+  | { type: 'smart_album'; id: number; name: string }
+  | { type: 'project';     id: number; title: string }
+  | { type: 'fulltext';    query: string }
+  | { type: 'ai';          query: string };
 
 export interface ClassifierHints {
   /** Nombres de tags conocidos en el catálogo activo */
   tags: string[];
   /** Nombres de eventos conocidos en el catálogo activo */
   events: string[];
+  /** Carpetas inteligentes accesibles */
+  smartAlbums: { id: number; name: string }[];
+  /** Proyectos del portfolio */
+  projects: { id: number; title: string }[];
 }
 
 // ─── Normalización ────────────────────────────────────────────────────────────
@@ -72,10 +78,12 @@ const DESCRIPTIVE_TOKENS = new Set([
  * 1. Solo 4 dígitos numéricos → year
  * 2. Coincidencia exacta con tag conocido (normalizado) → tag
  * 3. Coincidencia exacta con nombre de evento → event
- * 4. Contiene '?' o '¿' → ai
- * 5. ≥ 4 palabras → ai
- * 6. Algún token es una palabra descriptiva de la lista → ai
- * 7. Resto → fulltext
+ * 4. Coincidencia exacta con nombre de carpeta inteligente → smart_album
+ * 5. Coincidencia exacta con título de proyecto → project
+ * 6. Contiene '?' o '¿' → ai
+ * 7. ≥ 4 palabras → ai
+ * 8. Algún token es una palabra descriptiva de la lista → ai
+ * 9. Resto → fulltext
  */
 export function classifyQuery(query: string, hints: ClassifierHints): SearchIntent {
   const raw = query.trim();
@@ -105,22 +113,38 @@ export function classifyQuery(query: string, hints: ClassifierHints): SearchInte
     return { type: 'event', name: hints.events[eventIdx] };
   }
 
-  // 4. Contiene signo de pregunta → intención conversacional
+  // 4. Carpeta inteligente (coincidencia exacta)
+  const normAlbums = hints.smartAlbums.map(a => normalize(a.name));
+  const albumIdx = normAlbums.indexOf(norm);
+  if (albumIdx !== -1) {
+    const album = hints.smartAlbums[albumIdx];
+    return { type: 'smart_album', id: album.id, name: album.name };
+  }
+
+  // 5. Proyecto del portfolio (coincidencia exacta)
+  const normProjects = hints.projects.map(p => normalize(p.title));
+  const projectIdx = normProjects.indexOf(norm);
+  if (projectIdx !== -1) {
+    const project = hints.projects[projectIdx];
+    return { type: 'project', id: project.id, title: project.title };
+  }
+
+  // 6. Contiene signo de pregunta → intención conversacional
   if (raw.includes('?') || raw.includes('¿')) {
     return { type: 'ai', query: raw };
   }
 
-  // 5. ≥ 4 palabras → lenguaje natural
+  // 7. ≥ 4 palabras → lenguaje natural
   const tokens = norm.split(/\s+/).filter(Boolean);
   if (tokens.length >= 4) {
     return { type: 'ai', query: raw };
   }
 
-  // 6. Algún token es una palabra descriptiva
+  // 8. Algún token es una palabra descriptiva
   if (tokens.some(t => DESCRIPTIVE_TOKENS.has(t))) {
     return { type: 'ai', query: raw };
   }
 
-  // 7. Fallback: búsqueda por texto libre
+  // 9. Fallback: búsqueda por texto libre
   return { type: 'fulltext', query: raw };
 }

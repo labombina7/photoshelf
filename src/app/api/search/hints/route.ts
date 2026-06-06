@@ -15,8 +15,8 @@ export async function GET() {
 
   try {
     const catalogId = await getActiveCatalogId();
-    const { tags, events } = getSearchHints(catalogId);
-    return NextResponse.json({ tags, events });
+    const { tags, events, smartAlbums, projects } = getSearchHints(catalogId);
+    return NextResponse.json({ tags, events, smartAlbums, projects });
   } catch (err) {
     console.error('[search/hints] Error fetching hints:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

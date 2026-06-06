@@ -1,17 +1,22 @@
 'use client';
 
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import type { HistoryEntry } from '@/hooks/useSearchHistory';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface TagSuggestion   { name: string; count: number }
-interface EventSuggestion { name: string; year: number; count: number }
+interface TagSuggestion        { name: string; count: number }
+interface EventSuggestion      { name: string; year: number; count: number }
+interface SmartAlbumSuggestion { id: number; name: string }
+interface ProjectSuggestion    { id: number; title: string }
 
 export interface DropdownItem {
-  kind: 'history' | 'tag' | 'event';
+  kind: 'history' | 'tag' | 'event' | 'smart_album' | 'project';
   label: string;
   sub?: string;
+  /** Para smart_album y project: navegar directo en lugar de buscar */
+  href?: string;
 }
 
 interface SearchDropdownProps {
@@ -30,13 +35,18 @@ interface SearchDropdownProps {
 // ─── Fetch suggestions with debounce ─────────────────────────────────────────
 
 function useSuggestions(query: string) {
-  const [tags,   setTags]   = useState<TagSuggestion[]>([]);
-  const [events, setEvents] = useState<EventSuggestion[]>([]);
+  const [tags,        setTags]        = useState<TagSuggestion[]>([]);
+  const [events,      setEvents]      = useState<EventSuggestion[]>([]);
+  const [smartAlbums, setSmartAlbums] = useState<SmartAlbumSuggestion[]>([]);
+  const [projects,    setProjects]    = useState<ProjectSuggestion[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     clearTimeout(timerRef.current);
-    if (query.length < 2) { setTags([]); setEvents([]); return; }
+    if (query.length < 2) {
+      setTags([]); setEvents([]); setSmartAlbums([]); setProjects([]);
+      return;
+    }
 
     timerRef.current = setTimeout(async () => {
       try {
@@ -45,16 +55,25 @@ function useSuggestions(query: string) {
           { credentials: 'same-origin' },
         );
         if (!res.ok) return;
-        const json = await res.json() as { data: { tags: TagSuggestion[]; events: EventSuggestion[] } };
+        const json = await res.json() as {
+          data: {
+            tags: TagSuggestion[];
+            events: EventSuggestion[];
+            smartAlbums: SmartAlbumSuggestion[];
+            projects: ProjectSuggestion[];
+          }
+        };
         setTags(json.data.tags);
         setEvents(json.data.events);
+        setSmartAlbums(json.data.smartAlbums ?? []);
+        setProjects(json.data.projects ?? []);
       } catch {}
     }, 200);
 
     return () => clearTimeout(timerRef.current);
   }, [query]);
 
-  return { tags, events };
+  return { tags, events, smartAlbums, projects };
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -69,21 +88,26 @@ export default function SearchDropdown({
   setFocusedIndex,
   inline = false,
 }: SearchDropdownProps) {
-  const { tags, events } = useSuggestions(query);
+  const router = useRouter();
+  const { tags, events, smartAlbums, projects } = useSuggestions(query);
 
   // Build flat item list for keyboard navigation
   const items: DropdownItem[] = [
     ...history.map(h => ({ kind: 'history' as const, label: h.query, sub: h.intent })),
-    ...tags.map(t   => ({ kind: 'tag'     as const, label: t.name, sub: `${t.count} foto${t.count !== 1 ? 's' : ''}` })),
-    ...events.map(e => ({ kind: 'event'   as const, label: e.name, sub: `${e.year} · ${e.count} fotos` })),
+    ...tags.map(t        => ({ kind: 'tag'         as const, label: t.name,    sub: `${t.count} foto${t.count !== 1 ? 's' : ''}` })),
+    ...events.map(e      => ({ kind: 'event'       as const, label: e.name,    sub: `${e.year} · ${e.count} fotos` })),
+    ...smartAlbums.map(a => ({ kind: 'smart_album' as const, label: a.name,    href: `/smart-albums/${a.id}` })),
+    ...projects.map(p    => ({ kind: 'project'     as const, label: p.title,   href: `/projects/${p.id}` })),
   ];
 
   const hasContent = items.length > 0;
 
   if (!open || !hasContent) return null;
 
-  const historyEnd = history.length;
-  const tagsEnd    = historyEnd + tags.length;
+  const historyEnd    = history.length;
+  const tagsEnd       = historyEnd + tags.length;
+  const eventsEnd     = tagsEnd + events.length;
+  const albumsEnd     = eventsEnd + smartAlbums.length;
 
   return (
     <ul
@@ -167,6 +191,52 @@ export default function SearchDropdown({
           })}
         </>
       )}
+
+      {/* ── Smart Albums ── */}
+      {smartAlbums.length > 0 && (
+        <>
+          <li className="search-dropdown-section-label">Carpetas inteligentes</li>
+          {smartAlbums.map((a, i) => {
+            const idx = eventsEnd + i;
+            return (
+              <li
+                key={`sa-${a.id}`}
+                role="option"
+                aria-selected={focusedIndex === idx}
+                className={`search-dropdown-item${focusedIndex === idx ? ' focused' : ''}`}
+                onMouseEnter={() => setFocusedIndex(idx)}
+                onMouseDown={e => { e.preventDefault(); router.push(`/smart-albums/${a.id}`); }}
+              >
+                <span className="search-dropdown-icon search-dropdown-icon--album">📂</span>
+                <span className="search-dropdown-label">{a.name}</span>
+              </li>
+            );
+          })}
+        </>
+      )}
+
+      {/* ── Projects ── */}
+      {projects.length > 0 && (
+        <>
+          <li className="search-dropdown-section-label">Proyectos</li>
+          {projects.map((p, i) => {
+            const idx = albumsEnd + i;
+            return (
+              <li
+                key={`pr-${p.id}`}
+                role="option"
+                aria-selected={focusedIndex === idx}
+                className={`search-dropdown-item${focusedIndex === idx ? ' focused' : ''}`}
+                onMouseEnter={() => setFocusedIndex(idx)}
+                onMouseDown={e => { e.preventDefault(); router.push(`/projects/${p.id}`); }}
+              >
+                <span className="search-dropdown-icon search-dropdown-icon--project">🗂️</span>
+                <span className="search-dropdown-label">{p.title}</span>
+              </li>
+            );
+          })}
+        </>
+      )}
     </ul>
   );
 }
@@ -194,6 +264,6 @@ function ClockIcon() {
 }
 
 /** Exported so AppHeader can call this for keyboard nav */
-export function getItemCount(history: HistoryEntry[], tags: number, events: number) {
-  return history.length + tags + events;
+export function getItemCount(history: HistoryEntry[], tags: number, events: number, smartAlbums = 0, projects = 0) {
+  return history.length + tags + events + smartAlbums + projects;
 }
