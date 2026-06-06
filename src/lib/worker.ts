@@ -2,9 +2,10 @@ import { getDb } from './db';
 import { classifyPhoto } from './ollama';
 import { generateProject } from './ollama';
 import { upsertAiTags } from './db-helpers';
-import { CLASSIFY_BATCH_SIZE } from './config';
+import { CLASSIFY_BATCH_SIZE, PHOTOS_PATH } from './config';
 import { getNextJob, updateJob, purgeOldJobs, createJob, type JobRow } from './queries/jobs';
 import { getProjectCandidates, createProject, setProjectPhotos } from './queries/projects';
+import { getCatalogById } from './queries/catalogs';
 import { isAutoBackupDue } from './queries/backup';
 import { runBackup } from './backup';
 
@@ -14,8 +15,9 @@ interface ClassifyPayload {
   event?: string;
   force: boolean;
   catalogId: number;
-  photosRoot: string;
   originUrl: string;
+  /** @deprecated stored in old jobs — resolved from catalog at runtime instead */
+  photosRoot?: string;
 }
 
 interface GenerateProjectPayload {
@@ -96,7 +98,10 @@ async function runJob(job: JobRow): Promise<void> {
 
 async function runClassifyJob(job: JobRow, payload: ClassifyPayload, startedAt: string): Promise<void> {
   const db = getDb();
-  const { force, catalogId, photosRoot } = payload;
+  const { force, catalogId } = payload;
+  // Always resolve photosRoot from the catalog at execution time — never from the payload.
+  // This prevents stale paths stored at enqueue time from causing "Input file missing" errors.
+  const photosRoot = getCatalogById(catalogId)?.path ?? PHOTOS_PATH;
 
   const params: (string | number)[] = [catalogId];
   let sql = `SELECT p.id, p.path, p.event FROM photos p WHERE p.catalog_id = ?`;
