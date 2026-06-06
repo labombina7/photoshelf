@@ -200,7 +200,7 @@ export default function LibraryClient({
   const handleViewModeChange = useCallback((m: 'list' | 'folders') => startTransition(() => setViewMode(m)), []);
 
   return (
-    <div className="page-with-filterbar">
+    <>
       <FilterBar
         years={years}
         cameras={cameras}
@@ -219,7 +219,7 @@ export default function LibraryClient({
         onViewModeChange={handleViewModeChange}
         onSlideshow={openSlideshow}
       />
-      <div className="app-shell">
+      <div className="app-shell app-shell--with-filterbar">
         {slideshowIds && (
           <Slideshow
             photoIds={slideshowIds}
@@ -317,6 +317,6 @@ export default function LibraryClient({
         </div>
         {toast && <div className="toast">{toast}</div>}
       </div>
-    </div>
+    </>
   );
 }
