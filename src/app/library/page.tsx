@@ -84,6 +84,7 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       catalogs={sidebar.catalogs}
       activeCatalogId={catalogId}
       cameras={cameras}
+      hasMemories={banner.hasMemories}
     />
   );
 }

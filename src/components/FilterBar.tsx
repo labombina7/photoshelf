@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useAnalytics } from '@/hooks/useAnalytics';
 
 export interface FilterBarValues {
@@ -24,6 +25,7 @@ export interface FilterBarProps {
   canToggleView?: boolean;
   onViewModeChange?: (mode: 'list' | 'folders') => void;
   onSlideshow?: () => void;
+  hasMemories?: boolean;
 }
 
 const ISO_OPTIONS     = [{ label: '≤400', value: '400' }, { label: '≤1600', value: '1600' }, { label: '≤6400', value: '6400' }];
@@ -122,7 +124,7 @@ function IconGrid() {
 export default function FilterBar({
   years, cameras, activeYear, activeFilters,
   filteredTotal = 0, viewMode = 'folders', canToggleView = false,
-  onViewModeChange, onSlideshow,
+  onViewModeChange, onSlideshow, hasMemories = false,
 }: FilterBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -188,6 +190,14 @@ export default function FilterBar({
 
       {/* Spacer */}
       <div style={{ flex: 1 }} />
+
+      {/* Chip "Un día como hoy" */}
+      {hasMemories && (
+        <Link href="/memories" className="filter-bar-memories-chip" title="Ver recuerdos de hoy">
+          <span className="filter-bar-memories-dot" aria-hidden="true" />
+          Un día como hoy
+        </Link>
+      )}
 
       {/* Acciones de vista */}
       <div className="filter-bar-actions">
