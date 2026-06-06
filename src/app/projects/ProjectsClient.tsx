@@ -170,7 +170,7 @@ export default function ProjectsClient({ projects: initial, themes, years, event
               <IconSparkle size={32} />
               <p className="empty-state-title">Aún no hay proyectos</p>
               <p className="empty-state-subtitle">Genera tu primer portfolio con IA a partir de cualquier conjunto de fotos.</p>
-              <button className="btn btn--primary" onClick={() => setShowNew(true)}>
+              <button className="btn-small" onClick={() => setShowNew(true)}>
                 Crear primer proyecto
               </button>
             </div>
