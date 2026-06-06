@@ -243,7 +243,6 @@ export default function AppHeader() {
 
         {/* Slot derecha — siempre en DOM para mantener grid estable */}
         <div className="app-header-slot-right">{slot}</div>
-        <div className="app-header-actions" />
       </header>
 
       {/* ── Mobile: nav módulos secundaria ─────────────────────────────────── */}
