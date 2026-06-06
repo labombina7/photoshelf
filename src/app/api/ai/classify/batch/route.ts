@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
-import { PHOTOS_PATH, CLASSIFY_BATCH_SIZE } from '@/lib/config';
-import { getCatalogById } from '@/lib/queries/catalogs';
+import { CLASSIFY_BATCH_SIZE } from '@/lib/config';
 import { createJob } from '@/lib/queries/jobs';
 import { ensureWorkerRunning } from '@/lib/worker';
 
@@ -14,9 +13,6 @@ export async function POST(req: NextRequest) {
 
   const { year, event, force } = await req.json();
   const catalogId = session.catalogId ?? 1;
-  const catalog = getCatalogById(catalogId);
-  const photosRoot = catalog?.path ?? PHOTOS_PATH;
-
   const db = getDb();
 
   let countSql = `SELECT COUNT(*) as n FROM photos p WHERE p.catalog_id = ?`;
@@ -40,7 +36,6 @@ export async function POST(req: NextRequest) {
     event: event ?? undefined,
     force: force ?? false,
     catalogId,
-    photosRoot,
     originUrl: year && event ? `/library?year=${year}&event=${encodeURIComponent(event)}` : '/library',
   });
 

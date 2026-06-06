@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck, IconShield, IconHeartbeat, IconSmartAlbum } from './Icons';
+import { IconShelf, IconViewGrid, IconStar, IconSearch, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconChevronDown, IconCheck, IconShield, IconHeartbeat, IconSmartAlbum } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -601,14 +601,6 @@ function SidebarInner({
           )}
         </Link>
         <Link
-          href="/tools/roadmap"
-          onClick={handleNavClick}
-          className={`sidebar-item ${pathname === '/tools/roadmap' ? 'active' : ''}`}
-        >
-          <IconCalendar size={14} />
-          Roadmap
-        </Link>
-        <Link
           href="/settings/catalogs"
           onClick={handleNavClick}
           className={`sidebar-item ${pathname === '/settings/catalogs' ? 'active' : ''}`}
@@ -650,6 +642,15 @@ function SidebarInner({
             </div>
             <IconChevronDown size={10} />
           </button>
+          <Link
+            href="/about"
+            className="sidebar-logout-btn"
+            title="Acerca de photoshelf"
+            aria-label="Acerca de photoshelf"
+            style={{ textDecoration: 'none' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </Link>
           <button
             onClick={handleLogout}
             className="sidebar-logout-btn"

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
-import { PHOTOS_PATH } from '@/lib/config';
-import { getCatalogById } from '@/lib/queries/catalogs';
 import { createJob, hasActiveJobForYear } from '@/lib/queries/jobs';
 import { ensureWorkerRunning } from '@/lib/worker';
 
@@ -16,8 +14,6 @@ export async function POST(req: NextRequest) {
   if (!year) return NextResponse.json({ error: 'year is required' }, { status: 400 });
 
   const catalogId = session.catalogId ?? 1;
-  const catalog = getCatalogById(catalogId);
-  const photosRoot = catalog?.path ?? PHOTOS_PATH;
   const yearInt = parseInt(year, 10);
 
   if (hasActiveJobForYear(yearInt, catalogId)) {
@@ -44,7 +40,6 @@ export async function POST(req: NextRequest) {
     year: yearInt,
     force: force ?? false,
     catalogId,
-    photosRoot,
     originUrl: `/library?year=${year}`,
   });
 
