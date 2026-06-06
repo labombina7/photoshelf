@@ -122,14 +122,13 @@ body {
 }
 
 /* Sidebar en la vista de catálogo (con FilterBar encima).
-   --banner-h se actualiza dinámicamente desde LibraryClient con ResizeObserver. */
+   El banner está en la columna de contenido (padding-left: sidebar-w),
+   no interfiere con la columna del sidebar. */
 .app-shell--with-filterbar > .sidebar {
-  top: calc(var(--header-h) + var(--filter-bar-h, 44px) + var(--banner-h, 0px));
-  height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px) - var(--banner-h, 0px));
+  top: calc(var(--header-h) + var(--filter-bar-h, 44px));
+  height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px));
 }
-/* Banner foto del día — flujo normal (no sticky: la arquitectura window-scroll
-   no permite sticky sin tapar el contenido o generar huecos).
-   El banner aparece prominentemente al cargar y se scrollea con el contenido. */
+/* Banner foto del día — flujo normal, solo en columna de contenido */
 .library-banner-sticky {
   padding-left: var(--sidebar-w);
 }
@@ -269,6 +268,36 @@ body {
   transition: background 0.12s, color 0.12s;
 }
 .filter-bar-clear:hover { background: var(--bg-secondary); color: var(--text); }
+
+/* Chip "Un día como hoy" en la filter bar */
+.filter-bar-memories-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.filter-bar-memories-chip:hover {
+  color: var(--text);
+  border-color: #b0ada8;
+  background: var(--bg-secondary);
+}
+.filter-bar-memories-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4f46e5;
+  flex-shrink: 0;
+}
 
 .filter-bar-actions {
   display: flex;

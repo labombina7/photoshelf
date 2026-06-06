@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useMemo, useEffect, useCallback, useRef, type ReactNode } from 'react';
+import { useState, useTransition, useMemo, useEffect, useCallback, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import FilterBar from '@/components/FilterBar';
@@ -48,6 +48,7 @@ interface LibraryClientProps {
   catalogs?: CatalogRow[];
   activeCatalogId?: number;
   bannerSlot?: React.ReactNode;
+  hasMemories?: boolean;
   cameras?: string[];
 }
 
@@ -64,6 +65,7 @@ export default function LibraryClient({
   catalogs = [],
   activeCatalogId = 1,
   bannerSlot,
+  hasMemories = false,
   cameras = [],
 }: LibraryClientProps) {
   const router = useRouter();
@@ -101,16 +103,6 @@ export default function LibraryClient({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [slideshowIds, setSlideshowIds] = useState<number[] | null>(null);
 
-  // Mide la altura real del banner (puede ser 0 si está descartado) para ajustar el sidebar
-  const bannerRef = useRef<HTMLDivElement>(null);
-  const [bannerH, setBannerH] = useState(0);
-  useEffect(() => {
-    const el = bannerRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setBannerH(entry.contentRect.height));
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   async function openSlideshow() {
     const params = new URLSearchParams();
@@ -229,14 +221,11 @@ export default function LibraryClient({
         canToggleView={canToggleView}
         onViewModeChange={handleViewModeChange}
         onSlideshow={openSlideshow}
+        hasMemories={hasMemories}
       />
-      {/* Banner sticky — fuera del app-shell para evitar overflow:hidden de .main.
-          El ref mide la altura real (0 cuando se descarta) para ajustar el sidebar. */}
-      <div ref={bannerRef} className="library-banner-sticky">{bannerSlot}</div>
-      <div
-        className="app-shell app-shell--with-filterbar"
-        style={{ '--banner-h': `${bannerH}px` } as React.CSSProperties}
-      >
+      {/* Banner foto del día — flujo normal, solo en columna de contenido */}
+      <div className="library-banner-sticky">{bannerSlot}</div>
+      <div className="app-shell app-shell--with-filterbar">
         {slideshowIds && (
           <Slideshow
             photoIds={slideshowIds}
