@@ -3,6 +3,7 @@
 import { useState, useTransition, useMemo, useEffect, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
+import FilterBar from '@/components/FilterBar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
 import { IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
@@ -40,7 +41,6 @@ interface LibraryClientProps {
   filteredTotal: number;
   years: number[];
   themes: Theme[];
-  projects?: { id: number; title: string }[];
   favoriteCount: number;
   untaggedCount: number;
   activeYear: string | null;
@@ -57,7 +57,6 @@ export default function LibraryClient({
   filteredTotal,
   years,
   themes,
-  projects = [],
   favoriteCount,
   untaggedCount,
   activeYear,
@@ -143,14 +142,6 @@ export default function LibraryClient({
     setToast(msg);
     setTimeout(() => setToast(''), 4000);
   };
-
-  function setYear(year: string | null) {
-    const params = new URLSearchParams(searchParams.toString());
-    // Use 'all' sentinel so the server doesn't redirect back to current year
-    params.set('year', year ?? 'all');
-    params.delete('event');
-    router.push(`/library?${params.toString()}`);
-  }
 
   async function handleClassifyYear(force = false) {
     if (!activeYear) return;
@@ -251,72 +242,42 @@ export default function LibraryClient({
   );
 
   return (
-    <div className="app-shell">
-      {slideshowIds && (
-        <Slideshow
-          photoIds={slideshowIds}
-          startIndex={0}
-          onClose={() => setSlideshowIds(null)}
-        />
-      )}
-      <Sidebar
-        themes={themes}
-        projects={projects}
-        totalPhotos={total}
-        favoriteCount={favoriteCount}
-        untaggedCount={untaggedCount}
-        mobileOpen={mobileSidebarOpen}
-        onMobileClose={() => setMobileSidebarOpen(false)}
-        catalogs={catalogs}
-        activeCatalogId={activeCatalogId}
+    <>
+      <FilterBar
+        years={years}
         cameras={cameras}
+        activeYear={activeYear}
+        activeFilters={{
+          year: activeYear,
+          camera: activeFilters.camera,
+          iso_max: activeFilters.iso_max,
+          aperture_max: activeFilters.aperture_max,
+          focal_min: activeFilters.focal_min,
+          focal_max: activeFilters.focal_max,
+        }}
       />
+      <div className="app-shell">
+        {slideshowIds && (
+          <Slideshow
+            photoIds={slideshowIds}
+            startIndex={0}
+            onClose={() => setSlideshowIds(null)}
+          />
+        )}
+        <Sidebar
+          themes={themes}
+          totalPhotos={total}
+          favoriteCount={favoriteCount}
+          untaggedCount={untaggedCount}
+          mobileOpen={mobileSidebarOpen}
+          onMobileClose={() => setMobileSidebarOpen(false)}
+          catalogs={catalogs}
+          activeCatalogId={activeCatalogId}
+        />
 
-      <div className="main">
+        <div className="main">
         {bannerSlot}
         <div className="content">
-          {years.length > 1 && (
-            <>
-              {/* Desktop: chip tabs */}
-              <div className="year-tabs year-tabs--desktop" role="tablist" aria-label="Filtrar por año">
-                <button
-                  className={`year-tab ${!activeYear ? 'active' : ''}`}
-                  onClick={() => setYear(null)}
-                  role="tab"
-                  aria-selected={!activeYear}
-                  tabIndex={!activeYear ? 0 : -1}
-                >
-                  Todos
-                </button>
-                {years.map((y) => (
-                  <button
-                    key={y}
-                    className={`year-tab ${activeYear === String(y) ? 'active' : ''}`}
-                    onClick={() => setYear(String(y))}
-                    role="tab"
-                    aria-selected={activeYear === String(y)}
-                    tabIndex={activeYear === String(y) ? 0 : -1}
-                  >
-                    {y}
-                  </button>
-                ))}
-              </div>
-              {/* Mobile: native select */}
-              <div className="year-select-wrap year-tabs--mobile">
-                <select
-                  className="year-select"
-                  value={activeYear ?? ''}
-                  onChange={(e) => setYear(e.target.value || null)}
-                >
-                  <option value="">Todos los años</option>
-                  {years.map((y) => (
-                    <option key={y} value={String(y)}>{y}</option>
-                  ))}
-                </select>
-              </div>
-            </>
-          )}
-
           {/* Classify-year button is shown in both views */}
           {showClassifyYear && (
             <div className="collapse-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
@@ -390,9 +351,9 @@ export default function LibraryClient({
           )}
           </div>
         </div>
+        </div>
+        {toast && <div className="toast">{toast}</div>}
       </div>
-
-      {toast && <div className="toast">{toast}</div>}
-    </div>
+    </>
   );
 }

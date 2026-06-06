@@ -18,7 +18,6 @@ export default async function CatalogsSettingsPage() {
       catalogs={catalogs}
       activeCatalogId={catalogId}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}

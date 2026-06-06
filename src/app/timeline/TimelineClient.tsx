@@ -28,7 +28,6 @@ interface Props {
   initialNextCursor: string | null;
   initialHasMore: boolean;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -98,7 +97,6 @@ export default function TimelineClient({
   initialNextCursor,
   initialHasMore,
   themes,
-  projects,
   totalPhotos,
   favoriteCount,
   untaggedCount,
@@ -308,7 +306,6 @@ export default function TimelineClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

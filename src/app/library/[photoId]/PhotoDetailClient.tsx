@@ -179,7 +179,6 @@ export default function PhotoDetailClient({
       {/* Sidebar drawer (mobile) / static (desktop) */}
       <Sidebar
         themes={sidebarThemes}
-        projects={sidebarProjects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

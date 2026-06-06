@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { IconSearch, IconSparkle } from './Icons';
 import { useSearchShortcut } from '@/hooks/useSearchShortcut';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
@@ -10,6 +11,11 @@ import type { ClassifierHints } from '@/lib/search/classifier';
 import { HeaderSlotCtx } from './HeaderSlot';
 import SearchDropdown from './SearchDropdown';
 import { useAnalytics } from '@/hooks/useAnalytics';
+
+const NAV_MODULES = [
+  { href: '/projects',     label: 'Proyectos' },
+  { href: '/smart-albums', label: 'Álbumes' },
+] as const;
 
 // ─── Hints fetch (lazy, once per mount) ──────────────────────────────────────
 
@@ -27,6 +33,7 @@ async function fetchHints(): Promise<ClassifierHints> {
 
 export default function AppHeader() {
   const router   = useRouter();
+  const pathname = usePathname();
   const { slot, slotLeft } = useContext(HeaderSlotCtx);
   const inputRef       = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
@@ -175,6 +182,22 @@ export default function AppHeader() {
           <span className="app-header-logo-text">photoshelf</span>
         </div>
 
+        {/* Nav módulos globales */}
+        <nav className="app-header-nav" aria-label="Módulos">
+          {NAV_MODULES.map(({ href, label }) => {
+            const isActive = pathname === href || pathname.startsWith(href + '/');
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={`app-header-nav-item${isActive ? ' active' : ''}`}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* Slot izquierda — siempre en DOM para mantener grid estable */}
         <div className="app-header-slot-left">{slotLeft}</div>
 
@@ -223,6 +246,22 @@ export default function AppHeader() {
         <div className="app-header-slot-right">{slot}</div>
         <div className="app-header-actions" />
       </header>
+
+      {/* ── Mobile: nav módulos secundaria ─────────────────────────────────── */}
+      <nav className="app-nav-mobile" aria-label="Módulos">
+        {NAV_MODULES.map(({ href, label }) => {
+          const isActive = pathname === href || pathname.startsWith(href + '/');
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`app-nav-mobile-item${isActive ? ' active' : ''}`}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* ── Mobile: floating search FAB ─────────────────────────────────────── */}
       <button

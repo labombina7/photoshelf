@@ -28,7 +28,6 @@ export default async function TimelinePage() {
       initialNextCursor={nextCursor}
       initialHasMore={hasMore}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}

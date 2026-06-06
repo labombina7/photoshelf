@@ -41,7 +41,6 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
     <ProjectDetailClient
       project={{ ...project, photos }}
       themes={themes}
-      projects={sidebarProjects}
       totalPhotos={total}
       favoriteCount={favoriteCount}
       untaggedCount={untaggedCount}

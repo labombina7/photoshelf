@@ -81,7 +81,6 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       untaggedCount={sidebar.untaggedCount}
       activeYear={effectiveYear ?? null}
       activeFilters={{ year: effectiveYear, event: sp.event, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q, iso_max: sp.iso_max, aperture_max: sp.aperture_max, focal_min: sp.focal_min, focal_max: sp.focal_max, camera: sp.camera }}
-      projects={sidebar.projects}
       catalogs={sidebar.catalogs}
       activeCatalogId={catalogId}
       cameras={cameras}

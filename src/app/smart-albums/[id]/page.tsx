@@ -30,8 +30,6 @@ export default async function SmartAlbumDetailPage({ params }: { params: Promise
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}
-      projects={sidebar.projects}
-      smartAlbums={sidebar.smartAlbums}
       catalogs={sidebar.catalogs}
       activeCatalogId={catalogId}
     />

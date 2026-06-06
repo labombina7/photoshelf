@@ -9,7 +9,6 @@ import type { CatalogRow } from '@/lib/queries/catalogs';
 
 interface Props {
   themes: ThemeWithCount[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -18,7 +17,7 @@ interface Props {
 }
 
 export default function RoadmapClient({
-  themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId,
+  themes, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId,
 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -36,7 +35,6 @@ export default function RoadmapClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

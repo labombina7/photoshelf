@@ -27,8 +27,6 @@ export default async function SmartAlbumsPage() {
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}
-      projects={sidebar.projects}
-      smartAlbums={sidebar.smartAlbums}
       catalogs={sidebar.catalogs}
       activeCatalogId={catalogId}
       catalogName={catalog?.name ?? ''}

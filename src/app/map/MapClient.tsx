@@ -20,7 +20,6 @@ interface Props {
   total: number;
   withGps: number;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -31,7 +30,7 @@ interface Props {
 }
 
 export default function MapClient({
-  total, themes, projects, totalPhotos, favoriteCount, untaggedCount,
+  total, themes, totalPhotos, favoriteCount, untaggedCount,
   availableYears, initialYear, catalogs = [], activeCatalogId = 1,
 }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -184,7 +183,6 @@ export default function MapClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

@@ -9,7 +9,6 @@ import { useModal } from './ModalProvider';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
-import ExifFilters, { type ExifFilterValues } from './ExifFilters';
 
 const ALBUMS_VISIBLE = 5;
 
@@ -89,8 +88,6 @@ function shortenPath(p: string): string {
 
 interface SidebarProps {
   themes: Theme[];
-  projects?: { id: number; title: string }[];
-  smartAlbums?: { id: number; name: string }[];
   totalPhotos: number;
   favoriteCount?: number;
   untaggedCount?: number;
@@ -98,13 +95,10 @@ interface SidebarProps {
   onMobileClose?: () => void;
   catalogs?: CatalogRow[];
   activeCatalogId?: number;
-  cameras?: string[];
 }
 
 function SidebarInner({
   themes,
-  projects = [],
-  smartAlbums = [],
   totalPhotos,
   favoriteCount = 0,
   untaggedCount = 0,
@@ -112,7 +106,6 @@ function SidebarInner({
   onMobileClose,
   catalogs = [],
   activeCatalogId = 1,
-  cameras = [],
 }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -129,7 +122,6 @@ function SidebarInner({
   const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [eventOpen,   setEventOpen]   = useState(false);
-  const [exifFilters, setExifFilters] = useState<ExifFilterValues>({});
   const [orphanCount, setOrphanCount] = useState(0);
   const [activeJobCount, setActiveJobCount] = useState(0);
 
@@ -272,19 +264,6 @@ function SidebarInner({
     closeMobile();
   }
 
-  function handleExifChange(filters: ExifFilterValues) {
-    setExifFilters(filters);
-    const params = new URLSearchParams(searchParams.toString());
-    // Clear existing exif params
-    ['iso_max', 'aperture_max', 'focal_min', 'focal_max', 'camera'].forEach(k => params.delete(k));
-    for (const [k, v] of Object.entries(filters)) {
-      if (v) params.set(k, v);
-    }
-    const hasFilters = Object.values(filters).some(Boolean);
-    if (hasFilters) track('sidebar_filter_applied', { filter_type: 'exif', filter_value: JSON.stringify(filters) });
-    router.push(`/library?${params.toString()}`);
-  }
-
   return (
     <>
       {isMobileOpen && <div className="sidebar-overlay" onClick={closeMobile} />}
@@ -393,13 +372,6 @@ function SidebarInner({
           Tags
         </Link>
 
-        {totalPhotos > 0 && (
-          <ExifFilters
-            cameras={cameras}
-            activeFilters={exifFilters}
-            onChange={handleExifChange}
-          />
-        )}
       </div>
 
       <div className="sidebar-section">
@@ -515,36 +487,6 @@ function SidebarInner({
         )}
       </div>
 
-      <div className="sidebar-section">
-        <Link
-          href="/projects"
-          onClick={handleNavClick}
-          className="sidebar-section-label sidebar-section-label--link"
-        >
-          Portfolio
-        </Link>
-        {projects.map(p => (
-          <Link
-            key={p.id}
-            href={`/projects/${p.id}`}
-            onClick={handleNavClick}
-            className={`sidebar-item ${pathname === `/projects/${p.id}` ? 'active' : ''}`}
-          >
-            <IconFolder size={14} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
-          </Link>
-        ))}
-        {projects.length === 0 && (
-          <div className="sidebar-item" style={{ color: 'var(--text-tertiary)', fontSize: '12.5px' }}>
-            <Link href="/projects" onClick={handleNavClick} style={{ color: 'inherit', display: 'flex', alignItems: 'center', gap: 9 }}>
-              <IconPlus size={13} />
-              Nuevo proyecto
-            </Link>
-          </div>
-        )}
-      </div>
-
-      <SmartAlbumsSidebarSection smartAlbums={smartAlbums} pathname={pathname} onNavClick={handleNavClick} />
 
       <div className="sidebar-section">
         <div className="sidebar-section-label">Herramientas</div>

@@ -29,7 +29,6 @@ export default async function SpecPage({ params }: Props) {
       html={html as string}
       status={spec.status}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}

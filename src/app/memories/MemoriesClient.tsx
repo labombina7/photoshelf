@@ -24,7 +24,6 @@ interface MemoriesClientProps {
   initialData: MemoriesData;
   initialDate: string;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -48,7 +47,6 @@ export default function MemoriesClient({
   initialData,
   initialDate,
   themes,
-  projects,
   totalPhotos,
   favoriteCount,
   untaggedCount,
@@ -106,7 +104,6 @@ export default function MemoriesClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}
