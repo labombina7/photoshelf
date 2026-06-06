@@ -55,6 +55,8 @@ function CatalogSection({
   totalPhotos = 0,
   favoriteCount = 0,
   untaggedCount = 0,
+  watcher,
+  toggleWatcher,
   onNavClick,
   onFilterClick,
   onClearFilters,
@@ -63,6 +65,8 @@ function CatalogSection({
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
+  watcher?: { watching: boolean; enabled: boolean; classifying: boolean; classifyDone: number; classifyTotal: number };
+  toggleWatcher?: () => void;
   onNavClick: () => void;
   onFilterClick: (type: string, val: string) => void;
   onClearFilters: () => void;
@@ -119,7 +123,21 @@ function CatalogSection({
   return (
     <>
       <div className="sidebar-section">
-        <div className="sidebar-section-label">Biblioteca</div>
+        <div className="sidebar-section-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          Biblioteca
+          {watcher?.watching && (
+            <button
+              onClick={toggleWatcher}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center', marginRight: -2 }}
+              title={watcher.classifying
+                ? `Clasificando fotos… (${watcher.classifyDone}/${watcher.classifyTotal}) · Clic para desactivar`
+                : watcher.enabled ? 'Vigilando carpetas · Clic para desactivar' : 'Vigilancia desactivada · Clic para activar'}
+              aria-label="Estado del vigilante de carpetas"
+            >
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: watcher.enabled ? 'var(--tag-auto-color)' : 'var(--text-tertiary)', boxShadow: watcher.enabled ? '0 0 0 3px rgba(59,98,212,0.15)' : 'none', display: 'block' }} />
+            </button>
+          )}
+        </div>
 
         <Link href="/library" onClick={onClearFilters}
           className={`sidebar-item ${pathname === '/library' && !activeTheme && !activeFav ? 'active' : ''}`}>
@@ -268,10 +286,14 @@ function ProjectsSection({
 
   return (
     <div className="sidebar-section">
-      <Link href="/projects" onClick={onNavClick}
-        className="sidebar-section-label sidebar-section-label--link">
-        Proyectos
-      </Link>
+      <div className="sidebar-section-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Link href="/projects" onClick={onNavClick} style={{ color: 'inherit', textDecoration: 'none' }}>
+          Proyectos
+        </Link>
+        {projects.length > 0 && (
+          <span style={{ fontWeight: 400, color: 'var(--text-tertiary)', letterSpacing: 0 }}>{projects.length}</span>
+        )}
+      </div>
       {projects.map(p => (
         <Link key={p.id} href={`/projects/${p.id}`} onClick={onNavClick}
           className={`sidebar-item ${pathname === `/projects/${p.id}` ? 'active' : ''}`}>
@@ -509,24 +531,6 @@ function SidebarInner({
         onTouchStart={handleSidebarTouchStart}
         onTouchEnd={handleSidebarTouchEnd}
       >
-        {/* Watcher indicator — solo en catálogo */}
-        {isCatalog && watcher.watching && (
-          <div style={{ padding: '8px 18px 0', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <button
-              onClick={toggleWatcher}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', display: 'flex', alignItems: 'center' }}
-              title={watcher.classifying
-                ? `Clasificando fotos… (${watcher.classifyDone}/${watcher.classifyTotal}) · Clic para desactivar`
-                : watcher.enabled
-                  ? 'Vigilando carpetas · Clic para desactivar'
-                  : 'Vigilancia desactivada · Clic para activar'}
-              aria-label="Estado del vigilante de carpetas"
-            >
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: watcher.enabled ? 'var(--tag-auto-color)' : 'var(--text-tertiary)', boxShadow: watcher.enabled ? '0 0 0 3px rgba(59,98,212,0.15)' : 'none', display: 'block' }} />
-            </button>
-          </div>
-        )}
-
         {/* Contenido dinámico según módulo */}
         {module === 'catalog' && (
           <CatalogSection
@@ -534,6 +538,8 @@ function SidebarInner({
             totalPhotos={totalPhotos}
             favoriteCount={favoriteCount}
             untaggedCount={untaggedCount}
+            watcher={watcher}
+            toggleWatcher={toggleWatcher}
             onNavClick={handleNavClick}
             onFilterClick={handleFilterClick}
             onClearFilters={handleClearFilters}
