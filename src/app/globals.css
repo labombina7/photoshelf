@@ -57,21 +57,21 @@ body {
   grid-template-columns: var(--sidebar-w) minmax(0, 480px) 1fr auto auto auto;
   column-gap: 12px;
   align-items: center;
-  padding: 0 20px;
+  /* Sin padding-left — col1 (logo) arranca en x=0 alineado con el sidebar */
+  padding: 0 20px 0 0;
   z-index: 100;
 }
-.app-header-logo       { grid-column: 1; }
+.app-header-logo       { grid-column: 1; padding-left: 16px; }
 .app-header-search     { grid-column: 2; }
 /* col 3 = spacer 1fr */
 .app-header-nav        { grid-column: 4; }
 .app-header-slot-right { grid-column: 5; }
-.app-header-slot-left  { grid-column: 6; min-width: 0; }
+.app-header-slot-left  { grid-column: 6; min-width: 0; padding-right: 20px; }
 
 /* Logo */
 .app-header-logo {
   flex-shrink: 0;
   width: var(--sidebar-w);
-  padding: 0 0 0 2px;
 }
 .app-header-logo-text {
   font-size: 15px;
@@ -120,6 +120,15 @@ body {
 .app-shell--with-filterbar > .sidebar {
   top: calc(var(--header-h) + var(--filter-bar-h, 44px));
   height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px));
+}
+
+/* Banner sticky (foto del día) — entre FilterBar y app-shell */
+.library-banner-sticky {
+  position: sticky;
+  top: calc(var(--header-h) + var(--filter-bar-h, 44px));
+  z-index: 88;
+  /* Alinear con la zona de contenido (no sobre el sidebar) */
+  padding-left: var(--sidebar-w);
 }
 
 /* ── Filter Bar ── */
