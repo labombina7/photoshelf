@@ -20,9 +20,15 @@ interface Props {
 
 const LINKS = [
   {
+    href: '/about/docs',
+    label: 'Documentación',
+    description: 'Especificaciones de todas las historias de usuario — pendientes y completadas.',
+    icon: '📄',
+  },
+  {
     href: '/tools/roadmap',
     label: 'Roadmap',
-    description: 'Kanban de historias de usuario — todo pendiente, todo completado.',
+    description: 'Kanban visual con el estado de todas las historias de usuario.',
     icon: '🗺',
   },
   {

@@ -19,6 +19,7 @@
     "iron-session": "^8.0.4",
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
+    "marked": "^18.0.5",
     "next": "15.5.18",
     "node-addon-api": "^8.3.1",
     "react": "^19",
