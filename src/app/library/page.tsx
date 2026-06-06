@@ -6,7 +6,6 @@ import { getSidebarData } from '@/lib/queries/sidebar';
 import { getActiveCatalogId } from '@/lib/catalog-context';
 import { getMemoriesBannerData } from '@/lib/queries/memories';
 import LibraryClient from './LibraryClient';
-import TodayBanner from '@/app/memories/TodayBanner';
 
 interface SearchParams {
   year?: string;   // absent = redirect to current year; 'all' = show every year explicitly
@@ -64,14 +63,6 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
 
   return (
     <LibraryClient
-      bannerSlot={
-        <TodayBanner
-          hasMemories={banner.hasMemories}
-          total={banner.total}
-          yearList={banner.yearList}
-          previewPhotos={banner.previewPhotos}
-        />
-      }
       groups={groups}
       total={sidebar.totalPhotos}
       filteredTotal={filteredTotal}

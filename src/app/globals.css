@@ -128,11 +128,6 @@ body {
   top: calc(var(--header-h) + var(--filter-bar-h, 44px));
   height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px));
 }
-/* Banner foto del día — flujo normal, solo en columna de contenido */
-.library-banner-sticky {
-  padding-left: var(--sidebar-w);
-}
-
 /* ── Filter Bar ── */
 .filter-bar {
   position: sticky;
@@ -552,9 +547,8 @@ body {
   .app-header-logo        { display: none; }
   .app-header-nav         { display: none; }
   .app-header-search      { display: none; }
-  .app-header-actions     { display: none; }
-  .app-header-slot-left   { grid-column: 1; }
-  .app-header-slot-right  { grid-column: 2; }
+  .app-header-slot-left   { grid-column: 1; grid-row: 1; }
+  .app-header-slot-right  { grid-column: 2; grid-row: 1; }
 
   /* Nav módulos — barra secundaria bajo el header en mobile */
   .app-nav-mobile {
@@ -608,7 +602,15 @@ body {
   .filter-bar {
     padding: 0 12px;
     top: calc(var(--header-h) + var(--mobile-nav-h));
+    /* En mobile los dropdowns usan bottom sheet, así que overflow-x: auto es seguro */
+    overflow-x: auto;
+    scrollbar-width: none;
   }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  /* Ocultar chip de memorias en mobile — el link vive en el nav mobile */
+  .filter-bar-memories-chip { display: none; }
+  /* Ocultar acciones de vista en mobile (presentación + toggle) */
+  .filter-bar-actions { display: none; }
   /* Presentación: label visible — sobreescrito más abajo, ver regla junto a .btn-slideshow */
   /* Show hamburger button injected into header slot from pages (search, etc.) */
   .header-slot-hamburger {
@@ -1696,6 +1698,11 @@ body { padding-top: var(--header-h); }
   }
   .sidebar.mobile-open { transform: translateX(0); }
   .sidebar-overlay { display: block; }
+  /* Resetear el top/height calculado del catálogo desktop — el drawer siempre arranca en 0 */
+  .app-shell--with-filterbar > .sidebar {
+    top: 0;
+    height: 100vh;
+  }
 
   /* ── App shell ── */
   .app-shell { display: block; }
