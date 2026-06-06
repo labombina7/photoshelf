@@ -60,6 +60,13 @@ body {
   padding: 0 20px 0 0;
   z-index: 100;
 }
+/* grid-row: 1 explícito en todos — evita que el algoritmo de auto-placement
+   coloque elementos "detrás del cursor" en fila 2 */
+.app-header-logo,
+.app-header-search,
+.app-header-nav,
+.app-header-slot-right,
+.app-header-slot-left  { grid-row: 1; }
 .app-header-logo       { grid-column: 1; padding-left: 16px; }
 .app-header-search     { grid-column: 2; }
 .app-header-nav        { grid-column: 3; }
@@ -119,6 +126,11 @@ body {
 .app-shell--with-filterbar > .sidebar {
   top: calc(var(--header-h) + var(--filter-bar-h, 44px) + var(--banner-h, 0px));
   height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px) - var(--banner-h, 0px));
+}
+/* El content del catálogo añade padding-top = banner height para que los botones
+   de clasificar no queden ocultos bajo el banner sticky al hacer scroll. */
+.app-shell--with-filterbar > .main > .content {
+  padding-top: calc(28px + var(--banner-h, 0px));
 }
 
 /* Banner sticky (foto del día) — entre FilterBar y app-shell */
