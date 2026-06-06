@@ -127,10 +127,7 @@ export default function SmartAlbumsClient({
   return (
     <div className="app-shell">
       <Sidebar
-        themes={themes}
-        totalPhotos={totalPhotos}
-        favoriteCount={favoriteCount}
-        untaggedCount={untaggedCount}
+        smartAlbums={initialAlbums.map(a => ({ id: a.id, name: a.name }))}
         catalogs={catalogs}
         activeCatalogId={activeCatalogId}
         mobileOpen={mobileOpen}

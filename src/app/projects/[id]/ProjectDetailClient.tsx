@@ -121,10 +121,6 @@ export default function ProjectDetailClient({ project: initial, themes, totalPho
   return (
     <div className="app-shell">
       <Sidebar
-        themes={themes}
-        totalPhotos={totalPhotos}
-        favoriteCount={favoriteCount}
-        untaggedCount={untaggedCount}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
       />

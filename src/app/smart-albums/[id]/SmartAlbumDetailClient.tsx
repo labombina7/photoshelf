@@ -102,10 +102,6 @@ export default function SmartAlbumDetailClient({
   return (
     <div className="app-shell">
       <Sidebar
-        themes={themes}
-        totalPhotos={totalPhotos}
-        favoriteCount={favoriteCount}
-        untaggedCount={untaggedCount}
         catalogs={catalogs}
         activeCatalogId={activeCatalogId}
         mobileOpen={mobileOpen}

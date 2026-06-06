@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useTransition, useMemo, useEffect, type ReactNode } from 'react';
+import { useState, useTransition, useMemo, useEffect, useCallback, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import FilterBar from '@/components/FilterBar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
-import { IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
+import { IconSparkle, IconMenu } from '@/components/Icons';
 import Slideshow from '@/components/Slideshow';
-import { useHeaderSlot, useHeaderSlotLeft } from '@/components/HeaderSlot';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -185,15 +185,11 @@ export default function LibraryClient({
   const showClassifyYear = !!activeYear && !activeFilters.event && !fav && !themeId;
   const canToggleView = !activeFilters.event && !fav;
 
-  // ── Slot izquierda: solo hamburger en mobile ───────────────────────────────
+  // ── Slot izquierda: hamburger en mobile ──────────────────────────────────
   useHeaderSlotLeft(
     useMemo(() => (
       <div className="header-slot-library">
-        <button
-          className="hamburger header-slot-hamburger"
-          onClick={() => setMobileSidebarOpen(true)}
-          title="Menú"
-        >
+        <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
           <IconMenu size={18} />
         </button>
       </div>
@@ -201,45 +197,7 @@ export default function LibraryClient({
     ), []),
   );
 
-  // ── Slot derecha: Presentación + vista toggle ───────────────────────────────
-  useHeaderSlot(
-    useMemo(() => (
-      <div className="header-slot-library">
-        {/* Presentación */}
-        {filteredTotal > 0 && (
-          <button
-            className="btn-slideshow"
-            onClick={openSlideshow}
-            title="Presentación (P)"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-            <span className="btn-slideshow-label">Presentación</span>
-          </button>
-        )}
-
-        {/* Vista toggle */}
-        {canToggleView && (
-          <div className="view-toggle">
-            <button
-              className={`view-toggle-btn ${effectiveViewMode === 'list' ? 'active' : ''}`}
-              onClick={() => startTransition(() => setViewMode('list'))}
-              title="Vista lista"
-            >
-              <IconViewList />
-            </button>
-            <button
-              className={`view-toggle-btn ${effectiveViewMode === 'folders' ? 'active' : ''}`}
-              onClick={() => startTransition(() => setViewMode('folders'))}
-              title="Vista carpetas"
-            >
-              <IconViewGrid />
-            </button>
-          </div>
-        )}
-      </div>
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [filteredTotal, canToggleView, effectiveViewMode]),
-  );
+  const handleViewModeChange = useCallback((m: 'list' | 'folders') => startTransition(() => setViewMode(m)), []);
 
   return (
     <>
@@ -255,6 +213,11 @@ export default function LibraryClient({
           focal_min: activeFilters.focal_min,
           focal_max: activeFilters.focal_max,
         }}
+        filteredTotal={filteredTotal}
+        viewMode={effectiveViewMode}
+        canToggleView={canToggleView}
+        onViewModeChange={handleViewModeChange}
+        onSlideshow={openSlideshow}
       />
       <div className="app-shell">
         {slideshowIds && (

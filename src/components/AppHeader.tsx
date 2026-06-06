@@ -13,8 +13,10 @@ import SearchDropdown from './SearchDropdown';
 import { useAnalytics } from '@/hooks/useAnalytics';
 
 const NAV_MODULES = [
-  { href: '/projects',     label: 'Proyectos' },
-  { href: '/smart-albums', label: 'Álbumes' },
+  { href: '/library',      label: 'Catálogo',     match: (p: string) => p === '/library' || p.startsWith('/library/') || p === '/timeline' || p === '/map' || p === '/memories' || p.startsWith('/tags') || p === '/search' },
+  { href: '/projects',     label: 'Proyectos',    match: (p: string) => p === '/projects' || p.startsWith('/projects/') },
+  { href: '/smart-albums', label: 'Álbumes',      match: (p: string) => p === '/smart-albums' || p.startsWith('/smart-albums/') },
+  { href: '/jobs',         label: 'Herramientas', match: (p: string) => ['/jobs', '/stats', '/health', '/about'].some(r => p === r || p.startsWith(r + '/')) || p.startsWith('/tools') || p.startsWith('/settings') },
 ] as const;
 
 // ─── Hints fetch (lazy, once per mount) ──────────────────────────────────────
@@ -184,18 +186,15 @@ export default function AppHeader() {
 
         {/* Nav módulos globales */}
         <nav className="app-header-nav" aria-label="Módulos">
-          {NAV_MODULES.map(({ href, label }) => {
-            const isActive = pathname === href || pathname.startsWith(href + '/');
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`app-header-nav-item${isActive ? ' active' : ''}`}
-              >
-                {label}
-              </Link>
-            );
-          })}
+          {NAV_MODULES.map(({ href, label, match }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`app-header-nav-item${match(pathname) ? ' active' : ''}`}
+            >
+              {label}
+            </Link>
+          ))}
         </nav>
 
         {/* Slot izquierda — siempre en DOM para mantener grid estable */}
@@ -249,13 +248,12 @@ export default function AppHeader() {
 
       {/* ── Mobile: nav módulos secundaria ─────────────────────────────────── */}
       <nav className="app-nav-mobile" aria-label="Módulos">
-        {NAV_MODULES.map(({ href, label }) => {
-          const isActive = pathname === href || pathname.startsWith(href + '/');
+        {NAV_MODULES.map(({ href, label, match }) => {
           return (
             <Link
               key={href}
               href={href}
-              className={`app-nav-mobile-item${isActive ? ' active' : ''}`}
+              className={`app-nav-mobile-item${match(pathname) ? ' active' : ''}`}
             >
               {label}
             </Link>
