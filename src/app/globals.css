@@ -127,18 +127,10 @@ body {
   top: calc(var(--header-h) + var(--filter-bar-h, 44px) + var(--banner-h, 0px));
   height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px) - var(--banner-h, 0px));
 }
-/* El content del catálogo añade padding-top = banner height para que los botones
-   de clasificar no queden ocultos bajo el banner sticky al hacer scroll. */
-.app-shell--with-filterbar > .main > .content {
-  padding-top: calc(28px + var(--banner-h, 0px));
-}
-
-/* Banner sticky (foto del día) — entre FilterBar y app-shell */
+/* Banner foto del día — flujo normal (no sticky: la arquitectura window-scroll
+   no permite sticky sin tapar el contenido o generar huecos).
+   El banner aparece prominentemente al cargar y se scrollea con el contenido. */
 .library-banner-sticky {
-  position: sticky;
-  top: calc(var(--header-h) + var(--filter-bar-h, 44px));
-  z-index: 88;
-  /* Alinear con la zona de contenido (no sobre el sidebar) */
   padding-left: var(--sidebar-w);
 }
 
