@@ -116,12 +116,12 @@ function migrateEpic001(db: Database.Database) {
     );
   `);
 
-  // 2. Upsert default catalog (id=1) — always keep its path in sync with PHOTOS_PATH.
-  //    ON CONFLICT updates the path so renaming the host mount doesn't orphan the catalog.
-  //    The user-defined name is preserved.
+  // 2. Create default catalog (id=1) only if it doesn't exist yet.
+  //    DO NOTHING on conflict so the user can change the path via the UI
+  //    without it being overwritten on every server restart.
   db.prepare(`
     INSERT INTO catalogs (id, name, path) VALUES (1, 'Principal', ?)
-    ON CONFLICT(id) DO UPDATE SET path = excluded.path
+    ON CONFLICT(id) DO NOTHING
   `).run(PHOTOS_PATH);
 
   // 3. Add catalog_id column to photos (idempotent via try/catch — SQLite has no IF NOT EXISTS for columns).
