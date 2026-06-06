@@ -247,6 +247,22 @@ export default function AppHeader() {
         <div className="app-header-actions" />
       </header>
 
+      {/* ── Mobile: nav módulos secundaria ─────────────────────────────────── */}
+      <nav className="app-nav-mobile" aria-label="Módulos">
+        {NAV_MODULES.map(({ href, label }) => {
+          const isActive = pathname === href || pathname.startsWith(href + '/');
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`app-nav-mobile-item${isActive ? ' active' : ''}`}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+
       {/* ── Mobile: floating search FAB ─────────────────────────────────────── */}
       <button
         className={`mobile-search-fab${mobileSheetOpen ? ' mobile-search-fab--hidden' : ''}`}

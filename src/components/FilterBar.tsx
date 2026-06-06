@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAnalytics } from '@/hooks/useAnalytics';
 
@@ -35,113 +35,119 @@ const APERTURE_OPTIONS = [
 
 const YEAR_VISIBLE = 5;
 
-function Dropdown({
+// ── Bottom sheet para mobile ────────────────────────────────────────────────
+function BottomSheet({
+  open,
+  title,
+  onClose,
+  children,
+}: {
+  open: boolean;
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') onClose(); }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <>
+      <div className="filter-sheet-backdrop" onClick={onClose} aria-hidden="true" />
+      <div className="filter-sheet" role="dialog" aria-modal="true" aria-label={title}>
+        <div className="filter-sheet-handle" />
+        <div className="filter-sheet-title">{title}</div>
+        <div className="filter-sheet-body">{children}</div>
+      </div>
+    </>
+  );
+}
+
+// ── Dropdown unificado (desktop: dropdown ↓, mobile: bottom sheet) ──────────
+function FilterDropdown({
   label,
   options,
   value,
   onChange,
+  wide = false,
 }: {
   label: string;
   options: { label: string; value: string }[];
   value: string | undefined;
   onChange: (v: string | undefined) => void;
+  wide?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const mq = window.matchMedia('(max-width: 640px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
     function onPointerDown(e: PointerEvent) {
       if (!ref.current?.contains(e.target as Node)) setOpen(false);
     }
     document.addEventListener('pointerdown', onPointerDown);
     return () => document.removeEventListener('pointerdown', onPointerDown);
-  }, []);
+  }, [isMobile]);
 
   const active = value !== undefined && value !== '';
   const activeLabel = options.find(o => o.value === value)?.label;
+  const close = useCallback(() => setOpen(false), []);
+
+  const optionItems = options.map(opt => (
+    <button
+      key={opt.value}
+      role="option"
+      aria-selected={value === opt.value}
+      className={`filter-bar-dropdown-item${value === opt.value ? ' active' : ''}`}
+      onClick={() => { onChange(value === opt.value ? undefined : opt.value); setOpen(false); }}
+    >
+      {opt.label}
+    </button>
+  ));
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button
         className={`filter-bar-btn${active ? ' filter-bar-btn--active' : ''}`}
         onClick={() => setOpen(o => !o)}
-        aria-expanded={open}
+        aria-expanded={open && !isMobile}
         aria-haspopup="listbox"
       >
         {active ? activeLabel : label}
         <span style={{ fontSize: 9, opacity: 0.7, marginLeft: 2 }}>▾</span>
       </button>
-      {open && (
-        <div className="filter-bar-dropdown" role="listbox">
-          {options.map(opt => (
-            <button
-              key={opt.value}
-              role="option"
-              aria-selected={value === opt.value}
-              className={`filter-bar-dropdown-item${value === opt.value ? ' active' : ''}`}
-              onClick={() => { onChange(value === opt.value ? undefined : opt.value); setOpen(false); }}
-            >
-              {opt.label}
-            </button>
-          ))}
+
+      {/* Desktop: dropdown */}
+      {!isMobile && open && (
+        <div className={`filter-bar-dropdown${wide ? ' filter-bar-dropdown--wide' : ''}`} role="listbox">
+          {optionItems}
         </div>
+      )}
+
+      {/* Mobile: bottom sheet */}
+      {isMobile && (
+        <BottomSheet open={open} title={label} onClose={close}>
+          <div role="listbox">{optionItems}</div>
+        </BottomSheet>
       )}
     </div>
   );
 }
 
-function CameraDropdown({
-  cameras,
-  value,
-  onChange,
-}: {
-  cameras: string[];
-  value: string | undefined;
-  onChange: (v: string | undefined) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onPointerDown(e: PointerEvent) {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener('pointerdown', onPointerDown);
-    return () => document.removeEventListener('pointerdown', onPointerDown);
-  }, []);
-
-  const active = !!value;
-
-  return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button
-        className={`filter-bar-btn${active ? ' filter-bar-btn--active' : ''}`}
-        onClick={() => setOpen(o => !o)}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-      >
-        {active ? value : 'Cámara'}
-        <span style={{ fontSize: 9, opacity: 0.7, marginLeft: 2 }}>▾</span>
-      </button>
-      {open && (
-        <div className="filter-bar-dropdown filter-bar-dropdown--wide" role="listbox">
-          {cameras.map(cam => (
-            <button
-              key={cam}
-              role="option"
-              aria-selected={value === cam}
-              className={`filter-bar-dropdown-item${value === cam ? ' active' : ''}`}
-              onClick={() => { onChange(value === cam ? undefined : cam); setOpen(false); }}
-            >
-              {cam}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
+// ── FilterBar principal ─────────────────────────────────────────────────────
 export default function FilterBar({ years, cameras, activeYear, activeFilters }: FilterBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -227,19 +233,21 @@ export default function FilterBar({ years, cameras, activeYear, activeFilters }:
       {/* Filtros EXIF */}
       <div className="filter-bar-exif">
         {cameras.length > 0 && (
-          <CameraDropdown
-            cameras={cameras}
+          <FilterDropdown
+            label="Cámara"
+            options={cameras.map(c => ({ label: c, value: c }))}
             value={activeFilters.camera}
             onChange={v => setExifFilter('camera', v)}
+            wide
           />
         )}
-        <Dropdown
+        <FilterDropdown
           label="ISO"
           options={ISO_OPTIONS}
           value={activeFilters.iso_max}
           onChange={v => setExifFilter('iso_max', v)}
         />
-        <Dropdown
+        <FilterDropdown
           label="Apertura"
           options={APERTURE_OPTIONS}
           value={activeFilters.aperture_max}
