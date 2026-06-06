@@ -116,6 +116,16 @@ body {
   border-radius: 1px;
 }
 
+/* ── Wrapper para páginas con FilterBar ── */
+.page-with-filterbar {
+  display: contents; /* no afecta al layout normal */
+}
+/* Sidebar dentro de la página de catálogo: baja el sticky para no solapar FilterBar */
+.page-with-filterbar .sidebar {
+  top: calc(var(--header-h) + var(--filter-bar-h, 44px));
+  height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px));
+}
+
 /* ── Filter Bar ── */
 .filter-bar {
   position: sticky;
@@ -128,10 +138,13 @@ body {
   gap: 8px;
   padding: 0 20px 0 calc(var(--sidebar-w) + 20px);
   height: var(--filter-bar-h, 44px);
-  overflow-x: auto;
-  scrollbar-width: none;
+  /* Sin overflow-x: auto — los dropdowns hijos necesitan desbordarse verticalmente.
+     El scroll en mobile se gestiona via bottom sheet. */
 }
-.filter-bar::-webkit-scrollbar { display: none; }
+/* Wrapper interno scrollable que no contiene dropdowns posicionados */
+.filter-bar-inner {
+  display: contents; /* no crea contexto de apilamiento */
+}
 
 .filter-bar-years {
   display: flex;

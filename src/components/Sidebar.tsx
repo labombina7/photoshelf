@@ -260,13 +260,17 @@ function ProjectsSection({
   onNavClick: () => void;
 }) {
   const pathname = usePathname();
+
+  function openNewProject() {
+    window.dispatchEvent(new CustomEvent('photoshelf:new-project'));
+    onNavClick();
+  }
+
   return (
     <div className="sidebar-section">
-      <div className="sidebar-section-label">Proyectos</div>
       <Link href="/projects" onClick={onNavClick}
-        className={`sidebar-item ${pathname === '/projects' ? 'active' : ''}`}>
-        <IconFolder size={14} />
-        Todos los proyectos
+        className="sidebar-section-label sidebar-section-label--link">
+        Proyectos
       </Link>
       {projects.map(p => (
         <Link key={p.id} href={`/projects/${p.id}`} onClick={onNavClick}
@@ -275,11 +279,15 @@ function ProjectsSection({
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
         </Link>
       ))}
-      {projects.length === 0 && (
-        <p style={{ padding: '4px 10px', fontSize: 12.5, color: 'var(--text-tertiary)' }}>
-          Sin proyectos todavía.
-        </p>
-      )}
+      <button
+        className="sidebar-item"
+        style={{ color: 'var(--text-tertiary)', fontSize: '12.5px', background: 'none', border: 'none', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}
+        onClick={openNewProject}
+        aria-label="Crear nuevo proyecto"
+      >
+        <IconPlus size={13} />
+        Nuevo proyecto
+      </button>
     </div>
   );
 }
