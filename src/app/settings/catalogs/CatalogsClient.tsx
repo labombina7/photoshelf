@@ -23,7 +23,6 @@ interface Props {
   catalogs: CatalogRow[];
   activeCatalogId: number;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -34,7 +33,6 @@ export default function CatalogsClient({
   catalogs: initialCatalogs,
   activeCatalogId,
   themes,
-  projects,
   totalPhotos,
   favoriteCount,
   untaggedCount,
@@ -234,7 +232,6 @@ export default function CatalogsClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

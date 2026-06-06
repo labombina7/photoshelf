@@ -17,7 +17,6 @@ export default async function TagsPage() {
     <TagsClient
       tags={tags}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}

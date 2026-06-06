@@ -159,7 +159,6 @@ function TagsList({ tags }: { tags: StatsData['tags'] }) {
 interface Props {
   stats: StatsData;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -174,7 +173,7 @@ interface TechnicalStats {
   topCameras: { camera: string; count: number }[];
 }
 
-export default function StatsClient({ stats, themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs = [], activeCatalogId = 1 }: Props) {
+export default function StatsClient({ stats, themes, totalPhotos, favoriteCount, untaggedCount, catalogs = [], activeCatalogId = 1 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [techStats, setTechStats] = useState<TechnicalStats | null>(null);
   const router = useRouter();
@@ -217,7 +216,6 @@ export default function StatsClient({ stats, themes, projects, totalPhotos, favo
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

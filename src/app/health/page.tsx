@@ -23,7 +23,6 @@ export default async function HealthPage() {
       initialMetrics={metrics}
       initialHistory={history}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}

@@ -27,8 +27,6 @@ interface SmartAlbumsClientProps {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
-  projects: { id: number; title: string }[];
-  smartAlbums: { id: number; name: string }[];
   catalogs: CatalogRow[];
   activeCatalogId: number;
   catalogName: string;
@@ -79,8 +77,6 @@ export default function SmartAlbumsClient({
   totalPhotos,
   favoriteCount,
   untaggedCount,
-  projects,
-  smartAlbums,
   catalogs,
   activeCatalogId,
   catalogName,
@@ -132,8 +128,6 @@ export default function SmartAlbumsClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
-        smartAlbums={smartAlbums}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

@@ -12,7 +12,6 @@ import type { CatalogRow } from '@/lib/queries/catalogs';
 interface Props {
   specs: { todo: SpecMeta[]; done: SpecMeta[] };
   themes: ThemeWithCount[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -65,7 +64,7 @@ function SpecRow({ spec }: { spec: SpecMeta }) {
 }
 
 export default function DocsClient({
-  specs, themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId,
+  specs, themes, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId,
 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [tab, setTab] = useState<'todo' | 'done'>('todo');
@@ -88,7 +87,7 @@ export default function DocsClient({
   return (
     <div className="app-shell">
       <Sidebar
-        themes={themes} projects={projects} totalPhotos={totalPhotos}
+        themes={themes} totalPhotos={totalPhotos}
         favoriteCount={favoriteCount} untaggedCount={untaggedCount}
         mobileOpen={mobileSidebarOpen} onMobileClose={() => setMobileSidebarOpen(false)}
         catalogs={catalogs} activeCatalogId={activeCatalogId}

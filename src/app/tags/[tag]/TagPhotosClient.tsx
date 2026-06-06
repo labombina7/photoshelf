@@ -20,7 +20,6 @@ interface Props {
   tagName: string;
   total: number;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -28,7 +27,7 @@ interface Props {
   activeCatalogId?: number;
 }
 
-export default function TagPhotosClient({ tagName, total, themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs = [], activeCatalogId = 1 }: Props) {
+export default function TagPhotosClient({ tagName, total, themes, totalPhotos, favoriteCount, untaggedCount, catalogs = [], activeCatalogId = 1 }: Props) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -88,7 +87,6 @@ export default function TagPhotosClient({ tagName, total, themes, projects, tota
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

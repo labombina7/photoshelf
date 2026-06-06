@@ -51,12 +51,9 @@ export default async function ProjectsPage() {
     ORDER BY t.name ASC
   `).all() as { name: string }[]).map(r => r.name);
 
-  const sidebarProjects = getSidebarProjects();
-
   return (
     <ProjectsClient
       projects={projects}
-      sidebarProjects={sidebarProjects}
       themes={themes}
       years={years}
       events={events}

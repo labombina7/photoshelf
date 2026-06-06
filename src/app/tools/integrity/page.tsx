@@ -17,7 +17,6 @@ export default async function IntegrityPage() {
     <IntegrityClient
       initialMeta={meta}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}
