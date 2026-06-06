@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useModal } from '@/components/ModalProvider';
 import Link from 'next/link';
@@ -140,6 +140,12 @@ export default function ProjectsClient({ projects: initial, themes, years, event
     setProjects(prev => prev.filter(p => p.id !== id));
   }
 
+  useEffect(() => {
+    function onNew() { setShowNew(true); }
+    window.addEventListener('photoshelf:new-project', onNew);
+    return () => window.removeEventListener('photoshelf:new-project', onNew);
+  }, []);
+
   useHeaderSlot(useMemo(() => (
     <div className="header-slot-library">
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
@@ -147,15 +153,6 @@ export default function ProjectsClient({ projects: initial, themes, years, event
       </button>
       <span className="header-slot-title">Proyectos</span>
       <span className="header-slot-sub">{projects.length} proyecto{projects.length !== 1 ? 's' : ''}</span>
-      <div className="topbar-spacer" />
-      <button
-        className="btn-primary"
-        style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 14px', fontSize: 13 }}
-        onClick={() => setShowNew(true)}
-      >
-        <IconPlus size={13} />
-        Nuevo proyecto
-      </button>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [projects.length]));
