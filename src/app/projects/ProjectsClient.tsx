@@ -6,7 +6,7 @@ import { useModal } from '@/components/ModalProvider';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconSparkle, IconTrash, IconPlus, IconX, IconMenu } from '@/components/Icons';
-import { useHeaderSlot } from '@/components/HeaderSlot';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 
 interface Project {
@@ -146,16 +146,14 @@ export default function ProjectsClient({ projects: initial, themes, years, event
     return () => window.removeEventListener('photoshelf:new-project', onNew);
   }, []);
 
-  useHeaderSlot(useMemo(() => (
+  useHeaderSlotLeft(useMemo(() => (
     <div className="header-slot-library">
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Proyectos</span>
-      <span className="header-slot-sub">{projects.length} proyecto{projects.length !== 1 ? 's' : ''}</span>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [projects.length]));
+  ), []));
 
   return (
     <div className="app-shell">
