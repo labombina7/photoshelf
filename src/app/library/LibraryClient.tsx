@@ -47,7 +47,6 @@ interface LibraryClientProps {
   activeFilters: ActiveFilters;
   catalogs?: CatalogRow[];
   activeCatalogId?: number;
-  bannerSlot?: React.ReactNode;
   hasMemories?: boolean;
   cameras?: string[];
 }
@@ -64,7 +63,6 @@ export default function LibraryClient({
   activeFilters,
   catalogs = [],
   activeCatalogId = 1,
-  bannerSlot,
   hasMemories = false,
   cameras = [],
 }: LibraryClientProps) {
@@ -223,8 +221,6 @@ export default function LibraryClient({
         onSlideshow={openSlideshow}
         hasMemories={hasMemories}
       />
-      {/* Banner foto del día — flujo normal, solo en columna de contenido */}
-      <div className="library-banner-sticky">{bannerSlot}</div>
       <div className="app-shell app-shell--with-filterbar">
         {slideshowIds && (
           <Slideshow
