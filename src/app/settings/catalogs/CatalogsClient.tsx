@@ -100,6 +100,18 @@ export default function CatalogsClient({
     setEditError(null);
     if (!editName.trim()) { setEditError('El nombre es obligatorio'); return; }
 
+    const currentCatalog = catalogs.find(c => c.id === id);
+    const pathChanged = editPath.trim() !== '' && editPath.trim() !== currentCatalog?.path;
+
+    // Confirm before changing the path of the Principal catalog
+    if (pathChanged && id === 1) {
+      const ok = await confirm(
+        `Vas a cambiar la ruta del catálogo Principal:\n\nAnterior: ${currentCatalog?.path}\nNueva: ${editPath.trim()}\n\nAsegúrate de que la nueva ruta apunta a la misma carpeta de fotos. Si es incorrecta, ninguna foto será accesible hasta corregirla.`,
+        { title: 'Cambiar ruta del catálogo Principal', confirmLabel: 'Sí, cambiar ruta', danger: true },
+      );
+      if (!ok) return;
+    }
+
     // Update name
     const resName = await fetch(`/api/catalogs/${id}`, {
       method: 'PATCH',
@@ -113,8 +125,7 @@ export default function CatalogsClient({
     }
 
     // Update path if changed
-    const currentCatalog = catalogs.find(c => c.id === id);
-    if (editPath.trim() && editPath.trim() !== currentCatalog?.path) {
+    if (pathChanged) {
       const resPath = await fetch(`/api/catalogs/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -283,6 +294,11 @@ export default function CatalogsClient({
               }}>
                 {editingId === cat.id ? (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {cat.id === 1 && (
+                      <div style={{ fontSize: 11, color: '#ca8a04', background: 'rgba(202,138,4,0.08)', borderRadius: 4, padding: '5px 8px' }}>
+                        ⚠️ Cambiar la ruta del catálogo Principal afecta a todas las fotos indexadas. Se pedirá confirmación.
+                      </div>
+                    )}
                     <input
                       className="tag-input"
                       value={editName}
