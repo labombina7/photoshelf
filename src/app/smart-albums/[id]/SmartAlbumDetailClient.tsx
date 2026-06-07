@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconEdit, IconMenu } from '@/components/Icons';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import SmartAlbumBuilder from '../SmartAlbumBuilder';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
@@ -55,6 +56,15 @@ export default function SmartAlbumDetailClient({
   const [showBuilder, setShowBuilder] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useHeaderSlotLeft(useMemo(() => (
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setMobileOpen(true)} title="Menú">
+        <IconMenu size={18} />
+      </button>
+    </div>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), []));
 
   const fetchMore = useCallback(async () => {
     if (loading || !hasMore) return;
