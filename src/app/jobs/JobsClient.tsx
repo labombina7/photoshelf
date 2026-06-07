@@ -66,6 +66,90 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleString('es', { dateStyle: 'short', timeStyle: 'short' });
 }
 
+interface AmplitudeStatus {
+  configured: boolean;
+  total: number;
+  synced: number;
+  percent: number;
+}
+
+function AmplitudeCard() {
+  const [status, setStatus] = useState<AmplitudeStatus | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  async function fetchStatus() {
+    try {
+      const res = await fetch('/api/amplitude/sync');
+      if (res.ok) setStatus(await res.json() as AmplitudeStatus);
+    } catch { /* ignore */ }
+  }
+
+  useEffect(() => {
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  async function handleSync() {
+    setSyncing(true);
+    try {
+      await fetch('/api/amplitude/sync', { method: 'POST' });
+      await fetchStatus();
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  return (
+    <section style={{ marginBottom: 32 }}>
+      <h2 style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text-tertiary)', marginBottom: 10 }}>
+        Amplitude
+      </h2>
+      <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '16px 20px', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {!status ? (
+          <p style={{ fontSize: 14, color: 'var(--text-tertiary)', margin: 0 }}>Cargando…</p>
+        ) : !status.configured ? (
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: '0 0 6px' }}>API key no configurada</p>
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>
+              Añade <code style={{ fontFamily: 'monospace', background: 'var(--border)', padding: '1px 5px', borderRadius: 3 }}>AMPLITUDE_API_KEY=…</code> a tu <code style={{ fontFamily: 'monospace', background: 'var(--border)', padding: '1px 5px', borderRadius: 3 }}>.env.local</code> y reinicia el servidor.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div>
+                <p style={{ fontSize: 14, fontWeight: 500, margin: '0 0 2px' }}>
+                  {status.synced.toLocaleString('es-ES')} de {status.total.toLocaleString('es-ES')} fotos sincronizadas
+                </p>
+                <p style={{ fontSize: 12, color: 'var(--text-tertiary)', margin: 0 }}>{status.percent}% completado</p>
+              </div>
+              <button
+                onClick={handleSync}
+                disabled={syncing || status.synced === status.total}
+                style={{
+                  fontSize: 13, padding: '6px 14px', borderRadius: 6,
+                  border: '1px solid var(--border)', background: 'none',
+                  cursor: (syncing || status.synced === status.total) ? 'not-allowed' : 'pointer',
+                  color: 'var(--text-primary)', flexShrink: 0,
+                  opacity: (syncing || status.synced === status.total) ? 0.5 : 1,
+                }}
+              >
+                {syncing ? 'Sincronizando…' : status.synced === status.total ? '✓ Al día' : 'Sincronizar ahora'}
+              </button>
+            </div>
+            {status.total > 0 && status.percent < 100 && (
+              <div style={{ height: 4, borderRadius: 2, background: 'var(--border)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${status.percent}%`, background: '#6366f1', borderRadius: 2, transition: 'width 0.5s ease' }} />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export default function JobsClient({ themes, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId }: Props) {
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [cancelling, setCancelling] = useState<Set<string>>(new Set());
@@ -124,6 +208,8 @@ export default function JobsClient({ themes, totalPhotos, favoriteCount, untagge
       <div className="main">
         <div className="content" style={{ maxWidth: 760 }}>
           <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 24, marginTop: 8 }}>Cola de trabajos</h1>
+
+          <AmplitudeCard />
 
           {jobs.length === 0 && (
             <p style={{ color: 'var(--text-tertiary)', fontSize: 14 }}>No hay trabajos recientes.</p>

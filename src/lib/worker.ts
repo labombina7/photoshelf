@@ -10,6 +10,7 @@ import { isAutoBackupDue } from './queries/backup';
 import { runBackup } from './backup';
 import { ensureBootstrapRunning } from './style-analysis/bootstrap';
 import { runDailyCycle, runMissedMonthlySyntheses, runPendingNarratives } from './style-analysis/cycle';
+import { syncPendingPhotosToAmplitude } from './amplitude-sync';
 
 interface ClassifyPayload {
   type: 'classify_year' | 'classify_batch';
@@ -175,6 +176,9 @@ async function runClassifyJob(job: JobRow, payload: ClassifyPayload, startedAt: 
   }
 
   updateJob(job.id, { status: 'completed' });
+
+  // Sync newly tagged photos to Amplitude (fire-and-forget)
+  syncPendingPhotosToAmplitude().catch(err => console.error('[worker] Amplitude sync error:', err));
 }
 
 async function runGenerateProjectJob(job: JobRow, payload: GenerateProjectPayload): Promise<void> {
