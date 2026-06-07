@@ -1698,6 +1698,9 @@ body { padding-top: var(--header-h); }
     z-index: 40; transform: translateX(-100%);
     transition: transform 0.25s ease;
     box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    /* El header fijo (z-index:100) tapa los primeros 52px del drawer → padding compensa */
+    padding-top: var(--header-h);
+    overflow-y: auto;
   }
   .sidebar.mobile-open { transform: translateX(0); }
   .sidebar-overlay { display: block; }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
@@ -8,6 +8,7 @@ import { IconSmartAlbum, IconPlus, IconTrash, IconEdit, IconMenu } from '@/compo
 import SmartAlbumBuilder from './SmartAlbumBuilder';
 import UnstructuredCatalogBanner from '@/components/UnstructuredCatalogBanner';
 import { useModal } from '@/components/ModalProvider';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 import type { AlbumRule } from '@/lib/smartAlbumQuery';
@@ -89,6 +90,15 @@ export default function SmartAlbumsClient({
   const [editingAlbum, setEditingAlbum] = useState<AlbumItem | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('date_desc');
+
+  useHeaderSlotLeft(useMemo(() => (
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setMobileOpen(true)} title="Menú">
+        <IconMenu size={18} />
+      </button>
+    </div>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), []));
 
   async function handleCreate(name: string, rules: AlbumRule[]) {
     const res = await fetch('/api/smart-albums', {
