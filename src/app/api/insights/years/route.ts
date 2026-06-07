@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
 import { getLatestProfiles } from '@/lib/queries/style-analysis';
+import { mobileCameraExclusionSQL, mobileCameraExclusionParams } from '@/lib/config';
 import type { StyleProfile, PeriodStyleSummary } from '@/lib/types';
 
 export interface YearData {
@@ -65,12 +66,14 @@ export async function GET() {
     const db = getDb();
     const currentYear = new Date().getFullYear();
 
-    // All years that have photos
+    // All years that have photos (mobile excluded)
+    const mobSql = mobileCameraExclusionSQL('');
+    const mobParams = mobileCameraExclusionParams();
     const yearsWithPhotos = (db.prepare(`
       SELECT CAST(strftime('%Y', taken_at) AS INTEGER) AS year, COUNT(*) AS photo_count
-      FROM photos WHERE taken_at IS NOT NULL
+      FROM photos WHERE taken_at IS NOT NULL AND ${mobSql}
       GROUP BY year ORDER BY year DESC
-    `).all() as { year: number; photo_count: number }[]);
+    `).all(...mobParams) as { year: number; photo_count: number }[]);
 
     if (yearsWithPhotos.length === 0) {
       return NextResponse.json([]);

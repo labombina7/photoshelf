@@ -1,5 +1,10 @@
 import { getDb } from '@/lib/db';
+import { mobileCameraExclusionSQL, mobileCameraExclusionParams } from '@/lib/config';
 import type { StyleSignals, PeriodStyleSummary, StyleProfile, BootstrapProgress } from '@/lib/types';
+
+const MOB_SQL = mobileCameraExclusionSQL('p');
+const MOB_SQL_NO_ALIAS = mobileCameraExclusionSQL('');
+const MOB_PARAMS = mobileCameraExclusionParams();
 
 // ── US-074: Extracción de señales EXIF ───────────────────────────────────────
 
@@ -51,31 +56,36 @@ export function getStyleSignalsByPeriod({ from, to }: { from: string; to: string
       AVG(CAST(strftime('%H', taken_at) AS REAL) + CAST(strftime('%M', taken_at) AS REAL) / 60.0) AS avg_hour
     FROM photos
     WHERE taken_at >= ? AND taken_at < ?
-  `).get(from, to) as { photo_count: number; avg_hour: number | null };
+      AND ${MOB_SQL_NO_ALIAS}
+  `).get(from, to, ...MOB_PARAMS) as { photo_count: number; avg_hour: number | null };
 
   const topCamera = (db.prepare(`
     SELECT camera, COUNT(*) AS n FROM photos
     WHERE taken_at >= ? AND taken_at < ? AND camera IS NOT NULL
+      AND ${MOB_SQL_NO_ALIAS}
     GROUP BY camera ORDER BY n DESC LIMIT 1
-  `).get(from, to) as { camera: string } | undefined)?.camera ?? null;
+  `).get(from, to, ...MOB_PARAMS) as { camera: string } | undefined)?.camera ?? null;
 
   const topFocalLengths = (db.prepare(`
     SELECT ROUND(focal_length) AS val, COUNT(*) AS n FROM photos
     WHERE taken_at >= ? AND taken_at < ? AND focal_length IS NOT NULL
+      AND ${MOB_SQL_NO_ALIAS}
     GROUP BY val ORDER BY n DESC LIMIT 3
-  `).all(from, to) as { val: number }[]).map(r => r.val);
+  `).all(from, to, ...MOB_PARAMS) as { val: number }[]).map(r => r.val);
 
   const topApertures = (db.prepare(`
     SELECT aperture AS val, COUNT(*) AS n FROM photos
     WHERE taken_at >= ? AND taken_at < ? AND aperture IS NOT NULL
+      AND ${MOB_SQL_NO_ALIAS}
     GROUP BY val ORDER BY n DESC LIMIT 3
-  `).all(from, to) as { val: number }[]).map(r => Math.round(r.val * 10) / 10);
+  `).all(from, to, ...MOB_PARAMS) as { val: number }[]).map(r => Math.round(r.val * 10) / 10);
 
   const topIsos = (db.prepare(`
     SELECT iso AS val, COUNT(*) AS n FROM photos
     WHERE taken_at >= ? AND taken_at < ? AND iso IS NOT NULL
+      AND ${MOB_SQL_NO_ALIAS}
     GROUP BY val ORDER BY n DESC LIMIT 3
-  `).all(from, to) as { val: number }[]).map(r => r.val);
+  `).all(from, to, ...MOB_PARAMS) as { val: number }[]).map(r => r.val);
 
   const topGenres = (db.prepare(`
     SELECT t.name, COUNT(*) AS n
@@ -84,8 +94,9 @@ export function getStyleSignalsByPeriod({ from, to }: { from: string; to: string
     JOIN photos p ON p.id = pt.photo_id
     WHERE p.taken_at >= ? AND p.taken_at < ?
       AND t.name IN ('retrato','paisaje','arquitectura','street','naturaleza','macro','deporte','noche','abstracto','documental')
+      AND ${MOB_SQL}
     GROUP BY t.name ORDER BY n DESC LIMIT 5
-  `).all(from, to) as { name: string }[]).map(r => r.name);
+  `).all(from, to, ...MOB_PARAMS) as { name: string }[]).map(r => r.name);
 
   const topTags = (db.prepare(`
     SELECT t.name, COUNT(*) AS n
@@ -93,8 +104,9 @@ export function getStyleSignalsByPeriod({ from, to }: { from: string; to: string
     JOIN tags t ON t.id = pt.tag_id
     JOIN photos p ON p.id = pt.photo_id
     WHERE p.taken_at >= ? AND p.taken_at < ? AND pt.source = 'ai'
+      AND ${MOB_SQL}
     GROUP BY t.name ORDER BY n DESC LIMIT 10
-  `).all(from, to) as { name: string }[]).map(r => r.name);
+  `).all(from, to, ...MOB_PARAMS) as { name: string }[]).map(r => r.name);
 
   return {
     period: from.substring(0, 7),
@@ -123,7 +135,7 @@ export function selectRepresentativeSample({
 }): number[] {
   const db = getDb();
 
-  // Get all photos in period with their tag diversity score
+  // Get all photos in period with their tag diversity score (mobile excluded)
   const photos = db.prepare(`
     SELECT
       p.id,
@@ -133,9 +145,10 @@ export function selectRepresentativeSample({
     FROM photos p
     LEFT JOIN photo_tags pt ON pt.photo_id = p.id AND pt.source = 'ai'
     WHERE p.taken_at >= ? AND p.taken_at < ?
+      AND ${MOB_SQL}
     GROUP BY p.id
     ORDER BY p.taken_at ASC
-  `).all(from, to) as { id: number; taken_at: string | null; hour_bucket: string | null; tag_count: number }[];
+  `).all(from, to, ...MOB_PARAMS) as { id: number; taken_at: string | null; hour_bucket: string | null; tag_count: number }[];
 
   if (photos.length <= maxPhotos) return photos.map(p => p.id);
 
@@ -179,18 +192,18 @@ export function getAnalysablePeriods(): AnalysablePeriod[] {
   const months = db.prepare(`
     SELECT strftime('%Y-%m', taken_at) AS period, COUNT(*) AS photo_count
     FROM photos
-    WHERE taken_at IS NOT NULL
+    WHERE taken_at IS NOT NULL AND ${MOB_SQL_NO_ALIAS}
     GROUP BY period
     ORDER BY period ASC
-  `).all() as { period: string; photo_count: number }[];
+  `).all(...MOB_PARAMS) as { period: string; photo_count: number }[];
 
   const years = db.prepare(`
     SELECT strftime('%Y', taken_at) AS period, COUNT(*) AS photo_count
     FROM photos
-    WHERE taken_at IS NOT NULL
+    WHERE taken_at IS NOT NULL AND ${MOB_SQL_NO_ALIAS}
     GROUP BY period
     ORDER BY period ASC
-  `).all() as { period: string; photo_count: number }[];
+  `).all(...MOB_PARAMS) as { period: string; photo_count: number }[];
 
   const result: AnalysablePeriod[] = [];
   for (const m of months) result.push({ period: m.period, type: 'month', photoCount: m.photo_count });
@@ -256,9 +269,9 @@ export function initBootstrapIfEmpty(): void {
 
   const months = db.prepare(`
     SELECT strftime('%Y-%m', taken_at) AS period, COUNT(*) AS photo_count
-    FROM photos WHERE taken_at IS NOT NULL
+    FROM photos WHERE taken_at IS NOT NULL AND ${MOB_SQL_NO_ALIAS}
     GROUP BY period ORDER BY period ASC
-  `).all() as { period: string; photo_count: number }[];
+  `).all(...MOB_PARAMS) as { period: string; photo_count: number }[];
 
   const insert = db.prepare(`
     INSERT OR IGNORE INTO style_analysis_bootstrap (period, type, status, photo_count, sample_count)
