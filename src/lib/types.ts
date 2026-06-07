@@ -63,10 +63,10 @@ export interface StyleSignals {
 export interface PeriodStyleSummary {
   period: string;
   photoCount: number;
-  avgFocalLength: number | null;
-  avgAperture: number | null;
-  avgIso: number | null;
-  avgHourOfDay: number | null;
+  topFocalLengths: number[];   // e.g. [35, 50, 85] — most used, discrete values
+  topApertures: number[];      // e.g. [1.4, 2.0, 2.8]
+  topIsos: number[];           // e.g. [100, 400, 1600]
+  avgHourOfDay: number | null; // hour-of-day average still meaningful
   topCamera: string | null;
   topLens: string | null;
   topGenres: string[];

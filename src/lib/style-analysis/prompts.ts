@@ -3,9 +3,9 @@ import type { PeriodStyleSummary } from '@/lib/types';
 function formatSummary(s: PeriodStyleSummary): string {
   const lines: string[] = [];
   if (s.topCamera) lines.push(`- Cámara predominante: ${s.topCamera}`);
-  if (s.avgFocalLength) lines.push(`- Focal media: ${s.avgFocalLength}mm`);
-  if (s.avgAperture) lines.push(`- Apertura media: f/${s.avgAperture}`);
-  if (s.avgIso) lines.push(`- ISO medio: ${s.avgIso}`);
+  if (s.topFocalLengths?.length) lines.push(`- Focales más usadas: ${s.topFocalLengths.map(f => `${f}mm`).join(', ')}`);
+  if (s.topApertures?.length) lines.push(`- Aperturas más usadas: ${s.topApertures.map(a => `f/${a}`).join(', ')}`);
+  if (s.topIsos?.length) lines.push(`- ISOs más usados: ${s.topIsos.join(', ')}`);
   if (s.avgHourOfDay !== null) {
     const h = Math.floor(s.avgHourOfDay);
     const m = Math.round((s.avgHourOfDay - h) * 60);
