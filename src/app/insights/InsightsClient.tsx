@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu } from '@/components/Icons';
-import { useHeaderSlotLeft } from '@/components/HeaderSlot';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import BootstrapProgressBar from './components/BootstrapProgress';
 import HistoryBlock from './components/HistoryBlock';
 import RecentEvolutionBlock from './components/RecentEvolutionBlock';
@@ -38,18 +38,14 @@ export default function InsightsClient({
   const [annualProfiles, setAnnualProfiles] = useState(initialAnnual);
   const [monthlyProfiles, setMonthlyProfiles] = useState(initialMonthly);
 
-  const headerSlotLeft = useMemo(() => (
-    <button
-      className="btn-icon mobile-only"
-      onClick={() => setMobileOpen(true)}
-      aria-label="Abrir menú"
-    >
-      <IconMenu />
-    </button>
+  useHeaderSlot(useMemo(() => (
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setMobileOpen(true)} title="Menú">
+        <IconMenu size={20} />
+      </button>
+    </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), []);
-
-  useHeaderSlotLeft(headerSlotLeft);
+  ), []));
 
   // Poll for updates while bootstrap is still running
   useEffect(() => {
