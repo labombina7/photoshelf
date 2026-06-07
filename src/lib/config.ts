@@ -37,6 +37,31 @@ export const OLLAMA_TIMEOUT_VISION_MS   = 300_000;  // 5 min — vision models a
 export const OLLAMA_TIMEOUT_CLASSIFY_MS = 300_000;  // 5 min — same reason
 export const OLLAMA_IMAGE_SIZE          = 512;
 
+// ── Mobile camera exclusion (style analysis) ─────────────────────────────────
+// Camera model substrings that identify mobile/phone cameras.
+// Used to exclude casual mobile shots from the "Tu estilo" analysis.
+export const MOBILE_CAMERA_PATTERNS = [
+  'iphone', 'ipad', 'pixel', 'samsung', 'galaxy',
+  'huawei', 'xiaomi', 'redmi', 'oneplus', 'oppo',
+  'vivo', 'realme', 'motorola', 'nokia', 'honor',
+];
+
+/**
+ * SQL fragment for excluding mobile cameras from a query.
+ * @param alias - table alias for the photos table (e.g. 'p' or '')
+ */
+export function mobileCameraExclusionSQL(alias = ''): string {
+  const col = alias ? `${alias}.camera` : 'camera';
+  const conditions = MOBILE_CAMERA_PATTERNS
+    .map(() => `LOWER(${col}) NOT LIKE ?`)
+    .join(' AND ');
+  return `(${col} IS NULL OR (${conditions}))`;
+}
+
+export function mobileCameraExclusionParams(): string[] {
+  return MOBILE_CAMERA_PATTERNS.map(p => `%${p}%`);
+}
+
 // ── Folder watcher ────────────────────────────────────────────────────────────
 export const WATCHER_DEBOUNCE_MS = 5_000;
 export const WATCHER_POLL_MS     = 30_000;
