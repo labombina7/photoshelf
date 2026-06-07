@@ -136,7 +136,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 20px 0 calc(var(--sidebar-w) + 20px);
+  padding: 0 20px;
   height: var(--filter-bar-h, 44px);
   /* Sin overflow-x: auto — los dropdowns hijos necesitan desbordarse verticalmente.
      El scroll en mobile se gestiona via bottom sheet. */

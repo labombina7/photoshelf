@@ -202,26 +202,7 @@ export default function LibraryClient({
 
   return (
     <>
-      <FilterBar
-        years={years}
-        cameras={cameras}
-        activeYear={activeYear}
-        activeFilters={{
-          year: activeYear,
-          camera: activeFilters.camera,
-          iso_max: activeFilters.iso_max,
-          aperture_max: activeFilters.aperture_max,
-          focal_min: activeFilters.focal_min,
-          focal_max: activeFilters.focal_max,
-        }}
-        filteredTotal={filteredTotal}
-        viewMode={effectiveViewMode}
-        canToggleView={canToggleView}
-        onViewModeChange={handleViewModeChange}
-        onSlideshow={openSlideshow}
-        hasMemories={hasMemories}
-      />
-      <div className="app-shell app-shell--with-filterbar">
+      <div className="app-shell">
         {slideshowIds && (
           <Slideshow
             photoIds={slideshowIds}
@@ -241,6 +222,25 @@ export default function LibraryClient({
         />
 
         <div className="main">
+        <FilterBar
+          years={years}
+          cameras={cameras}
+          activeYear={activeYear}
+          activeFilters={{
+            year: activeYear,
+            camera: activeFilters.camera,
+            iso_max: activeFilters.iso_max,
+            aperture_max: activeFilters.aperture_max,
+            focal_min: activeFilters.focal_min,
+            focal_max: activeFilters.focal_max,
+          }}
+          filteredTotal={filteredTotal}
+          viewMode={effectiveViewMode}
+          canToggleView={canToggleView}
+          onViewModeChange={handleViewModeChange}
+          onSlideshow={openSlideshow}
+          hasMemories={hasMemories}
+        />
         <div className="content">
           {/* Classify-year button is shown in both views */}
           {showClassifyYear && (
