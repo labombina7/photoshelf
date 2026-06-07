@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
-import { PHOTOS_PATH } from './config';
+import { PHOTOS_PATH, STYLE_ANALYSIS_VERSION } from './config';
 
 const DB_PATH = process.env.DB_PATH ?? path.join(process.cwd(), 'data', 'photoshelf.db');
 
@@ -374,6 +374,25 @@ function migrateStyleAnalysis(db: Database.Database) {
       DROP TABLE style_profiles_old;
       CREATE INDEX IF NOT EXISTS idx_style_profiles_type ON style_profiles(type, period);
       COMMIT;
+    `);
+  }
+
+  // ── Style analysis versioning ────────────────────────────────────────────────
+  // Add version column if missing (migration from v1)
+  const bootstrapCols = db.prepare(`PRAGMA table_info(style_analysis_bootstrap)`).all() as { name: string }[];
+  if (!bootstrapCols.find(c => c.name === 'version')) {
+    db.exec(`ALTER TABLE style_analysis_bootstrap ADD COLUMN version INTEGER NOT NULL DEFAULT 1`);
+  }
+  // Reset any rows whose version doesn't match current — triggers reprocessing
+  const stale = (db.prepare(
+    `SELECT COUNT(*) AS n FROM style_analysis_bootstrap WHERE version != ?`
+  ).get(STYLE_ANALYSIS_VERSION) as { n: number }).n;
+  if (stale > 0) {
+    console.log(`[db] Style analysis v${STYLE_ANALYSIS_VERSION}: resetting ${stale} stale bootstrap rows`);
+    db.exec(`
+      DELETE FROM style_profiles;
+      UPDATE style_analysis_bootstrap SET status = 'pending', version = ${STYLE_ANALYSIS_VERSION},
+        processed_at = NULL, error = NULL, sample_count = 0;
     `);
   }
 

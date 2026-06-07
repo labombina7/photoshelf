@@ -7,6 +7,17 @@ export const BACKUP_PATH = process.env.BACKUP_PATH ?? path.join(path.dirname(_db
 export const BACKUP_MAX_KEEP = 10;
 
 /**
+ * Bump this when the style analysis logic changes in a way that requires
+ * reprocessing all periods (e.g. new filters, new EXIF fields, schema changes).
+ * On startup, any bootstrap rows with a different version are reset to 'pending'.
+ *
+ * History:
+ *   1 — initial
+ *   2 — exclude mobile cameras from all style analysis queries
+ */
+export const STYLE_ANALYSIS_VERSION = 2;
+
+/**
  * Canonical MIME type map for all image formats supported by photoshelf.
  * Use this instead of local switch/object definitions in route handlers.
  * Falls back to 'application/octet-stream' for unknown extensions.

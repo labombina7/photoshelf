@@ -1,5 +1,5 @@
 import { getDb } from '@/lib/db';
-import { mobileCameraExclusionSQL, mobileCameraExclusionParams } from '@/lib/config';
+import { mobileCameraExclusionSQL, mobileCameraExclusionParams, STYLE_ANALYSIS_VERSION } from '@/lib/config';
 import type { StyleSignals, PeriodStyleSummary, StyleProfile, BootstrapProgress } from '@/lib/types';
 
 const MOB_SQL = mobileCameraExclusionSQL('p');
@@ -274,8 +274,8 @@ export function initBootstrapIfEmpty(): void {
   `).all(...MOB_PARAMS) as { period: string; photo_count: number }[];
 
   const insert = db.prepare(`
-    INSERT OR IGNORE INTO style_analysis_bootstrap (period, type, status, photo_count, sample_count)
-    VALUES (?, ?, 'pending', ?, 0)
+    INSERT OR IGNORE INTO style_analysis_bootstrap (period, type, status, photo_count, sample_count, version)
+    VALUES (?, ?, 'pending', ?, 0, ${STYLE_ANALYSIS_VERSION})
   `);
 
   // Historical years (before cutoff): one row per year
