@@ -12,9 +12,9 @@ function formatMonth(period: string): string {
 function ExifChips({ summary }: { summary: NonNullable<StyleProfile['periodSummary']> }) {
   const chips: string[] = [];
   if (summary.topCamera) chips.push(summary.topCamera);
-  if (summary.avgFocalLength) chips.push(`${summary.avgFocalLength}mm`);
-  if (summary.avgAperture) chips.push(`f/${summary.avgAperture}`);
-  if (summary.avgIso) chips.push(`ISO ${summary.avgIso}`);
+  if (summary.topFocalLengths?.length) chips.push(summary.topFocalLengths.map(f => `${f}mm`).join(' · '));
+  if (summary.topApertures?.length) chips.push(summary.topApertures.map(a => `f/${a}`).join(' · '));
+  if (summary.topIsos?.length) chips.push(summary.topIsos.map(i => `ISO ${i}`).join(' · '));
   if (!chips.length) return null;
   return (
     <div className="insights-exif-chips">

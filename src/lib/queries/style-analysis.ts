@@ -48,22 +48,34 @@ export function getStyleSignalsByPeriod({ from, to }: { from: string; to: string
   const agg = db.prepare(`
     SELECT
       COUNT(*) AS photo_count,
-      AVG(focal_length) AS avg_focal,
-      AVG(aperture) AS avg_aperture,
-      AVG(iso) AS avg_iso,
       AVG(CAST(strftime('%H', taken_at) AS REAL) + CAST(strftime('%M', taken_at) AS REAL) / 60.0) AS avg_hour
     FROM photos
     WHERE taken_at >= ? AND taken_at < ?
-  `).get(from, to) as {
-    photo_count: number; avg_focal: number | null; avg_aperture: number | null;
-    avg_iso: number | null; avg_hour: number | null;
-  };
+  `).get(from, to) as { photo_count: number; avg_hour: number | null };
 
   const topCamera = (db.prepare(`
     SELECT camera, COUNT(*) AS n FROM photos
     WHERE taken_at >= ? AND taken_at < ? AND camera IS NOT NULL
     GROUP BY camera ORDER BY n DESC LIMIT 1
   `).get(from, to) as { camera: string } | undefined)?.camera ?? null;
+
+  const topFocalLengths = (db.prepare(`
+    SELECT ROUND(focal_length) AS val, COUNT(*) AS n FROM photos
+    WHERE taken_at >= ? AND taken_at < ? AND focal_length IS NOT NULL
+    GROUP BY val ORDER BY n DESC LIMIT 3
+  `).all(from, to) as { val: number }[]).map(r => r.val);
+
+  const topApertures = (db.prepare(`
+    SELECT aperture AS val, COUNT(*) AS n FROM photos
+    WHERE taken_at >= ? AND taken_at < ? AND aperture IS NOT NULL
+    GROUP BY val ORDER BY n DESC LIMIT 3
+  `).all(from, to) as { val: number }[]).map(r => Math.round(r.val * 10) / 10);
+
+  const topIsos = (db.prepare(`
+    SELECT iso AS val, COUNT(*) AS n FROM photos
+    WHERE taken_at >= ? AND taken_at < ? AND iso IS NOT NULL
+    GROUP BY val ORDER BY n DESC LIMIT 3
+  `).all(from, to) as { val: number }[]).map(r => r.val);
 
   const topGenres = (db.prepare(`
     SELECT t.name, COUNT(*) AS n
@@ -87,9 +99,9 @@ export function getStyleSignalsByPeriod({ from, to }: { from: string; to: string
   return {
     period: from.substring(0, 7),
     photoCount: agg.photo_count,
-    avgFocalLength: agg.avg_focal ? Math.round(agg.avg_focal) : null,
-    avgAperture: agg.avg_aperture ? Math.round(agg.avg_aperture * 10) / 10 : null,
-    avgIso: agg.avg_iso ? Math.round(agg.avg_iso) : null,
+    topFocalLengths,
+    topApertures,
+    topIsos,
     avgHourOfDay: agg.avg_hour ? Math.round(agg.avg_hour * 10) / 10 : null,
     topCamera,
     topLens: null,
