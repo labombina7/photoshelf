@@ -14,6 +14,19 @@ import { getStyleSignalsByPeriod, selectRepresentativeSample } from '@/lib/queri
 import { buildMonthlySynthesisPrompt, buildAnnualSynthesisPrompt, buildHistoricalSamplePrompt } from './prompts';
 
 const SYNTHESIS_DELAY_MS = 2_000;
+const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
+
+async function isOllamaAvailable(): Promise<boolean> {
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3_000);
+    const res = await fetch(`${OLLAMA_URL}/api/tags`, { signal: ctrl.signal });
+    clearTimeout(timer);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -131,6 +144,11 @@ export async function runAnnualSynthesis(year: number): Promise<void> {
 }
 
 export async function runMissedMonthlySyntheses(): Promise<void> {
+  if (!(await isOllamaAvailable())) {
+    console.log('[style-cycle] Ollama unavailable — skipping missed monthly syntheses');
+    return;
+  }
+
   const now = new Date();
   const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
@@ -154,6 +172,11 @@ export async function runMissedMonthlySyntheses(): Promise<void> {
 export async function runPendingNarratives(): Promise<void> {
   const pending = getProfilesWithoutNarrative();
   if (pending.length === 0) return;
+
+  if (!(await isOllamaAvailable())) {
+    console.log('[style-cycle] Ollama unavailable — skipping pending narratives');
+    return;
+  }
 
   console.log(`[style-cycle] ${pending.length} profiles without narrative — retrying`);
 
