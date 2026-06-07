@@ -964,6 +964,15 @@
         <div class="card-title">Álbumes inteligentes</div>
       </div>
 
+      <div class="card card-done" tabindex="0" data-id="US-091" onclick="openModal('US-091')">
+        <div class="card-top">
+          <span class="badge badge-us">US-091</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-07</span>
+        </div>
+        <div class="card-title">Hardening móvil web: navegación y filtros</div>
+      </div>
+
       <div class="card card-done" tabindex="0" data-id="US-073" onclick="openModal('US-073')">
         <div class="card-top">
           <span class="badge badge-us">US-073</span>
@@ -5284,6 +5293,38 @@ const CARDS = {
     ],
     tech: ['SQLite job_queue como fuente de verdad', 'Singleton worker en módulo Node (sobrevive HMR en prod)', 'started_at para reanudación de reclasificaciones', 'Polling cada 3s en el panel'],
     outOfScope: ['Cola multi-usuario', 'Prioridad entre jobs', 'Notificaciones push', 'Múltiples workers en paralelo']
+  },
+
+  'US-091': {
+    id: 'US-091', type: 'US', column: 'done', effort: 'M',
+    title: 'Hardening móvil web: navegación y filtros',
+    story: 'Como usuario de photoshelf en iOS Safari,\nquiero que la navegación, el sidebar y los filtros funcionen correctamente en mobile,\npara poder gestionar mi biblioteca desde el móvil sin perder acceso a ninguna función.',
+    description: [
+      'Serie de bugfixes encadenados que dejaban la web mobile inutilizable tras la refactorización del header/filter-bar.',
+      '<strong>Layout:</strong> franja gris entre header y nav tabs (body padding-top sumaba header+nav pero el header es fixed, no sticky). Sidebar con contenido tapado por el header fijo (faltaba padding-top en el drawer).',
+      '<strong>Filtros iOS Safari:</strong> bottom sheet aparecía fuera de pantalla porque <code>position:fixed</code> dentro de <code>position:sticky + overflow-x:auto</code> pierde el contexto de viewport en iOS. Fix: <code>createPortal(…, document.body)</code>. Además, <code>isMobile</code> arrancaba en <code>false</code> (SSR), renderizando el dropdown que quedaba clipado. Fix: inicialización síncrona con <code>window.matchMedia</code>.',
+      '<strong>Hamburguesa faltante:</strong> SmartAlbumsClient, MemoriesClient y SmartAlbumDetailClient tenían Sidebar pero no inyectaban el botón en el header slot-left.',
+      '<strong>Unificación UI:</strong> eliminado h1 redundante en Smart Albums, botones con flex-wrap para no desbordar en mobile, botón "Nuevo proyecto" eliminado del sidebar (patrón unificado: creación en el contenido).',
+      '✅ Desplegada en PRs #142–#147 el 2026-06-07.'
+    ],
+    criteria: [{ group: 'Desplegada', items: [
+      'Sin franja gris entre header y nav tabs en mobile',
+      'Sidebar drawer muestra todos los items (padding-top = header height)',
+      'Filtros abren bottom sheet correctamente en iOS Safari',
+      'Hamburguesa visible en Smart Albums, Recuerdos y detalle de álbum',
+      'Botones Smart Albums no desbordan en mobile',
+      'Sidebar Proyectos sin botón "Nuevo proyecto" duplicado'
+    ]}],
+    dependencies: [], components: [
+      { path: 'src/app/globals.css', desc: 'body padding-top mobile, sidebar padding-top drawer' },
+      { path: 'src/components/FilterBar.tsx', desc: 'createPortal para BottomSheet, isMobile síncrono' },
+      { path: 'src/app/smart-albums/SmartAlbumsClient.tsx', desc: 'useHeaderSlotLeft, quitar h1, flex-wrap botones' },
+      { path: 'src/app/memories/MemoriesClient.tsx', desc: 'useHeaderSlotLeft' },
+      { path: 'src/app/smart-albums/[id]/SmartAlbumDetailClient.tsx', desc: 'useHeaderSlotLeft' },
+      { path: 'src/components/Sidebar.tsx', desc: 'Eliminar botón Nuevo proyecto de ProjectsSection' },
+    ],
+    tech: ['iOS Safari: position:fixed dentro de sticky+overflow-x:auto pierde viewport → createPortal', 'SSR: useState inicializador síncrono para matchMedia evita flash de dropdown desktop'],
+    outOfScope: []
   }
 
 };
