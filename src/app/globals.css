@@ -124,10 +124,8 @@ body {
 /* Sidebar en la vista de catálogo (con FilterBar encima).
    El banner está en la columna de contenido (padding-left: sidebar-w),
    no interfiere con la columna del sidebar. */
-.app-shell--with-filterbar > .sidebar {
-  top: calc(var(--header-h) + var(--filter-bar-h, 44px));
-  height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px));
-}
+/* sidebar en catálogo: arranca justo bajo el header, el filter-bar ya tiene
+   padding-left: sidebar-w y no invade la columna del sidebar */
 /* ── Filter Bar ── */
 .filter-bar {
   position: sticky;
