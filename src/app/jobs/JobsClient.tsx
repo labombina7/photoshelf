@@ -112,7 +112,7 @@ function AmplitudeCard() {
           <div>
             <p style={{ fontSize: 14, fontWeight: 500, margin: '0 0 6px' }}>API key no configurada</p>
             <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0 }}>
-              Añade <code style={{ fontFamily: 'monospace', background: 'var(--border)', padding: '1px 5px', borderRadius: 3 }}>AMPLITUDE_API_KEY=…</code> a tu <code style={{ fontFamily: 'monospace', background: 'var(--border)', padding: '1px 5px', borderRadius: 3 }}>.env.local</code> y reinicia el servidor.
+              Añade <code style={{ fontFamily: 'monospace', background: 'var(--border)', padding: '1px 5px', borderRadius: 3 }}>AMPLITUDE_API_KEY=…</code> al <code style={{ fontFamily: 'monospace', background: 'var(--border)', padding: '1px 5px', borderRadius: 3 }}>.env</code> de docker-compose y reinicia el contenedor.
             </p>
           </div>
         ) : (
