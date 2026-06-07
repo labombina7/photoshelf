@@ -92,6 +92,38 @@ async function processRow(row: BootstrapRow): Promise<void> {
   console.log('[style-bootstrap] Period done:', row.period, `(${sampleIds.length} photos sampled)`);
 }
 
+async function isOllamaAvailable(): Promise<boolean> {
+  const ollamaUrl = process.env.OLLAMA_URL ?? 'http://localhost:11434';
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3_000);
+    const res = await fetch(`${ollamaUrl}/api/tags`, { signal: ctrl.signal });
+    clearTimeout(timer);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Saves EXIF stats for all pending rows without calling Ollama. */
+function saveAllPendingStats(): void {
+  const pending = getPendingBootstrapRows();
+  for (const row of pending) {
+    updateBootstrapRow(row.period, { status: 'in_progress' });
+    const { from, to } = periodRange(row.period);
+    const sampleIds = selectRepresentativeSample({ from, to, maxPhotos: row.type === 'historical_sample' ? 30 : 50 });
+    if (sampleIds.length === 0) {
+      updateBootstrapRow(row.period, { status: 'done', processed_at: new Date().toISOString(), sample_count: 0 });
+      continue;
+    }
+    const summary = getStyleSignalsByPeriod({ from, to });
+    const isHistorical = row.type === 'historical_sample';
+    upsertStyleProfileSummaryOnly(row.period, isHistorical ? 'annual_historical' : 'monthly', summary);
+    updateBootstrapRow(row.period, { status: 'done', processed_at: new Date().toISOString(), sample_count: sampleIds.length });
+  }
+  console.log(`[style-bootstrap] Saved EXIF stats for ${pending.length} periods (Ollama unavailable)`);
+}
+
 async function bootstrapLoop(): Promise<void> {
   initBootstrapIfEmpty();
 
@@ -105,6 +137,15 @@ async function bootstrapLoop(): Promise<void> {
 
     const progress = getBootstrapProgress();
     console.log(`[style-bootstrap] Progress: ${progress.done}/${progress.total} (${progress.percent}%)`);
+
+    // Quick pre-check: if Ollama is down, save stats for all pending periods at once
+    const ollamaUp = await isOllamaAvailable();
+    if (!ollamaUp) {
+      console.log('[style-bootstrap] Ollama unavailable — saving EXIF stats for all pending periods');
+      saveAllPendingStats();
+      g.__style_bootstrap_running = false;
+      return;
+    }
 
     const row = pending[0];
     await processRow(row);
