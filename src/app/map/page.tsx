@@ -20,7 +20,6 @@ export default async function MapPage() {
       total={sidebar.totalPhotos}
       withGps={withGps}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}

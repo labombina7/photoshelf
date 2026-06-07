@@ -14,6 +14,7 @@
   --surface: #ffffff;
   --border: #e8e6e1;
   --border-light: #f0ede8;
+  --mobile-nav-h: 0px; /* sobreescrito en mobile cuando el nav secundario existe */
   --border2: #dbd9d4;
   --bg-secondary: #f0ede8;
   --bg-tertiary: #e8e8e8;
@@ -52,24 +53,30 @@ body {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   display: grid;
-  grid-template-columns: var(--sidebar-w) auto minmax(0, 520px) 1fr auto auto;
+  /* logo | search (crece) | nav-modules | slot-right | slot-left */
+  grid-template-columns: var(--sidebar-w) 1fr auto auto auto;
   column-gap: 16px;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 20px 0 0;
   z-index: 100;
 }
-.app-header-logo       { grid-column: 1; }
-.app-header-slot-left  { grid-column: 2; min-width: 0; }
-.app-header-search     { grid-column: 3; }
-/* col 4 = spacer 1fr — empuja controles a la derecha */
-.app-header-slot-right { grid-column: 5; }
-.app-header-actions    { grid-column: 6; }
+/* grid-row: 1 explícito en todos — evita que el algoritmo de auto-placement
+   coloque elementos "detrás del cursor" en fila 2 */
+.app-header-logo,
+.app-header-search,
+.app-header-nav,
+.app-header-slot-right,
+.app-header-slot-left  { grid-row: 1; }
+.app-header-logo       { grid-column: 1; padding-left: 16px; }
+.app-header-search     { grid-column: 2; }
+.app-header-nav        { grid-column: 3; }
+.app-header-slot-right { grid-column: 4; }
+.app-header-slot-left  { grid-column: 5; min-width: 0; padding-right: 20px; }
 
 /* Logo */
 .app-header-logo {
   flex-shrink: 0;
   width: var(--sidebar-w);
-  padding: 0 0 0 2px;
 }
 .app-header-logo-text {
   font-size: 15px;
@@ -77,6 +84,373 @@ body {
   letter-spacing: -0.3px;
   color: var(--text);
 }
+
+/* Nav módulos globales */
+.app-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.app-header-nav-item {
+  position: relative;
+  padding: 5px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+.app-header-nav-item:hover {
+  color: var(--text);
+  background: var(--bg-secondary);
+}
+.app-header-nav-item.active {
+  color: var(--text);
+}
+.app-header-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: var(--tag-auto-color);
+  border-radius: 1px;
+}
+
+/* Sidebar en la vista de catálogo (con FilterBar encima).
+   El banner está en la columna de contenido (padding-left: sidebar-w),
+   no interfiere con la columna del sidebar. */
+.app-shell--with-filterbar > .sidebar {
+  top: calc(var(--header-h) + var(--filter-bar-h, 44px));
+  height: calc(100vh - var(--header-h) - var(--filter-bar-h, 44px));
+}
+/* ── Filter Bar ── */
+.filter-bar {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 90;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px 0 calc(var(--sidebar-w) + 20px);
+  height: var(--filter-bar-h, 44px);
+  /* Sin overflow-x: auto — los dropdowns hijos necesitan desbordarse verticalmente.
+     El scroll en mobile se gestiona via bottom sheet. */
+}
+/* Wrapper interno scrollable que no contiene dropdowns posicionados */
+.filter-bar-inner {
+  display: contents; /* no crea contexto de apilamiento */
+}
+
+.filter-bar-years {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.filter-bar-year {
+  padding: 3px 10px;
+  font-size: 12.5px;
+  font-family: inherit;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.filter-bar-year:hover { background: var(--bg-secondary); color: var(--text); }
+.filter-bar-year--active {
+  background: var(--tag-auto-bg);
+  color: var(--tag-auto-color);
+  border-color: var(--tag-auto-border);
+  font-weight: 500;
+}
+.filter-bar-year--more {
+  color: var(--text-tertiary);
+  border-style: dashed;
+}
+
+.filter-bar-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+.filter-bar-exif {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.filter-bar-btn {
+  padding: 4px 10px;
+  font-size: 12.5px;
+  font-family: inherit;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.filter-bar-btn:hover { background: var(--bg-secondary); color: var(--text); }
+.filter-bar-btn--active {
+  background: var(--tag-auto-bg);
+  color: var(--tag-auto-color);
+  border-color: var(--tag-auto-border);
+  font-weight: 500;
+}
+
+.filter-bar-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 120px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  z-index: 400;
+  overflow: hidden;
+}
+.filter-bar-dropdown--wide { min-width: 200px; }
+.filter-bar-dropdown-item {
+  width: 100%;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: block;
+}
+.filter-bar-dropdown-item:hover { background: var(--bg-secondary); color: var(--text); }
+.filter-bar-dropdown-item.active {
+  color: var(--tag-auto-color);
+  background: var(--tag-auto-bg);
+  font-weight: 500;
+}
+
+.filter-bar-clear {
+  margin-left: auto;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+}
+.filter-bar-clear:hover { background: var(--bg-secondary); color: var(--text); }
+
+/* Chip "Un día como hoy" en la filter bar */
+.filter-bar-memories-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.filter-bar-memories-chip:hover {
+  color: var(--text);
+  border-color: #b0ada8;
+  background: var(--bg-secondary);
+}
+.filter-bar-memories-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4f46e5;
+  flex-shrink: 0;
+}
+
+.filter-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+  margin-left: 4px;
+}
+
+/* Nav mobile — oculta en desktop, visible solo en el media query */
+.app-nav-mobile { display: none; }
+
+/* ── Filter bottom sheet (mobile) ── */
+.filter-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 300;
+}
+.filter-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-radius: 16px 16px 0 0;
+  z-index: 301;
+  padding: 0 0 calc(16px + env(safe-area-inset-bottom, 0px));
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.filter-sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border2);
+  margin: 10px auto 0;
+}
+.filter-sheet-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: 14px 20px 8px;
+}
+.filter-sheet-body {
+  padding: 0 8px;
+}
+.filter-sheet-body .filter-bar-dropdown-item {
+  padding: 12px 16px;
+  font-size: 15px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Spec / Markdown viewer ──────────────────────────── */
+.spec-body {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text);
+}
+.spec-body h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.spec-body h2 {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-tertiary);
+  margin: 32px 0 12px;
+}
+.spec-body h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 24px 0 8px;
+}
+.spec-body p {
+  margin: 0 0 14px;
+  color: var(--text);
+}
+.spec-body blockquote {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-secondary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.spec-body blockquote p { margin: 0; }
+.spec-body ul, .spec-body ol {
+  margin: 0 0 14px;
+  padding-left: 20px;
+}
+.spec-body li { margin-bottom: 4px; }
+.spec-body li input[type="checkbox"] { margin-right: 6px; }
+.spec-body code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--accent);
+}
+.spec-body pre {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0 0 16px;
+}
+.spec-body pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 12.5px;
+  color: var(--text);
+}
+.spec-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 16px;
+  font-size: 13px;
+}
+.spec-body th {
+  text-align: left;
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+.spec-body td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.spec-body tr:last-child td { border-bottom: none; }
+.spec-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+.spec-body a { color: var(--accent); }
 
 /* Search bar — columna fija en el grid del header */
 .app-header-search {
@@ -171,10 +545,72 @@ body {
     padding: 0 12px;
   }
   .app-header-logo        { display: none; }
+  .app-header-nav         { display: none; }
   .app-header-search      { display: none; }
-  .app-header-actions     { display: none; }
-  .app-header-slot-left   { grid-column: 1; }
-  .app-header-slot-right  { grid-column: 2; }
+  .app-header-slot-left   { grid-column: 1; grid-row: 1; }
+  .app-header-slot-right  { grid-column: 2; grid-row: 1; }
+
+  /* Nav módulos — barra secundaria bajo el header en mobile */
+  .app-nav-mobile {
+    display: flex;
+    position: sticky;
+    top: var(--header-h);
+    z-index: 99;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    height: 40px;
+    flex-shrink: 0;
+  }
+  .app-nav-mobile::-webkit-scrollbar { display: none; }
+  .app-nav-mobile-item {
+    position: relative;
+    padding: 0 12px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .app-nav-mobile-item.active {
+    color: var(--text);
+  }
+  .app-nav-mobile-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    background: var(--tag-auto-color);
+    border-radius: 1px;
+  }
+
+  /* Cuando el nav mobile existe, la variable se actualiza para que el FilterBar baje */
+  :root { --mobile-nav-h: 40px; }
+
+  /* Filter bar — sin padding de sidebar, posicionado bajo el nav mobile */
+  .filter-bar {
+    padding: 0 12px;
+    top: calc(var(--header-h) + var(--mobile-nav-h));
+    /* En mobile los dropdowns usan bottom sheet, así que overflow-x: auto es seguro */
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  /* Ocultar chip de memorias en mobile — el link vive en el nav mobile */
+  .filter-bar-memories-chip { display: none; }
+  /* Ocultar acciones de vista en mobile (presentación + toggle) */
+  .filter-bar-actions { display: none; }
   /* Presentación: label visible — sobreescrito más abajo, ver regla junto a .btn-slideshow */
   /* Show hamburger button injected into header slot from pages (search, etc.) */
   .header-slot-hamburger {
@@ -312,7 +748,10 @@ body {
 /* Body offset: header fijo arriba, FAB abajo en móvil */
 body { padding-top: var(--header-h); }
 @media (max-width: 640px) {
-  body { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+  /* El header es position:fixed y sale del flujo → padding-top solo compensa su altura.
+     La nav mobile (.app-nav-mobile) es sticky y está en el flujo → ocupa su espacio sola.
+     No sumar --mobile-nav-h aquí o se genera un hueco gris entre header y nav. */
+  body { padding-top: var(--header-h); padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ── Animations ── */
@@ -333,7 +772,7 @@ body { padding-top: var(--header-h); }
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  padding: 12px 0;
+  padding: 0;
   position: sticky;
   top: var(--header-h);
   height: calc(100vh - var(--header-h));
@@ -1259,9 +1698,17 @@ body { padding-top: var(--header-h); }
     z-index: 40; transform: translateX(-100%);
     transition: transform 0.25s ease;
     box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    /* El header fijo (z-index:100) tapa los primeros 52px del drawer → padding compensa */
+    padding-top: var(--header-h);
+    overflow-y: auto;
   }
   .sidebar.mobile-open { transform: translateX(0); }
   .sidebar-overlay { display: block; }
+  /* Resetear el top/height calculado del catálogo desktop — el drawer siempre arranca en 0 */
+  .app-shell--with-filterbar > .sidebar {
+    top: 0;
+    height: 100vh;
+  }
 
   /* ── App shell ── */
   .app-shell { display: block; }
@@ -2273,4 +2720,86 @@ body { padding-top: var(--header-h); }
 @media (max-width: 768px) {
   .memories-content { padding: 16px 16px 32px; }
   .memories-photo-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
+}
+
+/* ── EPIC-004: Insights ──────────────────────────────────────────────────────── */
+.insights-page { max-width: 760px; margin: 0 auto; padding: 28px 24px 48px; }
+.insights-header { margin-bottom: 24px; }
+.insights-title { font-size: 22px; font-weight: 600; color: var(--text); margin: 0 0 6px; }
+.insights-subtitle { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+
+.insights-bootstrap-notice {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px 16px; margin-bottom: 24px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.insights-bootstrap-icon { color: var(--text-tertiary); }
+.insights-bootstrap-text { display: flex; flex-direction: column; gap: 3px; }
+.insights-bootstrap-text strong { font-size: 13.5px; color: var(--text); }
+.insights-bootstrap-text span { font-size: 12.5px; color: var(--text-secondary); }
+.insights-bootstrap-bar {
+  height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px;
+}
+.insights-bootstrap-fill {
+  height: 100%; background: #4f46e5; border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.insights-blocks { display: flex; flex-direction: column; gap: 32px; }
+
+.insights-block { display: flex; flex-direction: column; gap: 16px; }
+.insights-block-title { font-size: 16px; font-weight: 600; color: var(--text); margin: 0 0 4px; }
+.insights-placeholder { font-size: 13.5px; color: var(--text-tertiary); font-style: italic; margin: 0; }
+
+.insights-months-list { display: flex; flex-direction: column; gap: 4px; }
+.insights-month { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.insights-month-header {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 12px 14px; background: none; border: none;
+  font-family: inherit; font-size: 13.5px; font-weight: 500; color: var(--text);
+  cursor: pointer; text-align: left; transition: background 0.1s;
+}
+.insights-month-header:hover { background: var(--bg-secondary); }
+.insights-month-header.open { background: var(--bg-secondary); }
+.insights-chevron { transition: transform 0.2s; flex-shrink: 0; color: var(--text-tertiary); }
+.insights-chevron.open { transform: rotate(180deg); }
+.insights-month-title { font-size: 13.5px; font-weight: 500; }
+
+.insights-month-body { padding: 12px 14px 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
+
+.insights-exif-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.insights-exif-chip {
+  font-size: 11.5px; color: var(--text-secondary);
+  padding: 3px 8px; background: var(--bg-secondary);
+  border: 1px solid var(--border); border-radius: 99px;
+}
+
+.insights-narrative { font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; white-space: pre-wrap; }
+
+.insights-highlights { display: flex; flex-direction: column; gap: 4px; }
+.insights-highlights-label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+.insights-highlights ul { margin: 4px 0 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+.insights-highlights li { font-size: 13px; color: var(--text-secondary); }
+
+.insights-trend {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12.5px; color: var(--text-secondary); font-style: italic;
+  padding: 8px 12px; background: var(--bg-secondary);
+  border-radius: var(--radius-sm); border-left: 2px solid #4f46e5;
+}
+
+.insights-history-list { display: flex; flex-direction: column; gap: 20px; }
+.insights-year { display: flex; flex-direction: column; gap: 8px; }
+.insights-year-header { font-size: 15px; font-weight: 600; color: var(--text); }
+.insights-year-highlights { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+.insights-year-highlights li { font-size: 13px; color: var(--text-secondary); }
+.insights-trend--year { margin-top: 2px; }
+
+.insights-current-month-note { font-size: 13px; color: var(--text-tertiary); margin-bottom: 8px; }
+.insights-month-in-progress { font-weight: 500; color: var(--text-secondary); }
+
+@media (max-width: 768px) {
+  .insights-page { padding: 16px 16px 40px; }
+  .insights-blocks { flex-direction: column-reverse; }
 }

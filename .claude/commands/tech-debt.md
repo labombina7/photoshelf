@@ -71,6 +71,41 @@ Para cada hallazgo: fichero exacto + línea aproximada + descripción + severida
 - Dependencias innecesarias o redundantes
 - Versiones muy desactualizadas de paquetes críticos
 
+### 9. Integridad de URLs
+Busca en todo el código (`src/`, `components/`, `.claude/commands/`, `specs/`) las URLs hardcodeadas y analiza cada una:
+
+- **URLs absolutas hardcodeadas** (`http://`, `https://`) en código TypeScript, JSX o Markdown — ¿siguen siendo válidas? ¿son las correctas para cada entorno?
+- **Rutas de API internas** (p.ej. `/api/photos`, `/api/v1/...`) referenciadas en `fetch()`, `axios`, o `useSWR` — ¿coinciden con los route handlers reales en `src/app/api/`? Busca llamadas a rutas que no existan como ficheros.
+- **URLs de documentación o referencia** en comentarios, specs o README — ¿están rotas o desactualizadas?
+- **Variables de entorno** que contienen URLs (`.env.example`, `process.env.*`) — ¿están documentadas y se validan al arrancar?
+- **Inconsistencias de versionado** — mezcla de `/api/photos` y `/api/v1/photos` apuntando al mismo recurso.
+- Método de revisión: `grep -r "http[s]*://" src/` y `grep -r "fetch(" src/` para localizar todos los puntos.
+
+### 10. Riesgos de pérdida de datos
+Analiza flujos donde una operación puede dejar los datos en estado inconsistente o borrarlos sin posibilidad de recuperación:
+
+- **Operaciones destructivas sin confirmación**: borrado de fotos, catálogos, álbumes — ¿pasan por confirmación de usuario? ¿hay soft-delete o es borrado físico?
+- **Transacciones SQLite ausentes**: operaciones que modifican varias tablas (p.ej. mover fotos entre álbumes, borrar un catálogo con sus fotos) — ¿se hacen en una sola transacción o pueden quedar a medias?
+- **Escrituras sobre el fichero de BD sin backup**: ¿existe algún mecanismo de backup o WAL activado?
+- **Race conditions**: endpoints que leen-modifican-escriben sin control de concurrencia (especialmente en el scanner y el watcher).
+- **Pérdida silenciosa en uploads o scans**: si falla a mitad de un escaneo, ¿quedan registros huérfanos o fotos sin indexar?
+- **Thumbnails y caché**: si se borran ficheros del filesystem pero no los metadatos en BD (o viceversa), ¿hay mecanismo de reconciliación?
+- Método: revisa todas las funciones con `DELETE`, `UPDATE`, `DROP` en `src/lib/queries/` y los handlers de scan/watcher.
+
+### 11. Persistencia en Docker
+Revisa `Dockerfile` y `docker-compose.yml` con foco en qué datos pueden perderse al recrear el contenedor:
+
+- **Volúmenes declarados**: ¿están correctamente montados todos los directorios con estado? Verifica especialmente:
+  - El fichero SQLite de base de datos (`photoshelf.db` o equivalente)
+  - El directorio de thumbnails/cache generados
+  - Los logs si se escriben en disco
+  - Cualquier directorio de uploads o fotos importadas
+- **Datos efímeros en capas de imagen**: ¿se genera o copia algún dato en el build que debería estar en un volumen?
+- **Variables de entorno**: ¿hay secretos o URLs de configuración que deberían pasarse como env vars y no están documentados en `.env.example`?
+- **Estrategia de backup**: ¿existe algún script o cron de backup del SQLite? ¿Se recomienda en el README?
+- **Permisos de volúmenes**: ¿el proceso dentro del contenedor tiene permisos de escritura sobre los volúmenes montados?
+- **Restart policy**: ¿está configurado `restart: unless-stopped` o equivalente para garantizar disponibilidad?
+
 ## Paso 3 — Genera el informe
 
 Obtén la fecha actual con `date +%Y-%m-%d`.
@@ -123,6 +158,15 @@ Crea `insights/tech-debt-FECHA.md` con esta estructura:
 [Mismo formato]
 
 ### 📦 Dependencias
+[Mismo formato]
+
+### 🔗 Integridad de URLs
+[Mismo formato]
+
+### 💾 Riesgos de pérdida de datos
+[Mismo formato]
+
+### 🐳 Persistencia en Docker
 [Mismo formato]
 
 ---

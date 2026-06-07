@@ -55,7 +55,6 @@ export default async function StatsPage({
     <StatsClient
       stats={stats}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}

@@ -2,15 +2,13 @@
 
 import { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { useHeaderSlot } from '@/components/AppHeader';
+import { useHeaderSlot } from '@/components/HeaderSlot';
 import { IconMenu, IconCalendar } from '@/components/Icons';
-
-interface Theme { id: number; name: string; count: number }
-interface CatalogRow { id: number; name: string; path: string }
+import type { ThemeWithCount } from '@/lib/queries/themes';
+import type { CatalogRow } from '@/lib/queries/catalogs';
 
 interface Props {
-  themes: Theme[];
-  projects: { id: number; title: string }[];
+  themes: ThemeWithCount[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -19,7 +17,7 @@ interface Props {
 }
 
 export default function RoadmapClient({
-  themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId,
+  themes, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId,
 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -28,7 +26,6 @@ export default function RoadmapClient({
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Roadmap</span>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ), []));
@@ -37,7 +34,6 @@ export default function RoadmapClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

@@ -88,6 +88,40 @@ export function getSmartAlbumPhotos(rules: AlbumRule[], catalogId = 1, limit = 1
   return { rows: page, hasMore, nextCursor, total: totalRow.c };
 }
 
+export interface SmartAlbumSearchPhoto {
+  id: number;
+  filename: string;
+  year: number;
+  event: string;
+  taken_at: string | null;
+  is_favorite: number;
+}
+
+/**
+ * Devuelve fotos de un smart album en formato compatible con SearchPhotoRow.
+ * Usado por el motor de búsqueda (US-073).
+ */
+export function getSmartAlbumSearchPhotos(
+  albumId: number,
+  catalogId = 1,
+  limit = 200,
+): SmartAlbumSearchPhoto[] {
+  const db = getDb();
+  const album = db.prepare('SELECT rules FROM smart_albums WHERE id = ?').get(albumId) as { rules: string } | undefined;
+  if (!album) return [];
+
+  const rules = rulesFromJson(album.rules);
+  const { whereSql, params } = buildSmartAlbumQuery(rules, catalogId);
+
+  return db.prepare(`
+    SELECT p.id, p.filename, p.year, p.event, p.taken_at, p.is_favorite
+    FROM photos p
+    WHERE 1=1 ${whereSql}
+    ORDER BY p.taken_at DESC, p.id DESC
+    LIMIT ?
+  `).all(...params, limit) as SmartAlbumSearchPhoto[];
+}
+
 export function createSmartAlbum(name: string, rules: AlbumRule[], catalogId = 1): number {
   const result = getDb().prepare(
     'INSERT INTO smart_albums (name, rules, catalog_id) VALUES (?, ?, ?)'

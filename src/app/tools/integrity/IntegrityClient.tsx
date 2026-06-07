@@ -37,7 +37,6 @@ interface ReportResponse {
 interface Props {
   initialMeta: Meta;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -162,7 +161,6 @@ function ReportSection({
 export default function IntegrityClient({
   initialMeta,
   themes,
-  projects,
   totalPhotos,
   favoriteCount,
   untaggedCount,
@@ -271,7 +269,6 @@ export default function IntegrityClient({
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Integridad de la biblioteca</span>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ), []));
@@ -280,7 +277,6 @@ export default function IntegrityClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

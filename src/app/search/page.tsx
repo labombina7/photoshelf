@@ -37,7 +37,6 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     <div className="app-shell">
       <Sidebar
         themes={sidebar.themes}
-        projects={sidebar.projects}
         totalPhotos={sidebar.totalPhotos}
         favoriteCount={sidebar.favoriteCount}
         untaggedCount={sidebar.untaggedCount}

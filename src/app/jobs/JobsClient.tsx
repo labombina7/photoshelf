@@ -24,7 +24,6 @@ interface JobRow {
 
 interface Props {
   themes: ThemeWithCount[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -67,7 +66,7 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleString('es', { dateStyle: 'short', timeStyle: 'short' });
 }
 
-export default function JobsClient({ themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId }: Props) {
+export default function JobsClient({ themes, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId }: Props) {
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [cancelling, setCancelling] = useState<Set<string>>(new Set());
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -77,7 +76,6 @@ export default function JobsClient({ themes, projects, totalPhotos, favoriteCoun
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Cola de trabajos</span>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ), []));
@@ -114,7 +112,6 @@ export default function JobsClient({ themes, projects, totalPhotos, favoriteCoun
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

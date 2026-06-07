@@ -9,6 +9,8 @@ import { getDb } from '@/lib/db';
 import { classifyQuery } from './classifier';
 import type { ClassifierHints } from './classifier';
 import { parseSearchQuery } from '@/lib/ollama';
+import { getSmartAlbumSearchPhotos } from '@/lib/queries/smartAlbums';
+import { getProjectSearchPhotos } from '@/lib/queries/projects';
 
 // ─── Tipos de respuesta ────────────────────────────────────────────────────────
 
@@ -32,7 +34,19 @@ export interface EventMatch {
   count: number;
 }
 
-export type SearchIntentType = 'year' | 'tag' | 'event' | 'fulltext' | 'ai';
+export interface SmartAlbumMatch {
+  id: number;
+  name: string;
+  photo_count: number;
+}
+
+export interface ProjectMatch {
+  id: number;
+  title: string;
+  photo_count: number;
+}
+
+export type SearchIntentType = 'year' | 'tag' | 'event' | 'smart_album' | 'project' | 'fulltext' | 'ai';
 
 export interface SearchResult {
   intent: SearchIntentType;
@@ -43,6 +57,8 @@ export interface SearchResult {
   photos: SearchPhotoRow[];
   tags: TagMatch[];
   events: EventMatch[];
+  smartAlbums: SmartAlbumMatch[];
+  projects: ProjectMatch[];
   total: number;
   duration_ms: number;
 }
@@ -72,7 +88,17 @@ function loadHints(catalogId: number): ClassifierHints {
     ).all(catalogId) as { event: string }[]
   ).map(r => r.event);
 
-  const data = { tags, events };
+  const smartAlbums = db.prepare(
+    `SELECT id, name FROM smart_albums
+     WHERE catalog_id IS NULL OR catalog_id = ?
+     ORDER BY name ASC`,
+  ).all(catalogId) as { id: number; name: string }[];
+
+  const projects = db.prepare(
+    'SELECT id, title FROM projects ORDER BY title ASC',
+  ).all() as { id: number; title: string }[];
+
+  const data = { tags, events, smartAlbums, projects };
   hintsCache.set(catalogId, { data, expiresAt: Date.now() + HINTS_TTL_MS });
   return data;
 }
@@ -140,6 +166,14 @@ function searchFulltext(query: string, catalogId: number): SearchPhotoRow[] {
   ).all(catalogId, like, like, like) as SearchPhotoRow[];
 }
 
+function searchBySmartAlbum(albumId: number, catalogId: number): SearchPhotoRow[] {
+  return getSmartAlbumSearchPhotos(albumId, catalogId, PHOTO_LIMIT) as SearchPhotoRow[];
+}
+
+function searchByProject(projectId: number): SearchPhotoRow[] {
+  return getProjectSearchPhotos(projectId, PHOTO_LIMIT) as SearchPhotoRow[];
+}
+
 async function searchAI(query: string, catalogId: number): Promise<{ photos: SearchPhotoRow[]; concept: string }> {
   const { year, tags, concept } = await parseSearchQuery(query);
 
@@ -189,6 +223,8 @@ export async function executeSearch(
   let aiConcept: string | undefined;
   let tags: TagMatch[] = [];
   let events: EventMatch[] = [];
+  let smartAlbums: SmartAlbumMatch[] = [];
+  let projects: ProjectMatch[] = [];
 
   switch (intent.type) {
     case 'year':
@@ -204,6 +240,16 @@ export async function executeSearch(
     case 'event':
       photos = searchByEvent(intent.name, catalogId);
       events = [{ year: photos[0]?.year ?? 0, event: intent.name, count: photos.length }];
+      break;
+
+    case 'smart_album':
+      photos = searchBySmartAlbum(intent.id, catalogId);
+      smartAlbums = [{ id: intent.id, name: intent.name, photo_count: photos.length }];
+      break;
+
+    case 'project':
+      photos = searchByProject(intent.id);
+      projects = [{ id: intent.id, title: intent.title, photo_count: photos.length }];
       break;
 
     case 'fulltext':
@@ -235,6 +281,8 @@ export async function executeSearch(
     photos,
     tags,
     events,
+    smartAlbums,
+    projects,
     total: photos.length,
     aiConcept,
     duration_ms: Date.now() - start,

@@ -577,7 +577,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">17</span>
+      <span class="col-count">16</span>
     </div>
     <div class="col-body">
 
@@ -698,6 +698,7 @@
       </div>
 
 
+
       <!-- ── US previas ── -->
 
       <div class="card" tabindex="0" data-id="US-025" onclick="openModal('US-025')">
@@ -723,6 +724,197 @@
         <div class="card-footer"><span>US-023 → US-024 → US-025</span></div>
       </div>
 
+
+      <div class="card" tabindex="0" data-id="EPIC-005" onclick="openModal('EPIC-005')">
+        <div class="card-top">
+          <span class="badge badge-epic">EPIC-005</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Reestructura de navegación y filtros</div>
+        <div class="card-summary">Tres capas: nav global en header (Proyectos, Álbumes), sidebar simplificada (catálogo + temáticas) y filter bar horizontal sticky (año, cámara, ISO, apertura).</div>
+        <div class="card-footer"><span>US-078 → US-079 → US-080 → US-081</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-078" onclick="openModal('US-078')">
+        <div class="card-top">
+          <span class="badge badge-us">US-078</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Nav global en header (Proyectos · Álbumes)</div>
+        <div class="card-summary">Añadir tabs de módulos principales en AppHeader entre el logo y el buscador. Proyectos y Álbumes como entidades independientes del catálogo.</div>
+        <div class="card-footer"><span>EPIC-005</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-079" onclick="openModal('US-079')">
+        <div class="card-top">
+          <span class="badge badge-us">US-079</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Sidebar simplificada (solo catálogo y temáticas)</div>
+        <div class="card-summary">Extraer ExifFilters del sidebar. Dejar solo navegación de catálogo y gestión editorial de temáticas. Eliminar elementos que pasan al header o al filter bar.</div>
+        <div class="card-footer"><span>EPIC-005</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-080" onclick="openModal('US-080')">
+        <div class="card-top">
+          <span class="badge badge-us">US-080</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Filter bar horizontal (año + EXIF)</div>
+        <div class="card-summary">Nueva franja sticky bajo el header, solo visible en vistas de catálogo. Concentra chips de año y dropdowns de cámara, ISO, apertura y focal. Pill de limpiar cuando hay filtros activos.</div>
+        <div class="card-footer"><span>EPIC-005 · dep: US-079</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-081" onclick="openModal('US-081')">
+        <div class="card-top">
+          <span class="badge badge-us">US-081</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Ajustes responsive y mobile</div>
+        <div class="card-summary">Adaptar los tres niveles de navegación para móvil: tabs en header con scroll horizontal, filter bar con bottom sheets para dropdowns EXIF, sidebar sin cambios en el patrón overlay.</div>
+        <div class="card-footer"><span>EPIC-005 · dep: US-078, US-079, US-080</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="EPIC-004" onclick="openModal('EPIC-004')">
+        <div class="card-top">
+          <span class="badge badge-epic">EPIC-004</span>
+          <span class="effort effort-xl">XL</span>
+        </div>
+        <div class="card-title">Análisis de estilo fotográfico</div>
+        <div class="card-summary">Análisis en background del catálogo con Ollama. Insights sobre historia fotográfica y evolución reciente del estilo.</div>
+        <div class="card-footer"><span>US-074 → US-075 → US-076 → US-077</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-074" onclick="openModal('US-074')">
+        <div class="card-top">
+          <span class="badge badge-us">US-074</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Motor de análisis EXIF + muestra</div>
+        <div class="card-summary">Extracción de señales EXIF por foto y algoritmo de selección de muestra representativa por periodo. Infraestructura base de EPIC-004.</div>
+        <div class="card-footer"><span>EPIC-004</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-075" onclick="openModal('US-075')">
+        <div class="card-top">
+          <span class="badge badge-us">US-075</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Bootstrap — análisis inicial del catálogo</div>
+        <div class="card-summary">Proceso único de arranque en 2 velocidades: muestra histórica (>24 meses) + análisis completo de los últimos 24 meses. Reanudable, prioridad baja.</div>
+        <div class="card-footer"><span>EPIC-004 · dep: US-074</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-076" onclick="openModal('US-076')">
+        <div class="card-top">
+          <span class="badge badge-us">US-076</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Ciclo continuo — síntesis mensual y anual</div>
+        <div class="card-summary">Ciclo diario (acumulación), mensual (Ollama sintetiza y compara con mes anterior) y anual (regenera perfil histórico). Narrativa en español.</div>
+        <div class="card-footer"><span>EPIC-004 · dep: US-074, US-075</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-077" onclick="openModal('US-077')">
+        <div class="card-top">
+          <span class="badge badge-us">US-077</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Vista de insights en el sidebar</div>
+        <div class="card-summary">Nueva vista con 2 bloques: historia fotográfica de largo plazo (anual) y evolución reciente (últimos 24 meses con highlights, tendencia y equipo).</div>
+        <div class="card-footer"><span>EPIC-004 · dep: US-074–076</span></div>
+      </div>
+
+      <!-- ── Deuda técnica — audit 2026-06-06 ─────────────────────────────── -->
+      <div class="card" tabindex="0" data-id="US-082" onclick="openModal('US-082')">
+        <div class="card-top">
+          <span class="badge badge-us">US-082</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Hardening transaccional — deleteCatalog y guard de scan</div>
+        <div class="card-summary">Envolver los dos DELETEs de deleteCatalog en una transacción SQLite. Guard atómica en POST /api/scan para evitar dobles escaneos concurrentes.</div>
+        <div class="card-footer"><span>Tech Debt 🔴</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-083" onclick="openModal('US-083')">
+        <div class="card-top">
+          <span class="badge badge-us">US-083</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Tests: backup, folderWatcher, integrityScanner y deleteCatalog</div>
+        <div class="card-summary">Cobertura de tests para las cuatro funciones más críticas sin tests: backup, watcher, integrity scanner y el borrado de catálogos.</div>
+        <div class="card-footer"><span>Tech Debt 🔴 · dep: US-082</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-084" onclick="openModal('US-084')">
+        <div class="card-top">
+          <span class="badge badge-us">US-084</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Centralizar MIME_TYPES, OLLAMA_URL y eliminar dead code</div>
+        <div class="card-summary">Unificar MIME_TYPES (añadir .avif) y OLLAMA_URL en config.ts. Eliminar el stub catalog.ts sin uso desde EPIC-001.</div>
+        <div class="card-footer"><span>Tech Debt 🟡</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-085" onclick="openModal('US-085')">
+        <div class="card-top">
+          <span class="badge badge-us">US-085</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Logging en catch vacíos y checkPassword</div>
+        <div class="card-summary">Añadir console.warn/error en los tres catch vacíos de cursores y path traversal. Sanear el catch vacío de checkPassword.</div>
+        <div class="card-footer"><span>Tech Debt 🟢</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-086" onclick="openModal('US-086')">
+        <div class="card-top">
+          <span class="badge badge-us">US-086</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Límite en /api/photos y endpoint ligero de IDs para slideshow</div>
+        <div class="card-summary">Añadir Math.min(limit, 1000) en /api/photos. Nuevo endpoint GET /api/photos/ids que devuelve solo IDs para el slideshow sin cargar tags.</div>
+        <div class="card-footer"><span>Tech Debt 🟡</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-087" onclick="openModal('US-087')">
+        <div class="card-top">
+          <span class="badge badge-us">US-087</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Refactor componentes grandes — hooks custom y useEffect</div>
+        <div class="card-summary">Dividir LibraryClient (398l), DetailPanel (396l) y SearchClient (367l) en hooks custom. Eliminar los 3 eslint-disable de exhaustive-deps.</div>
+        <div class="card-footer"><span>Tech Debt 🟡</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-088" onclick="openModal('US-088')">
+        <div class="card-top">
+          <span class="badge badge-us">US-088</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Backup automático activado por defecto + aviso en UI</div>
+        <div class="card-summary">Cambiar default auto_enabled=1 en instalaciones nuevas. Banner de aviso en ajustes si el backup automático está desactivado.</div>
+        <div class="card-footer"><span>Tech Debt 🟡</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-089" onclick="openModal('US-089')">
+        <div class="card-top">
+          <span class="badge badge-us">US-089</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Docker: healthcheck y node-addon-api a devDeps</div>
+        <div class="card-summary">Añadir healthcheck en docker-compose.yml apuntando a /api/health. Mover node-addon-api de dependencies a devDependencies.</div>
+        <div class="card-footer"><span>Tech Debt 🟢</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-090" onclick="openModal('US-090')">
+        <div class="card-top">
+          <span class="badge badge-us">US-090</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Limpieza de thumbnails huérfanos y queries a repositorio</div>
+        <div class="card-summary">Limpiar thumbnails en CACHE_PATH al borrar un catálogo. Mover queries inline de original/thumbnail routes a src/lib/queries/photos.ts.</div>
+        <div class="card-footer"><span>Tech Debt 🟡</span></div>
+      </div>
 
       <div class="card" tabindex="0" data-id="US-021" onclick="openModal('US-021')">
         <div class="card-top">
@@ -759,7 +951,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">66</span>
+      <span class="col-count">67</span>
     </div>
     <div class="col-body">
 
@@ -770,6 +962,24 @@
           <span class="date-badge">2026-06-04</span>
         </div>
         <div class="card-title">Álbumes inteligentes</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-091" onclick="openModal('US-091')">
+        <div class="card-top">
+          <span class="badge badge-us">US-091</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-07</span>
+        </div>
+        <div class="card-title">Hardening móvil web: navegación y filtros</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-073" onclick="openModal('US-073')">
+        <div class="card-top">
+          <span class="badge badge-us">US-073</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-06</span>
+        </div>
+        <div class="card-title">Búsqueda extendida: carpetas inteligentes y proyectos</div>
       </div>
 
       <div class="card card-done" tabindex="0" data-id="US-072" onclick="openModal('US-072')">
@@ -2488,6 +2698,182 @@ const CARDS = {
       'Rate limiting por API key',
       'Documentación OpenAPI/Swagger generada automáticamente',
     ]
+  },
+
+  'EPIC-005': {
+    id: 'EPIC-005',
+    type: 'EPIC',
+    column: 'todo',
+    effort: 'L',
+    title: 'Reestructura de navegación y filtros',
+    story: 'Como fotógrafo que usa photoshelf,\nquiero una interfaz con una jerarquía visual clara entre módulos de la app, exploración del catálogo y filtros,\npara entender de un vistazo dónde estoy y qué estoy filtrando sin tener que escanear un sidebar sobrecargado.',
+    description: [
+      'La sidebar actual mezcla navegación global de módulos, filtros de catálogo y filtros técnicos EXIF en el mismo nivel visual. Los filtros EXIF están escondidos bajo un acordeón que requiere dos clics. Los chips de año flotan sin relación con el resto de filtros.',
+      'Esta épica introduce <strong>tres capas con responsabilidades claras</strong>: nav global en el header para módulos independientes (Proyectos, Álbumes), sidebar simplificada para exploración del catálogo y gestión de temáticas, y filter bar horizontal sticky visible solo en vistas de catálogo.',
+      'Temáticas permanece en el sidebar — son filtros editoriales del catálogo, semánticamente equivalentes a Favoritos, no entidades independientes como Proyectos o Álbumes.',
+    ],
+    children: [
+      { id: 'US-078', title: 'Nav global en header (Proyectos · Álbumes)', status: 'todo' },
+      { id: 'US-079', title: 'Sidebar simplificada (solo catálogo y temáticas)', status: 'todo' },
+      { id: 'US-080', title: 'Filter bar horizontal (año + EXIF)', status: 'todo' },
+      { id: 'US-081', title: 'Ajustes responsive y mobile', status: 'todo' },
+    ],
+    tech: [
+      '<strong>AppHeader.tsx:</strong> añadir zona de tabs entre logo y buscador. Los slots laterales existentes se mantienen.',
+      '<strong>Sidebar.tsx:</strong> eliminar ExifFilters y los links que pasan al header. Queda solo navegación de catálogo + temáticas.',
+      '<strong>FilterBar.tsx (nuevo):</strong> franja sticky con chips de año y dropdowns EXIF. Visible solo en rutas /library.',
+      '<strong>ExifFilters.tsx:</strong> refactorizar de acordeón vertical a dropdowns horizontales para el filter bar.',
+    ],
+    outOfScope: [
+      'Rediseño visual de la sidebar más allá de eliminar elementos',
+      'Nuevas vistas de Proyectos o Álbumes (solo nav, no nuevas pantallas)',
+      'Filtros adicionales más allá de los ya existentes (año, cámara, ISO, apertura, focal)',
+    ]
+  },
+
+  'US-078': {
+    id: 'US-078',
+    type: 'US',
+    column: 'todo',
+    effort: 'S',
+    title: 'Nav global en header (Proyectos · Álbumes)',
+    story: 'Como usuario de photoshelf,\nquiero ver los módulos principales de la app (Proyectos, Álbumes) como tabs en el header,\npara acceder a ellos directamente sin tener que abrir el sidebar.',
+    description: [
+      'Añadir una zona de navegación de módulos en <code>AppHeader.tsx</code>, entre el logo y el buscador.',
+      'Dos tabs: Proyectos (<code>/projects</code>) y Álbumes (<code>/smart-albums</code>). Tab activo marcado con subrayado usando <code>var(--tag-auto-color)</code>. El slot izquierdo del header sigue funcionando para contenido contextual de cada vista.',
+    ],
+    outOfScope: ['Añadir más módulos al nav en esta US', 'Cambios en las páginas de Proyectos o Álbumes'],
+  },
+
+  'US-079': {
+    id: 'US-079',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Sidebar simplificada (solo catálogo y temáticas)',
+    story: 'Como usuario de photoshelf,\nquiero que el sidebar muestre solo las vistas de exploración del catálogo y la gestión de temáticas,\npara que su propósito sea claro y no mezcle navegación de app con filtros técnicos.',
+    description: [
+      'Extraer <code>ExifFilters</code> del sidebar (pasará al filter bar en US-080). Eliminar de la sidebar cualquier elemento que migra al header o al filter bar.',
+      'Se mantiene: Todas las fotos, Timeline, Mapa, Memorias, Favoritos, Sin clasificar, Tags, sección Temáticas con gestión inline (crear, editar, borrar, color). Se elimina: bloque ExifFilters.',
+    ],
+    outOfScope: ['Rediseño visual del sidebar', 'Cambios en la gestión de temáticas más allá de mantenerla'],
+  },
+
+  'US-080': {
+    id: 'US-080',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Filter bar horizontal (año + EXIF)',
+    story: 'Como fotógrafo que filtra su catálogo,\nquiero tener todos los filtros de corte (año, cámara, ISO, apertura, focal) en una franja horizontal accesible con un solo clic,\npara explorar mi catálogo sin tener que expandir acordeones ni buscar filtros en distintos sitios.',
+    description: [
+      'Nuevo componente <code>FilterBar.tsx</code>: franja sticky bajo el header, visible solo en rutas de catálogo (<code>/library</code> y variantes).',
+      'Estructura: chips de año scrollables → separador → dropdowns de Cámara, ISO, Apertura, Focal → pill <strong>✕ N activos</strong> (visible cuando hay filtros activos, limpia todo al clic).',
+      'Los chips de año migran de <code>LibraryClient.tsx</code> al FilterBar. Los filtros EXIF migran de <code>ExifFilters.tsx</code> (refactorizado a horizontal) al FilterBar. Los filtros se propagan a la URL para que sean compartibles y navegables con el botón atrás.',
+    ],
+    outOfScope: ['Filtros adicionales más allá de los existentes', 'Persistencia de filtros entre sesiones'],
+  },
+
+  'US-081': {
+    id: 'US-081',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Ajustes responsive y mobile',
+    story: 'Como usuario de photoshelf en móvil,\nquiero que la nueva arquitectura de navegación y filtros funcione bien en pantalla pequeña,\npara poder explorar y filtrar mi catálogo desde el móvil con la misma comodidad que en desktop.',
+    description: [
+      'Nav global (móvil): los tabs de Proyectos y Álbumes se integran con el menú hamburguesa existente o en scroll horizontal bajo el logo.',
+      'Filter bar (móvil): scroll horizontal en el rail completo. Los dropdowns EXIF abren un bottom sheet en móvil en lugar de un dropdown hacia abajo.',
+      'Sidebar (móvil): sin cambios en el patrón de apertura/cierre — el scroll interno es más corto al haber eliminado los filtros EXIF.',
+    ],
+    outOfScope: ['Nuevos patrones de navegación móvil más allá de adaptar los tres niveles existentes'],
+  },
+
+  'EPIC-004': {
+    id: 'EPIC-004',
+    type: 'EPIC',
+    column: 'todo',
+    effort: 'XL',
+    title: 'Análisis de estilo fotográfico',
+    story: 'Como fotógrafo que usa photoshelf,\nquiero que la app analice mi catálogo en background y me muestre insights sobre mi estilo fotográfico,\npara conocerme mejor como fotógrafo, entender cómo he evolucionado y recibir consejos accionables de mejora.',
+    description: [
+      'Photoshelf tiene acceso a todo el catálogo: fotos, EXIF, tags de IA y estructura temporal. Sin embargo, toda esa información vive en silos — el usuario puede buscar y explorar, pero nadie le devuelve una lectura de sí mismo como fotógrafo.',
+      'Esta épica añade una capa de <strong>inteligencia reflexiva</strong> que analiza el catálogo en background y genera insights sobre el estilo visual del fotógrafo: géneros que practica, equipo que prefiere, cómo dispara, cómo ha evolucionado y hacia dónde parece ir.',
+      'El análisis combina datos cuantitativos (EXIF: focal, apertura, ISO, hora, cámara, objetivo) con análisis cualitativo de las imágenes via Ollama, sintetizados en lenguaje natural.',
+    ],
+    children: [
+      { id: 'TBD-1', title: 'Motor de análisis — extracción EXIF + selección de muestra', status: 'todo' },
+      { id: 'TBD-2', title: 'Bootstrap — análisis inicial del catálogo en 2 velocidades', status: 'todo' },
+      { id: 'TBD-3', title: 'Ciclo continuo — análisis diario y síntesis mensual/anual', status: 'todo' },
+      { id: 'TBD-4', title: 'Vista de insights — UI en sidebar (Bloque 1 + Bloque 2)', status: 'todo' },
+    ],
+    tech: [
+      '<strong>2 velocidades de procesamiento:</strong> Bootstrap inicial (muestra histórica + últimos 24 meses completos) + ciclo continuo (diario para fotos nuevas, mensual para síntesis, anual para historia larga).',
+      '<strong>Síntesis por capas con Ollama:</strong> tags/descripción existentes → muestra por periodo → perfil del periodo → narrativa de evolución comparando periodos consecutivos.',
+      'El bootstrap puede tardar varios días; corre con prioridad baja para no interferir con el uso normal.',
+    ],
+    outOfScope: [
+      'Recomendaciones de fotógrafos/libros/recursos externos (extensión futura del Bloque 2)',
+      'Comparación con otros usuarios o benchmarks externos',
+      'Análisis en tiempo real al importar fotos',
+      'Exportar el informe de estilo como PDF u otro formato',
+    ]
+  },
+
+  'US-074': {
+    id: 'US-074',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Motor de análisis — extracción EXIF y selección de muestra',
+    story: 'Como sistema de análisis de estilo fotográfico,\nquiero extraer los datos EXIF relevantes de cada foto y seleccionar muestras representativas por periodo,\npara poder sintetizar el estilo del fotógrafo sin procesar el catálogo entero de una vez.',
+    description: [
+      'Infraestructura base de EPIC-004. Construye la capa de extracción de señales EXIF por foto (<code>focalLength</code>, <code>aperture</code>, <code>iso</code>, <code>camera</code>, <code>lens</code>...) y el algoritmo de selección de muestra representativa por periodo, maximizando la diversidad de géneros, horas y escenas.',
+      'No llama a Ollama. No produce UI. Es la base sobre la que trabajan US-075 y US-076.',
+    ],
+    outOfScope: ['Llamadas a Ollama', 'Persistencia de perfiles o insights en BD', 'UI de ningún tipo'],
+  },
+
+  'US-075': {
+    id: 'US-075',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Bootstrap — análisis inicial del catálogo en 2 velocidades',
+    story: 'Como fotógrafo que acaba de activar el análisis de estilo,\nquiero que la app analice mi catálogo histórico de forma progresiva y sin bloquear la app,\npara tener un perfil inicial de estilo en pocos días sin tener que hacer nada.',
+    description: [
+      'Proceso de arranque único. <strong>Velocidad rápida</strong>: muestra de 20-30 fotos por año para el histórico (>24 meses). <strong>Velocidad completa</strong>: todas las fotos de los últimos 24 meses, mes a mes.',
+      'El bootstrap es reanudable si la app se reinicia. Corre en background con prioridad baja. Puede tardar varios días en catálogos grandes — es esperado y correcto.',
+    ],
+    outOfScope: ['UI completa de insights (US-077)', 'Configuración por parte del usuario de qué periodo analizar'],
+  },
+
+  'US-076': {
+    id: 'US-076',
+    type: 'US',
+    column: 'todo',
+    effort: 'L',
+    title: 'Ciclo continuo — análisis diario y síntesis mensual/anual',
+    story: 'Como fotógrafo que usa photoshelf regularmente,\nquiero que el análisis de mi estilo se actualice solo en background a medida que añado fotos y pasan los meses,\npara que los insights siempre reflejen mi evolución más reciente.',
+    description: [
+      'Tres ritmos: <strong>diario</strong> (acumula señales de fotos nuevas sin llamar a Ollama), <strong>mensual</strong> (Ollama sintetiza el mes cerrado y lo compara con el anterior generando narrativa de evolución), <strong>anual</strong> (Ollama regenera el perfil histórico de largo plazo el 1 de enero).',
+      'También implementa los prompts de Ollama para la síntesis. La narrativa es en español, en tono personal, con highlights y tendencia del periodo.',
+    ],
+    outOfScope: ['UI de los insights (US-077)', 'Configuración del idioma de la narrativa', 'Notificaciones al usuario'],
+  },
+
+  'US-077': {
+    id: 'US-077',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Vista de insights — estilo fotográfico en el sidebar',
+    story: 'Como fotógrafo que usa photoshelf,\nquiero una vista en el sidebar donde pueda leer mis insights de estilo fotográfico,\npara conocerme mejor como fotógrafo, entender cómo he evolucionado y recibir orientación concreta de mejora.',
+    description: [
+      '<strong>Bloque 1 — Tu historia fotográfica</strong>: perfiles anuales en orden cronológico inverso. Relato narrativo de largo plazo. Se actualiza anualmente.',
+      '<strong>Bloque 2 — Tu evolución reciente</strong>: últimos 24 meses con perfiles mensuales. El mes más reciente expandido por defecto. Incluye highlights, tendencia y resumen visual de equipo EXIF (chips de cámara, focal, ISO). Se actualiza mensualmente.',
+    ],
+    outOfScope: ['Recomendaciones de fotógrafos/recursos externos', 'Edición manual de insights', 'Compartir como PDF', 'Notificaciones push'],
   },
 
   'US-017': {
@@ -4907,6 +5293,38 @@ const CARDS = {
     ],
     tech: ['SQLite job_queue como fuente de verdad', 'Singleton worker en módulo Node (sobrevive HMR en prod)', 'started_at para reanudación de reclasificaciones', 'Polling cada 3s en el panel'],
     outOfScope: ['Cola multi-usuario', 'Prioridad entre jobs', 'Notificaciones push', 'Múltiples workers en paralelo']
+  },
+
+  'US-091': {
+    id: 'US-091', type: 'US', column: 'done', effort: 'M',
+    title: 'Hardening móvil web: navegación y filtros',
+    story: 'Como usuario de photoshelf en iOS Safari,\nquiero que la navegación, el sidebar y los filtros funcionen correctamente en mobile,\npara poder gestionar mi biblioteca desde el móvil sin perder acceso a ninguna función.',
+    description: [
+      'Serie de bugfixes encadenados que dejaban la web mobile inutilizable tras la refactorización del header/filter-bar.',
+      '<strong>Layout:</strong> franja gris entre header y nav tabs (body padding-top sumaba header+nav pero el header es fixed, no sticky). Sidebar con contenido tapado por el header fijo (faltaba padding-top en el drawer).',
+      '<strong>Filtros iOS Safari:</strong> bottom sheet aparecía fuera de pantalla porque <code>position:fixed</code> dentro de <code>position:sticky + overflow-x:auto</code> pierde el contexto de viewport en iOS. Fix: <code>createPortal(…, document.body)</code>. Además, <code>isMobile</code> arrancaba en <code>false</code> (SSR), renderizando el dropdown que quedaba clipado. Fix: inicialización síncrona con <code>window.matchMedia</code>.',
+      '<strong>Hamburguesa faltante:</strong> SmartAlbumsClient, MemoriesClient y SmartAlbumDetailClient tenían Sidebar pero no inyectaban el botón en el header slot-left.',
+      '<strong>Unificación UI:</strong> eliminado h1 redundante en Smart Albums, botones con flex-wrap para no desbordar en mobile, botón "Nuevo proyecto" eliminado del sidebar (patrón unificado: creación en el contenido).',
+      '✅ Desplegada en PRs #142–#147 el 2026-06-07.'
+    ],
+    criteria: [{ group: 'Desplegada', items: [
+      'Sin franja gris entre header y nav tabs en mobile',
+      'Sidebar drawer muestra todos los items (padding-top = header height)',
+      'Filtros abren bottom sheet correctamente en iOS Safari',
+      'Hamburguesa visible en Smart Albums, Recuerdos y detalle de álbum',
+      'Botones Smart Albums no desbordan en mobile',
+      'Sidebar Proyectos sin botón "Nuevo proyecto" duplicado'
+    ]}],
+    dependencies: [], components: [
+      { path: 'src/app/globals.css', desc: 'body padding-top mobile, sidebar padding-top drawer' },
+      { path: 'src/components/FilterBar.tsx', desc: 'createPortal para BottomSheet, isMobile síncrono' },
+      { path: 'src/app/smart-albums/SmartAlbumsClient.tsx', desc: 'useHeaderSlotLeft, quitar h1, flex-wrap botones' },
+      { path: 'src/app/memories/MemoriesClient.tsx', desc: 'useHeaderSlotLeft' },
+      { path: 'src/app/smart-albums/[id]/SmartAlbumDetailClient.tsx', desc: 'useHeaderSlotLeft' },
+      { path: 'src/components/Sidebar.tsx', desc: 'Eliminar botón Nuevo proyecto de ProjectsSection' },
+    ],
+    tech: ['iOS Safari: position:fixed dentro de sticky+overflow-x:auto pierde viewport → createPortal', 'SSR: useState inicializador síncrono para matchMedia evita flash de dropdown desktop'],
+    outOfScope: []
   }
 
 };

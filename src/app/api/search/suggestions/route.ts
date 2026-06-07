@@ -15,14 +15,14 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = req.nextUrl;
   const q = searchParams.get('q')?.trim() ?? '';
-  if (q.length < 2) return NextResponse.json({ data: { tags: [], events: [] } });
+  if (q.length < 2) return NextResponse.json({ data: { tags: [], events: [], smartAlbums: [], projects: [] } });
 
   const catalogParam = searchParams.get('catalog');
   const catalogId = catalogParam ? parseInt(catalogParam, 10) : await getActiveCatalogId();
 
   try {
-    const { tags, events } = getSearchSuggestions(q, catalogId);
-    return NextResponse.json({ data: { tags, events } });
+    const { tags, events, smartAlbums, projects } = getSearchSuggestions(q, catalogId);
+    return NextResponse.json({ data: { tags, events, smartAlbums, projects } });
   } catch (err) {
     console.error('[search/suggestions] Error fetching suggestions:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

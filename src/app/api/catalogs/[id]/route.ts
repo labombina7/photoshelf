@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
-import { renameCatalog, deleteCatalog, getCatalogById } from '@/lib/queries/catalogs';
+import { renameCatalog, updateCatalogPath, deleteCatalog, getCatalogById } from '@/lib/queries/catalogs';
 import { getActiveCatalogId } from '@/lib/catalog-context';
 
 interface Params { params: Promise<{ id: string }> }
@@ -13,15 +13,21 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   const id = parseInt(idStr, 10);
   if (isNaN(id)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 });
 
-  const { name } = await req.json() as { name?: string };
-  if (!name?.trim()) return NextResponse.json({ error: 'El nombre es obligatorio' }, { status: 400 });
-  if (name.trim().length > 100) return NextResponse.json({ error: 'Nombre demasiado largo (máx 100 caracteres)' }, { status: 400 });
+  const body = await req.json() as { name?: string; path?: string };
 
   try {
-    const catalog = renameCatalog(id, name.trim());
+    if (body.path !== undefined) {
+      if (!body.path.trim()) return NextResponse.json({ error: 'La ruta es obligatoria' }, { status: 400 });
+      const catalog = updateCatalogPath(id, body.path);
+      return NextResponse.json({ catalog });
+    }
+
+    if (!body.name?.trim()) return NextResponse.json({ error: 'El nombre es obligatorio' }, { status: 400 });
+    if (body.name.trim().length > 100) return NextResponse.json({ error: 'Nombre demasiado largo (máx 100 caracteres)' }, { status: 400 });
+    const catalog = renameCatalog(id, body.name.trim());
     return NextResponse.json({ catalog });
   } catch (err) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Error al renombrar' }, { status: 400 });
+    return NextResponse.json({ error: err instanceof Error ? err.message : 'Error al actualizar' }, { status: 400 });
   }
 }
 

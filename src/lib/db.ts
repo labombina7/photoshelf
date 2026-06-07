@@ -103,6 +103,7 @@ function initSchema(db: Database.Database) {
   migrateSmartAlbums(db);
   migrateJobQueue(db);
   migrateBackupConfig(db);
+migrateStyleAnalysis(db);
 }
 
 function migrateEpic001(db: Database.Database) {
@@ -116,12 +117,12 @@ function migrateEpic001(db: Database.Database) {
     );
   `);
 
-  // 2. Upsert default catalog (id=1) — always keep its path in sync with PHOTOS_PATH.
-  //    ON CONFLICT updates the path so renaming the host mount doesn't orphan the catalog.
-  //    The user-defined name is preserved.
+  // 2. Create default catalog (id=1) only if it doesn't exist yet.
+  //    DO NOTHING on conflict so the user can change the path via the UI
+  //    without it being overwritten on every server restart.
   db.prepare(`
     INSERT INTO catalogs (id, name, path) VALUES (1, 'Principal', ?)
-    ON CONFLICT(id) DO UPDATE SET path = excluded.path
+    ON CONFLICT(id) DO NOTHING
   `).run(PHOTOS_PATH);
 
   // 3. Add catalog_id column to photos (idempotent via try/catch — SQLite has no IF NOT EXISTS for columns).
@@ -307,6 +308,47 @@ function migrateBackupConfig(db: Database.Database) {
       last_backup_db_path TEXT
     );
     INSERT OR IGNORE INTO backup_config (id) VALUES (1);
+  `);
+}
+
+// ── EPIC-004: Style analysis tables ──────────────────────────────────────────
+
+function migrateStyleAnalysis(db: Database.Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS style_analysis_bootstrap (
+      period        TEXT PRIMARY KEY,
+      type          TEXT NOT NULL CHECK(type IN ('historical_sample','full')),
+      status        TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','in_progress','done')),
+      processed_at  TEXT,
+      photo_count   INTEGER NOT NULL DEFAULT 0,
+      sample_count  INTEGER NOT NULL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS style_profiles (
+      id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+      period              TEXT NOT NULL UNIQUE,
+      type                TEXT NOT NULL CHECK(type IN ('monthly','annual_historical')),
+      profile_text        TEXT NOT NULL DEFAULT '',
+      highlights_json     TEXT NOT NULL DEFAULT '[]',
+      trend               TEXT,
+      period_summary_json TEXT,
+      created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS style_pending_signals (
+      photo_id  INTEGER NOT NULL,
+      period    TEXT NOT NULL,
+      PRIMARY KEY (photo_id, period)
+    );
+
+    CREATE TABLE IF NOT EXISTS style_config (
+      key   TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_style_profiles_type   ON style_profiles(type, period);
+    CREATE INDEX IF NOT EXISTS idx_style_pending_period  ON style_pending_signals(period);
   `);
 }
 

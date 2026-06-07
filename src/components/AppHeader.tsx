@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { IconSearch, IconSparkle } from './Icons';
 import { useSearchShortcut } from '@/hooks/useSearchShortcut';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
@@ -11,15 +12,23 @@ import { HeaderSlotCtx } from './HeaderSlot';
 import SearchDropdown from './SearchDropdown';
 import { useAnalytics } from '@/hooks/useAnalytics';
 
+const NAV_MODULES = [
+  { href: '/library',      label: 'Catálogo',     match: (p: string) => p === '/library' || p.startsWith('/library/') || p === '/timeline' || p === '/map' || p === '/memories' || p.startsWith('/tags') || p === '/search' },
+  { href: '/projects',     label: 'Proyectos',    match: (p: string) => p === '/projects' || p.startsWith('/projects/') },
+  { href: '/smart-albums', label: 'Álbumes',      match: (p: string) => p === '/smart-albums' || p.startsWith('/smart-albums/') },
+  { href: '/insights',     label: 'Tu estilo',    match: (p: string) => p === '/insights' || p.startsWith('/insights/') },
+  { href: '/jobs',         label: 'Herramientas', match: (p: string) => ['/jobs', '/stats', '/health', '/about'].some(r => p === r || p.startsWith(r + '/')) || p.startsWith('/tools') || p.startsWith('/settings') },
+] as const;
+
 // ─── Hints fetch (lazy, once per mount) ──────────────────────────────────────
 
 async function fetchHints(): Promise<ClassifierHints> {
   try {
     const res = await fetch('/api/search/hints', { credentials: 'same-origin' });
-    if (!res.ok) return { tags: [], events: [] };
+    if (!res.ok) return { tags: [], events: [], smartAlbums: [], projects: [] };
     return res.json() as Promise<ClassifierHints>;
   } catch {
-    return { tags: [], events: [] };
+    return { tags: [], events: [], smartAlbums: [], projects: [] };
   }
 }
 
@@ -27,13 +36,14 @@ async function fetchHints(): Promise<ClassifierHints> {
 
 export default function AppHeader() {
   const router   = useRouter();
+  const pathname = usePathname();
   const { slot, slotLeft } = useContext(HeaderSlotCtx);
   const inputRef       = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const formRef        = useRef<HTMLFormElement>(null);
 
   const [value,            setValue]            = useState('');
-  const [hints,            setHints]            = useState<ClassifierHints>({ tags: [], events: [] });
+  const [hints,            setHints]            = useState<ClassifierHints>({ tags: [], events: [], smartAlbums: [], projects: [] });
   const [dropdownOpen,     setDropdownOpen]     = useState(false);
   const [focusedIndex,     setFocusedIndex]     = useState(-1);
   const [mobileSheetOpen,  setMobileSheetOpen]  = useState(false);
@@ -175,6 +185,19 @@ export default function AppHeader() {
           <span className="app-header-logo-text">photoshelf</span>
         </div>
 
+        {/* Nav módulos globales */}
+        <nav className="app-header-nav" aria-label="Módulos">
+          {NAV_MODULES.map(({ href, label, match }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`app-header-nav-item${match(pathname) ? ' active' : ''}`}
+            >
+              {label}
+            </Link>
+          ))}
+        </nav>
+
         {/* Slot izquierda — siempre en DOM para mantener grid estable */}
         <div className="app-header-slot-left">{slotLeft}</div>
 
@@ -221,8 +244,22 @@ export default function AppHeader() {
 
         {/* Slot derecha — siempre en DOM para mantener grid estable */}
         <div className="app-header-slot-right">{slot}</div>
-        <div className="app-header-actions" />
       </header>
+
+      {/* ── Mobile: nav módulos secundaria ─────────────────────────────────── */}
+      <nav className="app-nav-mobile" aria-label="Módulos">
+        {NAV_MODULES.map(({ href, label, match }) => {
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`app-nav-mobile-item${match(pathname) ? ' active' : ''}`}
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* ── Mobile: floating search FAB ─────────────────────────────────────── */}
       <button

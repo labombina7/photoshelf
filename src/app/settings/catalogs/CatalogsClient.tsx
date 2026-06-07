@@ -23,7 +23,6 @@ interface Props {
   catalogs: CatalogRow[];
   activeCatalogId: number;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -34,7 +33,6 @@ export default function CatalogsClient({
   catalogs: initialCatalogs,
   activeCatalogId,
   themes,
-  projects,
   totalPhotos,
   favoriteCount,
   untaggedCount,
@@ -52,6 +50,8 @@ export default function CatalogsClient({
   const [createError, setCreateError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
+  const [editPath, setEditPath] = useState('');
+  const [editError, setEditError] = useState<string | null>(null);
 
   // Backup state
   const [backupStatus, setBackupStatus] = useState<BackupStatus | null>(null);
@@ -94,18 +94,48 @@ export default function CatalogsClient({
     startTransition(() => router.refresh());
   }
 
-  async function saveRename(id: number) {
-    if (!editName.trim()) return;
-    const res = await fetch(`/api/catalogs/${id}`, {
+  async function saveEdit(id: number) {
+    setEditError(null);
+    if (!editName.trim()) { setEditError('El nombre es obligatorio'); return; }
+
+    const currentCatalog = catalogs.find(c => c.id === id);
+    const pathChanged = editPath.trim() !== '' && editPath.trim() !== currentCatalog?.path;
+
+    // Confirm before changing the path of the Principal catalog
+    if (pathChanged && id === 1) {
+      const ok = await confirm(
+        `Vas a cambiar la ruta del catálogo Principal:\n\nAnterior: ${currentCatalog?.path}\nNueva: ${editPath.trim()}\n\nAsegúrate de que la nueva ruta apunta a la misma carpeta de fotos. Si es incorrecta, ninguna foto será accesible hasta corregirla.`,
+        { title: 'Cambiar ruta del catálogo Principal', confirmLabel: 'Sí, cambiar ruta', danger: true },
+      );
+      if (!ok) return;
+    }
+
+    // Update name
+    const resName = await fetch(`/api/catalogs/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: editName.trim() }),
     });
-    if (!res.ok) {
-      const err = await res.json() as { error?: string };
-      await alert(err.error ?? 'Error al renombrar', { title: 'Error' });
+    if (!resName.ok) {
+      const err = await resName.json() as { error?: string };
+      setEditError(err.error ?? 'Error al renombrar');
       return;
     }
+
+    // Update path if changed
+    if (pathChanged) {
+      const resPath = await fetch(`/api/catalogs/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: editPath.trim() }),
+      });
+      if (!resPath.ok) {
+        const err = await resPath.json() as { error?: string };
+        setEditError(err.error ?? 'Error al actualizar la ruta');
+        return;
+      }
+    }
+
     setEditingId(null);
     await refresh();
     startTransition(() => router.refresh());
@@ -194,7 +224,6 @@ export default function CatalogsClient({
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Catálogos</span>
     </div>
   ), []));
 
@@ -202,7 +231,6 @@ export default function CatalogsClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}
@@ -261,25 +289,41 @@ export default function CatalogsClient({
                 background: cat.id === activeCatalogId ? 'rgba(var(--accent-rgb), 0.06)' : 'transparent',
               }}>
                 {editingId === cat.id ? (
-                  <>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {cat.id === 1 && (
+                      <div style={{ fontSize: 11, color: '#ca8a04', background: 'rgba(202,138,4,0.08)', borderRadius: 4, padding: '5px 8px' }}>
+                        ⚠️ Cambiar la ruta del catálogo Principal afecta a todas las fotos indexadas. Se pedirá confirmación.
+                      </div>
+                    )}
                     <input
                       className="tag-input"
                       value={editName}
                       onChange={e => setEditName(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') saveRename(cat.id);
-                        if (e.key === 'Escape') setEditingId(null);
-                      }}
+                      onKeyDown={e => { if (e.key === 'Escape') setEditingId(null); }}
                       autoFocus
-                      style={{ flex: 1 }}
+                      placeholder="Nombre"
+                      style={{ width: '100%' }}
                     />
-                    <button className="btn-small" onClick={() => saveRename(cat.id)}>Guardar</button>
-                    <button
-                      className="btn-small"
-                      onClick={() => setEditingId(null)}
-                      style={{ background: 'var(--border)', color: 'var(--text)' }}
-                    >Cancelar</button>
-                  </>
+                    <input
+                      className="tag-input"
+                      value={editPath}
+                      onChange={e => setEditPath(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') saveEdit(cat.id); if (e.key === 'Escape') setEditingId(null); }}
+                      placeholder="Ruta de la carpeta"
+                      style={{ width: '100%' }}
+                    />
+                    {editError && (
+                      <div style={{ fontSize: 12, color: 'var(--danger, #e05252)' }}>{editError}</div>
+                    )}
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button className="btn-small" onClick={() => saveEdit(cat.id)}>Guardar</button>
+                      <button
+                        className="btn-small"
+                        onClick={() => { setEditingId(null); setEditError(null); }}
+                        style={{ background: 'var(--border)', color: 'var(--text)' }}
+                      >Cancelar</button>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -307,7 +351,7 @@ export default function CatalogsClient({
                         </button>
                       )}
                       <button
-                        onClick={() => { setEditingId(cat.id); setEditName(cat.name); }}
+                        onClick={() => { setEditingId(cat.id); setEditName(cat.name); setEditPath(cat.path); setEditError(null); }}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 4 }}
                         title="Renombrar"
                       >

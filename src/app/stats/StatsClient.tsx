@@ -159,7 +159,6 @@ function TagsList({ tags }: { tags: StatsData['tags'] }) {
 interface Props {
   stats: StatsData;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -174,7 +173,7 @@ interface TechnicalStats {
   topCameras: { camera: string; count: number }[];
 }
 
-export default function StatsClient({ stats, themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs = [], activeCatalogId = 1 }: Props) {
+export default function StatsClient({ stats, themes, totalPhotos, favoriteCount, untaggedCount, catalogs = [], activeCatalogId = 1 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [techStats, setTechStats] = useState<TechnicalStats | null>(null);
   const router = useRouter();
@@ -201,15 +200,6 @@ export default function StatsClient({ stats, themes, projects, totalPhotos, favo
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Estadísticas</span>
-      <div className="topbar-spacer" />
-      <button
-        className="btn-small"
-        style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
-        onClick={() => router.refresh()}
-      >
-        Actualizar
-      </button>
     </div>
   ), []));
 
@@ -217,7 +207,6 @@ export default function StatsClient({ stats, themes, projects, totalPhotos, favo
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}
@@ -229,6 +218,18 @@ export default function StatsClient({ stats, themes, projects, totalPhotos, favo
 
       <div className="main">
         <div className="content">
+          {/* Page header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 700 }}>Estadísticas</h1>
+            <button
+              className="btn-small"
+              style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+              onClick={() => router.refresh()}
+            >
+              Actualizar
+            </button>
+          </div>
+
           {/* Overview cards */}
           <div className="stats-section">
             <div className="stats-section-title">Resumen</div>

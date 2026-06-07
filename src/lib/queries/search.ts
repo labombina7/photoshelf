@@ -3,6 +3,8 @@ import { getDb } from '@/lib/db';
 export interface SearchHints {
   tags: string[];
   events: string[];
+  smartAlbums: { id: number; name: string }[];
+  projects: { id: number; title: string }[];
 }
 
 export interface TagSuggestion {
@@ -16,9 +18,21 @@ export interface EventSuggestion {
   count: number;
 }
 
+export interface SmartAlbumSuggestion {
+  id: number;
+  name: string;
+}
+
+export interface ProjectSuggestion {
+  id: number;
+  title: string;
+}
+
 export interface SearchSuggestions {
   tags: TagSuggestion[];
   events: EventSuggestion[];
+  smartAlbums: SmartAlbumSuggestion[];
+  projects: ProjectSuggestion[];
 }
 
 export interface AiSearchCandidate {
@@ -41,7 +55,17 @@ export function getSearchHints(catalogId = 1): SearchHints {
     ).all(catalogId) as { event: string }[]
   ).map(r => r.event);
 
-  return { tags, events };
+  const smartAlbums = db.prepare(
+    `SELECT id, name FROM smart_albums
+     WHERE catalog_id IS NULL OR catalog_id = ?
+     ORDER BY name ASC`,
+  ).all(catalogId) as { id: number; name: string }[];
+
+  const projects = db.prepare(
+    'SELECT id, title FROM projects ORDER BY title ASC',
+  ).all() as { id: number; title: string }[];
+
+  return { tags, events, smartAlbums, projects };
 }
 
 export function getSearchSuggestions(q: string, catalogId: number): SearchSuggestions {
@@ -65,7 +89,22 @@ export function getSearchSuggestions(q: string, catalogId: number): SearchSugges
     GROUP BY year, event ORDER BY year DESC, count DESC LIMIT 3
   `).all(like, catalogId) as EventSuggestion[];
 
-  return { tags, events };
+  const smartAlbums = db.prepare(`
+    SELECT id, name
+    FROM smart_albums
+    WHERE name LIKE ? ESCAPE '\\'
+      AND (catalog_id IS NULL OR catalog_id = ?)
+    ORDER BY name ASC LIMIT 3
+  `).all(like, catalogId) as SmartAlbumSuggestion[];
+
+  const projects = db.prepare(`
+    SELECT id, title
+    FROM projects
+    WHERE title LIKE ? ESCAPE '\\'
+    ORDER BY title ASC LIMIT 3
+  `).all(like) as ProjectSuggestion[];
+
+  return { tags, events, smartAlbums, projects };
 }
 
 export function getAiSearchCandidates(

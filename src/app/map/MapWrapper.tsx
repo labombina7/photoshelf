@@ -9,7 +9,6 @@ interface Props {
   total: number;
   withGps: number;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
