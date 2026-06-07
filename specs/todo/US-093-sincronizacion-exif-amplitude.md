@@ -156,3 +156,7 @@ El `insert_id: photo_${id}` garantiza que si se re-sincroniza una foto ya enviad
 - Envío de eventos de comportamiento del usuario en la app (clicks, vistas)
 - Dashboard predefinido en Amplitude (se crea manualmente tras la primera sync)
 - Soporte para múltiples usuarios / catálogos en el mismo proyecto Amplitude
+
+## Ideas para v2
+
+- **Embeber charts de Amplitude en la app**: Amplitude permite compartir dashboards con iframe. Una vez configurado y con datos, evaluar qué charts merece la pena incrustar en la sección "Tu estilo" o en una nueva sección de analytics. El iframe se configuraría con la URL pública del chart compartido desde Amplitude.
