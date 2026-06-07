@@ -102,19 +102,9 @@ export default function ProjectDetailClient({ project: initial, themes, totalPho
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <Link href="/projects" className="back-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-        <IconChevronLeft size={14} />
-        Proyectos
-      </Link>
-      <span style={{ color: 'var(--text-tertiary)' }}>/</span>
-      <span className="header-slot-title">{project.title}</span>
-      <div className="topbar-spacer" />
-      <button className="btn-icon" onClick={deleteProject} title="Eliminar proyecto">
-        <IconTrash size={14} />
-      </button>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [project.title, deleteProject]));
+  ), []));
 
   const currentPhoto = lightboxIdx !== null ? project.photos[lightboxIdx] : null;
 
@@ -127,6 +117,19 @@ export default function ProjectDetailClient({ project: initial, themes, totalPho
 
       <div className="main">
         <div className="content" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          {/* Breadcrumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+            <Link href="/projects" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, color: 'var(--text-secondary)', textDecoration: 'none' }}>
+              <IconChevronLeft size={14} />
+              Proyectos
+            </Link>
+            <span style={{ color: 'var(--text-tertiary)', fontSize: 13 }}>/</span>
+            <span style={{ fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{project.title}</span>
+            <div style={{ flex: 1 }} />
+            <button className="btn-icon" onClick={deleteProject} title="Eliminar proyecto">
+              <IconTrash size={14} />
+            </button>
+          </div>
           {/* Hero */}
           <div className="project-hero">
             {project.photos[0] && (
