@@ -63,7 +63,11 @@ function FilterDropdown({ label, options, value, onChange, wide = false }: {
   wide?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // Inicialización síncrona: evita que el dropdown desktop (position:absolute, clipado por
+  // overflow-x:auto del filter-bar) se renderice en el primer frame en mobile.
+  const [isMobile, setIsMobile] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.matchMedia('(max-width: 640px)').matches : false
+  );
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
