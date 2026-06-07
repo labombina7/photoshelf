@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { IconChevronLeft, IconChevronRight, IconSparkle, IconCalendar } from '@/components/Icons';
+import { IconChevronLeft, IconChevronRight, IconSparkle, IconCalendar, IconMenu } from '@/components/Icons';
 import Sidebar from '@/components/Sidebar';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import type { Photo, Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 
@@ -60,6 +61,15 @@ export default function MemoriesClient({
   const [narratives, setNarratives] = useState<Record<number, string>>({});
   const [generatingYear, setGeneratingYear] = useState<number | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  useHeaderSlotLeft(useMemo(() => (
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
+        <IconMenu size={18} />
+      </button>
+    </div>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), []));
 
   const loadDate = useCallback(async (newDate: string) => {
     setLoading(true);
