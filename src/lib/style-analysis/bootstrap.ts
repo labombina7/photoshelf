@@ -5,6 +5,7 @@ import {
   getPendingBootstrapRows,
   updateBootstrapRow,
   getBootstrapProgress,
+  upsertStyleProfileSummaryOnly,
 } from '@/lib/queries/style-analysis';
 import { selectRepresentativeSample, getStyleSignalsByPeriod } from '@/lib/queries/style-analysis';
 import { upsertStyleProfile } from '@/lib/queries/style-analysis';
@@ -54,9 +55,10 @@ async function processRow(row: BootstrapRow): Promise<void> {
     raw = await callOllama(prompt, 60_000);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error('[style-bootstrap] Ollama failed for period', row.period, ':', msg);
-    // Reset to pending so it can be retried
-    updateBootstrapRow(row.period, { status: 'pending' });
+    console.error('[style-bootstrap] Ollama unavailable for period', row.period, ':', msg);
+    // Save EXIF stats without narrative so the UI can show them immediately
+    upsertStyleProfileSummaryOnly(row.period, isHistorical ? 'annual_historical' : 'monthly', summary);
+    updateBootstrapRow(row.period, { status: 'done', processed_at: new Date().toISOString(), sample_count: sampleIds.length });
     return;
   }
 
@@ -66,7 +68,9 @@ async function processRow(row: BootstrapRow): Promise<void> {
     if (!parsed?.narrative) throw new Error('missing narrative');
   } catch {
     console.error('[style-bootstrap] Failed to parse Ollama response for period', row.period);
-    updateBootstrapRow(row.period, { status: 'pending' });
+    // Save EXIF stats without narrative — narrative will be retried later
+    upsertStyleProfileSummaryOnly(row.period, isHistorical ? 'annual_historical' : 'monthly', summary);
+    updateBootstrapRow(row.period, { status: 'done', processed_at: new Date().toISOString(), sample_count: sampleIds.length });
     return;
   }
 

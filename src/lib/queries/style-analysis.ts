@@ -340,6 +340,32 @@ export function upsertStyleProfile(profile: Omit<StyleProfile, 'id' | 'createdAt
   );
 }
 
+/** Saves only the EXIF summary without narrative — used when Ollama is unavailable. */
+export function upsertStyleProfileSummaryOnly(
+  period: string,
+  type: 'monthly' | 'annual_historical',
+  summary: PeriodStyleSummary,
+): void {
+  const db = getDb();
+  db.prepare(`
+    INSERT INTO style_profiles (period, type, profile_text, highlights_json, trend, period_summary_json, updated_at)
+    VALUES (?, ?, NULL, '[]', NULL, ?, datetime('now'))
+    ON CONFLICT(period) DO UPDATE SET
+      period_summary_json = excluded.period_summary_json,
+      updated_at = excluded.updated_at
+    WHERE profile_text IS NULL
+  `).run(period, type, JSON.stringify(summary));
+}
+
+/** Returns profiles that have EXIF stats but no narrative yet (Ollama pending). */
+export function getProfilesWithoutNarrative(): StyleProfile[] {
+  const db = getDb();
+  const rows = db.prepare(
+    `SELECT * FROM style_profiles WHERE (profile_text IS NULL OR profile_text = '') ORDER BY period DESC`
+  ).all() as StyleProfileRow[];
+  return rows.map(rowToProfile);
+}
+
 // ── US-076: Pending signals ───────────────────────────────────────────────────
 
 export function accumulatePendingSignals(sinceIso: string): void {
