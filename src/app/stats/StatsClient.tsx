@@ -201,15 +201,6 @@ export default function StatsClient({ stats, themes, projects, totalPhotos, favo
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Estadísticas</span>
-      <div className="topbar-spacer" />
-      <button
-        className="btn-small"
-        style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
-        onClick={() => router.refresh()}
-      >
-        Actualizar
-      </button>
     </div>
   ), []));
 
@@ -229,6 +220,18 @@ export default function StatsClient({ stats, themes, projects, totalPhotos, favo
 
       <div className="main">
         <div className="content">
+          {/* Page header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 700 }}>Estadísticas</h1>
+            <button
+              className="btn-small"
+              style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+              onClick={() => router.refresh()}
+            >
+              Actualizar
+            </button>
+          </div>
+
           {/* Overview cards */}
           <div className="stats-section">
             <div className="stats-section-title">Resumen</div>

@@ -3,6 +3,8 @@
 > **Épica padre:** [EPIC-004 — Análisis de estilo fotográfico](EPIC-004-analisis-estilo-fotografico.md)
 > **Depende de:** US-074, US-075, US-076
 
+> Estado: ✅ Desplegada
+
 ## Historia de usuario
 
 Como fotógrafo que usa photoshelf,

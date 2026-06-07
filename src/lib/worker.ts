@@ -8,6 +8,8 @@ import { getProjectCandidates, createProject, setProjectPhotos } from './queries
 import { getCatalogById } from './queries/catalogs';
 import { isAutoBackupDue } from './queries/backup';
 import { runBackup } from './backup';
+import { ensureBootstrapRunning } from './style-analysis/bootstrap';
+import { runDailyCycle, runMissedMonthlySyntheses } from './style-analysis/cycle';
 
 interface ClassifyPayload {
   type: 'classify_year' | 'classify_batch';
@@ -44,11 +46,25 @@ export function ensureWorkerRunning(): void {
   if (g.__photoshelf_worker_running) return;
   g.__photoshelf_worker_running = true;
   scheduleAutoBackupIfDue();
+  scheduleStyleAnalysis();
   workerLoop().catch((err) => {
     console.error('[worker] Fatal error, will retry in 5s:', err);
     g.__photoshelf_worker_running = false;
     setTimeout(ensureWorkerRunning, 5_000);
   });
+}
+
+function scheduleStyleAnalysis(): void {
+  // Bootstrap runs shortly after startup with low priority
+  ensureBootstrapRunning();
+
+  // Daily cycle: accumulate signals
+  runDailyCycle().catch(err => console.error('[worker] Daily style cycle error:', err));
+
+  // Catch-up: synthesize any months that were missed
+  setTimeout(() => {
+    runMissedMonthlySyntheses().catch(err => console.error('[worker] Missed monthly syntheses error:', err));
+  }, 10_000);
 }
 
 function scheduleAutoBackupIfDue(): void {

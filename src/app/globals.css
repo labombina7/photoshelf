@@ -2376,3 +2376,85 @@ body { padding-top: var(--header-h); }
   .memories-content { padding: 16px 16px 32px; }
   .memories-photo-grid { grid-template-columns: repeat(3, 1fr); gap: 3px; }
 }
+
+/* ── EPIC-004: Insights ──────────────────────────────────────────────────────── */
+.insights-page { max-width: 760px; margin: 0 auto; padding: 28px 24px 48px; }
+.insights-header { margin-bottom: 24px; }
+.insights-title { font-size: 22px; font-weight: 600; color: var(--text); margin: 0 0 6px; }
+.insights-subtitle { font-size: 13.5px; color: var(--text-secondary); margin: 0; }
+
+.insights-bootstrap-notice {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 14px 16px; margin-bottom: 24px;
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.insights-bootstrap-icon { color: var(--text-tertiary); }
+.insights-bootstrap-text { display: flex; flex-direction: column; gap: 3px; }
+.insights-bootstrap-text strong { font-size: 13.5px; color: var(--text); }
+.insights-bootstrap-text span { font-size: 12.5px; color: var(--text-secondary); }
+.insights-bootstrap-bar {
+  height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px;
+}
+.insights-bootstrap-fill {
+  height: 100%; background: #4f46e5; border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.insights-blocks { display: flex; flex-direction: column; gap: 32px; }
+
+.insights-block { display: flex; flex-direction: column; gap: 16px; }
+.insights-block-title { font-size: 16px; font-weight: 600; color: var(--text); margin: 0 0 4px; }
+.insights-placeholder { font-size: 13.5px; color: var(--text-tertiary); font-style: italic; margin: 0; }
+
+.insights-months-list { display: flex; flex-direction: column; gap: 4px; }
+.insights-month { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.insights-month-header {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 12px 14px; background: none; border: none;
+  font-family: inherit; font-size: 13.5px; font-weight: 500; color: var(--text);
+  cursor: pointer; text-align: left; transition: background 0.1s;
+}
+.insights-month-header:hover { background: var(--bg-secondary); }
+.insights-month-header.open { background: var(--bg-secondary); }
+.insights-chevron { transition: transform 0.2s; flex-shrink: 0; color: var(--text-tertiary); }
+.insights-chevron.open { transform: rotate(180deg); }
+.insights-month-title { font-size: 13.5px; font-weight: 500; }
+
+.insights-month-body { padding: 12px 14px 16px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
+
+.insights-exif-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.insights-exif-chip {
+  font-size: 11.5px; color: var(--text-secondary);
+  padding: 3px 8px; background: var(--bg-secondary);
+  border: 1px solid var(--border); border-radius: 99px;
+}
+
+.insights-narrative { font-size: 13.5px; color: var(--text-secondary); line-height: 1.65; white-space: pre-wrap; }
+
+.insights-highlights { display: flex; flex-direction: column; gap: 4px; }
+.insights-highlights-label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+.insights-highlights ul { margin: 4px 0 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+.insights-highlights li { font-size: 13px; color: var(--text-secondary); }
+
+.insights-trend {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12.5px; color: var(--text-secondary); font-style: italic;
+  padding: 8px 12px; background: var(--bg-secondary);
+  border-radius: var(--radius-sm); border-left: 2px solid #4f46e5;
+}
+
+.insights-history-list { display: flex; flex-direction: column; gap: 20px; }
+.insights-year { display: flex; flex-direction: column; gap: 8px; }
+.insights-year-header { font-size: 15px; font-weight: 600; color: var(--text); }
+.insights-year-highlights { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 3px; }
+.insights-year-highlights li { font-size: 13px; color: var(--text-secondary); }
+.insights-trend--year { margin-top: 2px; }
+
+.insights-current-month-note { font-size: 13px; color: var(--text-tertiary); margin-bottom: 8px; }
+.insights-month-in-progress { font-weight: 500; color: var(--text-secondary); }
+
+@media (max-width: 768px) {
+  .insights-page { padding: 16px 16px 40px; }
+  .insights-blocks { flex-direction: column-reverse; }
+}
