@@ -31,13 +31,12 @@ interface Project {
 interface Props {
   project: Project;
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
 }
 
-export default function ProjectDetailClient({ project: initial, themes, projects, totalPhotos, favoriteCount, untaggedCount }: Props) {
+export default function ProjectDetailClient({ project: initial, themes, totalPhotos, favoriteCount, untaggedCount }: Props) {
   const router = useRouter();
   const { confirm } = useModal();
   const [project, setProject] = useState(initial);
@@ -122,11 +121,6 @@ export default function ProjectDetailClient({ project: initial, themes, projects
   return (
     <div className="app-shell">
       <Sidebar
-        themes={themes}
-        projects={projects}
-        totalPhotos={totalPhotos}
-        favoriteCount={favoriteCount}
-        untaggedCount={untaggedCount}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
       />

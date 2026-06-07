@@ -14,7 +14,6 @@ interface Props {
   initialMetrics: HealthMetrics;
   initialHistory: { date: string; score: number }[];
   themes: Theme[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -178,7 +177,6 @@ export default function HealthClient({
   initialMetrics,
   initialHistory,
   themes,
-  projects,
   totalPhotos,
   favoriteCount,
   untaggedCount,
@@ -271,7 +269,6 @@ export default function HealthClient({
     <div className="app-shell">
       <Sidebar
         themes={themes}
-        projects={projects}
         totalPhotos={totalPhotos}
         favoriteCount={favoriteCount}
         untaggedCount={untaggedCount}

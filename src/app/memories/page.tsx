@@ -34,7 +34,6 @@ export default async function MemoriesPage({ searchParams }: { searchParams: Pro
       initialData={data}
       initialDate={date}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}

@@ -13,7 +13,6 @@ interface Props {
   html: string;
   status: 'todo' | 'done';
   themes: ThemeWithCount[];
-  projects: { id: number; title: string }[];
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
@@ -23,7 +22,7 @@ interface Props {
 
 export default function SpecClient({
   slug, html, status,
-  themes, projects, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId,
+  themes, totalPhotos, favoriteCount, untaggedCount, catalogs, activeCatalogId,
 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -42,7 +41,7 @@ export default function SpecClient({
   return (
     <div className="app-shell">
       <Sidebar
-        themes={themes} projects={projects} totalPhotos={totalPhotos}
+        themes={themes} totalPhotos={totalPhotos}
         favoriteCount={favoriteCount} untaggedCount={untaggedCount}
         mobileOpen={mobileSidebarOpen} onMobileClose={() => setMobileSidebarOpen(false)}
         catalogs={catalogs} activeCatalogId={activeCatalogId}

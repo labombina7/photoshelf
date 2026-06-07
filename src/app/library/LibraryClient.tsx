@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useTransition, useMemo, useEffect, type ReactNode } from 'react';
+import { useState, useTransition, useMemo, useEffect, useCallback, type ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
+import FilterBar from '@/components/FilterBar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
-import { IconSparkle, IconViewList, IconViewGrid, IconMenu } from '@/components/Icons';
+import { IconSparkle, IconMenu } from '@/components/Icons';
 import Slideshow from '@/components/Slideshow';
-import { useHeaderSlot, useHeaderSlotLeft } from '@/components/HeaderSlot';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
 import type { Theme } from '@/lib/types';
@@ -40,14 +41,13 @@ interface LibraryClientProps {
   filteredTotal: number;
   years: number[];
   themes: Theme[];
-  projects?: { id: number; title: string }[];
   favoriteCount: number;
   untaggedCount: number;
   activeYear: string | null;
   activeFilters: ActiveFilters;
   catalogs?: CatalogRow[];
   activeCatalogId?: number;
-  bannerSlot?: React.ReactNode;
+  hasMemories?: boolean;
   cameras?: string[];
 }
 
@@ -57,14 +57,13 @@ export default function LibraryClient({
   filteredTotal,
   years,
   themes,
-  projects = [],
   favoriteCount,
   untaggedCount,
   activeYear,
   activeFilters,
   catalogs = [],
   activeCatalogId = 1,
-  bannerSlot,
+  hasMemories = false,
   cameras = [],
 }: LibraryClientProps) {
   const router = useRouter();
@@ -101,6 +100,7 @@ export default function LibraryClient({
   const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [slideshowIds, setSlideshowIds] = useState<number[] | null>(null);
+
 
   async function openSlideshow() {
     const params = new URLSearchParams();
@@ -144,14 +144,6 @@ export default function LibraryClient({
     setTimeout(() => setToast(''), 4000);
   };
 
-  function setYear(year: string | null) {
-    const params = new URLSearchParams(searchParams.toString());
-    // Use 'all' sentinel so the server doesn't redirect back to current year
-    params.set('year', year ?? 'all');
-    params.delete('event');
-    router.push(`/library?${params.toString()}`);
-  }
-
   async function handleClassifyYear(force = false) {
     if (!activeYear) return;
     setLocalClassifying(true);
@@ -194,15 +186,11 @@ export default function LibraryClient({
   const showClassifyYear = !!activeYear && !activeFilters.event && !fav && !themeId;
   const canToggleView = !activeFilters.event && !fav;
 
-  // ── Slot izquierda: solo hamburger en mobile ───────────────────────────────
+  // ── Slot izquierda: hamburger en mobile ──────────────────────────────────
   useHeaderSlotLeft(
     useMemo(() => (
       <div className="header-slot-library">
-        <button
-          className="hamburger header-slot-hamburger"
-          onClick={() => setMobileSidebarOpen(true)}
-          title="Menú"
-        >
+        <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
           <IconMenu size={18} />
         </button>
       </div>
@@ -210,113 +198,50 @@ export default function LibraryClient({
     ), []),
   );
 
-  // ── Slot derecha: Presentación + vista toggle ───────────────────────────────
-  useHeaderSlot(
-    useMemo(() => (
-      <div className="header-slot-library">
-        {/* Presentación */}
-        {filteredTotal > 0 && (
-          <button
-            className="btn-slideshow"
-            onClick={openSlideshow}
-            title="Presentación (P)"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3" /></svg>
-            <span className="btn-slideshow-label">Presentación</span>
-          </button>
-        )}
-
-        {/* Vista toggle */}
-        {canToggleView && (
-          <div className="view-toggle">
-            <button
-              className={`view-toggle-btn ${effectiveViewMode === 'list' ? 'active' : ''}`}
-              onClick={() => startTransition(() => setViewMode('list'))}
-              title="Vista lista"
-            >
-              <IconViewList />
-            </button>
-            <button
-              className={`view-toggle-btn ${effectiveViewMode === 'folders' ? 'active' : ''}`}
-              onClick={() => startTransition(() => setViewMode('folders'))}
-              title="Vista carpetas"
-            >
-              <IconViewGrid />
-            </button>
-          </div>
-        )}
-      </div>
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    ), [filteredTotal, canToggleView, effectiveViewMode]),
-  );
+  const handleViewModeChange = useCallback((m: 'list' | 'folders') => startTransition(() => setViewMode(m)), []);
 
   return (
-    <div className="app-shell">
-      {slideshowIds && (
-        <Slideshow
-          photoIds={slideshowIds}
-          startIndex={0}
-          onClose={() => setSlideshowIds(null)}
-        />
-      )}
-      <Sidebar
-        themes={themes}
-        projects={projects}
-        totalPhotos={total}
-        favoriteCount={favoriteCount}
-        untaggedCount={untaggedCount}
-        mobileOpen={mobileSidebarOpen}
-        onMobileClose={() => setMobileSidebarOpen(false)}
-        catalogs={catalogs}
-        activeCatalogId={activeCatalogId}
+    <>
+      <FilterBar
+        years={years}
         cameras={cameras}
+        activeYear={activeYear}
+        activeFilters={{
+          year: activeYear,
+          camera: activeFilters.camera,
+          iso_max: activeFilters.iso_max,
+          aperture_max: activeFilters.aperture_max,
+          focal_min: activeFilters.focal_min,
+          focal_max: activeFilters.focal_max,
+        }}
+        filteredTotal={filteredTotal}
+        viewMode={effectiveViewMode}
+        canToggleView={canToggleView}
+        onViewModeChange={handleViewModeChange}
+        onSlideshow={openSlideshow}
+        hasMemories={hasMemories}
       />
+      <div className="app-shell app-shell--with-filterbar">
+        {slideshowIds && (
+          <Slideshow
+            photoIds={slideshowIds}
+            startIndex={0}
+            onClose={() => setSlideshowIds(null)}
+          />
+        )}
+        <Sidebar
+          themes={themes}
+          totalPhotos={total}
+          favoriteCount={favoriteCount}
+          untaggedCount={untaggedCount}
+          mobileOpen={mobileSidebarOpen}
+          onMobileClose={() => setMobileSidebarOpen(false)}
+          catalogs={catalogs}
+          activeCatalogId={activeCatalogId}
+        />
 
-      <div className="main">
-        {bannerSlot}
+        <div className="main">
         <div className="content">
-          {years.length > 1 && (
-            <>
-              {/* Desktop: chip tabs */}
-              <div className="year-tabs year-tabs--desktop" role="tablist" aria-label="Filtrar por año">
-                <button
-                  className={`year-tab ${!activeYear ? 'active' : ''}`}
-                  onClick={() => setYear(null)}
-                  role="tab"
-                  aria-selected={!activeYear}
-                  tabIndex={!activeYear ? 0 : -1}
-                >
-                  Todos
-                </button>
-                {years.map((y) => (
-                  <button
-                    key={y}
-                    className={`year-tab ${activeYear === String(y) ? 'active' : ''}`}
-                    onClick={() => setYear(String(y))}
-                    role="tab"
-                    aria-selected={activeYear === String(y)}
-                    tabIndex={activeYear === String(y) ? 0 : -1}
-                  >
-                    {y}
-                  </button>
-                ))}
-              </div>
-              {/* Mobile: native select */}
-              <div className="year-select-wrap year-tabs--mobile">
-                <select
-                  className="year-select"
-                  value={activeYear ?? ''}
-                  onChange={(e) => setYear(e.target.value || null)}
-                >
-                  <option value="">Todos los años</option>
-                  {years.map((y) => (
-                    <option key={y} value={String(y)}>{y}</option>
-                  ))}
-                </select>
-              </div>
-            </>
-          )}
-
           {/* Classify-year button is shown in both views */}
           {showClassifyYear && (
             <div className="collapse-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
@@ -390,9 +315,9 @@ export default function LibraryClient({
           )}
           </div>
         </div>
+        </div>
+        {toast && <div className="toast">{toast}</div>}
       </div>
-
-      {toast && <div className="toast">{toast}</div>}
-    </div>
+    </>
   );
 }

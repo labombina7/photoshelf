@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useModal } from '@/components/ModalProvider';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconSparkle, IconTrash, IconPlus, IconX, IconMenu } from '@/components/Icons';
-import { useHeaderSlot } from '@/components/HeaderSlot';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 
 interface Project {
@@ -30,7 +30,6 @@ const STYLES = ['portrait', 'landscape', 'street', 'fashion', 'editorial', 'arch
 
 interface Props {
   projects: Project[];
-  sidebarProjects: { id: number; title: string }[];
   themes: Theme[];
   years: number[];
   events: { year: number; event: string }[];
@@ -41,7 +40,7 @@ interface Props {
   untaggedCount: number;
 }
 
-export default function ProjectsClient({ projects: initial, sidebarProjects, themes, years, events, topTags, allTags, totalPhotos, favoriteCount, untaggedCount }: Props) {
+export default function ProjectsClient({ projects: initial, themes, years, events, topTags, allTags, totalPhotos, favoriteCount, untaggedCount }: Props) {
   const router = useRouter();
   const { confirm } = useModal();
   const [projects, setProjects] = useState(initial);
@@ -141,34 +140,25 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
     setProjects(prev => prev.filter(p => p.id !== id));
   }
 
-  useHeaderSlot(useMemo(() => (
+  useEffect(() => {
+    function onNew() { setShowNew(true); }
+    window.addEventListener('photoshelf:new-project', onNew);
+    return () => window.removeEventListener('photoshelf:new-project', onNew);
+  }, []);
+
+  useHeaderSlotLeft(useMemo(() => (
     <div className="header-slot-library">
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Proyectos</span>
-      <span className="header-slot-sub">{projects.length} proyecto{projects.length !== 1 ? 's' : ''}</span>
-      <div className="topbar-spacer" />
-      <button
-        className="btn-primary"
-        style={{ width: 'auto', display: 'flex', alignItems: 'center', gap: 7, padding: '7px 14px', fontSize: 13 }}
-        onClick={() => setShowNew(true)}
-      >
-        <IconPlus size={13} />
-        Nuevo proyecto
-      </button>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [projects.length]));
+  ), []));
 
   return (
     <div className="app-shell">
       <Sidebar
-        themes={themes}
-        projects={sidebarProjects}
-        totalPhotos={totalPhotos}
-        favoriteCount={favoriteCount}
-        untaggedCount={untaggedCount}
+        projects={projects}
         mobileOpen={mobileSidebarOpen}
         onMobileClose={() => setMobileSidebarOpen(false)}
       />
@@ -180,7 +170,7 @@ export default function ProjectsClient({ projects: initial, sidebarProjects, the
               <IconSparkle size={32} />
               <p className="empty-state-title">Aún no hay proyectos</p>
               <p className="empty-state-subtitle">Genera tu primer portfolio con IA a partir de cualquier conjunto de fotos.</p>
-              <button className="btn btn--primary" onClick={() => setShowNew(true)}>
+              <button className="btn-small" onClick={() => setShowNew(true)}>
                 Crear primer proyecto
               </button>
             </div>

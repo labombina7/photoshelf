@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
@@ -8,6 +8,7 @@ import { IconSmartAlbum, IconPlus, IconTrash, IconEdit, IconMenu } from '@/compo
 import SmartAlbumBuilder from './SmartAlbumBuilder';
 import UnstructuredCatalogBanner from '@/components/UnstructuredCatalogBanner';
 import { useModal } from '@/components/ModalProvider';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 import type { AlbumRule } from '@/lib/smartAlbumQuery';
@@ -27,8 +28,6 @@ interface SmartAlbumsClientProps {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
-  projects: { id: number; title: string }[];
-  smartAlbums: { id: number; name: string }[];
   catalogs: CatalogRow[];
   activeCatalogId: number;
   catalogName: string;
@@ -79,8 +78,6 @@ export default function SmartAlbumsClient({
   totalPhotos,
   favoriteCount,
   untaggedCount,
-  projects,
-  smartAlbums,
   catalogs,
   activeCatalogId,
   catalogName,
@@ -93,6 +90,15 @@ export default function SmartAlbumsClient({
   const [editingAlbum, setEditingAlbum] = useState<AlbumItem | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>('date_desc');
+
+  useHeaderSlotLeft(useMemo(() => (
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setMobileOpen(true)} title="Menú">
+        <IconMenu size={18} />
+      </button>
+    </div>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), []));
 
   async function handleCreate(name: string, rules: AlbumRule[]) {
     const res = await fetch('/api/smart-albums', {
@@ -131,12 +137,7 @@ export default function SmartAlbumsClient({
   return (
     <div className="app-shell">
       <Sidebar
-        themes={themes}
-        projects={projects}
-        smartAlbums={smartAlbums}
-        totalPhotos={totalPhotos}
-        favoriteCount={favoriteCount}
-        untaggedCount={untaggedCount}
+        smartAlbums={initialAlbums.map(a => ({ id: a.id, name: a.name }))}
         catalogs={catalogs}
         activeCatalogId={activeCatalogId}
         mobileOpen={mobileOpen}
@@ -144,35 +145,22 @@ export default function SmartAlbumsClient({
       />
 
       <main className="main" style={{ padding: '24px 32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button
-              className="mobile-menu-btn"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Abrir menú"
-              style={{ display: 'none' }}
-            >
-              <IconMenu size={20} />
-            </button>
-            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>Álbumes inteligentes</h1>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              className="btn-small"
-              style={{ background: 'var(--border)', color: 'var(--text)' }}
-              onClick={() => router.push(`/catalogs/${activeCatalogId}/organize`)}
-            >
-              Organizar con smart albums
-            </button>
-            <button
-              className="btn-small"
-              onClick={() => setShowBuilder(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-            >
-              <IconPlus size={13} />
-              Nuevo álbum
-            </button>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+          <button
+            className="btn-small"
+            style={{ background: 'var(--border)', color: 'var(--text)' }}
+            onClick={() => router.push(`/catalogs/${activeCatalogId}/organize`)}
+          >
+            Organizar con smart albums
+          </button>
+          <button
+            className="btn-small"
+            onClick={() => setShowBuilder(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <IconPlus size={13} />
+            Nuevo álbum
+          </button>
         </div>
 
         {(isUnstructured || alreadyOrganized) && (

@@ -6,7 +6,6 @@ import { getSidebarData } from '@/lib/queries/sidebar';
 import { getActiveCatalogId } from '@/lib/catalog-context';
 import { getMemoriesBannerData } from '@/lib/queries/memories';
 import LibraryClient from './LibraryClient';
-import TodayBanner from '@/app/memories/TodayBanner';
 
 interface SearchParams {
   year?: string;   // absent = redirect to current year; 'all' = show every year explicitly
@@ -64,14 +63,6 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
 
   return (
     <LibraryClient
-      bannerSlot={
-        <TodayBanner
-          hasMemories={banner.hasMemories}
-          total={banner.total}
-          yearList={banner.yearList}
-          previewPhotos={banner.previewPhotos}
-        />
-      }
       groups={groups}
       total={sidebar.totalPhotos}
       filteredTotal={filteredTotal}
@@ -81,10 +72,10 @@ export default async function LibraryPage({ searchParams }: { searchParams: Prom
       untaggedCount={sidebar.untaggedCount}
       activeYear={effectiveYear ?? null}
       activeFilters={{ year: effectiveYear, event: sp.event, theme: sp.theme, favorite: sp.favorite, untagged: sp.untagged, q: sp.q, iso_max: sp.iso_max, aperture_max: sp.aperture_max, focal_min: sp.focal_min, focal_max: sp.focal_max, camera: sp.camera }}
-      projects={sidebar.projects}
       catalogs={sidebar.catalogs}
       activeCatalogId={catalogId}
       cameras={cameras}
+      hasMemories={banner.hasMemories}
     />
   );
 }

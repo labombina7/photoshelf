@@ -24,7 +24,6 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
       tagName={tagName}
       total={count}
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}

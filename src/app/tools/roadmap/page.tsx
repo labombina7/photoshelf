@@ -14,7 +14,6 @@ export default async function RoadmapPage() {
   return (
     <RoadmapClient
       themes={sidebar.themes}
-      projects={sidebar.projects}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
       untaggedCount={sidebar.untaggedCount}
