@@ -111,14 +111,15 @@ function saveAllPendingStats(): void {
   for (const row of pending) {
     updateBootstrapRow(row.period, { status: 'in_progress' });
     const { from, to } = periodRange(row.period);
-    const sampleIds = selectRepresentativeSample({ from, to, maxPhotos: row.type === 'historical_sample' ? 30 : 50 });
+    const isHistorical = row.type === 'historical_sample';
+    const profileType: 'annual_historical' | 'monthly' = isHistorical ? 'annual_historical' : 'monthly';
+    const sampleIds = selectRepresentativeSample({ from, to, maxPhotos: isHistorical ? 30 : 50 });
     if (sampleIds.length === 0) {
       updateBootstrapRow(row.period, { status: 'done', processed_at: new Date().toISOString(), sample_count: 0 });
       continue;
     }
     const summary = getStyleSignalsByPeriod({ from, to });
-    const isHistorical = row.type === 'historical_sample';
-    upsertStyleProfileSummaryOnly(row.period, isHistorical ? 'annual_historical' : 'monthly', summary);
+    upsertStyleProfileSummaryOnly(row.period, profileType, summary);
     updateBootstrapRow(row.period, { status: 'done', processed_at: new Date().toISOString(), sample_count: sampleIds.length });
   }
   console.log(`[style-bootstrap] Saved EXIF stats for ${pending.length} periods (Ollama unavailable)`);
