@@ -124,8 +124,12 @@ body {
 /* Sidebar en la vista de catálogo (con FilterBar encima).
    El banner está en la columna de contenido (padding-left: sidebar-w),
    no interfiere con la columna del sidebar. */
-/* sidebar en catálogo: arranca justo bajo el header, el filter-bar ya tiene
-   padding-left: sidebar-w y no invade la columna del sidebar */
+/* filter-bar dentro de .main: no necesita sticky (el scroll vive en .content).
+   Resetear top para que position:relative no genere el gap del header-h. */
+.main > .filter-bar {
+  position: relative;
+  top: 0;
+}
 /* ── Filter Bar ── */
 .filter-bar {
   position: sticky;

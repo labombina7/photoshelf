@@ -76,7 +76,7 @@
     /* ── Board ──────────────────────────────────────────────── */
     .board {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 14px;
       padding: 18px 20px 48px;
     }
@@ -594,14 +594,6 @@
         <div class="card-summary">Vista /compare?a=ID&b=ID con dos columnas a pantalla completa. Navegación por teclado entre fotos. Marcar favorita sin salir de la comparación.</div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-050" onclick="openModal('US-050')">
-        <div class="card-top">
-          <span class="badge badge-us">US-050</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Exportar selección de fotos como ZIP</div>
-        <div class="card-summary">Modo selección múltiple en biblioteca (Shift+click, checkboxes). Botón "Descargar selección" genera ZIP streaming con los originales.</div>
-      </div>
 
 
       <div class="card" tabindex="0" data-id="US-052" onclick="openModal('US-052')">
@@ -914,6 +906,16 @@
         <div class="card-title">Limpieza de thumbnails huérfanos y queries a repositorio</div>
         <div class="card-summary">Limpiar thumbnails en CACHE_PATH al borrar un catálogo. Mover queries inline de original/thumbnail routes a src/lib/queries/photos.ts.</div>
         <div class="card-footer"><span>Tech Debt 🟡</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-092" onclick="openModal('US-092')">
+        <div class="card-top">
+          <span class="badge badge-us">US-092</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Compartir fotos mediante enlace de descarga</div>
+        <div class="card-summary">Seleccionar fotos o álbumes, generar un share token temporal de uso único, compartir la URL via Web Share API (WhatsApp, etc.). El destinatario descarga el ZIP directamente sin necesitar cuenta.</div>
+        <div class="card-footer"><span>Feature ✨</span></div>
       </div>
 
       <div class="card" tabindex="0" data-id="US-021" onclick="openModal('US-021')">
@@ -1619,6 +1621,29 @@
 
     </div>
   </div>
+
+  <!-- ═══════════════ DESCARTADAS ═══════════════ -->
+  <div class="column">
+    <div class="col-header">
+      <div class="col-dot" style="background:#6b7280"></div>
+      <h2>Descartadas</h2>
+      <span class="col-count">1</span>
+    </div>
+    <div class="col-body">
+
+      <div class="card" tabindex="0" data-id="US-050" onclick="openModal('US-050')" style="opacity:0.55">
+        <div class="card-top">
+          <span class="badge badge-us">US-050</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title" style="text-decoration:line-through;color:var(--muted)">Exportar selección de fotos como ZIP</div>
+        <div class="card-summary" style="font-style:italic">Sustituida por US-092: el flujo de compartir via share token cubre el caso de descarga sin necesitar un path separado.</div>
+        <div class="card-footer"><span style="color:#6b7280">❌ Descartada</span></div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
 
 <!-- ══════════════════════════ MODAL ══════════════════════════ -->
@@ -3921,9 +3946,10 @@ const CARDS = {
   'US-050': {
     id: 'US-050',
     type: 'US',
-    column: 'todo',
+    column: 'discarded',
     effort: 'M',
     title: 'Exportar selección de fotos como ZIP',
+    discardReason: 'El flujo de compartir via share token (US-092) cubre el caso de uso de descarga. Desde móvil el SO gestiona la descarga directamente; no hay razón para mantener dos caminos.',
     story: 'Como fotógrafo que quiere compartir o hacer backup de un subconjunto de fotos,\nquiero poder seleccionar varias fotos en la biblioteca y descargarlas todas en un único archivo ZIP,\npara no tener que descargarlas una por una o acceder directamente al NAS por SFTP.',
     description: [
       'photoshelf permite descargar solo una foto a la vez. Un caso muy común — "quiero las 15 mejores fotos de vacaciones para compartir con familia" — obliga a descargas individuales. Esta US añade modo selección múltiple en la biblioteca (Shift+Click) y endpoint de exportación que genera ZIP con streaming para no cargar todo en memoria.',
@@ -5325,6 +5351,76 @@ const CARDS = {
     ],
     tech: ['iOS Safari: position:fixed dentro de sticky+overflow-x:auto pierde viewport → createPortal', 'SSR: useState inicializador síncrono para matchMedia evita flash de dropdown desktop'],
     outOfScope: []
+  },
+
+  'US-092': {
+    id: 'US-092', type: 'US', column: 'todo', effort: 'L',
+    title: 'Compartir fotos mediante enlace de descarga',
+    story: 'Como fotógrafo que usa photoshelf desde móvil,\nquiero seleccionar fotos o álbumes completos y generar un enlace de descarga directo,\npara compartirlos con familia o clientes (por WhatsApp u otras apps) sin que el destinatario necesite tener cuenta en photoshelf.',
+    description: [
+      'photoshelf vive en una red privada o NAS. Esta feature añade share tokens: el servidor genera un token de uso único (+ TTL 72h), y sirve un ZIP en streaming a cualquiera que tenga el enlace — sin autenticación.',
+      'El flujo mobile usa la Web Share API del navegador para abrir el menú nativo del SO (WhatsApp, iMessage, etc.). En desktop se muestra un dialog de "Copiar enlace".',
+      'Sustituye a US-050 (Exportar selección ZIP): el caso de descarga para uno mismo queda cubierto compartiéndose el link a sí mismo.',
+    ],
+    criteria: [
+      {
+        group: 'Generación del enlace',
+        items: [
+          'Botón "Compartir enlace" en toolbar de selección múltiple de la biblioteca',
+          'Opción "Compartir álbum" en el menú de la vista de álbum',
+          'Token de uso único — se invalida tras la primera descarga completada',
+          'Expiración adicional de 72h como red de seguridad (configurable)',
+          'Al crear el token se invoca navigator.share con la URL',
+          'Fallback: dialog con "Copiar enlace" si navigator.share no disponible',
+        ]
+      },
+      {
+        group: 'Descarga pública (sin autenticación)',
+        items: [
+          'GET /share/[token] no requiere sesión',
+          'Respuesta: ZIP en streaming con archivos originales',
+          'Content-Disposition: attachment; filename="photoshelf-share.zip"',
+          'Nombres de archivo: filename original, sin rutas absolutas del NAS',
+          'Token ya usado: error "Este enlace ya fue utilizado"',
+          'Token expirado o inexistente: error "Este enlace ha caducado"',
+        ]
+      },
+      {
+        group: 'Seguridad y límites',
+        items: [
+          'Tokens expirados se limpian en cada arranque del servidor',
+          'Un token solo accede a las fotos incluidas al crearlo',
+          'Límite de 300 fotos por share token',
+          'El token no expone IDs internos en la URL',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/api/share/route.ts', desc: 'POST crear token · GET listar tokens activos', isNew: true },
+      { path: 'src/app/api/share/[token]/route.ts', desc: 'DELETE revocar token', isNew: true },
+      { path: 'src/app/share/[token]/route.ts', desc: 'GET público — descarga ZIP en streaming', isNew: true },
+      { path: 'src/lib/queries/share.ts', desc: 'CRUD share_tokens + limpieza expirados', isNew: true },
+      { path: 'src/components/ShareButton.tsx', desc: 'Invoca API y luego navigator.share', isNew: true },
+      { path: 'src/components/ShareDialog.tsx', desc: 'Fallback copiar enlace para desktop', isNew: true },
+      { path: 'src/app/library/LibraryClient.tsx', desc: 'Añadir ShareButton a toolbar de selección', isNew: false },
+      { path: 'src/app/albums/[id]/AlbumClient.tsx', desc: 'Opción "Compartir álbum" en menú', isNew: false },
+    ],
+    tech: [
+      'Web Share API: navigator.share({ title, text, url }) — disponible en Chrome Android, Safari iOS 12.1+, Safari macOS 14+',
+      'ZIP bajo demanda en streaming (sin almacenamiento intermedio): archiver.pipe(response)',
+      'Token = UUID aleatorio 32 chars; BD: tabla share_tokens con campo used_at',
+      'Invalidación: marcar used_at al completar transferencia HTTP',
+      'Limpieza: DELETE FROM share_tokens WHERE expires_at < unixepoch() en cada arranque',
+      'SHARE_TOKEN_TTL_HOURS = 72 en src/lib/config.ts',
+    ],
+    outOfScope: [
+      'Proteger el enlace con contraseña',
+      'Tokens multi-uso (máx N descargas)',
+      'Notificación al propietario cuando alguien descarga',
+      'Preview de fotos en la página del link (descarga directa, sin intermedio)',
+      'Compartir fotos individuales como imagen para preview en WhatsApp',
+    ]
   }
 
 };
@@ -5346,7 +5442,7 @@ function openModal(cardId) {
   // Badges
   const effortMap = { S: 'effort-s', M: 'effort-m', L: 'effort-l' };
   const typeClass = card.type === 'EPIC' ? 'badge-epic' : 'badge-us';
-  const colTag = card.column === 'done' ? '<span class="badge badge-done">✓ done</span>' : (card.next ? '<span class="badge badge-next">▶ Siguiente</span>' : '');
+  const colTag = card.column === 'done' ? '<span class="badge badge-done">✓ done</span>' : card.column === 'discarded' ? '<span class="badge" style="background:#374151;color:#9ca3af">❌ descartada</span>' : (card.next ? '<span class="badge badge-next">▶ Siguiente</span>' : '');
   badgesEl.innerHTML = `<span class="badge ${typeClass}">${card.id}</span>${colTag}<span class="effort ${effortMap[card.effort] || 'effort-m'}">${card.effort}</span>`;
 
   // Title
@@ -5366,6 +5462,14 @@ function openModal(cardId) {
 
   // Build body
   let html = '';
+
+  // Discard reason (shown first, only for discarded cards)
+  if (card.discardReason) {
+    html += `<div class="modal-section" style="background:#1f2937;border:1px solid #374151;border-radius:8px;padding:12px 14px">
+      <div class="section-label" style="color:#9ca3af">❌ Motivo del descarte</div>
+      <p style="color:#d1d5db;margin:6px 0 0">${card.discardReason}</p>
+    </div>`;
+  }
 
   // Description
   if (card.description && card.description.length) {
