@@ -9,7 +9,7 @@ import { getCatalogById } from './queries/catalogs';
 import { isAutoBackupDue } from './queries/backup';
 import { runBackup } from './backup';
 import { ensureBootstrapRunning } from './style-analysis/bootstrap';
-import { runDailyCycle, runMissedMonthlySyntheses } from './style-analysis/cycle';
+import { runDailyCycle, runMissedMonthlySyntheses, runPendingNarratives } from './style-analysis/cycle';
 
 interface ClassifyPayload {
   type: 'classify_year' | 'classify_batch';
@@ -65,6 +65,11 @@ function scheduleStyleAnalysis(): void {
   setTimeout(() => {
     runMissedMonthlySyntheses().catch(err => console.error('[worker] Missed monthly syntheses error:', err));
   }, 10_000);
+
+  // Retry narratives for profiles that have EXIF stats but Ollama was unavailable
+  setTimeout(() => {
+    runPendingNarratives().catch(err => console.error('[worker] Pending narratives error:', err));
+  }, 15_000);
 }
 
 function scheduleAutoBackupIfDue(): void {

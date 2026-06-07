@@ -43,7 +43,10 @@ export default function MonthProfile({ profile, defaultOpen = false }: { profile
         <div className="insights-month-body">
           {profile.periodSummary && <ExifChips summary={profile.periodSummary} />}
 
-          <div className="insights-narrative">{profile.profileText}</div>
+          {profile.profileText
+            ? <div className="insights-narrative">{profile.profileText}</div>
+            : <div className="insights-narrative-pending">Narrativa en cola — se generará cuando Ollama esté disponible.</div>
+          }
 
           {profile.highlights.length > 0 && (
             <div className="insights-highlights">

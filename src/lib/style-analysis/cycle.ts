@@ -8,9 +8,10 @@ import {
   getStyleProfile,
   getLatestProfiles,
   upsertStyleProfile,
+  getProfilesWithoutNarrative,
 } from '@/lib/queries/style-analysis';
 import { getStyleSignalsByPeriod, selectRepresentativeSample } from '@/lib/queries/style-analysis';
-import { buildMonthlySynthesisPrompt, buildAnnualSynthesisPrompt } from './prompts';
+import { buildMonthlySynthesisPrompt, buildAnnualSynthesisPrompt, buildHistoricalSamplePrompt } from './prompts';
 
 const SYNTHESIS_DELAY_MS = 2_000;
 
@@ -89,14 +90,14 @@ export async function runMonthlySynthesis(month: string): Promise<void> {
 export async function runAnnualSynthesis(year: number): Promise<void> {
   console.log('[style-cycle] Starting annual synthesis for', year);
   const monthlyProfiles = getLatestProfiles(12, 'monthly')
-    .filter(p => p.period.startsWith(String(year)));
+    .filter(p => p.period.startsWith(String(year)) && p.profileText);
 
   if (monthlyProfiles.length === 0) {
-    console.log('[style-cycle] No monthly profiles for', year, '— skipping');
+    console.log('[style-cycle] No monthly profiles with narrative for', year, '— skipping');
     return;
   }
 
-  const narratives = monthlyProfiles.map(p => p.profileText);
+  const narratives = monthlyProfiles.map(p => p.profileText as string);
   const prompt = buildAnnualSynthesisPrompt(year, narratives);
 
   let raw: string;
@@ -143,5 +144,71 @@ export async function runMissedMonthlySyntheses(): Promise<void> {
       await runMonthlySynthesis(month);
       await sleep(SYNTHESIS_DELAY_MS);
     }
+  }
+}
+
+/**
+ * Retries narrative generation for profiles that have EXIF stats but no narrative.
+ * Called when Ollama becomes available after being unreachable during bootstrap.
+ */
+export async function runPendingNarratives(): Promise<void> {
+  const pending = getProfilesWithoutNarrative();
+  if (pending.length === 0) return;
+
+  console.log(`[style-cycle] ${pending.length} profiles without narrative — retrying`);
+
+  for (const profile of pending) {
+    const isAnnual = profile.type === 'annual_historical' && profile.period.length === 4;
+
+    let raw: string;
+    try {
+      if (isAnnual) {
+        // For annual profiles re-use monthly narratives if available
+        const monthlyProfiles = getLatestProfiles(12, 'monthly')
+          .filter(p => p.period.startsWith(profile.period) && p.profileText);
+        if (monthlyProfiles.length > 0) {
+          const prompt = buildAnnualSynthesisPrompt(Number(profile.period), monthlyProfiles.map(p => p.profileText as string));
+          raw = await callOllama(prompt, 120_000);
+        } else if (profile.periodSummary) {
+          raw = await callOllama(buildHistoricalSamplePrompt(profile.period, profile.periodSummary), 60_000);
+        } else {
+          continue;
+        }
+      } else {
+        if (!profile.periodSummary) continue;
+        const prevMonth = prevMonthStr(profile.period);
+        const prevProfile = getStyleProfile(prevMonth);
+        raw = await callOllama(
+          buildMonthlySynthesisPrompt(profile.period, profile.periodSummary, prevProfile?.profileText ?? null),
+          60_000,
+        );
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[style-cycle] Ollama still unavailable for pending narrative', profile.period, ':', msg);
+      break; // Stop trying — Ollama is down, retry next time
+    }
+
+    let parsed: { narrative: string; highlights: string[]; trend: string };
+    try {
+      parsed = extractJsonObject(raw) as unknown as typeof parsed;
+      if (!parsed?.narrative) throw new Error('missing narrative');
+    } catch {
+      console.error('[style-cycle] Failed to parse narrative for', profile.period);
+      await sleep(SYNTHESIS_DELAY_MS);
+      continue;
+    }
+
+    upsertStyleProfile({
+      period: profile.period,
+      type: profile.type,
+      profileText: parsed.narrative,
+      highlights: Array.isArray(parsed.highlights) ? parsed.highlights : [],
+      trend: parsed.trend ?? null,
+      periodSummary: profile.periodSummary,
+    });
+
+    console.log('[style-cycle] Narrative filled for', profile.period);
+    await sleep(SYNTHESIS_DELAY_MS);
   }
 }

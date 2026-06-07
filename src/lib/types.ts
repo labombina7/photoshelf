@@ -77,7 +77,7 @@ export interface StyleProfile {
   id: number;
   period: string;
   type: 'monthly' | 'annual_historical';
-  profileText: string;
+  profileText: string | null;
   highlights: string[];
   trend: string | null;
   periodSummary: PeriodStyleSummary | null;

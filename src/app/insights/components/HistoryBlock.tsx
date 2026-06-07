@@ -17,7 +17,10 @@ export default function HistoryBlock({ profiles }: { profiles: StyleProfile[] })
         {profiles.map(p => (
           <div key={p.period} className="insights-year">
             <div className="insights-year-header">{p.period}</div>
-            <div className="insights-narrative">{p.profileText}</div>
+            {p.profileText
+              ? <div className="insights-narrative">{p.profileText}</div>
+              : <div className="insights-narrative-pending">Narrativa en cola — se generará cuando Ollama esté disponible.</div>
+            }
             {p.highlights.length > 0 && (
               <ul className="insights-year-highlights">
                 {p.highlights.map((h, i) => <li key={i}>{h}</li>)}
