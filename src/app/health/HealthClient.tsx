@@ -259,20 +259,9 @@ export default function HealthClient({
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Salud de la biblioteca</span>
-      <div className="topbar-spacer" />
-      <button
-        className="btn-small"
-        onClick={refresh}
-        disabled={refreshing}
-        style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 5 }}
-      >
-        {refreshing ? <span className="spinner dark" aria-hidden /> : <IconRefresh size={12} />}
-        Actualizar
-      </button>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [refreshing]));
+  ), []));
 
   const m = metrics;
 
@@ -291,6 +280,20 @@ export default function HealthClient({
 
       <div className="main">
         <div className="content" style={{ maxWidth: 860 }}>
+
+          {/* Page header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 700 }}>Salud de la biblioteca</h1>
+            <button
+              className="btn-small"
+              onClick={refresh}
+              disabled={refreshing}
+              style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 5 }}
+            >
+              {refreshing ? <span className="spinner dark" aria-hidden /> : <IconRefresh size={12} />}
+              Actualizar
+            </button>
+          </div>
 
           {/* Score hero */}
           <div style={{

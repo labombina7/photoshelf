@@ -1,6 +1,6 @@
 # Épica: Análisis de estilo fotográfico
 
-> **Estado: 🗂 Planificada**
+> **Estado: ✅ Desplegada**
 
 ---
 

@@ -21,9 +21,10 @@ function shortenPath(p: string): string {
   return `${prefix}/…/${parts[parts.length - 1]}`;
 }
 
-function activeModule(pathname: string): 'catalog' | 'projects' | 'albums' | 'tools' {
+function activeModule(pathname: string): 'catalog' | 'projects' | 'albums' | 'tools' | 'insights' {
   if (pathname === '/projects' || pathname.startsWith('/projects/')) return 'projects';
   if (pathname === '/smart-albums' || pathname.startsWith('/smart-albums/')) return 'albums';
+  if (pathname === '/insights' || pathname.startsWith('/insights/')) return 'insights';
   if (['/jobs', '/stats', '/health', '/about'].some(r => pathname === r || pathname.startsWith(r + '/')) ||
       pathname.startsWith('/tools') || pathname.startsWith('/settings')) return 'tools';
   return 'catalog';
@@ -346,6 +347,24 @@ function AlbumsSection({
   );
 }
 
+// ── Insights sidebar content ──────────────────────────────────────────────────
+
+function InsightsSection({ onNavClick }: { onNavClick: () => void }) {
+  const pathname = usePathname();
+  return (
+    <div className="sidebar-section">
+      <div className="sidebar-section-label">Tu estilo</div>
+      <Link href="/insights" onClick={onNavClick}
+        className={`sidebar-item ${pathname === '/insights' ? 'active' : ''}`}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+        </svg>
+        Análisis de estilo
+      </Link>
+    </div>
+  );
+}
+
 // ── Tools sidebar content ─────────────────────────────────────────────────────
 
 function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
@@ -539,6 +558,9 @@ function SidebarInner({
         )}
         {module === 'tools' && (
           <ToolsSection onNavClick={handleNavClick} />
+        )}
+        {module === 'insights' && (
+          <InsightsSection onNavClick={handleNavClick} />
         )}
 
         <div className="sidebar-spacer" />

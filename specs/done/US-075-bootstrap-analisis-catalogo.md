@@ -3,6 +3,8 @@
 > **Épica padre:** [EPIC-004 — Análisis de estilo fotográfico](EPIC-004-analisis-estilo-fotografico.md)
 > **Depende de:** US-074
 
+> Estado: ✅ Desplegada
+
 ## Historia de usuario
 
 Como fotógrafo que acaba de activar el análisis de estilo,

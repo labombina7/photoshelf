@@ -45,3 +45,48 @@ export interface EventGroup {
   photos: Photo[];
   count: number;
 }
+
+// ── EPIC-004: Análisis de estilo fotográfico ──────────────────────────────────
+
+export interface StyleSignals {
+  photoId: number;
+  focalLength: number | null;
+  aperture: number | null;
+  iso: number | null;
+  shutterSpeed: number | null;
+  capturedAt: string | null;
+  camera: string | null;
+  lens: string | null;
+  genre: string | null;
+}
+
+export interface PeriodStyleSummary {
+  period: string;
+  photoCount: number;
+  avgFocalLength: number | null;
+  avgAperture: number | null;
+  avgIso: number | null;
+  avgHourOfDay: number | null;
+  topCamera: string | null;
+  topLens: string | null;
+  topGenres: string[];
+  topTags: string[];
+}
+
+export interface StyleProfile {
+  id: number;
+  period: string;
+  type: 'monthly' | 'annual_historical';
+  profileText: string;
+  highlights: string[];
+  trend: string | null;
+  periodSummary: PeriodStyleSummary | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BootstrapProgress {
+  total: number;
+  done: number;
+  percent: number;
+}
