@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -41,7 +42,9 @@ function BottomSheet({ open, title, onClose, children }: { open: boolean; title:
     return () => document.removeEventListener('keydown', onKey);
   }, [open, onClose]);
   if (!open) return null;
-  return (
+  // Portal a document.body: evita que position:sticky + overflow-x:auto del filter-bar
+  // rompa el contexto de position:fixed en iOS Safari (el sheet aparecía fuera de pantalla).
+  return createPortal(
     <>
       <div className="filter-sheet-backdrop" onClick={onClose} aria-hidden="true" />
       <div className="filter-sheet" role="dialog" aria-modal="true" aria-label={title}>
@@ -49,7 +52,8 @@ function BottomSheet({ open, title, onClose, children }: { open: boolean; title:
         <div className="filter-sheet-title">{title}</div>
         <div className="filter-sheet-body">{children}</div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 
