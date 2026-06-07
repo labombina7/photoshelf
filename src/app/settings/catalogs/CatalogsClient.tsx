@@ -224,7 +224,6 @@ export default function CatalogsClient({
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Catálogos</span>
     </div>
   ), []));
 
