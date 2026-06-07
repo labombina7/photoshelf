@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { getSession } from '@/lib/session';
 import { getDb } from '@/lib/db';
 import { getThumbnail } from '@/lib/thumbnail';
@@ -23,10 +24,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   try {
     const { buffer, contentType } = await getThumbnail(photo.path, photo.catalog_path, size, fit);
+    const etag = `"${crypto.createHash('md5').update(`${photo.catalog_path}:${photo.path}:${size}:${fit}`).digest('hex')}"`;
+    if (req.headers.get('if-none-match') === etag) {
+      return new NextResponse(null, { status: 304, headers: { ETag: etag } });
+    }
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        'Cache-Control': 'public, max-age=604800, must-revalidate',
+        'ETag': etag,
       },
     });
   } catch (err) {

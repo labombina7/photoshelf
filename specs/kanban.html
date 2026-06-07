@@ -966,6 +966,15 @@
         <div class="card-title">Álbumes inteligentes</div>
       </div>
 
+      <div class="card card-done" tabindex="0" data-id="BUG-001" onclick="openModal('BUG-001')">
+        <div class="card-top">
+          <span class="badge badge-us">BUG-001</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-07</span>
+        </div>
+        <div class="card-title">Thumbnails obsoletos por Cache-Control immutable</div>
+      </div>
+
       <div class="card card-done" tabindex="0" data-id="US-091" onclick="openModal('US-091')">
         <div class="card-top">
           <span class="badge badge-us">US-091</span>
@@ -2562,7 +2571,7 @@ const CARDS = {
       {
         group: 'GET /api/v1/photos/{id}/thumbnail y /original',
         items: [
-          'Thumbnail: parámetro <code>?size=120|200|400|800</code>, WebP, <code>Cache-Control: immutable</code>',
+          'Thumbnail: parámetro <code>?size=120|200|400|800</code>, WebP, <code>Cache-Control: public, max-age=604800, must-revalidate</code> + ETag',
           'Original: <code>Content-Disposition: attachment</code> y <code>Content-Type</code> correcto',
         ]
       },
@@ -2591,7 +2600,7 @@ const CARDS = {
     tech: [
       'El cursor del timeline: base64 del <code>periodKey</code> (ej. <code>"2024-08"</code> → <code>"MjAyNC0w"</code>). El servidor decodifica y hace <code>WHERE period_key &lt; ?</code>.',
       '<code>taken_at</code> en la respuesta debe ser ISO 8601 con timezone UTC (importante para iOS <code>Date</code> parsing).',
-      'Headers <code>Cache-Control: public, max-age=31536000, immutable</code> en thumbnails para que iOS las cachee.',
+      'Headers <code>Cache-Control: public, max-age=604800, must-revalidate</code> + ETag en thumbnails. <strong>No usar <code>immutable</code></strong>: si la BD se resetea y los IDs se reasignan, el navegador/iOS nunca revalidaría y mostraría thumbnails incorrectos.',
     ],
     outOfScope: [
       'Búsqueda semántica (cubierta en US-025)',
@@ -5319,6 +5328,31 @@ const CARDS = {
     ],
     tech: ['SQLite job_queue como fuente de verdad', 'Singleton worker en módulo Node (sobrevive HMR en prod)', 'started_at para reanudación de reclasificaciones', 'Polling cada 3s en el panel'],
     outOfScope: ['Cola multi-usuario', 'Prioridad entre jobs', 'Notificaciones push', 'Múltiples workers en paralelo']
+  },
+
+  'BUG-001': {
+    id: 'BUG-001', type: 'BUG', column: 'done', effort: 'XS',
+    title: 'Thumbnails obsoletos por Cache-Control immutable',
+    story: 'Como usuario de photoshelf,\nquiero que los thumbnails siempre muestren la foto correcta,\npara que no haya discrepancia entre la miniatura del grid y la foto que se abre al hacer clic.',
+    description: [
+      'La API de thumbnails usaba <code>Cache-Control: public, max-age=31536000, immutable</code>. El flag <code>immutable</code> indica al navegador que esa URL nunca cambiará, por lo que nunca la revalida.',
+      'Si la BD se vacía y se reescanea, los IDs de fotos se reasignan a ficheros distintos. El navegador servía el thumbnail antiguo para ese ID (de caché), mientras que al hacer clic se cargaba la foto real actual → no coincidían.',
+      'En modo incógnito no había caché previa, por eso sí salían correctos.',
+      '✅ Fix: <code>Cache-Control: public, max-age=604800, must-revalidate</code> + ETag basado en <code>md5(catalogPath:relativePath:size:fit)</code>. El navegador revalida con If-None-Match; si el ID ahora apunta a otro fichero, el ETag difiere y recibe el thumbnail correcto. PR #156, 2026-06-07.'
+    ],
+    criteria: [{ group: 'Resuelto', items: [
+      'Thumbnails en grid coinciden con la foto que se abre al hacer clic',
+      'Hard refresh (⌘⇧R) limpia cualquier thumbnail en caché incorrecto',
+      'No usar Cache-Control: immutable en ningún endpoint de thumbnails'
+    ]}],
+    dependencies: [], components: [
+      { path: 'src/app/api/photos/[id]/thumbnail/route.ts', desc: 'Cache-Control + ETag' },
+    ],
+    tech: [
+      'ETag = md5(catalogPath:relativePath:size:fit) — misma clave que el disco, permite 304 eficiente',
+      'No usar immutable: los IDs pueden apuntar a ficheros distintos tras un reseteo de BD',
+    ],
+    outOfScope: []
   },
 
   'US-091': {
