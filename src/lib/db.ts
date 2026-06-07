@@ -328,7 +328,7 @@ function migrateStyleAnalysis(db: Database.Database) {
       id                  INTEGER PRIMARY KEY AUTOINCREMENT,
       period              TEXT NOT NULL UNIQUE,
       type                TEXT NOT NULL CHECK(type IN ('monthly','annual_historical')),
-      profile_text        TEXT NOT NULL DEFAULT '',
+      profile_text        TEXT,
       highlights_json     TEXT NOT NULL DEFAULT '[]',
       trend               TEXT,
       period_summary_json TEXT,
@@ -350,6 +350,32 @@ function migrateStyleAnalysis(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_style_profiles_type   ON style_profiles(type, period);
     CREATE INDEX IF NOT EXISTS idx_style_pending_period  ON style_pending_signals(period);
   `);
+
+  // Migration: allow NULL profile_text (was NOT NULL DEFAULT '' in initial schema)
+  // SQLite doesn't support ALTER COLUMN, so we recreate the table if needed
+  const colInfo = db.prepare(`PRAGMA table_info(style_profiles)`).all() as { name: string; notnull: number }[];
+  const profileTextCol = colInfo.find(c => c.name === 'profile_text');
+  if (profileTextCol && profileTextCol.notnull === 1) {
+    db.exec(`
+      BEGIN;
+      ALTER TABLE style_profiles RENAME TO style_profiles_old;
+      CREATE TABLE style_profiles (
+        id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+        period              TEXT NOT NULL UNIQUE,
+        type                TEXT NOT NULL CHECK(type IN ('monthly','annual_historical')),
+        profile_text        TEXT,
+        highlights_json     TEXT NOT NULL DEFAULT '[]',
+        trend               TEXT,
+        period_summary_json TEXT,
+        created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at          TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+      INSERT INTO style_profiles SELECT * FROM style_profiles_old;
+      DROP TABLE style_profiles_old;
+      CREATE INDEX IF NOT EXISTS idx_style_profiles_type ON style_profiles(type, period);
+      COMMIT;
+    `);
+  }
 }
 
 // ── integrity badge: unresolved orphan count ──────────────────────────────────
