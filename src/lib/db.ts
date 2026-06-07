@@ -376,6 +376,15 @@ function migrateStyleAnalysis(db: Database.Database) {
       COMMIT;
     `);
   }
+
+  // ── US-093: Amplitude sync column ──────────────────────────────────────────
+  const photoCols = db.prepare(`PRAGMA table_info(photos)`).all() as { name: string }[];
+  if (!photoCols.find(c => c.name === 'amplitude_synced_at')) {
+    db.exec(`
+      ALTER TABLE photos ADD COLUMN amplitude_synced_at TEXT;
+      CREATE INDEX IF NOT EXISTS idx_photos_amplitude ON photos(amplitude_synced_at) WHERE amplitude_synced_at IS NULL;
+    `);
+  }
 }
 
 // ── integrity badge: unresolved orphan count ──────────────────────────────────
