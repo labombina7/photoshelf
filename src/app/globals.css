@@ -2802,7 +2802,91 @@ body { padding-top: var(--header-h); }
 .insights-current-month-note { font-size: 13px; color: var(--text-tertiary); margin-bottom: 8px; }
 .insights-month-in-progress { font-weight: 500; color: var(--text-secondary); }
 
+/* ── Year navigator ─────────────────────────────────────────────────────────── */
+.insights-navigator {
+  display: grid;
+  grid-template-columns: 40px 1fr 40px;
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 40px;
+}
+.insights-nav-arrow {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; margin-top: 6px;
+  background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 18px; color: var(--text-secondary); cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.insights-nav-arrow:hover:not(:disabled) { background: var(--bg-secondary); color: var(--text); }
+.insights-nav-arrow:disabled { opacity: 0.25; cursor: default; }
+.insights-navigator-content { min-width: 0; }
+
+/* ── Year view ───────────────────────────────────────────────────────────────── */
+.insights-year-view { display: flex; flex-direction: column; gap: 20px; }
+.insights-year-view-header { display: flex; align-items: center; gap: 12px; }
+.insights-year-title { font-size: 36px; font-weight: 700; color: var(--text); margin: 0; line-height: 1; }
+.insights-year-badge {
+  font-size: 11px; font-weight: 600; color: #4f46e5;
+  padding: 3px 10px; border: 1px solid #4f46e5;
+  border-radius: 99px; letter-spacing: 0.04em;
+}
+.insights-year-narrative {
+  font-size: 14px; line-height: 1.7; color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+.insights-year-trend {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 13px; color: var(--text-secondary); font-style: italic;
+  padding: 10px 14px; background: var(--bg-secondary);
+  border-radius: var(--radius-sm); border-left: 2px solid #4f46e5;
+}
+
+/* ── Stats block ─────────────────────────────────────────────────────────────── */
+.insights-stats-block {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.insights-stats-row {
+  display: grid; grid-template-columns: 24px 80px 1fr;
+  align-items: center; gap: 8px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+}
+.insights-stats-row:last-child { border-bottom: none; }
+.insights-stats-icon { font-size: 14px; text-align: center; }
+.insights-stats-label { color: var(--text-tertiary); font-size: 12px; }
+.insights-stats-value { color: var(--text); font-weight: 500; }
+
+/* ── Evolution line ──────────────────────────────────────────────────────────── */
+.insights-evolution { display: flex; flex-direction: column; gap: 12px; }
+.insights-evolution-title { font-size: 14px; font-weight: 600; color: var(--text); margin: 0; }
+.insights-evolution-track {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+.insights-evolution-pill {
+  flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 10px 14px; min-width: 100px;
+  background: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  cursor: pointer; text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+.insights-evolution-pill:hover { background: var(--bg-secondary); }
+.insights-evolution-pill.active { border-color: #4f46e5; background: color-mix(in srgb, #4f46e5 8%, transparent); }
+.insights-evolution-year { font-size: 15px; font-weight: 700; color: var(--text); }
+.insights-evolution-count { font-size: 11px; color: var(--text-tertiary); }
+.insights-evolution-trend { font-size: 11.5px; color: var(--text-secondary); font-style: italic; line-height: 1.4; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+
 @media (max-width: 768px) {
   .insights-page { padding: 16px 16px 40px; }
   .insights-blocks { flex-direction: column-reverse; }
+  .insights-navigator { grid-template-columns: 36px 1fr 36px; gap: 8px; }
+  .insights-nav-arrow { width: 36px; height: 36px; font-size: 16px; }
+  .insights-year-title { font-size: 28px; }
+  .insights-stats-row { grid-template-columns: 22px 70px 1fr; }
 }
