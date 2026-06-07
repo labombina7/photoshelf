@@ -69,7 +69,7 @@ export async function runMonthlySynthesis(month: string): Promise<void> {
 
   let raw: string;
   try {
-    raw = await callOllama(prompt, 60_000);
+    raw = await callOllama(prompt, 120_000);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[style-cycle] Ollama failed for monthly synthesis', month, ':', msg);
@@ -193,7 +193,7 @@ export async function runPendingNarratives(): Promise<void> {
           const prompt = buildAnnualSynthesisPrompt(Number(profile.period), monthlyProfiles.map(p => p.profileText as string));
           raw = await callOllama(prompt, 120_000);
         } else if (profile.periodSummary) {
-          raw = await callOllama(buildHistoricalSamplePrompt(profile.period, profile.periodSummary), 60_000);
+          raw = await callOllama(buildHistoricalSamplePrompt(profile.period, profile.periodSummary), 120_000);
         } else {
           continue;
         }
@@ -203,7 +203,7 @@ export async function runPendingNarratives(): Promise<void> {
         const prevProfile = getStyleProfile(prevMonth);
         raw = await callOllama(
           buildMonthlySynthesisPrompt(profile.period, profile.periodSummary, prevProfile?.profileText ?? null),
-          60_000,
+          120_000,
         );
       }
     } catch (err) {

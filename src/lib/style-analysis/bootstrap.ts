@@ -52,7 +52,7 @@ async function processRow(row: BootstrapRow): Promise<void> {
 
   let raw: string;
   try {
-    raw = await callOllama(prompt, 60_000);
+    raw = await callOllama(prompt, 120_000);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('[style-bootstrap] Ollama unavailable for period', row.period, ':', msg);
