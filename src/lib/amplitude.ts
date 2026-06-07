@@ -4,7 +4,7 @@
  * If AMPLITUDE_API_KEY is not set, all calls are no-ops.
  */
 
-const AMPLITUDE_ENDPOINT = 'https://api2.amplitude.com/2/httpapi';
+const AMPLITUDE_ENDPOINT = 'https://api.eu.amplitude.com/2/httpapi';
 
 function getApiKey(): string | null {
   return process.env.AMPLITUDE_API_KEY ?? null;
