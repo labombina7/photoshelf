@@ -145,35 +145,22 @@ export default function SmartAlbumsClient({
       />
 
       <main className="main" style={{ padding: '24px 32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <button
-              className="mobile-menu-btn"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Abrir menú"
-              style={{ display: 'none' }}
-            >
-              <IconMenu size={20} />
-            </button>
-            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>Álbumes inteligentes</h1>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button
-              className="btn-small"
-              style={{ background: 'var(--border)', color: 'var(--text)' }}
-              onClick={() => router.push(`/catalogs/${activeCatalogId}/organize`)}
-            >
-              Organizar con smart albums
-            </button>
-            <button
-              className="btn-small"
-              onClick={() => setShowBuilder(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-            >
-              <IconPlus size={13} />
-              Nuevo álbum
-            </button>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+          <button
+            className="btn-small"
+            style={{ background: 'var(--border)', color: 'var(--text)' }}
+            onClick={() => router.push(`/catalogs/${activeCatalogId}/organize`)}
+          >
+            Organizar con smart albums
+          </button>
+          <button
+            className="btn-small"
+            onClick={() => setShowBuilder(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <IconPlus size={13} />
+            Nuevo álbum
+          </button>
         </div>
 
         {(isUnstructured || alreadyOrganized) && (

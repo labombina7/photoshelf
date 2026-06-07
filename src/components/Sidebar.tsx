@@ -279,11 +279,6 @@ function ProjectsSection({
 }) {
   const pathname = usePathname();
 
-  function openNewProject() {
-    window.dispatchEvent(new CustomEvent('photoshelf:new-project'));
-    onNavClick();
-  }
-
   return (
     <div className="sidebar-section">
       <div className="sidebar-section-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -301,25 +296,6 @@ function ProjectsSection({
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.title}</span>
         </Link>
       ))}
-      <div style={{ padding: '6px 10px' }}>
-        <button
-          onClick={openNewProject}
-          aria-label="Crear nuevo proyecto"
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            width: '100%', padding: '7px 12px',
-            border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
-            background: 'transparent', color: 'var(--text-secondary)',
-            cursor: 'pointer', fontFamily: 'inherit', fontSize: 13,
-            transition: 'border-color 0.15s, background 0.15s, color 0.15s',
-          }}
-          onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-secondary)'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text)'; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'; }}
-        >
-          <IconPlus size={13} />
-          Nuevo proyecto
-        </button>
-      </div>
     </div>
   );
 }
