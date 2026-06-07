@@ -748,7 +748,10 @@ body {
 /* Body offset: header fijo arriba, FAB abajo en móvil */
 body { padding-top: var(--header-h); }
 @media (max-width: 640px) {
-  body { padding-top: calc(var(--header-h) + var(--mobile-nav-h)); padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
+  /* El header es position:fixed y sale del flujo → padding-top solo compensa su altura.
+     La nav mobile (.app-nav-mobile) es sticky y está en el flujo → ocupa su espacio sola.
+     No sumar --mobile-nav-h aquí o se genera un hueco gris entre header y nav. */
+  body { padding-top: var(--header-h); padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ── Animations ── */
