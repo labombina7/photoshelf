@@ -1,5 +1,7 @@
 # US-094 — Rediseño vista "Tu estilo": navegador anual e historial de evolución
 
+> Estado: ✅ Desplegada (PR #166, 2026-06-07)
+
 ## Historia de usuario
 
 Como fotógrafo que usa photoshelf,

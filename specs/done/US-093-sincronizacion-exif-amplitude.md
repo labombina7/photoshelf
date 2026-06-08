@@ -1,3 +1,5 @@
+> Estado: ✅ Desplegada (PR #167, 2026-06-07)
+
 # US-093 — Sincronización de metadatos EXIF a Amplitude
 
 ## Historia de usuario

@@ -64,7 +64,7 @@ async function processRow(row: BootstrapRow): Promise<void> {
 
   let parsed: { narrative: string; highlights: string[]; trend: string };
   try {
-    parsed = extractJsonObject('{' + raw) as unknown as typeof parsed;
+    parsed = extractJsonObject(raw) as unknown as typeof parsed;
     if (!parsed?.narrative) throw new Error('missing narrative');
   } catch {
     console.error('[style-bootstrap] Failed to parse Ollama response for period', row.period, '— raw:', raw?.substring(0, 200));

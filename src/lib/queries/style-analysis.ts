@@ -269,7 +269,9 @@ export function initBootstrapIfEmpty(): void {
 
   const months = db.prepare(`
     SELECT strftime('%Y-%m', taken_at) AS period, COUNT(*) AS photo_count
-    FROM photos WHERE taken_at IS NOT NULL AND ${MOB_SQL_NO_ALIAS}
+    FROM photos WHERE taken_at IS NOT NULL
+      AND CAST(strftime('%Y', taken_at) AS INTEGER) >= 1990
+      AND ${MOB_SQL_NO_ALIAS}
     GROUP BY period ORDER BY period ASC
   `).all(...MOB_PARAMS) as { period: string; photo_count: number }[];
 
