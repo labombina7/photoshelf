@@ -64,10 +64,10 @@ async function processRow(row: BootstrapRow): Promise<void> {
 
   let parsed: { narrative: string; highlights: string[]; trend: string };
   try {
-    parsed = extractJsonObject(raw) as unknown as typeof parsed;
+    parsed = extractJsonObject('{' + raw) as unknown as typeof parsed;
     if (!parsed?.narrative) throw new Error('missing narrative');
   } catch {
-    console.error('[style-bootstrap] Failed to parse Ollama response for period', row.period);
+    console.error('[style-bootstrap] Failed to parse Ollama response for period', row.period, '— raw:', raw?.substring(0, 200));
     // Save EXIF stats without narrative — narrative will be retried later
     upsertStyleProfileSummaryOnly(row.period, isHistorical ? 'annual_historical' : 'monthly', summary);
     updateBootstrapRow(row.period, { status: 'done', processed_at: new Date().toISOString(), sample_count: sampleIds.length });

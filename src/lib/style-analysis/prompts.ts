@@ -45,7 +45,10 @@ Responde ÚNICAMENTE con un objeto JSON válido con esta estructura exacta:
 - Tono personal, dirigido al fotógrafo
 - Compara con el mes anterior si hay datos
 - Incluye observaciones concretas sobre equipo, géneros y técnica
-- Los highlights deben ser específicos, no genéricos`;
+- Los highlights deben ser específicos, no genéricos
+
+Respuesta (empieza directamente con {, sin texto previo):
+{`;
 }
 
 export function buildAnnualSynthesisPrompt(year: number, monthlyProfiles: string[]): string {
@@ -71,7 +74,10 @@ Responde ÚNICAMENTE con un objeto JSON válido:
 - Responde en español
 - Usa los 12 perfiles para construir una narrativa coherente del año
 - Identifica qué definió ese año fotográficamente
-- Menciona equipo, géneros y momentos clave`;
+- Menciona equipo, géneros y momentos clave
+
+Respuesta (empieza directamente con {, sin texto previo):
+{`;
 }
 
 export function buildHistoricalSamplePrompt(
@@ -95,5 +101,8 @@ Responde ÚNICAMENTE con un objeto JSON válido:
 
 - Responde en español
 - Tono histórico y descriptivo
-- Sé conciso — es un perfil de muestra representativa`;
+- Sé conciso — es un perfil de muestra representativa
+
+Respuesta (empieza directamente con {, sin texto previo):
+{`;
 }

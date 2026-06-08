@@ -79,7 +79,7 @@ export async function runMonthlySynthesis(month: string): Promise<void> {
 
   let parsed: { narrative: string; highlights: string[]; trend: string };
   try {
-    parsed = extractJsonObject(raw) as unknown as typeof parsed;
+    parsed = extractJsonObject('{' + raw) as unknown as typeof parsed;
     if (!parsed?.narrative) throw new Error('missing narrative');
   } catch {
     console.error('[style-cycle] Failed to parse Ollama response for', month, '— raw:', raw.substring(0, 300));
