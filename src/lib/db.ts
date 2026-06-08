@@ -392,7 +392,7 @@ function migrateStyleAnalysis(db: Database.Database) {
     db.exec(`
       DELETE FROM style_profiles;
       UPDATE style_analysis_bootstrap SET status = 'pending', version = ${STYLE_ANALYSIS_VERSION},
-        processed_at = NULL, error = NULL, sample_count = 0;
+        processed_at = NULL, sample_count = 0;
     `);
   }
 
