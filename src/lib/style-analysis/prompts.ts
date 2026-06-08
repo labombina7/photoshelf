@@ -34,18 +34,8 @@ ${formatSummary(current)}
 ${prevSection}
 ## Instrucciones
 
-Responde ÚNICAMENTE con un objeto JSON válido con esta estructura exacta:
-{
-  "narrative": "texto narrativo de 3-5 párrafos en español, tono personal ('este mes has...', 'se nota que...')",
-  "highlights": ["observación clave 1", "observación clave 2", "observación clave 3"],
-  "trend": "una frase sobre la dirección actual del estilo"
-}
-
-- Responde en español
-- Tono personal, dirigido al fotógrafo
-- Compara con el mes anterior si hay datos
-- NO incluyas texto antes ni después del JSON
-- Los highlights deben ser específicos, no genéricos`;
+Responde ÚNICAMENTE con este JSON (sin texto antes ni después):
+{"narrative":"2 párrafos en español, tono personal ('este mes has...', 'se nota que...')","highlights":["observación 1","observación 2","observación 3"],"trend":"una frase sobre la dirección del estilo"}`;
 }
 
 export function buildAnnualSynthesisPrompt(year: number, monthlyProfiles: string[]): string {
@@ -61,17 +51,8 @@ ${profilesText}
 
 ## Instrucciones
 
-Responde ÚNICAMENTE con un objeto JSON válido:
-{
-  "narrative": "relato narrativo del año completo en español, en 4-6 párrafos cronológicos, tono autobiográfico ('en este año...')",
-  "highlights": ["hito fotográfico 1", "hito fotográfico 2", "hito fotográfico 3"],
-  "trend": "una frase sobre la evolución global del estilo durante este año"
-}
-
-- Responde en español
-- Usa los 12 perfiles para construir una narrativa coherente del año
-- Identifica qué definió ese año fotográficamente
-- NO incluyas texto antes ni después del JSON`;
+Responde ÚNICAMENTE con este JSON (sin texto antes ni después):
+{"narrative":"2-3 párrafos en español, tono autobiográfico ('en este año...')","highlights":["hito 1","hito 2","hito 3"],"trend":"una frase sobre la evolución del estilo"}`;
 }
 
 export function buildHistoricalSamplePrompt(
@@ -86,15 +67,6 @@ ${formatSummary(summary)}
 
 ## Instrucciones
 
-Responde ÚNICAMENTE con un objeto JSON válido:
-{
-  "narrative": "descripción narrativa del año en español, 2-3 párrafos, tono histórico ('en ${year}...')",
-  "highlights": ["característica 1 de ese año", "característica 2"],
-  "trend": "una frase que resume el estilo fotográfico de ese año"
-}
-
-- Responde en español
-- Tono histórico y descriptivo
-- Sé conciso — es un perfil de muestra representativa
-- NO incluyas texto antes ni después del JSON`;
+Responde ÚNICAMENTE con este JSON (sin texto antes ni después):
+{"narrative":"1-2 párrafos en español, tono histórico ('en ${year}...')","highlights":["característica 1","característica 2"],"trend":"una frase que resume el estilo de ese año"}`;
 }
