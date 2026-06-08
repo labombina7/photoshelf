@@ -8,6 +8,7 @@ import {
   getStyleProfile,
   getLatestProfiles,
   upsertStyleProfile,
+  upsertStyleProfileSummaryOnly,
   getProfilesWithoutNarrative,
 } from '@/lib/queries/style-analysis';
 import { getStyleSignalsByPeriod, selectRepresentativeSample } from '@/lib/queries/style-analysis';
@@ -81,7 +82,9 @@ export async function runMonthlySynthesis(month: string): Promise<void> {
     parsed = extractJsonObject(raw) as unknown as typeof parsed;
     if (!parsed?.narrative) throw new Error('missing narrative');
   } catch {
-    console.error('[style-cycle] Failed to parse Ollama response for', month);
+    console.error('[style-cycle] Failed to parse Ollama response for', month, '— raw:', raw.substring(0, 300));
+    // Save EXIF stats without narrative so UI shows camera/focal/ISO data
+    upsertStyleProfileSummaryOnly(month, 'monthly', summary);
     return;
   }
 
