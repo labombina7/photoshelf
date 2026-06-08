@@ -79,7 +79,10 @@ export async function runMonthlySynthesis(month: string): Promise<void> {
 
   let parsed: { narrative: string; highlights: string[]; trend: string };
   try {
-    parsed = extractJsonObject(raw) as unknown as typeof parsed;
+    const obj = JSON.parse(extractJsonObject(raw));
+    // Normalize keys to lowercase to handle "Trend" vs "trend" etc.
+    const norm = Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
+    parsed = norm as typeof parsed;
     if (!parsed?.narrative) throw new Error('missing narrative');
   } catch {
     console.error('[style-cycle] Failed to parse Ollama response for', month, '— raw:', raw.substring(0, 600));
@@ -127,7 +130,9 @@ export async function runAnnualSynthesis(year: number): Promise<void> {
 
   let parsed: { narrative: string; highlights: string[]; trend: string };
   try {
-    parsed = extractJsonObject(raw) as unknown as typeof parsed;
+    const obj = JSON.parse(extractJsonObject(raw));
+    const norm = Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
+    parsed = norm as typeof parsed;
     if (!parsed?.narrative) throw new Error('missing narrative');
   } catch {
     console.error('[style-cycle] Failed to parse Ollama response for year', year);
@@ -217,7 +222,9 @@ export async function runPendingNarratives(): Promise<void> {
 
     let parsed: { narrative: string; highlights: string[]; trend: string };
     try {
-      parsed = extractJsonObject(raw) as unknown as typeof parsed;
+      const obj = JSON.parse(extractJsonObject(raw));
+      const norm = Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
+      parsed = norm as typeof parsed;
       if (!parsed?.narrative) throw new Error('missing narrative');
     } catch {
       console.error('[style-cycle] Failed to parse narrative for', profile.period);

@@ -37,7 +37,7 @@ export async function callOllama(prompt: string, timeoutMs = OLLAMA_TIMEOUT_TEXT
         model: process.env.OLLAMA_TEXT_MODEL ?? 'llama3:latest',
         prompt,
         stream: false,
-        options: { temperature: 0, num_predict: 2048 },
+        options: { temperature: 0, num_predict: 4096 },
       }),
       signal: AbortSignal.timeout(timeoutMs),
     });
