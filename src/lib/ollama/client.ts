@@ -34,7 +34,7 @@ export async function callOllama(prompt: string, timeoutMs = OLLAMA_TIMEOUT_TEXT
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'llava:7b',
+        model: process.env.OLLAMA_TEXT_MODEL ?? 'llama3:latest',
         prompt,
         stream: false,
         options: { temperature: 0 },
