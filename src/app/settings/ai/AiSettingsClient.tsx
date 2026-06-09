@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
-import SettingsNav from '@/components/SettingsNav';
 import { IconMenu } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
@@ -51,8 +50,6 @@ export default function AiSettingsClient({
 
       <div className="main">
         <div style={{ padding: '24px 32px', maxWidth: 640 }}>
-          <SettingsNav />
-
           <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>Modelos de IA</div>
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>
             Configura el proveedor de inteligencia artificial para clasificación de fotos, búsqueda semántica y análisis de estilo.
