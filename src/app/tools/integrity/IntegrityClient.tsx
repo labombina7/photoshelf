@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu, IconShield, IconRefresh, IconCheck, IconTrash, IconAlertTriangle } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
@@ -42,6 +42,7 @@ interface Props {
   untaggedCount: number;
   catalogs?: CatalogRow[];
   activeCatalogId?: number;
+  topSlot?: React.ReactNode;
 }
 
 function fmtDate(iso: string | null): string {
@@ -166,6 +167,7 @@ export default function IntegrityClient({
   untaggedCount,
   catalogs = [],
   activeCatalogId = 1,
+  topSlot,
 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [meta, setMeta] = useState<Meta>(initialMeta);
@@ -288,6 +290,8 @@ export default function IntegrityClient({
 
       <div className="main">
         <div className="content" style={{ maxWidth: 800 }}>
+
+          {topSlot}
 
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 28 }}>

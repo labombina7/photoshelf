@@ -3,6 +3,7 @@
 import { useState, useTransition, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
+import SettingsNav from '@/components/SettingsNav';
 import { IconMenu, IconTrash, IconEdit } from '@/components/Icons';
 import { useModal } from '@/components/ModalProvider';
 import { useHeaderSlot } from '@/components/HeaderSlot';
@@ -242,6 +243,7 @@ export default function CatalogsClient({
 
       <div className="main">
         <div style={{ padding: '24px 32px', maxWidth: 640 }}>
+          <SettingsNav />
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>
             Cada catálogo apunta a una carpeta de fotos independiente. Escribe la ruta completa tal como aparece en el NAS.
           </p>
