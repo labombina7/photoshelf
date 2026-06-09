@@ -26,7 +26,7 @@ function activeModule(pathname: string): 'catalog' | 'projects' | 'albums' | 'to
   if (pathname === '/smart-albums' || pathname.startsWith('/smart-albums/')) return 'albums';
   if (pathname === '/insights' || pathname.startsWith('/insights/')) return 'insights';
   if (['/jobs', '/stats', '/health', '/about'].some(r => pathname === r || pathname.startsWith(r + '/')) ||
-      pathname.startsWith('/tools') || pathname.startsWith('/settings')) return 'tools';
+      pathname.startsWith('/tools')) return 'tools';
   return 'catalog';
 }
 
@@ -424,8 +424,8 @@ function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
         <IconHeartbeat size={14} />
         Salud
       </Link>
-      <Link href="/settings/tools" onClick={onNavClick}
-        className={`sidebar-item ${pathname.startsWith('/settings/tools') ? 'active' : ''}`}>
+      <Link href="/tools/integrity" onClick={onNavClick}
+        className={`sidebar-item ${pathname.startsWith('/tools/integrity') ? 'active' : ''}`}>
         <IconShield size={14} />
         Integridad
         {orphanCount > 0 && (
@@ -433,11 +433,6 @@ function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
             {orphanCount}
           </span>
         )}
-      </Link>
-      <Link href="/settings" onClick={onNavClick}
-        className={`sidebar-item ${pathname.startsWith('/settings') ? 'active' : ''}`}>
-        <IconViewGrid size={14} />
-        Ajustes
       </Link>
       <Link href="/about" onClick={onNavClick}
         className={`sidebar-item ${pathname === '/about' || pathname.startsWith('/about/') ? 'active' : ''}`}>

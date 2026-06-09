@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 const SECTIONS = [
   { href: '/settings/general',  label: 'General' },
   { href: '/settings/catalogs', label: 'Catálogos' },
-  { href: '/settings/tools',    label: 'Herramientas' },
   { href: '/settings/ai',       label: 'IA' },
 ];
 
