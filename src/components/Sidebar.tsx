@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { IconViewGrid, IconStar, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck, IconShield, IconHeartbeat, IconSmartAlbum } from './Icons';
+import { IconViewGrid, IconStar, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck, IconShield, IconHeartbeat, IconSmartAlbum, IconGear } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -21,10 +21,11 @@ function shortenPath(p: string): string {
   return `${prefix}/…/${parts[parts.length - 1]}`;
 }
 
-function activeModule(pathname: string): 'catalog' | 'projects' | 'albums' | 'tools' | 'insights' {
+function activeModule(pathname: string): 'catalog' | 'projects' | 'albums' | 'tools' | 'insights' | 'settings' {
   if (pathname === '/projects' || pathname.startsWith('/projects/')) return 'projects';
   if (pathname === '/smart-albums' || pathname.startsWith('/smart-albums/')) return 'albums';
   if (pathname === '/insights' || pathname.startsWith('/insights/')) return 'insights';
+  if (pathname.startsWith('/settings')) return 'settings';
   if (['/jobs', '/stats', '/health', '/about'].some(r => pathname === r || pathname.startsWith(r + '/')) ||
       pathname.startsWith('/tools')) return 'tools';
   return 'catalog';
@@ -365,6 +366,35 @@ function InsightsSection({ onNavClick }: { onNavClick: () => void }) {
   );
 }
 
+// ── Settings sidebar content ──────────────────────────────────────────────────
+
+function SettingsSection({ onNavClick }: { onNavClick: () => void }) {
+  const pathname = usePathname();
+  return (
+    <div className="sidebar-section">
+      <div className="sidebar-section-label">Ajustes</div>
+      <Link href="/settings/general" onClick={onNavClick}
+        className={`sidebar-item ${pathname.startsWith('/settings/general') ? 'active' : ''}`}>
+        <IconGear size={14} />
+        General
+      </Link>
+      <Link href="/settings/catalogs" onClick={onNavClick}
+        className={`sidebar-item ${pathname.startsWith('/settings/catalogs') ? 'active' : ''}`}>
+        <IconViewGrid size={14} />
+        Catálogos
+      </Link>
+      <Link href="/settings/ai" onClick={onNavClick}
+        className={`sidebar-item ${pathname.startsWith('/settings/ai') ? 'active' : ''}`}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M12 2a4 4 0 0 1 4 4c0 1.5-.8 2.8-2 3.5V11h1a1 1 0 0 1 1 1v1h1a1 1 0 0 1 1 1v3H6v-3a1 1 0 0 1 1-1h1v-1a1 1 0 0 1 1-1h1V9.5C8.8 8.8 8 7.5 8 6a4 4 0 0 1 4-4z"/>
+          <line x1="9" y1="21" x2="15" y2="21"/>
+        </svg>
+        Modelos de IA
+      </Link>
+    </div>
+  );
+}
+
 // ── Tools sidebar content ─────────────────────────────────────────────────────
 
 function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
@@ -553,6 +583,9 @@ function SidebarInner({
         )}
         {module === 'tools' && (
           <ToolsSection onNavClick={handleNavClick} />
+        )}
+        {module === 'settings' && (
+          <SettingsSection onNavClick={handleNavClick} />
         )}
         {module === 'insights' && (
           <InsightsSection onNavClick={handleNavClick} />

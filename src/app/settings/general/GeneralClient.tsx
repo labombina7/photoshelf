@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
-import SettingsNav from '@/components/SettingsNav';
 import { IconMenu } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
@@ -89,8 +88,6 @@ export default function GeneralClient({
 
       <div className="main">
         <div style={{ padding: '24px 32px', maxWidth: 640 }}>
-          <SettingsNav />
-
           {/* ── Watcher ───────────────────────────────────────── */}
           <section style={{ marginBottom: 36 }}>
             <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Vigilancia de carpetas</div>

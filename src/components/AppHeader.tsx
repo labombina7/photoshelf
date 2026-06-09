@@ -196,17 +196,17 @@ export default function AppHeader() {
               {label}
             </Link>
           ))}
+          {/* Separador + icono de ajustes — al final de la nav, a la derecha de Herramientas */}
+          <span style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 6px', alignSelf: 'center', flexShrink: 0 }} aria-hidden="true" />
+          <Link
+            href="/settings"
+            className={`app-header-nav-item app-header-settings-btn${pathname.startsWith('/settings') ? ' active' : ''}`}
+            title="Ajustes"
+            aria-label="Ajustes"
+          >
+            <IconGear size={16} />
+          </Link>
         </nav>
-
-        {/* Ajustes — icono de engranaje fijo en el header */}
-        <Link
-          href="/settings"
-          className={`app-header-nav-item app-header-settings-btn${pathname.startsWith('/settings') ? ' active' : ''}`}
-          title="Ajustes"
-          aria-label="Ajustes"
-        >
-          <IconGear size={16} />
-        </Link>
 
         {/* Slot izquierda — siempre en DOM para mantener grid estable */}
         <div className="app-header-slot-left">{slotLeft}</div>
