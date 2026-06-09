@@ -918,6 +918,26 @@
         <div class="card-footer"><span>Feature ✨</span></div>
       </div>
 
+      <div class="card" tabindex="0" data-id="US-094" onclick="openModal('US-094')">
+        <div class="card-top">
+          <span class="badge badge-us">US-094</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Rediseño vista "Tu estilo": navegador anual</div>
+        <div class="card-summary">Navegador año a año con flechas, narrativa + bloque de estadísticas por año, y línea de evolución global. Los datos vienen de los perfiles ya en BD — solo cambia la presentación.</div>
+        <div class="card-footer"><span>Feature ✨ · dep: EPIC-004</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-093" onclick="openModal('US-093')">
+        <div class="card-top">
+          <span class="badge badge-us">US-093</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Sincronización de metadatos EXIF a Amplitude</div>
+        <div class="card-summary">Enviar cada foto como evento photo_taken a Amplitude (cámara, focal, apertura, ISO, género, hora…) para analizar el estilo fotográfico con las gráficas nativas de Amplitude. Sin GPS. Sync inicial + incremental automática.</div>
+        <div class="card-footer"><span>Feature ✨ · Analytics</span></div>
+      </div>
+
       <div class="card" tabindex="0" data-id="US-021" onclick="openModal('US-021')">
         <div class="card-top">
           <span class="badge badge-us">US-021</span>
@@ -5387,6 +5407,107 @@ const CARDS = {
     outOfScope: []
   },
 
+  'US-094': {
+    id: 'US-094', type: 'US', column: 'todo', effort: 'M',
+    title: 'Rediseño vista "Tu estilo": navegador anual',
+    story: 'Como fotógrafo que usa photoshelf,\nquiero navegar por mi historia fotográfica año a año con flechas,\npara leer la narrativa de cada año junto a mis estadísticas reales.',
+    description: [
+      'La vista actual muestra acordeones de meses — útil para almacenamiento pero no para lectura. Esta US rediseña la presentación para priorizar la experiencia narrativa.',
+      'Navegador año a año con flechas ← →. Cada año: narrativa Ollama, bloque de estadísticas (cámara, focal, apertura, ISO, hora, géneros, volumen), frase de tendencia.',
+      'Línea de evolución debajo: todos los años en fila con su trend y volumen. Al pulsar un año en la línea, el navegador salta a él.',
+      'Sin cambios en BD — los perfiles existentes se usan tal cual. Para años recientes (últimos 24 meses, solo perfiles mensuales), la API agrega al vuelo.',
+    ],
+    criteria: [
+      { group: 'Navegador anual', items: [
+        'Año más reciente al cargar, flechas ← → para navegar',
+        'Badge "Este año" en el año actual',
+        'Narrativa + estadísticas + trend por año',
+        'Placeholder si la narrativa aún no está generada (Ollama pendiente)',
+      ]},
+      { group: 'Estadísticas', items: [
+        'Cámara más usada, focales más usadas, aperturas, ISOs, hora habitual, géneros, volumen',
+        'Sin medias — solo valores más frecuentes',
+      ]},
+      { group: 'Línea de evolución', items: [
+        'Todos los años en fila debajo del navegador',
+        'Trend + volumen por año',
+        'Al pulsar un año, el navegador salta a él',
+      ]},
+      { group: 'Datos', items: [
+        'Años históricos: perfil annual_historical directo de BD',
+        'Años recientes: agregación de perfiles mensuales en API (GET /api/insights/years)',
+        'Sin cambios en esquema de BD',
+      ]},
+    ],
+    files: [
+      'src/app/api/insights/years/route.ts',
+      'src/app/insights/InsightsClient.tsx',
+      'src/app/insights/components/YearView.tsx',
+      'src/app/insights/components/StatsBlock.tsx',
+      'src/app/insights/components/EvolutionLine.tsx',
+      'src/app/globals.css',
+    ],
+    tags: ['Feature ✨'],
+  },
+
+  'US-093': {
+    id: 'US-093', type: 'US', column: 'todo', effort: 'M',
+    title: 'Sincronización de metadatos EXIF a Amplitude',
+    story: 'Como fotógrafo que usa photoshelf,\nquiero que los metadatos EXIF de mi catálogo se envíen a Amplitude,\npara poder analizar mi estilo fotográfico con las gráficas nativas de Amplitude.',
+    description: [
+      'Cada foto se envía como evento photo_taken con propiedades EXIF (cámara, focal, apertura, ISO, género, hora del día, tags). El timestamp del evento es taken_at para que el histórico aparezca correctamente.',
+      'Sin datos de GPS. El insert_id es photo_${id} para garantizar idempotencia en re-sincronizaciones.',
+      'Sincronización inicial vía POST /api/amplitude/sync + incremental automática tras cada scan. UI en /jobs con progreso y botón de sync manual.',
+    ],
+    criteria: [
+      {
+        group: 'Configuración',
+        items: [
+          'API key via AMPLITUDE_API_KEY env var; si no está definida, sync desactivada silenciosamente',
+          'user_id configurable via AMPLITUDE_USER_ID (default: photoshelf-user)',
+        ],
+      },
+      {
+        group: 'Evento photo_taken',
+        items: [
+          'insert_id: photo_${id} para idempotencia',
+          'time: taken_at en ms (fallback: created_at)',
+          'Propiedades: camera, focal_length, aperture, iso, shutter_speed, year, month, hour_of_day, day_of_week, genre, tags[], width, height, has_exif',
+          'No se envían gps_lat, gps_lon, path ni filename',
+        ],
+      },
+      {
+        group: 'Sync inicial',
+        items: [
+          'POST /api/amplitude/sync lanza sync en background, responde inmediatamente',
+          'Batches de 100 fotos (límite API Amplitude)',
+          'Columna amplitude_synced_at en photos para tracking',
+          'GET /api/amplitude/sync devuelve progreso { total, synced, percent }',
+        ],
+      },
+      {
+        group: 'Sync incremental',
+        items: [
+          'Worker llama syncPendingPhotosToAmplitude() tras cada scan',
+        ],
+      },
+      {
+        group: 'UI',
+        items: [
+          'Tarjeta Amplitude en /jobs con estado API key, progreso y botón "Sincronizar ahora"',
+        ],
+      },
+    ],
+    files: [
+      'src/lib/amplitude.ts',
+      'src/lib/queries/amplitude.ts',
+      'src/app/api/amplitude/sync/route.ts',
+      'src/lib/worker.ts',
+      'src/app/jobs/JobsClient.tsx',
+      'src/lib/db.ts',
+    ],
+    tags: ['Feature ✨', 'Analytics'],
+  },
   'US-092': {
     id: 'US-092', type: 'US', column: 'todo', effort: 'L',
     title: 'Compartir fotos mediante enlace de descarga',

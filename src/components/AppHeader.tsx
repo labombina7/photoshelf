@@ -3,7 +3,7 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { IconSearch, IconSparkle } from './Icons';
+import { IconSearch, IconSparkle, IconGear } from './Icons';
 import { useSearchShortcut } from '@/hooks/useSearchShortcut';
 import { useSearchHistory } from '@/hooks/useSearchHistory';
 import { classifyQuery } from '@/lib/search/classifier';
@@ -17,7 +17,7 @@ const NAV_MODULES = [
   { href: '/projects',     label: 'Proyectos',    match: (p: string) => p === '/projects' || p.startsWith('/projects/') },
   { href: '/smart-albums', label: 'Álbumes',      match: (p: string) => p === '/smart-albums' || p.startsWith('/smart-albums/') },
   { href: '/insights',     label: 'Tu estilo',    match: (p: string) => p === '/insights' || p.startsWith('/insights/') },
-  { href: '/jobs',         label: 'Herramientas', match: (p: string) => ['/jobs', '/stats', '/health', '/about'].some(r => p === r || p.startsWith(r + '/')) || p.startsWith('/tools') || p.startsWith('/settings') },
+  { href: '/jobs',         label: 'Herramientas', match: (p: string) => ['/jobs', '/stats', '/health', '/about'].some(r => p === r || p.startsWith(r + '/')) || p.startsWith('/tools') },
 ] as const;
 
 // ─── Hints fetch (lazy, once per mount) ──────────────────────────────────────
@@ -197,6 +197,16 @@ export default function AppHeader() {
             </Link>
           ))}
         </nav>
+
+        {/* Ajustes — icono de engranaje fijo en el header */}
+        <Link
+          href="/settings"
+          className={`app-header-nav-item app-header-settings-btn${pathname.startsWith('/settings') ? ' active' : ''}`}
+          title="Ajustes"
+          aria-label="Ajustes"
+        >
+          <IconGear size={16} />
+        </Link>
 
         {/* Slot izquierda — siempre en DOM para mantener grid estable */}
         <div className="app-header-slot-left">{slotLeft}</div>

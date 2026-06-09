@@ -120,6 +120,15 @@ body {
   background: var(--tag-auto-color);
   border-radius: 1px;
 }
+/* Botón de ajustes (icono engranaje) — sin subrayado activo, con padding simétrico */
+.app-header-settings-btn {
+  padding: 5px 8px;
+  margin-left: 4px;
+  display: flex;
+  align-items: center;
+}
+.app-header-settings-btn.active::after { display: none; }
+.app-header-settings-btn.active { color: var(--accent); }
 
 /* Sidebar en la vista de catálogo (con FilterBar encima).
    El banner está en la columna de contenido (padding-left: sidebar-w),
