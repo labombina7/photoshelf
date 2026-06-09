@@ -424,8 +424,8 @@ function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
         <IconHeartbeat size={14} />
         Salud
       </Link>
-      <Link href="/tools/integrity" onClick={onNavClick}
-        className={`sidebar-item ${pathname === '/tools/integrity' ? 'active' : ''}`}>
+      <Link href="/settings/tools" onClick={onNavClick}
+        className={`sidebar-item ${pathname.startsWith('/settings/tools') ? 'active' : ''}`}>
         <IconShield size={14} />
         Integridad
         {orphanCount > 0 && (
@@ -434,10 +434,10 @@ function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
           </span>
         )}
       </Link>
-      <Link href="/settings/catalogs" onClick={onNavClick}
-        className={`sidebar-item ${pathname === '/settings/catalogs' ? 'active' : ''}`}>
+      <Link href="/settings" onClick={onNavClick}
+        className={`sidebar-item ${pathname.startsWith('/settings') ? 'active' : ''}`}>
         <IconViewGrid size={14} />
-        Catálogos
+        Ajustes
       </Link>
       <Link href="/about" onClick={onNavClick}
         className={`sidebar-item ${pathname === '/about' || pathname.startsWith('/about/') ? 'active' : ''}`}>
