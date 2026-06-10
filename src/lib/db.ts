@@ -103,7 +103,19 @@ function initSchema(db: Database.Database) {
   migrateSmartAlbums(db);
   migrateJobQueue(db);
   migrateBackupConfig(db);
-migrateStyleAnalysis(db);
+  migrateStyleAnalysis(db);
+  migrateEvolution(db);
+}
+
+function migrateEvolution(db: Database.Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS evolution_analysis (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      generated_at TEXT NOT NULL,
+      data_hash    TEXT NOT NULL,
+      analysis     TEXT NOT NULL
+    );
+  `);
 }
 
 function migrateEpic001(db: Database.Database) {

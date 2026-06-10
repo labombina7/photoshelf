@@ -2899,3 +2899,99 @@ body { padding-top: var(--header-h); }
   .insights-year-title { font-size: 28px; }
   .insights-stats-row { grid-template-columns: 22px 70px 1fr; }
 }
+
+/* ── US-095: Evolution charts ────────────────────────────────────────────────── */
+.evolution-header { margin-bottom: 28px; }
+.evolution-subtitle { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+.evolution-empty { color: var(--text-secondary); font-size: 14px; display: flex; flex-direction: column; gap: 8px; padding: 40px 0; }
+
+.evolution-charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.evolution-chart {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.evolution-chart-empty {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+.evolution-chart-title { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 0; }
+.evolution-chart-svg { width: 100%; height: auto; display: block; }
+.evolution-chart-legend {
+  display: flex; flex-wrap: wrap; gap: 8px 14px;
+}
+.evolution-chart-legend-item {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.evolution-chart-legend-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+.evolution-analysis-section {
+  border-top: 1px solid var(--border);
+  padding-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.evolution-analysis-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.evolution-analysis-header h2 { font-size: 16px; font-weight: 600; color: var(--text); margin: 0; }
+.evolution-analysis-hint { font-size: 13.5px; color: var(--text-tertiary); font-style: italic; }
+.evolution-analysis-error {
+  font-size: 13.5px; color: #ef4444;
+  background: color-mix(in srgb, #ef4444 8%, transparent);
+  border: 1px solid color-mix(in srgb, #ef4444 20%, transparent);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+.evolution-analysis-loading {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13.5px; color: var(--text-secondary);
+  padding: 16px 0;
+}
+.evolution-spinner {
+  width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid var(--border);
+  border-top-color: var(--text-secondary);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.evolution-analysis-result {
+  display: flex; flex-direction: column; gap: 12px;
+  font-size: 14px; line-height: 1.7; color: var(--text);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+}
+.evolution-analysis-date {
+  font-size: 11.5px; color: var(--text-tertiary);
+  margin-top: 4px;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .evolution-charts-grid { grid-template-columns: 1fr; }
+  .evolution-analysis-header { flex-direction: column; align-items: flex-start; }
+}

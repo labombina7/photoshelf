@@ -2,10 +2,8 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
 import { getSidebarData } from '@/lib/queries/sidebar';
 import { getActiveCatalogId } from '@/lib/catalog-context';
-import { getBootstrapProgress } from '@/lib/queries/style-analysis';
-import { GET as getYears } from '@/app/api/insights/years/route';
+import { getEvolutionData, getEvolutionAnalysis } from '@/lib/queries/evolution';
 import InsightsClient from './InsightsClient';
-import type { YearData } from '@/app/api/insights/years/route';
 
 export default async function InsightsPage() {
   const session = await getSession();
@@ -13,19 +11,13 @@ export default async function InsightsPage() {
 
   const catalogId = await getActiveCatalogId();
   const sidebar = getSidebarData(catalogId);
-  const bootstrapProgress = getBootstrapProgress();
-
-  // Call the years endpoint logic directly (server-side, no HTTP round-trip)
-  let years: YearData[] = [];
-  try {
-    const res = await getYears();
-    years = await res.json() as YearData[];
-  } catch { /* empty catalog */ }
+  const evolutionData = getEvolutionData();
+  const savedAnalysis = getEvolutionAnalysis();
 
   return (
     <InsightsClient
-      bootstrapProgress={bootstrapProgress}
-      years={years}
+      evolutionData={evolutionData}
+      savedAnalysis={savedAnalysis}
       themes={sidebar.themes}
       totalPhotos={sidebar.totalPhotos}
       favoriteCount={sidebar.favoriteCount}
