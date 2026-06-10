@@ -151,6 +151,8 @@ export function getTagEvolution(): TagByYear[] {
   return result;
 }
 
+const GENRE_TAGS = ['retrato','paisaje','arquitectura','street','naturaleza','macro','deporte','noche','abstracto','documental'];
+
 export function getGenreEvolution(): GenreByYear[] {
   const years = activeYears();
   if (years.length === 0) return [];
@@ -158,28 +160,32 @@ export function getGenreEvolution(): GenreByYear[] {
 
   const totals = new Map<number, number>();
   (db.prepare(`
-    SELECT CAST(strftime('%Y', taken_at) AS INTEGER) AS year, COUNT(*) AS n
-    FROM photos
-    WHERE taken_at IS NOT NULL
-      AND CAST(strftime('%Y', taken_at) AS INTEGER) IN (${years.map(() => '?').join(',')})
+    SELECT CAST(strftime('%Y', p.taken_at) AS INTEGER) AS year, COUNT(*) AS n
+    FROM photos p
+    WHERE p.taken_at IS NOT NULL
+      AND CAST(strftime('%Y', p.taken_at) AS INTEGER) IN (${years.map(() => '?').join(',')})
       AND ${MOB_SQL}
     GROUP BY year
   `).all(...years, ...MOB_PARAMS) as { year: number; n: number }[])
     .forEach(r => totals.set(r.year, r.n));
 
+  const genrePlaceholders = GENRE_TAGS.map(() => '?').join(',');
   const rows = db.prepare(`
     SELECT
-      CAST(strftime('%Y', taken_at) AS INTEGER) AS year,
-      genre,
+      CAST(strftime('%Y', p.taken_at) AS INTEGER) AS year,
+      t.name AS genre,
       COUNT(*) AS count
-    FROM photos
-    WHERE taken_at IS NOT NULL
-      AND genre IS NOT NULL
-      AND CAST(strftime('%Y', taken_at) AS INTEGER) IN (${years.map(() => '?').join(',')})
-      AND ${MOB_SQL}
-    GROUP BY year, genre
+    FROM photo_tags pt
+    JOIN photos p ON p.id = pt.photo_id
+    JOIN tags t ON t.id = pt.tag_id
+    WHERE p.taken_at IS NOT NULL
+      AND pt.source = 'ai'
+      AND t.name IN (${genrePlaceholders})
+      AND CAST(strftime('%Y', p.taken_at) AS INTEGER) IN (${years.map(() => '?').join(',')})
+      AND ${mobileCameraExclusionSQL('p')}
+    GROUP BY year, t.name
     ORDER BY year ASC, count DESC
-  `).all(...years, ...MOB_PARAMS) as { year: number; genre: string; count: number }[];
+  `).all(...GENRE_TAGS, ...years, ...MOB_PARAMS) as { year: number; genre: string; count: number }[];
 
   const byYear = new Map<number, typeof rows>();
   for (const row of rows) {
