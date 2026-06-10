@@ -258,17 +258,22 @@ export default function AppHeader() {
 
       {/* ── Mobile: nav módulos secundaria ─────────────────────────────────── */}
       <nav className="app-nav-mobile" aria-label="Módulos">
-        {NAV_MODULES.map(({ href, label, match }) => {
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`app-nav-mobile-item${match(pathname) ? ' active' : ''}`}
-            >
-              {label}
-            </Link>
-          );
-        })}
+        {NAV_MODULES.map(({ href, label, match }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`app-nav-mobile-item${match(pathname) ? ' active' : ''}`}
+          >
+            {label}
+          </Link>
+        ))}
+        <Link
+          href="/settings"
+          className={`app-nav-mobile-item${pathname.startsWith('/settings') ? ' active' : ''}`}
+          aria-label="Ajustes"
+        >
+          <IconGear size={15} />
+        </Link>
       </nav>
 
       {/* ── Mobile: floating search FAB ─────────────────────────────────────── */}
