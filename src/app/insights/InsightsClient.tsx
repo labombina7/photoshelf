@@ -135,7 +135,7 @@ export default function InsightsClient({
   const hasData = years.length > 0;
 
   return (
-    <>
+    <div className="app-shell">
       <Sidebar
         mobileOpen={sidebarOpen}
         onMobileClose={() => setSidebarOpen(false)}
@@ -236,6 +236,6 @@ export default function InsightsClient({
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
