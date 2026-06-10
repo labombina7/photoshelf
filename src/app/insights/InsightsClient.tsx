@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu } from '@/components/Icons';
-import { useHeaderSlotLeft } from '@/components/HeaderSlot';
+import { useHeaderSlotLeft, useHeaderSlot } from '@/components/HeaderSlot';
 import LineChart, { COLORS } from './components/LineChart';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
@@ -46,6 +46,8 @@ export default function InsightsClient({
       <IconMenu />
     </button>
   );
+  // Clear right slot — previous pages may have left content there
+  useHeaderSlot(null);
 
   const { years, focals, tags, genres, hours } = evolutionData;
 
@@ -145,8 +147,8 @@ export default function InsightsClient({
         activeCatalogId={activeCatalogId}
       />
 
-      <main className="page-main">
-        <div className="page-inner">
+      <div className="main">
+        <div className="content">
           <div className="evolution-header">
             <h1 className="page-title">Evolución fotográfica</h1>
             {hasData && (
@@ -233,7 +235,7 @@ export default function InsightsClient({
             </>
           )}
         </div>
-      </main>
+      </div>
     </>
   );
 }
