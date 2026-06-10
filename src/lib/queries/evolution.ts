@@ -122,15 +122,16 @@ export function getTagEvolution(): TagByYear[] {
   const rows = db.prepare(`
     SELECT
       CAST(strftime('%Y', p.taken_at) AS INTEGER) AS year,
-      pt.tag,
+      t.name AS tag,
       COUNT(*) AS count
     FROM photo_tags pt
     JOIN photos p ON p.id = pt.photo_id
+    JOIN tags t ON t.id = pt.tag_id
     WHERE p.taken_at IS NOT NULL
       AND pt.source = 'ai'
       AND CAST(strftime('%Y', p.taken_at) AS INTEGER) IN (${years.map(() => '?').join(',')})
       AND ${mobileCameraExclusionSQL('p')}
-    GROUP BY year, pt.tag
+    GROUP BY year, t.name
     ORDER BY year ASC, count DESC
   `).all(...years, ...MOB_PARAMS) as { year: number; tag: string; count: number }[];
 
