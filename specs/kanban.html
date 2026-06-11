@@ -552,7 +552,7 @@
   <div class="logo">📷</div>
   <h1>photoshelf — Kanban</h1>
   <span class="kbd-hint">Haz clic en una tarjeta para ver el detalle</span>
-  <span class="subtitle">2026-06-05</span>
+  <span class="subtitle">2026-06-11</span>
 </header>
 
 <div class="board">
@@ -577,7 +577,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">16</span>
+      <span class="col-count">9</span>
     </div>
     <div class="col-body">
 
@@ -767,56 +767,6 @@
         <div class="card-footer"><span>EPIC-005 · dep: US-078, US-079, US-080</span></div>
       </div>
 
-      <div class="card" tabindex="0" data-id="EPIC-004" onclick="openModal('EPIC-004')">
-        <div class="card-top">
-          <span class="badge badge-epic">EPIC-004</span>
-          <span class="effort effort-xl">XL</span>
-        </div>
-        <div class="card-title">Análisis de estilo fotográfico</div>
-        <div class="card-summary">Análisis en background del catálogo con Ollama. Insights sobre historia fotográfica y evolución reciente del estilo.</div>
-        <div class="card-footer"><span>US-074 → US-075 → US-076 → US-077</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-074" onclick="openModal('US-074')">
-        <div class="card-top">
-          <span class="badge badge-us">US-074</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Motor de análisis EXIF + muestra</div>
-        <div class="card-summary">Extracción de señales EXIF por foto y algoritmo de selección de muestra representativa por periodo. Infraestructura base de EPIC-004.</div>
-        <div class="card-footer"><span>EPIC-004</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-075" onclick="openModal('US-075')">
-        <div class="card-top">
-          <span class="badge badge-us">US-075</span>
-          <span class="effort effort-l">L</span>
-        </div>
-        <div class="card-title">Bootstrap — análisis inicial del catálogo</div>
-        <div class="card-summary">Proceso único de arranque en 2 velocidades: muestra histórica (>24 meses) + análisis completo de los últimos 24 meses. Reanudable, prioridad baja.</div>
-        <div class="card-footer"><span>EPIC-004 · dep: US-074</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-076" onclick="openModal('US-076')">
-        <div class="card-top">
-          <span class="badge badge-us">US-076</span>
-          <span class="effort effort-l">L</span>
-        </div>
-        <div class="card-title">Ciclo continuo — síntesis mensual y anual</div>
-        <div class="card-summary">Ciclo diario (acumulación), mensual (Ollama sintetiza y compara con mes anterior) y anual (regenera perfil histórico). Narrativa en español.</div>
-        <div class="card-footer"><span>EPIC-004 · dep: US-074, US-075</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-077" onclick="openModal('US-077')">
-        <div class="card-top">
-          <span class="badge badge-us">US-077</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Vista de insights en el sidebar</div>
-        <div class="card-summary">Nueva vista con 2 bloques: historia fotográfica de largo plazo (anual) y evolución reciente (últimos 24 meses con highlights, tendencia y equipo).</div>
-        <div class="card-footer"><span>EPIC-004 · dep: US-074–076</span></div>
-      </div>
-
       <!-- ── Deuda técnica — audit 2026-06-06 ─────────────────────────────── -->
       <div class="card" tabindex="0" data-id="US-082" onclick="openModal('US-082')">
         <div class="card-top">
@@ -918,26 +868,6 @@
         <div class="card-footer"><span>Feature ✨</span></div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-094" onclick="openModal('US-094')">
-        <div class="card-top">
-          <span class="badge badge-us">US-094</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Rediseño vista "Tu estilo": navegador anual</div>
-        <div class="card-summary">Navegador año a año con flechas, narrativa + bloque de estadísticas por año, y línea de evolución global. Los datos vienen de los perfiles ya en BD — solo cambia la presentación.</div>
-        <div class="card-footer"><span>Feature ✨ · dep: EPIC-004</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-093" onclick="openModal('US-093')">
-        <div class="card-top">
-          <span class="badge badge-us">US-093</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Sincronización de metadatos EXIF a Amplitude</div>
-        <div class="card-summary">Enviar cada foto como evento photo_taken a Amplitude (cámara, focal, apertura, ISO, género, hora…) para analizar el estilo fotográfico con las gráficas nativas de Amplitude. Sin GPS. Sync inicial + incremental automática.</div>
-        <div class="card-footer"><span>Feature ✨ · Analytics</span></div>
-      </div>
-
       <div class="card" tabindex="0" data-id="US-021" onclick="openModal('US-021')">
         <div class="card-top">
           <span class="badge badge-us">US-021</span>
@@ -973,11 +903,40 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">67</span>
+      <span class="col-count">70</span>
     </div>
     <div class="col-body">
 
+      <div class="card card-done" tabindex="0" data-id="US-095" onclick="openModal('US-095')">
+        <div class="card-top">
+          <span class="badge badge-us">US-095</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Evolución fotográfica — gráficas + análisis IA on demand</div>
+        <div class="card-summary">Sustituye la vista insights con 4 gráficas SVG (focales, tags, cámaras, hora) por año. Botón "✦ Analizar evolución" llama a llama3 para un análisis narrativo en texto.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-094" onclick="openModal('US-094')">
+        <div class="card-top">
+          <span class="badge badge-us">US-094</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Rediseño vista "Tu estilo": navegador anual</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-093" onclick="openModal('US-093')">
+        <div class="card-top">
+          <span class="badge badge-us">US-093</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Sincronización de metadatos EXIF a Amplitude</div>
+      </div>
+
       <div class="card card-done" tabindex="0" data-id="US-005" onclick="openModal('US-005')">
+
         <div class="card-top">
           <span class="badge badge-us">US-005</span>
           <span class="badge badge-done">✓ done</span>
