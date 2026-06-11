@@ -1,8 +1,10 @@
 import { getDb } from '@/lib/db';
+import { PHOTOS_PATH } from '@/lib/config';
+import fsSync from 'fs';
 
 export interface IntegrityReport {
   id: number;
-  type: 'orphan' | 'unindexed' | 'corrupt';
+  type: 'orphan' | 'unindexed' | 'corrupt' | 'orphan_thumbnail';
   path: string;
   photo_id: number | null;
   error_msg: string | null;
@@ -14,7 +16,7 @@ export function clearIntegrityReports(): void {
 }
 
 export function insertIntegrityReport(
-  type: 'orphan' | 'unindexed' | 'corrupt',
+  type: 'orphan' | 'unindexed' | 'corrupt' | 'orphan_thumbnail',
   filePath: string,
   photoId?: number,
   errorMsg?: string,
@@ -31,13 +33,13 @@ export function getIntegrityReport(): IntegrityReport[] {
   ).all() as IntegrityReport[];
 }
 
-export function getIntegrityReportByType(type: 'orphan' | 'unindexed' | 'corrupt'): IntegrityReport[] {
+export function getIntegrityReportByType(type: 'orphan' | 'unindexed' | 'corrupt' | 'orphan_thumbnail'): IntegrityReport[] {
   return getDb().prepare(
     `SELECT * FROM integrity_reports WHERE type = ? ORDER BY detected_at ASC`
   ).all(type) as IntegrityReport[];
 }
 
-export function getIntegrityReportMeta(): { total: number; orphans: number; unindexed: number; corrupt: number; lastRun: string | null } {
+export function getIntegrityReportMeta(): { total: number; orphans: number; unindexed: number; corrupt: number; orphanThumbnails: number; lastRun: string | null } {
   const db = getDb();
   const counts = db.prepare(`
     SELECT type, COUNT(*) as n FROM integrity_reports GROUP BY type
@@ -53,6 +55,7 @@ export function getIntegrityReportMeta(): { total: number; orphans: number; unin
     orphans: byType['orphan'] ?? 0,
     unindexed: byType['unindexed'] ?? 0,
     corrupt: byType['corrupt'] ?? 0,
+    orphanThumbnails: byType['orphan_thumbnail'] ?? 0,
     lastRun,
   };
 }
@@ -80,6 +83,37 @@ export function removeOrphansByIds(ids: number[]): number {
   return result.changes;
 }
 
+export function removeOrphanThumbnailsByIds(ids: number[]): { removed: number; errors: string[] } {
+  if (ids.length === 0) return { removed: 0, errors: [] };
+  const db = getDb();
+  const ph = ids.map(() => '?').join(',');
+
+  const rows = db.prepare(
+    `SELECT id, path FROM integrity_reports WHERE id IN (${ph}) AND type = 'orphan_thumbnail'`
+  ).all(...ids) as { id: number; path: string }[];
+
+  let removed = 0;
+  const errors: string[] = [];
+  const resolvedIds: number[] = [];
+
+  for (const row of rows) {
+    try {
+      fsSync.unlinkSync(row.path);
+      removed++;
+      resolvedIds.push(row.id);
+    } catch (err) {
+      errors.push(`${row.path}: ${err instanceof Error ? err.message : 'error'}`);
+    }
+  }
+
+  if (resolvedIds.length > 0) {
+    const ph2 = resolvedIds.map(() => '?').join(',');
+    db.prepare(`DELETE FROM integrity_reports WHERE id IN (${ph2})`).run(...resolvedIds);
+  }
+
+  return { removed, errors };
+}
+
 export function getAllPhotoPaths(catalogId?: number): { id: number; path: string }[] {
   const db = getDb();
   if (catalogId != null) {
@@ -88,6 +122,14 @@ export function getAllPhotoPaths(catalogId?: number): { id: number; path: string
     ).all(catalogId) as { id: number; path: string }[];
   }
   return db.prepare(`SELECT id, path FROM photos`).all() as { id: number; path: string }[];
+}
+
+export function getAllPhotosWithCatalogPath(): { path: string; catalog_path: string }[] {
+  return getDb().prepare(`
+    SELECT p.path, COALESCE(c.path, ?) as catalog_path
+    FROM photos p
+    LEFT JOIN catalogs c ON c.id = p.catalog_id
+  `).all(PHOTOS_PATH) as { path: string; catalog_path: string }[];
 }
 
 export function getIndexedPathsSet(catalogId?: number): Set<string> {

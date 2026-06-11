@@ -2,6 +2,7 @@ import { getDb } from '@/lib/db';
 import { buildPhotoFilter } from '@/lib/db-helpers';
 import type { PhotoFilters } from '@/lib/db-helpers';
 import type { Photo, Tag, Theme, PhotoDetail } from '@/lib/types';
+import { PHOTOS_PATH } from '@/lib/config';
 
 export type { PhotoFilters };
 
@@ -70,6 +71,23 @@ export function listPhotos(
   const years = (db.prepare('SELECT DISTINCT year FROM photos WHERE catalog_id = ? ORDER BY year DESC').all(catalogId) as { year: number }[]).map(r => r.year);
 
   return { photos, total, years };
+}
+
+// ── Single photo path lookup (for serving original/thumbnail) ─────────────────
+
+export interface PhotoPathResult {
+  path: string;
+  filename: string;
+  catalog_path: string;
+}
+
+export function getPhotoPathById(id: number): PhotoPathResult | null {
+  return (getDb().prepare(`
+    SELECT p.path, p.filename, COALESCE(c.path, ?) as catalog_path
+    FROM photos p
+    LEFT JOIN catalogs c ON c.id = p.catalog_id
+    WHERE p.id = ?
+  `).get(PHOTOS_PATH, id) as PhotoPathResult | undefined) ?? null;
 }
 
 // ── ID-only list (for slideshow) ──────────────────────────────────────────────

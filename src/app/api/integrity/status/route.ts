@@ -16,6 +16,7 @@ export async function GET() {
       orphansFound: state.orphansFound,
       unindexedFound: state.unindexedFound,
       corruptFound: state.corruptFound,
+      orphanThumbnailsFound: state.orphanThumbnailsFound,
       error: state.error,
       completedAt: state.completedAt,
     });

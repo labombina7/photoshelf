@@ -98,6 +98,7 @@ function initSchema(db: Database.Database) {
   // ── EPIC-001 migration: catalogs table + catalog_id column ────────────────
   migrateEpic001(db);
   migrateIntegrity(db);
+  migrateIntegrityOrphanThumbnail(db);
   migrateHealthSnapshots(db);
   migrateExif(db);
   migrateSmartAlbums(db);
@@ -230,6 +231,34 @@ function migrateIntegrity(db: Database.Database) {
       detected_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    CREATE INDEX IF NOT EXISTS idx_integrity_type ON integrity_reports(type);
+    CREATE INDEX IF NOT EXISTS idx_integrity_at   ON integrity_reports(detected_at);
+  `);
+}
+
+function migrateIntegrityOrphanThumbnail(db: Database.Database) {
+  // Check if the old restricted CHECK constraint is still in place (no orphan_thumbnail support).
+  // We detect this by checking for the old CHECK text in sqlite_master.
+  // If so, rebuild the table dropping the CHECK so new types can be inserted freely.
+  const tableInfo = db.prepare(
+    `SELECT sql FROM sqlite_master WHERE type='table' AND name='integrity_reports'`
+  ).get() as { sql: string } | undefined;
+
+  if (!tableInfo) return; // table doesn't exist yet — migrateIntegrity hasn't run
+  if (!tableInfo.sql.includes("'orphan', 'unindexed', 'corrupt'")) return; // already migrated
+
+  db.exec(`
+    CREATE TABLE integrity_reports_new (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      type        TEXT NOT NULL,
+      path        TEXT NOT NULL,
+      photo_id    INTEGER,
+      error_msg   TEXT,
+      detected_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    INSERT INTO integrity_reports_new SELECT * FROM integrity_reports;
+    DROP TABLE integrity_reports;
+    ALTER TABLE integrity_reports_new RENAME TO integrity_reports;
     CREATE INDEX IF NOT EXISTS idx_integrity_type ON integrity_reports(type);
     CREATE INDEX IF NOT EXISTS idx_integrity_at   ON integrity_reports(detected_at);
   `);

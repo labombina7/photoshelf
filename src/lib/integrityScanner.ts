@@ -1,13 +1,23 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { getIntegrityState, updateIntegrityState } from './integrityState';
 import {
   clearIntegrityReports,
   insertIntegrityReport,
   getAllPhotoPaths,
   getIndexedPathsSet,
+  getAllPhotosWithCatalogPath,
 } from './queries/integrity';
 import { PHOTOS_PATH } from './config';
+import { CACHE_PATH } from './thumbnail';
+
+const THUMBNAIL_VARIANTS: Array<{ size: number; fit: 'cover' | 'inside' }> = [
+  { size: 200, fit: 'cover' },
+  { size: 400, fit: 'cover' },
+  { size: 400, fit: 'inside' },
+  { size: 800, fit: 'inside' },
+];
 
 const PHOTO_EXTS = new Set(['.jpg', '.jpeg', '.png', '.heic', '.webp', '.tif', '.tiff', '.avif', '.gif']);
 
@@ -62,6 +72,7 @@ export async function runIntegrityScan(includeCorrupt = false): Promise<void> {
     orphansFound: 0,
     unindexedFound: 0,
     corruptFound: 0,
+    orphanThumbnailsFound: 0,
     error: null,
     completedAt: null,
   });
@@ -119,6 +130,39 @@ export async function runIntegrityScan(includeCorrupt = false): Promise<void> {
         updateIntegrityState({ checked: i + batch.length, corruptFound: corrupt });
         // Yield to event loop between batches
         await new Promise(r => setImmediate(r));
+      }
+    }
+
+    // ── Phase 4: orphan thumbnails in cache ───────────────────────────────────
+    updateIntegrityState({ phase: 'orphan_thumbnails', checked: 0, total: 0 });
+
+    let cacheFiles: string[] = [];
+    try {
+      cacheFiles = fs.readdirSync(CACHE_PATH).filter(f => f.endsWith('.webp'));
+    } catch { /* cache dir doesn't exist yet */ }
+
+    if (cacheFiles.length > 0) {
+      // Build set of all valid cache keys from indexed photos
+      const allPhotos = getAllPhotosWithCatalogPath();
+      const validKeys = new Set<string>();
+      for (const photo of allPhotos) {
+        for (const { size, fit } of THUMBNAIL_VARIANTS) {
+          const key = crypto.createHash('md5')
+            .update(`${photo.catalog_path}:${photo.path}:${size}:${fit}`)
+            .digest('hex');
+          validKeys.add(key);
+        }
+      }
+
+      let orphanThumbs = 0;
+      for (let i = 0; i < cacheFiles.length; i++) {
+        const file = cacheFiles[i];
+        const key = file.replace(/\.webp$/, '');
+        if (!validKeys.has(key)) {
+          insertIntegrityReport('orphan_thumbnail', path.join(CACHE_PATH, file));
+          orphanThumbs++;
+        }
+        updateIntegrityState({ checked: i + 1, total: cacheFiles.length, orphanThumbnailsFound: orphanThumbs });
       }
     }
 
