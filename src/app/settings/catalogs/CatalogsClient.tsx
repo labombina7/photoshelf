@@ -58,6 +58,7 @@ export default function CatalogsClient({
   const [backupRunning, setBackupRunning] = useState(false);
   const [backupError, setBackupError] = useState<string | null>(null);
   const [backupSuccess, setBackupSuccess] = useState<string | null>(null);
+  const [backupBannerDismissed, setBackupBannerDismissed] = useState(false);
 
   useEffect(() => {
     fetch('/api/backup/status')
@@ -189,6 +190,12 @@ export default function CatalogsClient({
     }
   }
 
+  async function activateAutoBackup() {
+    setBackupBannerDismissed(true);
+    setBackupStatus(s => s ? { ...s, auto_enabled: true, auto_interval_days: 7 } : s);
+    await updateBackupConfig({ auto_enabled: true, auto_interval_days: 7 });
+  }
+
   async function updateBackupConfig(patch: { auto_enabled?: boolean; auto_interval_days?: number }) {
     try {
       const res = await fetch('/api/backup/config', {
@@ -242,6 +249,36 @@ export default function CatalogsClient({
 
       <div className="main">
         <div style={{ padding: '24px 32px', maxWidth: 640 }}>
+
+          {/* Backup disabled warning banner */}
+          {backupStatus && !backupStatus.auto_enabled && !backupBannerDismissed && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              padding: '10px 14px', marginBottom: 20,
+              borderRadius: 'var(--radius-sm)',
+              background: '#fff8ed', border: '1px solid #f5c36a',
+              fontSize: 13,
+            }}>
+              <span style={{ flex: 1, color: '#92600a' }}>
+                ⚠️ Los backups automáticos están desactivados. Actívalos para proteger tus datos.
+              </span>
+              <button
+                className="btn-small"
+                onClick={activateAutoBackup}
+                style={{ flexShrink: 0 }}
+              >
+                Activar ahora
+              </button>
+              <button
+                onClick={() => setBackupBannerDismissed(true)}
+                aria-label="Cerrar aviso"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#92600a', lineHeight: 1 }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24 }}>
             Cada catálogo apunta a una carpeta de fotos independiente. Escribe la ruta completa tal como aparece en el NAS.
           </p>

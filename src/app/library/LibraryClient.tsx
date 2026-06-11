@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useMemo, useEffect, useCallback, type ReactNode } from 'react';
+import { useState, useTransition, useMemo, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import FilterBar from '@/components/FilterBar';
@@ -11,6 +11,7 @@ import Slideshow from '@/components/Slideshow';
 import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
+import { useSlideshow } from '@/hooks/useSlideshow';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 
@@ -99,22 +100,7 @@ export default function LibraryClient({
   const [localClassifying, setLocalClassifying] = useState(false);
   const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [slideshowIds, setSlideshowIds] = useState<number[] | null>(null);
-
-
-  async function openSlideshow() {
-    const params = new URLSearchParams();
-    if (activeFilters.year) params.set('year', activeFilters.year);
-    if (activeFilters.event) params.set('event', activeFilters.event);
-    if (activeFilters.theme) params.set('theme', activeFilters.theme);
-    if (activeFilters.favorite) params.set('favorite', activeFilters.favorite);
-    if (activeFilters.untagged) params.set('untagged', activeFilters.untagged);
-    if (activeFilters.q) params.set('q', activeFilters.q);
-    const res = await fetch(`/api/photos/ids?${params.toString()}`);
-    const data = await res.json() as { ids: number[] };
-    const ids = data.ids;
-    if (ids.length > 0) setSlideshowIds(ids);
-  }
+  const { slideshowIds, setSlideshowIds, openSlideshow } = useSlideshow(activeFilters);
 
   // Keep localClassifying in sync: clear it when server confirms this year's job is done
   useEffect(() => {
@@ -123,20 +109,6 @@ export default function LibraryClient({
 
   // If navigated to a specific event, always use list mode
   const effectiveViewMode = activeFilters.event ? 'list' : viewMode;
-
-  // P key to open slideshow
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (e.key === 'p' || e.key === 'P') {
-        if (slideshowIds) setSlideshowIds(null);
-        else void openSlideshow();
-      }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slideshowIds]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -193,7 +165,6 @@ export default function LibraryClient({
           <IconMenu size={18} />
         </button>
       </div>
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     ), []),
   );
 
