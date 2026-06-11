@@ -190,8 +190,11 @@ export function getCameraEvolution(): CameraByYear[] {
   for (const [year, yearRows] of byYear) {
     const total = totals.get(year) ?? 1;
     for (const row of yearRows.slice(0, 4)) {
-      // Shorten camera names: "Canon EOS 6D" → "EOS 6D", "RICOH GR IIIx" → "GR IIIx"
-      const shortName = row.camera.replace(/^(Canon|Nikon|Sony|Fujifilm|Olympus|Panasonic|Leica|Ricoh|RICOH)\s*/i, '');
+      // Shorten camera names: "OLYMPUS CORPORATION E-M1MarkII" → "E-M1MarkII"
+      const shortName = row.camera
+        .replace(/^(Canon|Nikon|Sony|Fujifilm|Olympus|Panasonic|Leica|Ricoh|RICOH|Apple|Samsung)\s*/i, '')
+        .replace(/^(CORPORATION|IMAGING CORP\.|IMAGING CORP|Corp\.?)\s*/i, '')
+        .trim();
       result.push({ year, camera: shortName || row.camera, count: row.count, percent: Math.round((row.count / total) * 100) });
     }
   }
