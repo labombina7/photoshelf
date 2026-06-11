@@ -26,9 +26,9 @@ export interface TagByYear {
   percent: number;
 }
 
-export interface GenreByYear {
+export interface CameraByYear {
   year: number;
-  genre: string;
+  camera: string;
   count: number;
   percent: number;
 }
@@ -42,7 +42,7 @@ export interface EvolutionData {
   years: number[];
   focals: FocalByYear[];
   tags: TagByYear[];
-  genres: GenreByYear[];
+  cameras: CameraByYear[];
   hours: HourByYear[];
 }
 
@@ -151,52 +151,48 @@ export function getTagEvolution(): TagByYear[] {
   return result;
 }
 
-const GENRE_TAGS = ['retrato','paisaje','arquitectura','street','naturaleza','macro','deporte','noche','abstracto','documental'];
-
-export function getGenreEvolution(): GenreByYear[] {
+export function getCameraEvolution(): CameraByYear[] {
   const years = activeYears();
   if (years.length === 0) return [];
   const db = getDb();
 
   const totals = new Map<number, number>();
   (db.prepare(`
-    SELECT CAST(strftime('%Y', p.taken_at) AS INTEGER) AS year, COUNT(*) AS n
-    FROM photos p
-    WHERE p.taken_at IS NOT NULL
-      AND CAST(strftime('%Y', p.taken_at) AS INTEGER) IN (${years.map(() => '?').join(',')})
+    SELECT CAST(strftime('%Y', taken_at) AS INTEGER) AS year, COUNT(*) AS n
+    FROM photos
+    WHERE taken_at IS NOT NULL
+      AND CAST(strftime('%Y', taken_at) AS INTEGER) IN (${years.map(() => '?').join(',')})
       AND ${MOB_SQL}
     GROUP BY year
   `).all(...years, ...MOB_PARAMS) as { year: number; n: number }[])
     .forEach(r => totals.set(r.year, r.n));
 
-  const genrePlaceholders = GENRE_TAGS.map(() => '?').join(',');
   const rows = db.prepare(`
     SELECT
-      CAST(strftime('%Y', p.taken_at) AS INTEGER) AS year,
-      t.name AS genre,
+      CAST(strftime('%Y', taken_at) AS INTEGER) AS year,
+      camera,
       COUNT(*) AS count
-    FROM photo_tags pt
-    JOIN photos p ON p.id = pt.photo_id
-    JOIN tags t ON t.id = pt.tag_id
-    WHERE p.taken_at IS NOT NULL
-      AND pt.source = 'ai'
-      AND t.name IN (${genrePlaceholders})
-      AND CAST(strftime('%Y', p.taken_at) AS INTEGER) IN (${years.map(() => '?').join(',')})
-      AND ${mobileCameraExclusionSQL('p')}
-    GROUP BY year, t.name
+    FROM photos
+    WHERE taken_at IS NOT NULL
+      AND camera IS NOT NULL
+      AND CAST(strftime('%Y', taken_at) AS INTEGER) IN (${years.map(() => '?').join(',')})
+      AND ${MOB_SQL}
+    GROUP BY year, camera
     ORDER BY year ASC, count DESC
-  `).all(...GENRE_TAGS, ...years, ...MOB_PARAMS) as { year: number; genre: string; count: number }[];
+  `).all(...years, ...MOB_PARAMS) as { year: number; camera: string; count: number }[];
 
   const byYear = new Map<number, typeof rows>();
   for (const row of rows) {
     if (!byYear.has(row.year)) byYear.set(row.year, []);
     byYear.get(row.year)!.push(row);
   }
-  const result: GenreByYear[] = [];
+  const result: CameraByYear[] = [];
   for (const [year, yearRows] of byYear) {
     const total = totals.get(year) ?? 1;
-    for (const row of yearRows.slice(0, 5)) {
-      result.push({ ...row, percent: Math.round((row.count / total) * 100) });
+    for (const row of yearRows.slice(0, 4)) {
+      // Shorten camera names: "Canon EOS 6D" → "EOS 6D", "RICOH GR IIIx" → "GR IIIx"
+      const shortName = row.camera.replace(/^(Canon|Nikon|Sony|Fujifilm|Olympus|Panasonic|Leica|Ricoh|RICOH)\s*/i, '');
+      result.push({ year, camera: shortName || row.camera, count: row.count, percent: Math.round((row.count / total) * 100) });
     }
   }
   return result;
@@ -228,7 +224,7 @@ export function getEvolutionData(): EvolutionData {
     years: activeYears(),
     focals: getFocalEvolution(),
     tags: getTagEvolution(),
-    genres: getGenreEvolution(),
+    cameras: getCameraEvolution(),
     hours: getShootingHourEvolution(),
   };
 }

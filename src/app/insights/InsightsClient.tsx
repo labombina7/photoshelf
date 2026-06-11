@@ -46,15 +46,13 @@ export default function InsightsClient({
       <IconMenu />
     </button>
   );
-  // Clear right slot — previous pages may have left content there
   useHeaderSlot(null);
 
-  const { years, focals, tags, genres, hours } = evolutionData;
+  const { years, focals, tags, cameras, hours } = evolutionData;
 
   // ── Build chart series ────────────────────────────────────────────────────
 
   const focalSeries = useMemo(() => {
-    // Find top 5 focals overall
     const focalCount = new Map<number, number>();
     for (const f of focals) focalCount.set(f.focal_length, (focalCount.get(f.focal_length) ?? 0) + f.count);
     const topFocals = [...focalCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([f]) => f);
@@ -88,22 +86,22 @@ export default function InsightsClient({
     })).filter(s => s.data.length > 0);
   }, [tags, years]);
 
-  const genreSeries = useMemo(() => {
-    const genreCount = new Map<string, number>();
-    for (const g of genres) genreCount.set(g.genre, (genreCount.get(g.genre) ?? 0) + g.count);
-    const topGenres = [...genreCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([g]) => g);
+  const cameraSeries = useMemo(() => {
+    const cameraCount = new Map<string, number>();
+    for (const c of cameras) cameraCount.set(c.camera, (cameraCount.get(c.camera) ?? 0) + c.count);
+    const topCameras = [...cameraCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([c]) => c);
 
-    return topGenres.map((genre, i) => ({
-      label: genre,
+    return topCameras.map((cam, i) => ({
+      label: cam,
       color: COLORS[i % COLORS.length],
       data: years
         .map(y => {
-          const row = genres.find(g => g.year === y && g.genre === genre);
+          const row = cameras.find(c => c.year === y && c.camera === cam);
           return row ? { x: y, y: row.percent } : null;
         })
         .filter(Boolean) as { x: number; y: number }[],
     })).filter(s => s.data.length > 0);
-  }, [genres, years]);
+  }, [cameras, years]);
 
   const hourSeries = useMemo(() => [{
     label: 'Hora media',
@@ -150,11 +148,50 @@ export default function InsightsClient({
       <div className="main">
         <div className="content">
           <div className="evolution-header">
-            <h1 className="page-title">Evolución fotográfica</h1>
-            {hasData && (
-              <p className="evolution-subtitle">
-                {years[0]}–{years[years.length - 1]} · {years.length} años · cámaras móviles excluidas
-              </p>
+            <div className="evolution-header-top">
+              <div>
+                <h1 className="evolution-title">Evolución fotográfica</h1>
+                {hasData && (
+                  <p className="evolution-subtitle">
+                    {years[0]}–{years[years.length - 1]} · {years.length} años · cámaras móviles excluidas
+                  </p>
+                )}
+              </div>
+              {hasData && canAnalyze && (
+                <button
+                  className="evolution-analyze-btn"
+                  onClick={handleAnalyze}
+                  disabled={analyzing}
+                >
+                  {analyzing ? (
+                    <><span className="evolution-spinner-sm" /> Analizando…</>
+                  ) : (
+                    analysis ? '↺ Regenerar análisis' : '✦ Analizar evolución'
+                  )}
+                </button>
+              )}
+            </div>
+
+            {analyzeError && (
+              <div className="evolution-analysis-error">{analyzeError}</div>
+            )}
+
+            {analyzing && (
+              <div className="evolution-analysis-loading">
+                <span className="evolution-spinner" />
+                Ollama está analizando tus {years.length} años de fotografía…
+              </div>
+            )}
+
+            {analysis && !analyzing && (
+              <div className="evolution-analysis-result">
+                {analysis.analysis.split('\n').filter(Boolean).map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+                <span className="evolution-analysis-date">
+                  Generado el {new Date(analysis.generated_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+              </div>
             )}
           </div>
 
@@ -164,75 +201,31 @@ export default function InsightsClient({
               <p>Necesitas fotos con datos EXIF en al menos un año.</p>
             </div>
           ) : (
-            <>
-              <div className="evolution-charts-grid">
-                <LineChart
-                  title="Focales más usadas (nº fotos)"
-                  series={focalSeries}
-                  years={years}
-                />
-                <LineChart
-                  title="Tags más frecuentes (% del año)"
-                  series={tagSeries}
-                  years={years}
-                  formatY={v => `${Math.round(v)}%`}
-                />
-                <LineChart
-                  title="Géneros predominantes (% del año)"
-                  series={genreSeries}
-                  years={years}
-                  formatY={v => `${Math.round(v)}%`}
-                />
-                <LineChart
-                  title="Hora media de disparo"
-                  series={hourSeries}
-                  years={years}
-                  formatY={formatHour}
-                />
-              </div>
-
-              <div className="evolution-analysis-section">
-                <div className="evolution-analysis-header">
-                  <h2>Análisis de evolución</h2>
-                  <button
-                    className="btn-primary"
-                    onClick={handleAnalyze}
-                    disabled={analyzing || !canAnalyze}
-                    title={!canAnalyze ? 'Necesitas al menos 3 años de datos' : undefined}
-                  >
-                    {analyzing ? 'Analizando…' : analysis ? 'Regenerar análisis' : 'Analizar mi evolución'}
-                  </button>
-                </div>
-
-                {analyzeError && (
-                  <div className="evolution-analysis-error">{analyzeError}</div>
-                )}
-
-                {analyzing && (
-                  <div className="evolution-analysis-loading">
-                    <span className="evolution-spinner" />
-                    Ollama está analizando tus {years.length} años de fotografía…
-                  </div>
-                )}
-
-                {analysis && !analyzing && (
-                  <div className="evolution-analysis-result">
-                    {analysis.analysis.split('\n').filter(Boolean).map((p, i) => (
-                      <p key={i}>{p}</p>
-                    ))}
-                    <span className="evolution-analysis-date">
-                      Generado el {new Date(analysis.generated_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
-                    </span>
-                  </div>
-                )}
-
-                {!analysis && !analyzing && canAnalyze && (
-                  <p className="evolution-analysis-hint">
-                    Pulsa el botón para que Ollama analice tu evolución basándose en los datos reales de las gráficas.
-                  </p>
-                )}
-              </div>
-            </>
+            <div className="evolution-charts-grid">
+              <LineChart
+                title="Focales más usadas (nº fotos)"
+                series={focalSeries}
+                years={years}
+              />
+              <LineChart
+                title="Tags más frecuentes (% del año)"
+                series={tagSeries}
+                years={years}
+                formatY={v => `${Math.round(v)}%`}
+              />
+              <LineChart
+                title="Cámaras más usadas (% del año)"
+                series={cameraSeries}
+                years={years}
+                formatY={v => `${Math.round(v)}%`}
+              />
+              <LineChart
+                title="Hora media de disparo"
+                series={hourSeries}
+                years={years}
+                formatY={formatHour}
+              />
+            </div>
           )}
         </div>
       </div>

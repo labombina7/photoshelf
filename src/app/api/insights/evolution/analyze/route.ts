@@ -5,7 +5,7 @@ import { callOllama } from '@/lib/ollama';
 import { createHash } from 'crypto';
 
 function buildEvolutionPrompt(data: ReturnType<typeof getEvolutionData>): string {
-  const { years, focals, tags, genres, hours } = data;
+  const { years, focals, tags, cameras, hours } = data;
 
   // Top focal per year
   const focalByYear = new Map<number, string>();
@@ -20,28 +20,27 @@ function buildEvolutionPrompt(data: ReturnType<typeof getEvolutionData>): string
     if (tagsByYear.get(t.year)!.length < 3) tagsByYear.get(t.year)!.push(`${t.tag}(${t.percent}%)`);
   }
 
-  // Top genre per year
-  const genreByYear = new Map<number, string>();
-  for (const g of genres) {
-    if (!genreByYear.has(g.year)) genreByYear.set(g.year, g.genre);
+  // Top camera per year
+  const cameraByYear = new Map<number, string>();
+  for (const c of cameras) {
+    if (!cameraByYear.has(c.year)) cameraByYear.set(c.year, c.camera);
   }
 
   const table = years.map(y => {
     const focal = focalByYear.get(y) ?? '-';
     const topTags = (tagsByYear.get(y) ?? []).join(', ') || '-';
-    const genre = genreByYear.get(y) ?? '-';
+    const camera = cameraByYear.get(y) ?? '-';
     const hour = hours.find(h => h.year === y);
     const avgHour = hour ? `${Math.floor(hour.avg_hour)}:${String(Math.round((hour.avg_hour % 1) * 60)).padStart(2, '0')}` : '-';
-    return `${y}: focal=${focal} | tags=${topTags} | género=${genre} | hora_media=${avgHour}`;
+    return `${y}: focal=${focal} | cámara=${camera} | tags=${topTags} | hora_media=${avgHour}`;
   }).join('\n');
 
-  return `Eres un asistente experto en análisis fotográfico. Analiza la evolución de este fotógrafo basándote en sus datos reales de ${years[0]} a ${years[years.length - 1]}.
+  return `Eres un asistente experto en análisis fotográfico. Analiza la evolución de este fotógrafo basándote exclusivamente en sus datos reales de ${years[0]} a ${years[years.length - 1]}.
 
 Datos por año:
 ${table}
 
-Responde ÚNICAMENTE con este JSON (sin texto antes ni después):
-{"analysis":"3-4 párrafos en español analizando la evolución real del fotógrafo. Detecta cambios de estilo concretos (ej: migración de focal, cambio de género), identifica hitos de cambio con el año exacto, y termina con una frase sobre la dirección actual. Tono personal y directo."}`;
+Escribe 3-4 párrafos en español analizando la evolución real. Detecta cambios concretos (qué focal o género cambió y en qué año), identifica hitos de cambio, y termina con una frase sobre la dirección actual. Tono personal y directo, dirigido al fotógrafo. No inventes nada que no esté en los datos.`;
 }
 
 export async function POST() {
@@ -68,17 +67,25 @@ export async function POST() {
     }
 
     // Parse and normalize keys
+    // Accept either JSON {"analysis":"..."} or plain text
     let analysis: string;
-    try {
-      const start = raw.indexOf('{');
-      const end = raw.lastIndexOf('}');
-      if (start === -1 || end === -1) throw new Error('No JSON found');
-      const obj = JSON.parse(raw.slice(start, end + 1));
-      const norm = Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
-      analysis = norm.analysis as string;
-      if (!analysis) throw new Error('missing analysis field');
-    } catch {
-      console.error('[insights/evolution/analyze] Parse failed — raw:', raw.substring(0, 400));
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('{')) {
+      try {
+        const start = trimmed.indexOf('{');
+        const end = trimmed.lastIndexOf('}');
+        const obj = JSON.parse(trimmed.slice(start, end + 1));
+        const norm = Object.fromEntries(Object.entries(obj).map(([k, v]) => [k.toLowerCase(), v]));
+        analysis = (norm.analysis ?? norm.text ?? norm.content ?? '') as string;
+      } catch {
+        analysis = trimmed;
+      }
+    } else {
+      analysis = trimmed;
+    }
+
+    if (!analysis || analysis.length < 50) {
+      console.error('[insights/evolution/analyze] Response too short — raw:', raw.substring(0, 400));
       return NextResponse.json({ error: 'El modelo no devolvió un análisis válido. Inténtalo de nuevo.' }, { status: 500 });
     }
 
