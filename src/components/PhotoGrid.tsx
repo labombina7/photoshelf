@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { IconChevronDown, IconChevronUp, IconSparkle } from '@/components/Icons';
+import { IconChevronDown, IconChevronUp, IconSparkle, IconShare } from '@/components/Icons';
 import EmptyState from '@/components/EmptyState';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import ShareButton from '@/components/ShareButton';
+import ShareDialog from '@/components/ShareDialog';
 import type { Photo, Tag } from '@/lib/types';
 
 function IconStar({ filled, className }: { filled: boolean; className?: string }) {
@@ -55,6 +57,7 @@ interface PhotoGridProps {
   selectionMode?: boolean;
   selectedIds?: Set<number>;
   onToggleSelect?: (id: number) => void;
+  onActivateSelection?: (photoId: number) => void;
 }
 
 function EventGroupBlock({
@@ -67,6 +70,7 @@ function EventGroupBlock({
   selectionMode,
   selectedIds,
   onToggleSelect,
+  onActivateSelection,
 }: {
   group: EventGroup;
   isCollapsed: boolean;
@@ -77,6 +81,7 @@ function EventGroupBlock({
   selectionMode?: boolean;
   selectedIds?: Set<number>;
   onToggleSelect?: (id: number) => void;
+  onActivateSelection?: (photoId: number) => void;
 }) {
   const PAGE_SIZE = 60;
   const router = useRouter();
@@ -95,6 +100,7 @@ function EventGroupBlock({
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   // true when the device has a precise pointer (mouse/trackpad) → selection mode
   const isPointerFine = useRef(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     isPointerFine.current = window.matchMedia('(pointer: fine)').matches;
   }, []);
@@ -363,6 +369,12 @@ function EventGroupBlock({
                   <IconSparkle size={11} />
                   {classifying ? 'Clasificando…' : 'Clasificar'}
                 </button>
+                <ShareEventItem
+                  year={group.year}
+                  event={group.event}
+                  currentParams={currentParams}
+                  onClose={() => setMenuOpen(false)}
+                />
               </div>
             )}
           </div>
@@ -396,6 +408,18 @@ function EventGroupBlock({
                   role="button"
                   tabIndex={-1}
                   onMouseEnter={() => { if (isPointerFine.current) setFocusedIndex(idx); }}
+                  onTouchStart={() => {
+                    if (selectionMode || !onActivateSelection) return;
+                    longPressTimer.current = setTimeout(() => {
+                      onActivateSelection(photo.id);
+                    }, 500);
+                  }}
+                  onTouchEnd={() => {
+                    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+                  }}
+                  onTouchMove={() => {
+                    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+                  }}
                   onClick={() => {
                     if (selectionMode && onToggleSelect) {
                       onToggleSelect(photo.id);
@@ -457,6 +481,54 @@ function EventGroupBlock({
   );
 }
 
+// ── Compartir evento desde menú móvil ────────────────────────────────────────
+function ShareEventItem({
+  year, event, currentParams, onClose,
+}: { year: number; event: string; currentParams: string; onClose: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [dialog, setDialog] = useState<{ url: string; photoCount: number } | null>(null);
+
+  async function handleShare(e: React.MouseEvent) {
+    e.stopPropagation();
+    onClose();
+    setLoading(true);
+    try {
+      const params = new URLSearchParams(currentParams);
+      params.set('year', String(year));
+      params.set('event', event);
+      params.set('limit', '300');
+      const res = await fetch(`/api/photos/ids?${params.toString()}`);
+      const data = await res.json() as { ids?: number[] };
+      const ids = data.ids ?? [];
+      if (ids.length === 0) return;
+
+      const { sharePhotos } = await import('@/lib/shareUtils');
+      const result = await sharePhotos(ids, event);
+      if (result) setDialog(result);
+    } catch (err) {
+      console.error('[ShareEventItem]', err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <button className="event-menu-item" onClick={handleShare} disabled={loading}>
+        <IconShare size={11} />
+        {loading ? 'Preparando…' : 'Compartir evento'}
+      </button>
+      {dialog && (
+        <ShareDialog
+          url={dialog.url}
+          photoCount={dialog.photoCount}
+          onClose={() => setDialog(null)}
+        />
+      )}
+    </>
+  );
+}
+
 export default function PhotoGrid({
   groups,
   collapsed,
@@ -466,6 +538,7 @@ export default function PhotoGrid({
   selectionMode,
   selectedIds,
   onToggleSelect,
+  onActivateSelection,
 }: PhotoGridProps) {
   const searchParams = useSearchParams();
   const currentParams = searchParams.toString();
@@ -503,6 +576,7 @@ export default function PhotoGrid({
             selectionMode={selectionMode}
             selectedIds={selectedIds}
             onToggleSelect={onToggleSelect}
+            onActivateSelection={onActivateSelection}
           />
         );
       })}
