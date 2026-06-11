@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import FilterBar from '@/components/FilterBar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
-import { IconSparkle, IconMenu, IconShare } from '@/components/Icons';
+import { IconSparkle, IconMenu } from '@/components/Icons';
 import Slideshow from '@/components/Slideshow';
 import ShareButton from '@/components/ShareButton';
 import { useHeaderSlotLeft } from '@/components/HeaderSlot';
@@ -227,32 +227,10 @@ export default function LibraryClient({
           onViewModeChange={handleViewModeChange}
           onSlideshow={openSlideshow}
           hasMemories={hasMemories}
+          selectionMode={selectionMode}
+          onToggleSelection={toggleSelectionMode}
         />
         <div className="content">
-          {/* Selection mode toolbar */}
-          {effectiveViewMode === 'list' && (
-            <div className="collapse-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', marginBottom: selectionMode ? 0 : undefined }}>
-              <button
-                className={`collapse-btn${selectionMode ? ' collapse-btn--active' : ''}`}
-                onClick={toggleSelectionMode}
-                title={selectionMode ? 'Cancelar selección' : 'Seleccionar fotos para compartir'}
-              >
-                <IconShare size={11} />
-                {selectionMode ? 'Cancelar selección' : 'Seleccionar'}
-              </button>
-              {selectionMode && selectedIds.size > 0 && (
-                <>
-                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {selectedIds.size} {selectedIds.size === 1 ? 'foto' : 'fotos'}
-                  </span>
-                  <ShareButton
-                    photoIds={Array.from(selectedIds)}
-                    label={activeFilters.event ?? activeYear ?? 'selección'}
-                  />
-                </>
-              )}
-            </div>
-          )}
 
           {/* Classify-year button is shown in both views */}
           {showClassifyYear && (
@@ -332,6 +310,29 @@ export default function LibraryClient({
         </div>
         </div>
         {toast && <div className="toast">{toast}</div>}
+
+        {/* Floating selection action bar */}
+        {selectionMode && (
+          <div className="selection-action-bar">
+            <span className="selection-action-count">
+              {selectedIds.size > 0
+                ? `${selectedIds.size} ${selectedIds.size === 1 ? 'foto seleccionada' : 'fotos seleccionadas'}`
+                : 'Toca fotos para seleccionar'}
+            </span>
+            <div className="selection-action-btns">
+              {selectedIds.size > 0 && (
+                <ShareButton
+                  photoIds={Array.from(selectedIds)}
+                  label={activeFilters.event ?? activeYear ?? 'selección'}
+                  className="selection-action-share"
+                />
+              )}
+              <button className="selection-action-cancel" onClick={toggleSelectionMode}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

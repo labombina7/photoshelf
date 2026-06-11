@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { IconShare } from '@/components/Icons';
 
 export interface FilterBarValues {
   year?: string | null;
@@ -27,6 +28,9 @@ export interface FilterBarProps {
   onViewModeChange?: (mode: 'list' | 'folders') => void;
   onSlideshow?: () => void;
   hasMemories?: boolean;
+  // Selection mode
+  selectionMode?: boolean;
+  onToggleSelection?: () => void;
 }
 
 const ISO_OPTIONS     = [{ label: '≤400', value: '400' }, { label: '≤1600', value: '1600' }, { label: '≤6400', value: '6400' }];
@@ -133,6 +137,7 @@ export default function FilterBar({
   years, cameras, activeYear, activeFilters,
   filteredTotal = 0, viewMode = 'folders', canToggleView = false,
   onViewModeChange, onSlideshow, hasMemories = false,
+  selectionMode = false, onToggleSelection,
 }: FilterBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -226,6 +231,15 @@ export default function FilterBar({
               <IconGrid />
             </button>
           </div>
+        )}
+        {viewMode === 'list' && onToggleSelection && (
+          <button
+            className={`view-toggle-btn${selectionMode ? ' active' : ''}`}
+            onClick={onToggleSelection}
+            title={selectionMode ? 'Cancelar selección' : 'Seleccionar fotos para compartir'}
+          >
+            <IconShare size={13} />
+          </button>
         )}
       </div>
     </div>
