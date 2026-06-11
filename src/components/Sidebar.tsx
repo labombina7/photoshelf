@@ -25,8 +25,8 @@ function activeModule(pathname: string): 'catalog' | 'projects' | 'albums' | 'to
   if (pathname === '/projects' || pathname.startsWith('/projects/')) return 'projects';
   if (pathname === '/smart-albums' || pathname.startsWith('/smart-albums/')) return 'albums';
   if (pathname === '/insights' || pathname.startsWith('/insights/')) return 'insights';
-  if (pathname.startsWith('/settings')) return 'settings';
-  if (['/jobs', '/stats', '/health', '/about'].some(r => pathname === r || pathname.startsWith(r + '/')) ||
+  if (pathname.startsWith('/settings') || pathname === '/about' || pathname.startsWith('/about/')) return 'settings';
+  if (['/jobs', '/stats', '/health'].some(r => pathname === r || pathname.startsWith(r + '/')) ||
       pathname.startsWith('/tools')) return 'tools';
   return 'catalog';
 }
@@ -391,6 +391,11 @@ function SettingsSection({ onNavClick }: { onNavClick: () => void }) {
         </svg>
         Modelos de IA
       </Link>
+      <Link href="/about" onClick={onNavClick}
+        className={`sidebar-item ${pathname === '/about' || pathname.startsWith('/about/') ? 'active' : ''}`}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Acerca de
+      </Link>
     </div>
   );
 }
@@ -463,11 +468,6 @@ function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
             {orphanCount}
           </span>
         )}
-      </Link>
-      <Link href="/about" onClick={onNavClick}
-        className={`sidebar-item ${pathname === '/about' || pathname.startsWith('/about/') ? 'active' : ''}`}>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        Acerca de
       </Link>
     </div>
   );
