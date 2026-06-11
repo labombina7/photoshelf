@@ -40,7 +40,7 @@ export function checkPassword(input: string): boolean {
       const a = Buffer.from(input.padEnd(dummy.length, '\0'));
       const b = Buffer.from(dummy.padEnd(input.length, '\0'));
       crypto.timingSafeEqual(a, b);
-    } catch {}
+    } catch (e) { console.error('[session] checkPassword comparison error:', e); }
     return false;
   }
   const a = Buffer.from(input);

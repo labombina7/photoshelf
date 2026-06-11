@@ -64,3 +64,5 @@ Los cuatro fixes son de una línea cada uno: añadir `console.warn` o `console.e
 
 - Alertas o métricas sobre intentos de path traversal (requeriría sistema de observabilidad externo)
 - Rate limiting sobre intentos de autenticación fallidos
+
+> Estado: ✅ Desplegada

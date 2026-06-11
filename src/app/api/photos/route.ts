@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { listPhotos } from '@/lib/queries/photos';
+import { PHOTOS_MAX_LIMIT } from '@/lib/config';
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     const untagged = sp.get('untagged');
     const q        = sp.get('q');
     const page     = parseInt(sp.get('page')  ?? '1',   10);
-    const limit    = parseInt(sp.get('limit') ?? '200', 10);
+    const limit    = Math.min(parseInt(sp.get('limit') ?? '200', 10), PHOTOS_MAX_LIMIT);
     const offset   = (page - 1) * limit;
 
     const iso_min       = sp.get('iso_min');

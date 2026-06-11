@@ -1,25 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withAuth, apiError } from '@/lib/api';
 import { getDb } from '@/lib/db';
-import { resolvePhotoPath, PHOTOS_PATH } from '@/lib/config';
+import { resolvePhotoPath, PHOTOS_PATH, MIME_TYPES, FALLBACK_MIME } from '@/lib/config';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
 
 export const dynamic = 'force-dynamic';
-
-const MIME_TYPES: Record<string, string> = {
-  '.jpg':  'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png':  'image/png',
-  '.webp': 'image/webp',
-  '.gif':  'image/gif',
-  '.heic': 'image/heic',
-  '.heif': 'image/heif',
-  '.tif':  'image/tiff',
-  '.tiff': 'image/tiff',
-  '.avif': 'image/avif',
-};
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -42,6 +29,7 @@ export function GET(_req: NextRequest, { params }: Params) {
     try {
       absPath = resolvePhotoPath(photo.path, photo.catalog_path);
     } catch {
+      console.error('[security] Path traversal attempt blocked, photo id:', id);
       return apiError('FORBIDDEN', 'Access denied', 403);
     }
 
@@ -50,7 +38,7 @@ export function GET(_req: NextRequest, { params }: Params) {
 
     const stream = fs.createReadStream(absPath);
     const ext    = path.extname(photo.filename).toLowerCase();
-    const mime   = MIME_TYPES[ext] ?? 'image/jpeg';
+    const mime   = MIME_TYPES[ext] ?? FALLBACK_MIME;
 
     return new NextResponse(stream as unknown as ReadableStream, {
       headers: {

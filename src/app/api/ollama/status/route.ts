@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
-
-const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
+import { OLLAMA_URL } from '@/lib/config';
 
 export async function GET() {
   const session = await getSession();

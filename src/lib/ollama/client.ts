@@ -1,6 +1,4 @@
-import { OLLAMA_TIMEOUT_TEXT_MS, OLLAMA_TIMEOUT_VISION_MS } from '@/lib/config';
-
-const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
+import { OLLAMA_TIMEOUT_TEXT_MS, OLLAMA_TIMEOUT_VISION_MS, OLLAMA_URL } from '@/lib/config';
 
 export function isTimeoutError(err: unknown): boolean {
   if (!(err instanceof Error)) return false;

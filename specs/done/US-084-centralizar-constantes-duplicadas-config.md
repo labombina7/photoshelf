@@ -66,3 +66,5 @@ Los tres fixes son puramente de refactor — ninguno cambia comportamiento obser
 
 - Centralizar otros valores de configuración no duplicados
 - Validación de `OLLAMA_URL` al arrancar (URL malformada, puerto inválido)
+
+> Estado: ✅ Desplegada

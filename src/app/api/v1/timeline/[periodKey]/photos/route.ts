@@ -39,7 +39,7 @@ export function GET(req: NextRequest, { params }: Params) {
       try {
         const [takenAt, idStr] = Buffer.from(cursor, 'base64url').toString('utf8').split('|');
         decodedCursor = { taken_at: takenAt, id: parseInt(idStr, 10) };
-      } catch {}
+      } catch { console.warn('[timeline-photos] Invalid cursor, ignoring:', cursor); }
     }
 
     const db = getDb();

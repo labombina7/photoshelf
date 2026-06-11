@@ -74,3 +74,5 @@ La infraestructura de Vitest + mocks de `fs` y `getDb` ya está establecida (ver
 
 - Tests de integración end-to-end para el watcher (requeriría sistema de ficheros real)
 - Tests de concurrencia para el scan (se cubren en US-078)
+
+> Estado: ✅ Desplegada
