@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
-import { getDb } from '@/lib/db';
-import { resolvePhotoPath, PHOTOS_PATH, MIME_TYPES, FALLBACK_MIME } from '@/lib/config';
+import { getPhotoPathById } from '@/lib/queries/photos';
+import { resolvePhotoPath, MIME_TYPES, FALLBACK_MIME } from '@/lib/config';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
 import path from 'path';
@@ -12,13 +12,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   try {
     const { id } = await params;
-    const db = getDb();
-    const photo = db.prepare(`
-      SELECT p.path, p.filename, COALESCE(c.path, ?) as catalog_path
-      FROM photos p
-      LEFT JOIN catalogs c ON c.id = p.catalog_id
-      WHERE p.id = ?
-    `).get(PHOTOS_PATH, parseInt(id, 10)) as { path: string; filename: string; catalog_path: string } | undefined;
+    const photo = getPhotoPathById(parseInt(id, 10));
     if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     // Validate path is within its catalog root (path traversal protection)

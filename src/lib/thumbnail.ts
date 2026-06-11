@@ -4,9 +4,14 @@ import crypto from 'crypto';
 import { resolvePhotoPath } from './config';
 import { getDb } from './db';
 
-const CACHE_PATH = process.env.CACHE_PATH ?? path.join(process.cwd(), 'data', '.cache');
+export const CACHE_PATH = process.env.CACHE_PATH ?? path.join(process.cwd(), 'data', '.cache');
 const DEFAULT_SIZE = 400;
 const GRID_SIZE = 200;
+
+export function getCacheFilePath(photosRoot: string, relativePath: string, size: number, fit: 'cover' | 'inside'): string {
+  const key = crypto.createHash('md5').update(`${photosRoot}:${relativePath}:${size}:${fit}`).digest('hex');
+  return path.join(CACHE_PATH, `${key}.webp`);
+}
 
 export async function evictOldThumbnails(maxAgeDays = 30): Promise<void> {
   const cutoff = Date.now() - maxAgeDays * 86_400_000;

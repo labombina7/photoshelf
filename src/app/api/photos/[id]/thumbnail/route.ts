@@ -1,22 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { getSession } from '@/lib/session';
-import { getDb } from '@/lib/db';
+import { getPhotoPathById } from '@/lib/queries/photos';
 import { getThumbnail } from '@/lib/thumbnail';
-import { PHOTOS_PATH } from '@/lib/config';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session.isLoggedIn) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
-  const db = getDb();
-  const photo = db.prepare(`
-    SELECT p.path, COALESCE(c.path, ?) as catalog_path
-    FROM photos p
-    LEFT JOIN catalogs c ON c.id = p.catalog_id
-    WHERE p.id = ?
-  `).get(PHOTOS_PATH, parseInt(id, 10)) as { path: string; catalog_path: string } | undefined;
+  const photo = getPhotoPathById(parseInt(id, 10));
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const size = parseInt(req.nextUrl.searchParams.get('size') ?? '400', 10);

@@ -1,11 +1,12 @@
 export interface IntegrityState {
   running: boolean;
-  phase: 'idle' | 'orphans' | 'unindexed' | 'corrupt' | 'done';
+  phase: 'idle' | 'orphans' | 'unindexed' | 'corrupt' | 'orphan_thumbnails' | 'done';
   checked: number;
   total: number;
   orphansFound: number;
   unindexedFound: number;
   corruptFound: number;
+  orphanThumbnailsFound: number;
   error: string | null;
   completedAt: number | null;
 }
@@ -21,6 +22,7 @@ if (!g.__photoshelf_integrity) {
     orphansFound: 0,
     unindexedFound: 0,
     corruptFound: 0,
+    orphanThumbnailsFound: 0,
     error: null,
     completedAt: null,
   };

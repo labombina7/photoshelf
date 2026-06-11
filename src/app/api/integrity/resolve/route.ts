@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
-import { removeOrphansByIds, getIntegrityReportByType } from '@/lib/queries/integrity';
+import { removeOrphansByIds, removeOrphanThumbnailsByIds, getIntegrityReportByType } from '@/lib/queries/integrity';
 import fs from 'fs';
 import path from 'path';
 import { PHOTOS_PATH } from '@/lib/config';
@@ -21,6 +21,11 @@ export async function POST(req: NextRequest) {
     if (action === 'remove_orphans') {
       const removed = removeOrphansByIds(ids);
       return NextResponse.json({ removed });
+    }
+
+    if (action === 'delete_orphan_thumbnails') {
+      const result = removeOrphanThumbnailsByIds(ids);
+      return NextResponse.json(result);
     }
 
     if (action === 'quarantine_corrupt') {

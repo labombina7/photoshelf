@@ -13,6 +13,7 @@ interface Meta {
   orphans: number;
   unindexed: number;
   corrupt: number;
+  orphanThumbnails: number;
   lastRun: string | null;
 }
 
@@ -24,6 +25,7 @@ interface StatusResponse {
   orphansFound: number;
   unindexedFound: number;
   corruptFound: number;
+  orphanThumbnailsFound: number;
   error: string | null;
   completedAt: number | null;
 }
@@ -245,6 +247,9 @@ export default function IntegrityClient({
       } else if (action === 'quarantine_corrupt') {
         setMessage(`${data.moved} archivo(s) movidos a _quarantine/.${data.errors?.length ? ` ${data.errors.length} error(es).` : ''}`);
         await fetchReport();
+      } else if (action === 'delete_orphan_thumbnails') {
+        setMessage(`${data.removed} thumbnail(s) huérfano(s) eliminados de la caché.${data.errors?.length ? ` ${data.errors.length} error(es).` : ''}`);
+        await fetchReport();
       }
     } finally {
       setActionLoading(null);
@@ -255,6 +260,7 @@ export default function IntegrityClient({
     orphans: 'Fase 1: verificando huérfanos en base de datos…',
     unindexed: 'Fase 2: buscando archivos no indexados en disco…',
     corrupt: 'Fase 3: verificando cabeceras de imagen…',
+    orphan_thumbnails: 'Fase 4: detectando thumbnails huérfanos en caché…',
     done: 'Análisis completo',
     idle: '',
   };
@@ -262,6 +268,7 @@ export default function IntegrityClient({
   const orphanItems = items.filter(i => i.type === 'orphan');
   const unindexedItems = items.filter(i => i.type === 'unindexed');
   const corruptItems = items.filter(i => i.type === 'corrupt');
+  const orphanThumbnailItems = items.filter(i => i.type === 'orphan_thumbnail');
   const hasResults = items.length > 0;
   const allClean = hasResults === false && meta.lastRun !== null;
 
@@ -359,6 +366,7 @@ export default function IntegrityClient({
                   <span>Huérfanos: {status.orphansFound}</span>
                   <span>No indexados: {status.unindexedFound}</span>
                   {includeCorrupt && <span>Corruptos: {status.corruptFound}</span>}
+                  <span>Thumbnails huérfanos: {status.orphanThumbnailsFound}</span>
                 </div>
               </div>
             )}
@@ -381,6 +389,7 @@ export default function IntegrityClient({
               <StatusBadge count={meta.orphans} label="Huérfanos" color="#e67e22" />
               <StatusBadge count={meta.unindexed} label="No indexados" color="#3498db" />
               <StatusBadge count={meta.corrupt} label="Corruptos" color="#c0392b" />
+              <StatusBadge count={meta.orphanThumbnails} label="Thumbs huérfanos" color="#8e44ad" />
             </div>
           )}
 
@@ -423,6 +432,14 @@ export default function IntegrityClient({
                 actionColor="#c0392b"
                 onAction={ids => handleAction('quarantine_corrupt', ids)}
                 actionLoading={actionLoading === 'quarantine_corrupt'}
+              />
+              <ReportSection
+                title="Thumbnails huérfanos (en caché, sin foto en BD)"
+                items={orphanThumbnailItems}
+                actionLabel="Eliminar de caché"
+                actionColor="#8e44ad"
+                onAction={ids => handleAction('delete_orphan_thumbnails', ids)}
+                actionLoading={actionLoading === 'delete_orphan_thumbnails'}
               />
             </div>
           )}

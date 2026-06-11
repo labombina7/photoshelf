@@ -719,45 +719,6 @@
 
       <!-- ── Deuda técnica — audit 2026-06-06 ─────────────────────────────── -->
 
-      <div class="card" tabindex="0" data-id="US-087" onclick="openModal('US-087')">
-        <div class="card-top">
-          <span class="badge badge-us">US-087</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Refactor componentes grandes — hooks custom y useEffect</div>
-        <div class="card-summary">Dividir LibraryClient (398l), DetailPanel (396l) y SearchClient (367l) en hooks custom. Eliminar los 3 eslint-disable de exhaustive-deps.</div>
-        <div class="card-footer"><span>Tech Debt 🟡</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-088" onclick="openModal('US-088')">
-        <div class="card-top">
-          <span class="badge badge-us">US-088</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Backup automático activado por defecto + aviso en UI</div>
-        <div class="card-summary">Cambiar default auto_enabled=1 en instalaciones nuevas. Banner de aviso en ajustes si el backup automático está desactivado.</div>
-        <div class="card-footer"><span>Tech Debt 🟡</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-089" onclick="openModal('US-089')">
-        <div class="card-top">
-          <span class="badge badge-us">US-089</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Docker: healthcheck y node-addon-api a devDeps</div>
-        <div class="card-summary">Añadir healthcheck en docker-compose.yml apuntando a /api/health. Mover node-addon-api de dependencies a devDependencies.</div>
-        <div class="card-footer"><span>Tech Debt 🟢</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-090" onclick="openModal('US-090')">
-        <div class="card-top">
-          <span class="badge badge-us">US-090</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Limpieza de thumbnails huérfanos y queries a repositorio</div>
-        <div class="card-summary">Limpiar thumbnails en CACHE_PATH al borrar un catálogo. Mover queries inline de original/thumbnail routes a src/lib/queries/photos.ts.</div>
-        <div class="card-footer"><span>Tech Debt 🟡</span></div>
-      </div>
 
       <div class="card" tabindex="0" data-id="US-092" onclick="openModal('US-092')">
         <div class="card-top">
@@ -864,6 +825,33 @@
         <div class="card-title">Reestructura de navegación y filtros</div>
       </div>
 
+      <div class="card card-done" tabindex="0" data-id="US-089" onclick="openModal('US-089')">
+        <div class="card-top">
+          <span class="badge badge-us">US-089</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Docker: healthcheck y node-addon-api a devDeps</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-088" onclick="openModal('US-088')">
+        <div class="card-top">
+          <span class="badge badge-us">US-088</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Backup automático activado por defecto + aviso en UI</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-087" onclick="openModal('US-087')">
+        <div class="card-top">
+          <span class="badge badge-us">US-087</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Refactor componentes grandes — hooks custom y useEffect</div>
+      </div>
+
       <div class="card card-done" tabindex="0" data-id="US-086" onclick="openModal('US-086')">
         <div class="card-top">
           <span class="badge badge-us">US-086</span>
@@ -943,6 +931,15 @@
           <span class="date-badge">2026-06-11</span>
         </div>
         <div class="card-title">Nav global en header (Proyectos · Álbumes)</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-090" onclick="openModal('US-090')">
+        <div class="card-top">
+          <span class="badge badge-us">US-090</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Limpieza de thumbnails huérfanos y queries a repositorio</div>
       </div>
 
       <div class="card card-done" tabindex="0" data-id="US-091" onclick="openModal('US-091')">
