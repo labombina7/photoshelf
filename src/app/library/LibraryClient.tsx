@@ -162,6 +162,11 @@ export default function LibraryClient({
     });
   }
 
+  function activateSelection(photoId: number) {
+    setSelectionMode(true);
+    setSelectedIds(new Set([photoId]));
+  }
+
   const themeId = searchParams.get('theme');
   const fav = searchParams.get('favorite');
   const activeThemeName = themes.find(t => String(t.id) === themeId)?.name;
@@ -303,6 +308,7 @@ export default function LibraryClient({
                 selectionMode={selectionMode}
                 selectedIds={selectedIds}
                 onToggleSelect={togglePhotoSelect}
+                onActivateSelection={activateSelection}
               />
             </>
           )}
