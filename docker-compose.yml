@@ -13,6 +13,12 @@ services:
       OLLAMA_URL: ${OLLAMA_URL:-http://192.168.1.135:11434}
       BACKUP_PATH: ${BACKUP_PATH:-/data/backups}
       AMPLITUDE_API_KEY: ${AMPLITUDE_API_KEY}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     volumes:
       - /volume1:/volume1:ro          # NAS completo en solo lectura — permite múltiples catálogos sin re-configurar
       - ${DATA_PATH:-/volume1/homes/javi/photoshelf-data}:/data

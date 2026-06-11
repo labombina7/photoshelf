@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { IconSparkle, IconMenu } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { DeepSearchPanel } from './DeepSearchPanel';
+import { SaveThemePanel } from './SaveThemePanel';
 import type { SearchResult, SearchPhotoRow, TagMatch, EventMatch, SmartAlbumMatch, ProjectMatch } from '@/lib/search/execute';
 
 // ─── Sync header ──────────────────────────────────────────────────────────────
@@ -116,145 +118,6 @@ function ProjectsSection({ projects }: { projects: ProjectMatch[] }) {
   );
 }
 
-// ─── Deep AI search ───────────────────────────────────────────────────────────
-
-interface DeepResult {
-  id: number; filename: string; year: number; event: string; taken_at: string | null; is_favorite: number;
-}
-
-function DeepSearchPanel({ query }: { query: string }) {
-  const [running,   setRunning]   = useState(false);
-  const [analyzed,  setAnalyzed]  = useState(0);
-  const [totalCand, setTotalCand] = useState(0);
-  const [photos,    setPhotos]    = useState<DeepResult[]>([]);
-  const [offset,    setOffset]    = useState(0);
-  const [hasMore,   setHasMore]   = useState(false);
-  const [done,      setDone]      = useState(false);
-
-  async function runBatch(currentOffset: number) {
-    setRunning(true);
-    try {
-      const res = await fetch('/api/ai/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: query, mode: 'deep', offset: currentOffset }),
-        credentials: 'same-origin',
-      });
-      if (!res.ok) return;
-      const data = await res.json() as {
-        photos: DeepResult[]; analyzed: number; next_offset: number;
-        total_candidates: number; has_more: boolean;
-      };
-      setPhotos(prev => [...prev, ...data.photos]);
-      setAnalyzed(currentOffset + data.analyzed);
-      setTotalCand(data.total_candidates);
-      setOffset(data.next_offset);
-      setHasMore(data.has_more);
-      if (!data.has_more) setDone(true);
-    } finally {
-      setRunning(false);
-    }
-  }
-
-  if (done && photos.length === 0) return (
-    <p className="search-deep-empty">El análisis visual no encontró coincidencias.</p>
-  );
-
-  return (
-    <section className="search-results-section">
-      <h2 className="search-results-section-title">
-        Análisis visual IA
-        {running && <span className="search-deep-spinner" />}
-      </h2>
-
-      {photos.length > 0 && <SearchPhotoGrid photos={photos} />}
-
-      {!running && !done && (
-        <button
-          className="search-deep-btn"
-          onClick={() => runBatch(offset)}
-        >
-          <IconSparkle size={12} />
-          {photos.length === 0
-            ? 'Analizar fotos con visión IA (más lento)'
-            : `Analizar ${Math.min(50, totalCand - analyzed)} más`}
-        </button>
-      )}
-
-      {running && (
-        <div className="search-deep-progress">
-          <div className="search-deep-progress-bar">
-            <div
-              className="search-deep-progress-fill"
-              style={{ width: totalCand > 0 ? `${Math.round((analyzed / totalCand) * 100)}%` : '0%' }}
-            />
-          </div>
-          <span className="search-deep-progress-label">
-            Analizando {analyzed}/{totalCand} fotos…
-          </span>
-        </div>
-      )}
-    </section>
-  );
-}
-
-// ─── Save as theme ────────────────────────────────────────────────────────────
-
-function SaveThemePanel({ photoIds }: { photoIds: number[] }) {
-  const router = useRouter();
-  const [name,    setName]    = useState('');
-  const [saving,  setSaving]  = useState(false);
-  const [savedMsg, setSavedMsg] = useState('');
-
-  if (photoIds.length === 0) return null;
-
-  async function handleSave() {
-    if (!name.trim()) return;
-    setSaving(true);
-    try {
-      const res  = await fetch('/api/themes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), color: '#3b62d4' }),
-      });
-      const theme = await res.json() as { id: number };
-      await Promise.all(photoIds.map(id =>
-        fetch(`/api/photo-themes/${id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ themeId: theme.id }),
-        })
-      ));
-      setSavedMsg(`Temática "${name}" guardada con ${photoIds.length} fotos`);
-      setTimeout(() => setSavedMsg(''), 5000);
-      router.refresh();
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div className="search-save-theme">
-      <span className="search-save-theme-label">Guardar como temática</span>
-      <input
-        className="search-save-theme-input"
-        placeholder="Nombre de la temática…"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && handleSave()}
-      />
-      <button
-        className="search-save-theme-btn"
-        onClick={handleSave}
-        disabled={saving || !name.trim()}
-      >
-        {saving ? 'Guardando…' : 'Guardar'}
-      </button>
-      {savedMsg && <span className="search-save-theme-msg">{savedMsg}</span>}
-    </div>
-  );
-}
-
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyResult({ query, isAI }: { query: string; isAI: boolean }) {
@@ -298,7 +161,6 @@ export default function SearchClient({ result }: { result: SearchResult }) {
         <span className="header-slot-sub">{total} foto{total !== 1 ? 's' : ''}</span>
       )}
     </div>
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [total]));
 
   return (

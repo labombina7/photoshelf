@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useTagEditor } from '@/hooks/useTagEditor';
+import { useAiReview } from '@/hooks/useAiReview';
 import {
   IconX, IconSparkle, IconCheck, IconCalendar,
   IconCamera, IconMap, IconFile, IconAperture, IconStar, IconEye,
@@ -16,112 +18,94 @@ interface DetailPanelProps {
   allThemes: Theme[];
 }
 
+function ReviewModal({ review, error, onClose }: {
+  review: PhotoReview | null;
+  error: string | null;
+  onClose: () => void;
+}) {
+  if (!review && !error) return null;
+  return (
+    <>
+      <div className="review-overlay" onClick={onClose} />
+      <div className="review-modal">
+        <div className="review-modal-header">
+          <span style={{ fontWeight: 600, fontSize: 14 }}>Análisis de la imagen</span>
+          <button className="ai-panel-close" onClick={onClose} aria-label="Cerrar análisis de IA">
+            <IconX size={14} />
+          </button>
+        </div>
+        <div className="review-modal-body">
+          {error && (
+            <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+              No se pudo analizar la imagen: <strong>{error}</strong>
+            </p>
+          )}
+          {review && (
+            <>
+              {review.score > 0 && (
+                <div className="review-score">
+                  <span className="review-score-num">{review.score}</span>
+                  <span className="review-score-label">/10</span>
+                  <div className="review-score-bar">
+                    <div className="review-score-fill" style={{ width: `${review.score * 10}%` }} />
+                  </div>
+                </div>
+              )}
+              {review.summary && <p className="review-summary">{review.summary}</p>}
+              {review.composition && (
+                <div className="review-row">
+                  <span className="review-row-label">Composición</span>
+                  <span className="review-row-value">{review.composition}</span>
+                </div>
+              )}
+              {review.light && (
+                <div className="review-row">
+                  <span className="review-row-label">Luz</span>
+                  <span className="review-row-value">{review.light}</span>
+                </div>
+              )}
+              {review.strengths.length > 0 && (
+                <div className="review-row">
+                  <span className="review-row-label">Puntos fuertes</span>
+                  <ul className="review-list review-list--positive">
+                    {review.strengths.map((s, i) => <li key={i}>{s}</li>)}
+                  </ul>
+                </div>
+              )}
+              {review.weaknesses.length > 0 && (
+                <div className="review-row">
+                  <span className="review-row-label">Mejoras</span>
+                  <ul className="review-list review-list--negative">
+                    {review.weaknesses.map((w, i) => <li key={i}>{w}</li>)}
+                  </ul>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   const router = useRouter();
   const { track } = useAnalytics();
-  const [tags, setTags] = useState(photo.tags);
+  const { tags, newTag, setNewTag, addTag, removeTag, mergeAiTags, errorToast } = useTagEditor(photo);
+  const {
+    classifying, classifyError,
+    reviewing, review, setReview,
+    reviewError, setReviewError,
+    classify, requestReview,
+  } = useAiReview(photo.id);
   const [assignedThemeIds, setAssignedThemeIds] = useState<Set<number>>(
     new Set(photo.themes.map((t) => t.id))
   );
-  const [newTag, setNewTag] = useState('');
-  const [classifying, setClassifying] = useState(false);
-  const [classifyError, setClassifyError] = useState<string | null>(null);
   const [isFavorite, setIsFavorite] = useState(photo.is_favorite === 1);
-  const [reviewing, setReviewing] = useState(false);
-  const [review, setReview] = useState<PhotoReview | null>(null);
-  const [reviewError, setReviewError] = useState<string | null>(null);
-  const [errorToast, setErrorToast] = useState<string | null>(null);
-  const errorToastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function showErrorToast(msg: string) {
-    if (errorToastTimer.current) clearTimeout(errorToastTimer.current);
-    setErrorToast(msg);
-    errorToastTimer.current = setTimeout(() => setErrorToast(null), 4000);
-  }
-
-  useEffect(() => () => { if (errorToastTimer.current) clearTimeout(errorToastTimer.current); }, []);
-
-  async function addTag() {
-    const name = newTag.trim().toLowerCase();
-    if (!name) return;
-    const res = await fetch(`/api/tags/${photo.id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, source: 'manual' }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setTags((prev) => [...prev.filter((t) => t.name !== data.name), { id: data.id, name: data.name, source: 'manual' }]);
-      setNewTag('');
-    }
-  }
-
-  async function removeTag(name: string) {
-    const prevTags = tags;
-    const removedTag = tags.find(t => t.name === name);
-    if (removedTag?.source === 'ai') track('ai_tag_reviewed', { action: 'reject' });
-    setTags((prev) => prev.filter((t) => t.name !== name)); // optimistic
-    try {
-      const res = await fetch(`/api/tags/${photo.id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
-      });
-      if (!res.ok) throw new Error(`Error ${res.status}`);
-    } catch (err) {
-      console.error('[DetailPanel] removeTag failed:', err instanceof Error ? err.message : err);
-      setTags(prevTags); // rollback
-      showErrorToast('No se pudo eliminar la etiqueta. Inténtalo de nuevo.');
-    }
-  }
-
-  async function classify() {
-    track('ai_classify_triggered');
-    setClassifying(true);
-    setClassifyError(null);
-    try {
-      const res = await fetch(`/api/ai/classify/${photo.id}`, { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error ?? `Error ${res.status}`);
-      if (data.tags?.length === 0) {
-        setClassifyError('La IA no generó ningún tag. Comprueba que Ollama esté disponible.');
-      } else if (data.tags) {
-        // Merge AI tags without overwriting manual ones
-        setTags((prev) => {
-          const existing = new Set(prev.map((t) => t.name));
-          const newAi = data.tags
-            .filter((n: string) => !existing.has(n))
-            .map((n: string, i: number) => ({ id: -(i + 1), name: n, source: 'ai' as const }));
-          return [...prev, ...newAi];
-        });
-      }
-    } catch (err) {
-      setClassifyError(err instanceof Error ? err.message : 'Error al clasificar la imagen');
-    } finally {
-      setClassifying(false);
-    }
-  }
-
-  async function requestReview() {
-    setReviewing(true);
-    setReview(null);
-    setReviewError(null);
-    try {
-      const res = await fetch(`/api/ai/review/${photo.id}`, { method: 'POST' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error ?? `Error ${res.status}`);
-      const r = data as PhotoReview;
-      const isEmpty = !r.score && !r.summary && !r.composition && !r.light
-        && r.strengths.length === 0 && r.weaknesses.length === 0;
-      if (isEmpty) {
-        throw new Error('La IA no pudo generar un análisis. Comprueba que Ollama esté disponible e inténtalo de nuevo.');
-      }
-      setReview(r);
-    } catch (err) {
-      setReviewError(err instanceof Error ? err.message : 'Error al analizar la imagen');
-    } finally {
-      setReviewing(false);
-    }
+  async function handleClassify() {
+    const aiTags = await classify();
+    if (aiTags) mergeAiTags(aiTags);
   }
 
   async function toggleTheme(themeId: number) {
@@ -129,7 +113,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
     const next = new Set(assignedThemeIds);
     if (next.has(themeId)) next.delete(themeId);
     else next.add(themeId);
-    setAssignedThemeIds(next); // optimistic
+    setAssignedThemeIds(next);
     try {
       const res = await fetch(`/api/photo-themes/${photo.id}`, {
         method: 'PUT',
@@ -140,8 +124,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
       router.refresh();
     } catch (err) {
       console.error('[DetailPanel] toggleTheme failed:', err instanceof Error ? err.message : err);
-      setAssignedThemeIds(prevThemeIds); // rollback
-      showErrorToast('No se pudo actualizar la temática. Inténtalo de nuevo.');
+      setAssignedThemeIds(prevThemeIds);
     }
   }
 
@@ -159,7 +142,6 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   const takenDate = photo.taken_at
     ? new Date(photo.taken_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
     : null;
-
   const sizeMb = photo.size_bytes ? (photo.size_bytes / 1024 / 1024).toFixed(1) : null;
   const dimensions = photo.width && photo.height ? `${photo.width}×${photo.height}` : null;
 
@@ -250,7 +232,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
       <div>
         <Button
           variant="subtle"
-          onClick={classify}
+          onClick={handleClassify}
           disabled={classifying}
           aria-label={classifying ? 'Clasificando foto con IA…' : 'Clasificar foto con IA'}
         >
@@ -279,80 +261,11 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
         </Button>
       </div>
 
-      {/* Review error */}
-      {reviewError && (
-        <>
-          <div className="review-overlay" onClick={() => setReviewError(null)} />
-          <div className="review-modal">
-            <div className="review-modal-header">
-              <span style={{ fontWeight: 600, fontSize: 14 }}>Análisis de la imagen</span>
-              <button className="ai-panel-close" onClick={() => setReviewError(null)} aria-label="Cerrar análisis de IA">
-                <IconX size={14} />
-              </button>
-            </div>
-            <div className="review-modal-body">
-              <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
-                No se pudo analizar la imagen: <strong>{reviewError}</strong>
-              </p>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Review modal */}
-      {review && (
-        <>
-          <div className="review-overlay" onClick={() => setReview(null)} />
-          <div className="review-modal">
-            <div className="review-modal-header">
-              <span style={{ fontWeight: 600, fontSize: 14 }}>Análisis de la imagen</span>
-              <button className="ai-panel-close" onClick={() => setReview(null)} aria-label="Cerrar análisis de IA">
-                <IconX size={14} />
-              </button>
-            </div>
-            <div className="review-modal-body">
-              {review.score > 0 && (
-                <div className="review-score">
-                  <span className="review-score-num">{review.score}</span>
-                  <span className="review-score-label">/10</span>
-                  <div className="review-score-bar">
-                    <div className="review-score-fill" style={{ width: `${review.score * 10}%` }} />
-                  </div>
-                </div>
-              )}
-              {review.summary && <p className="review-summary">{review.summary}</p>}
-              {review.composition && (
-                <div className="review-row">
-                  <span className="review-row-label">Composición</span>
-                  <span className="review-row-value">{review.composition}</span>
-                </div>
-              )}
-              {review.light && (
-                <div className="review-row">
-                  <span className="review-row-label">Luz</span>
-                  <span className="review-row-value">{review.light}</span>
-                </div>
-              )}
-              {review.strengths.length > 0 && (
-                <div className="review-row">
-                  <span className="review-row-label">Puntos fuertes</span>
-                  <ul className="review-list review-list--positive">
-                    {review.strengths.map((s, i) => <li key={i}>{s}</li>)}
-                  </ul>
-                </div>
-              )}
-              {review.weaknesses.length > 0 && (
-                <div className="review-row">
-                  <span className="review-row-label">Mejoras</span>
-                  <ul className="review-list review-list--negative">
-                    {review.weaknesses.map((w, i) => <li key={i}>{w}</li>)}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+      <ReviewModal
+        review={review}
+        error={reviewError}
+        onClose={() => { setReview(null); setReviewError(null); }}
+      />
 
       {/* Themes */}
       {allThemes.length > 0 && (
