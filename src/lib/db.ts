@@ -445,6 +445,23 @@ function migrateStyleAnalysis(db: Database.Database) {
       CREATE INDEX IF NOT EXISTS idx_photos_amplitude ON photos(amplitude_synced_at) WHERE amplitude_synced_at IS NULL;
     `);
   }
+
+  // ── US-092: Share tokens ────────────────────────────────────────────────────
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS share_tokens (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      token      TEXT NOT NULL UNIQUE,
+      photo_ids  TEXT NOT NULL,
+      label      TEXT,
+      created_at INTEGER NOT NULL,
+      expires_at INTEGER NOT NULL,
+      used_at    INTEGER
+    );
+    CREATE INDEX IF NOT EXISTS idx_share_tokens_token ON share_tokens(token);
+    CREATE INDEX IF NOT EXISTS idx_share_tokens_expires ON share_tokens(expires_at);
+  `);
+  // Clean up expired tokens on startup
+  db.prepare(`DELETE FROM share_tokens WHERE expires_at < unixepoch()`).run();
 }
 
 // ── integrity badge: unresolved orphan count ──────────────────────────────────

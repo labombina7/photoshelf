@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconEdit, IconMenu } from '@/components/Icons';
+import ShareButton from '@/components/ShareButton';
 import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import SmartAlbumBuilder from '../SmartAlbumBuilder';
 import type { Theme } from '@/lib/types';
@@ -145,8 +146,11 @@ export default function SmartAlbumDetailClient({
                   <IconEdit size={14} />
                 </button>
               </div>
-              <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--text-secondary)' }}>
+              <p style={{ margin: '2px 0 0', fontSize: 13, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: 10 }}>
                 {total.toLocaleString('es')} fotos
+                {total > 0 && (
+                  <ShareButton albumId={album.id} label={album.name} className="collapse-btn" />
+                )}
               </p>
             </div>
           </div>

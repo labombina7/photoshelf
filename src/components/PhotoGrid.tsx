@@ -52,6 +52,9 @@ interface PhotoGridProps {
   onToggle: (key: string) => void;
   activeFilters: ActiveFilters;
   showYear?: boolean;
+  selectionMode?: boolean;
+  selectedIds?: Set<number>;
+  onToggleSelect?: (id: number) => void;
 }
 
 function EventGroupBlock({
@@ -61,6 +64,9 @@ function EventGroupBlock({
   activeFilters,
   currentParams,
   showYear,
+  selectionMode,
+  selectedIds,
+  onToggleSelect,
 }: {
   group: EventGroup;
   isCollapsed: boolean;
@@ -68,6 +74,9 @@ function EventGroupBlock({
   activeFilters: ActiveFilters;
   currentParams: string;
   showYear: boolean;
+  selectionMode?: boolean;
+  selectedIds?: Set<number>;
+  onToggleSelect?: (id: number) => void;
 }) {
   const PAGE_SIZE = 60;
   const router = useRouter();
@@ -379,14 +388,21 @@ function EventGroupBlock({
               const previewTags = photo.tags.slice(0, 2);
               const isFocused = focusedIndex === idx;
               const isFav = !!photo.is_favorite;
+              const isSelected = selectionMode && selectedIds?.has(photo.id);
               return (
                 <div
                   key={photo.id}
-                  className={`photo-item${isFocused ? ' photo-item--focused' : ''}`}
+                  className={`photo-item${isFocused ? ' photo-item--focused' : ''}${isSelected ? ' photo-item--selected' : ''}`}
                   role="button"
                   tabIndex={-1}
                   onMouseEnter={() => { if (isPointerFine.current) setFocusedIndex(idx); }}
-                  onClick={() => navigateTo(photo.id)}
+                  onClick={() => {
+                    if (selectionMode && onToggleSelect) {
+                      onToggleSelect(photo.id);
+                    } else {
+                      navigateTo(photo.id);
+                    }
+                  }}
                 >
                   <div className="photo-skeleton" aria-hidden="true" />
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -401,19 +417,24 @@ function EventGroupBlock({
                     }}
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
-                  {/* Star icon */}
-                  <button
-                    className={`photo-star${isFav ? ' photo-star--active' : ''}`}
-                    aria-label={isFav ? 'Quitar de favoritas' : 'Marcar como favorita'}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleFavorite(photo.id, idx);
-                    }}
-                  >
-                    <IconStar filled={isFav} />
-                  </button>
-                  {previewTags.length > 0 && (
+                  {selectionMode ? (
+                    <div className="photo-select-check" aria-hidden="true">
+                      {isSelected && <span>✓</span>}
+                    </div>
+                  ) : (
+                    <button
+                      className={`photo-star${isFav ? ' photo-star--active' : ''}`}
+                      aria-label={isFav ? 'Quitar de favoritas' : 'Marcar como favorita'}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleFavorite(photo.id, idx);
+                      }}
+                    >
+                      <IconStar filled={isFav} />
+                    </button>
+                  )}
+                  {!selectionMode && previewTags.length > 0 && (
                     <div className="photo-overlay">
                       {previewTags.map((tag) => (
                         <span key={tag.name} className={`photo-tag-chip ${tag.source === 'ai' ? 'auto' : ''}`}>
@@ -436,7 +457,16 @@ function EventGroupBlock({
   );
 }
 
-export default function PhotoGrid({ groups, collapsed, onToggle, activeFilters, showYear = false }: PhotoGridProps) {
+export default function PhotoGrid({
+  groups,
+  collapsed,
+  onToggle,
+  activeFilters,
+  showYear = false,
+  selectionMode,
+  selectedIds,
+  onToggleSelect,
+}: PhotoGridProps) {
   const searchParams = useSearchParams();
   const currentParams = searchParams.toString();
 
@@ -470,6 +500,9 @@ export default function PhotoGrid({ groups, collapsed, onToggle, activeFilters, 
             activeFilters={activeFilters}
             currentParams={currentParams}
             showYear={showYear}
+            selectionMode={selectionMode}
+            selectedIds={selectedIds}
+            onToggleSelect={onToggleSelect}
           />
         );
       })}

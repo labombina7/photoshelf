@@ -6,8 +6,9 @@ import Sidebar from '@/components/Sidebar';
 import FilterBar from '@/components/FilterBar';
 import PhotoGrid from '@/components/PhotoGrid';
 import FolderGrid from '@/components/FolderGrid';
-import { IconSparkle, IconMenu } from '@/components/Icons';
+import { IconSparkle, IconMenu, IconShare } from '@/components/Icons';
 import Slideshow from '@/components/Slideshow';
+import ShareButton from '@/components/ShareButton';
 import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
@@ -100,6 +101,8 @@ export default function LibraryClient({
   const [localClassifying, setLocalClassifying] = useState(false);
   const { alert } = useModal();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const { slideshowIds, setSlideshowIds, openSlideshow } = useSlideshow(activeFilters);
 
   // Keep localClassifying in sync: clear it when server confirms this year's job is done
@@ -144,6 +147,20 @@ export default function LibraryClient({
 
   function collapseAll() { setCollapsed(new Set(allKeys)); }
   function expandAll() { setCollapsed(new Set()); }
+
+  function toggleSelectionMode() {
+    setSelectionMode(m => !m);
+    setSelectedIds(new Set());
+  }
+
+  function togglePhotoSelect(id: number) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const themeId = searchParams.get('theme');
   const fav = searchParams.get('favorite');
@@ -212,6 +229,31 @@ export default function LibraryClient({
           hasMemories={hasMemories}
         />
         <div className="content">
+          {/* Selection mode toolbar */}
+          {effectiveViewMode === 'list' && (
+            <div className="collapse-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', marginBottom: selectionMode ? 0 : undefined }}>
+              <button
+                className={`collapse-btn${selectionMode ? ' collapse-btn--active' : ''}`}
+                onClick={toggleSelectionMode}
+                title={selectionMode ? 'Cancelar selección' : 'Seleccionar fotos para compartir'}
+              >
+                <IconShare size={11} />
+                {selectionMode ? 'Cancelar selección' : 'Seleccionar'}
+              </button>
+              {selectionMode && selectedIds.size > 0 && (
+                <>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                    {selectedIds.size} {selectedIds.size === 1 ? 'foto' : 'fotos'}
+                  </span>
+                  <ShareButton
+                    photoIds={Array.from(selectedIds)}
+                    label={activeFilters.event ?? activeYear ?? 'selección'}
+                  />
+                </>
+              )}
+            </div>
+          )}
+
           {/* Classify-year button is shown in both views */}
           {showClassifyYear && (
             <div className="collapse-controls" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap' }}>
@@ -280,6 +322,9 @@ export default function LibraryClient({
                 onToggle={toggleGroup}
                 activeFilters={activeFilters}
                 showYear={!activeYear && !activeFilters.event}
+                selectionMode={selectionMode}
+                selectedIds={selectedIds}
+                onToggleSelect={togglePhotoSelect}
               />
             </>
           )}
