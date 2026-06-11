@@ -5,7 +5,7 @@ import { resolvePhotoPath } from '@/lib/config';
 import fs from 'fs';
 import path from 'path';
 import type { Archiver } from 'archiver';
-import { PassThrough } from 'stream';
+import { PassThrough, Readable } from 'stream';
 
 export async function GET(
   _req: NextRequest,
@@ -66,7 +66,10 @@ export async function GET(
   // Mark as used before streaming so concurrent requests get rejected
   markShareTokenUsed(token);
 
-  // Stream ZIP via PassThrough bridge (archiver Node stream → Web ReadableStream)
+  const label = shareToken.label ?? 'photoshelf-share';
+  const safeName = label.replace(/[^a-zA-Z0-9_\-]/g, '_');
+
+  // Build ZIP in memory via PassThrough, convert Node stream → Web ReadableStream
   const passThrough = new PassThrough();
 
   // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
@@ -75,19 +78,20 @@ export async function GET(
 
   for (const { absPath, filename } of photos) {
     const ext = path.extname(filename).toLowerCase();
-    const level = ['.jpg', '.jpeg', '.heic', '.heif', '.tif', '.tiff'].includes(ext) ? 0 : 6;
-    archive.append(fs.createReadStream(absPath), { name: filename, store: level === 0 });
+    const store = ['.jpg', '.jpeg', '.heic', '.heif', '.tif', '.tiff'].includes(ext);
+    archive.append(fs.createReadStream(absPath), { name: filename, store });
   }
 
+  // finalize() triggers the data flow; errors propagate through the stream
   archive.finalize().catch((err: unknown) => {
     console.error('[share] ZIP archive error:', err);
     passThrough.destroy(err instanceof Error ? err : new Error(String(err)));
   });
 
-  const label = shareToken.label ?? 'photoshelf-share';
-  const safeName = label.replace(/[^a-zA-Z0-9_\-]/g, '_');
+  // Readable.toWeb() gives Next.js a proper Web ReadableStream (Node 18+)
+  const webStream = Readable.toWeb(passThrough) as ReadableStream;
 
-  return new NextResponse(passThrough as unknown as ReadableStream, {
+  return new NextResponse(webStream, {
     headers: {
       'Content-Type': 'application/zip',
       'Content-Disposition': `attachment; filename="${safeName}.zip"`,
