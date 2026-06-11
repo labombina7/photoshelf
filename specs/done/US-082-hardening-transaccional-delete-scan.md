@@ -59,3 +59,5 @@ Ambos fixes son quirúrgicos y de bajo riesgo: no cambian interfaces ni comporta
 
 - Soft-delete de fotos o catálogos (papelera)
 - Bloqueo de concurrencia para la clasificación batch (tiene su propio mecanismo en `classifyState`)
+
+> Estado: ✅ Desplegada

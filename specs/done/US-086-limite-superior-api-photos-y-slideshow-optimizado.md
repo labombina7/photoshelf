@@ -73,3 +73,5 @@ El audit de deuda técnica (2026-06-06) identificó que `GET /api/photos` acepta
 
 - Paginación cursor-based en `/api/photos` (la API v1 ya la tiene; migrar la UI interna es otro refactor)
 - Caché de resultados de fotos en Redis u otro almacén externo
+
+> Estado: ✅ Desplegada
