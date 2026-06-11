@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu } from '@/components/Icons';
 import { useHeaderSlotLeft, useHeaderSlot } from '@/components/HeaderSlot';
@@ -41,12 +41,16 @@ export default function InsightsClient({
   const [analyzing, setAnalyzing] = useState(false);
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
 
+  const handleOpenSidebar = useCallback(() => setSidebarOpen(true), []);
   useHeaderSlotLeft(
-    <div className="header-slot-library">
-      <button className="hamburger header-slot-hamburger" onClick={() => setSidebarOpen(true)} aria-label="Menú">
-        <IconMenu />
-      </button>
-    </div>
+    useMemo(() => (
+      <div className="header-slot-library">
+        <button className="hamburger header-slot-hamburger" onClick={handleOpenSidebar} aria-label="Menú">
+          <IconMenu />
+        </button>
+      </div>
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    ), []),
   );
   useHeaderSlot(null);
 
