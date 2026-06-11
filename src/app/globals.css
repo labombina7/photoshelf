@@ -1257,6 +1257,25 @@ body { padding-top: var(--header-h); }
 .photo-item:hover img { transform: scale(1.02); }
 .photo-item--focused { z-index: 1; }
 .photo-item--focused img { transform: scale(1.02); }
+.photo-item--selected { z-index: 1; }
+.photo-item--selected img { opacity: 0.75; }
+.photo-item--selected::after {
+  content: '';
+  position: absolute; inset: 0;
+  border: 3px solid #4ade80;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+}
+.photo-select-check {
+  position: absolute; top: 6px; right: 6px;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.45); border-radius: 50%;
+  font-size: 13px; color: #4ade80; z-index: 3;
+  pointer-events: none;
+}
+.collapse-btn--active { border-color: var(--text); color: var(--text); background: var(--surface-raised, rgba(255,255,255,0.06)); }
 .photo-item--focused::after {
   content: '';
   position: absolute; inset: 0;
@@ -1458,6 +1477,30 @@ body { padding-top: var(--header-h); }
   0% { transform: translateX(-100%); }
   100% { transform: translateX(350%); }
 }
+
+/* ── Share / generic modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(2px); z-index: 300; animation: fadeIn 0.15s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-content {
+  width: min(480px, calc(100vw - 32px));
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  z-index: 301; animation: scaleIn 0.15s ease;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border);
+}
+.modal-title { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 7px; margin: 0; }
+.modal-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-tertiary); padding: 4px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { color: var(--text); background: var(--bg); }
 
 /* ── Confirm/alert dialog ── */
 .dialog-overlay {

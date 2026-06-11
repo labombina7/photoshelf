@@ -81,6 +81,10 @@ export function mobileCameraExclusionParams(): string[] {
 export const WATCHER_DEBOUNCE_MS = 5_000;
 export const WATCHER_POLL_MS     = 30_000;
 
+// ── Share tokens ─────────────────────────────────────────────────────────────
+export const SHARE_TOKEN_TTL_HOURS = 72;
+export const SHARE_MAX_PHOTOS      = 300;
+
 // ── Auth rate limiting ────────────────────────────────────────────────────────
 export const AUTH_RATE_LIMIT_ATTEMPTS  = 10;
 export const AUTH_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1_000;
