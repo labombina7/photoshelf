@@ -577,7 +577,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">9</span>
+      <span class="col-count">4</span>
     </div>
     <div class="col-body">
 
@@ -717,56 +717,6 @@
       </div>
 
 
-      <div class="card" tabindex="0" data-id="EPIC-005" onclick="openModal('EPIC-005')">
-        <div class="card-top">
-          <span class="badge badge-epic">EPIC-005</span>
-          <span class="effort effort-l">L</span>
-        </div>
-        <div class="card-title">Reestructura de navegación y filtros</div>
-        <div class="card-summary">Tres capas: nav global en header (Proyectos, Álbumes), sidebar simplificada (catálogo + temáticas) y filter bar horizontal sticky (año, cámara, ISO, apertura).</div>
-        <div class="card-footer"><span>US-078 → US-079 → US-080 → US-081</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-078" onclick="openModal('US-078')">
-        <div class="card-top">
-          <span class="badge badge-us">US-078</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Nav global en header (Proyectos · Álbumes)</div>
-        <div class="card-summary">Añadir tabs de módulos principales en AppHeader entre el logo y el buscador. Proyectos y Álbumes como entidades independientes del catálogo.</div>
-        <div class="card-footer"><span>EPIC-005</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-079" onclick="openModal('US-079')">
-        <div class="card-top">
-          <span class="badge badge-us">US-079</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Sidebar simplificada (solo catálogo y temáticas)</div>
-        <div class="card-summary">Extraer ExifFilters del sidebar. Dejar solo navegación de catálogo y gestión editorial de temáticas. Eliminar elementos que pasan al header o al filter bar.</div>
-        <div class="card-footer"><span>EPIC-005</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-080" onclick="openModal('US-080')">
-        <div class="card-top">
-          <span class="badge badge-us">US-080</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Filter bar horizontal (año + EXIF)</div>
-        <div class="card-summary">Nueva franja sticky bajo el header, solo visible en vistas de catálogo. Concentra chips de año y dropdowns de cámara, ISO, apertura y focal. Pill de limpiar cuando hay filtros activos.</div>
-        <div class="card-footer"><span>EPIC-005 · dep: US-079</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-081" onclick="openModal('US-081')">
-        <div class="card-top">
-          <span class="badge badge-us">US-081</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Ajustes responsive y mobile</div>
-        <div class="card-summary">Adaptar los tres niveles de navegación para móvil: tabs en header con scroll horizontal, filter bar con bottom sheets para dropdowns EXIF, sidebar sin cambios en el patrón overlay.</div>
-        <div class="card-footer"><span>EPIC-005 · dep: US-078, US-079, US-080</span></div>
-      </div>
-
       <!-- ── Deuda técnica — audit 2026-06-06 ─────────────────────────────── -->
       <div class="card" tabindex="0" data-id="US-082" onclick="openModal('US-082')">
         <div class="card-top">
@@ -903,7 +853,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">70</span>
+      <span class="col-count">75</span>
     </div>
     <div class="col-body">
 
@@ -952,6 +902,51 @@
           <span class="date-badge">2026-06-07</span>
         </div>
         <div class="card-title">Thumbnails obsoletos por Cache-Control immutable</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="EPIC-005" onclick="openModal('EPIC-005')">
+        <div class="card-top">
+          <span class="badge badge-epic">EPIC-005</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Reestructura de navegación y filtros</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-081" onclick="openModal('US-081')">
+        <div class="card-top">
+          <span class="badge badge-us">US-081</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Ajustes responsive y mobile</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-080" onclick="openModal('US-080')">
+        <div class="card-top">
+          <span class="badge badge-us">US-080</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Filter bar horizontal (año + EXIF)</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-079" onclick="openModal('US-079')">
+        <div class="card-top">
+          <span class="badge badge-us">US-079</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Sidebar simplificada (solo catálogo y temáticas)</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-078" onclick="openModal('US-078')">
+        <div class="card-top">
+          <span class="badge badge-us">US-078</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Nav global en header (Proyectos · Álbumes)</div>
       </div>
 
       <div class="card card-done" tabindex="0" data-id="US-091" onclick="openModal('US-091')">
