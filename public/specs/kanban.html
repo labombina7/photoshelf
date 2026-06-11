@@ -718,55 +718,6 @@
 
 
       <!-- ── Deuda técnica — audit 2026-06-06 ─────────────────────────────── -->
-      <div class="card" tabindex="0" data-id="US-082" onclick="openModal('US-082')">
-        <div class="card-top">
-          <span class="badge badge-us">US-082</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Hardening transaccional — deleteCatalog y guard de scan</div>
-        <div class="card-summary">Envolver los dos DELETEs de deleteCatalog en una transacción SQLite. Guard atómica en POST /api/scan para evitar dobles escaneos concurrentes.</div>
-        <div class="card-footer"><span>Tech Debt 🔴</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-083" onclick="openModal('US-083')">
-        <div class="card-top">
-          <span class="badge badge-us">US-083</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Tests: backup, folderWatcher, integrityScanner y deleteCatalog</div>
-        <div class="card-summary">Cobertura de tests para las cuatro funciones más críticas sin tests: backup, watcher, integrity scanner y el borrado de catálogos.</div>
-        <div class="card-footer"><span>Tech Debt 🔴 · dep: US-082</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-084" onclick="openModal('US-084')">
-        <div class="card-top">
-          <span class="badge badge-us">US-084</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Centralizar MIME_TYPES, OLLAMA_URL y eliminar dead code</div>
-        <div class="card-summary">Unificar MIME_TYPES (añadir .avif) y OLLAMA_URL en config.ts. Eliminar el stub catalog.ts sin uso desde EPIC-001.</div>
-        <div class="card-footer"><span>Tech Debt 🟡</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-085" onclick="openModal('US-085')">
-        <div class="card-top">
-          <span class="badge badge-us">US-085</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Logging en catch vacíos y checkPassword</div>
-        <div class="card-summary">Añadir console.warn/error en los tres catch vacíos de cursores y path traversal. Sanear el catch vacío de checkPassword.</div>
-        <div class="card-footer"><span>Tech Debt 🟢</span></div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-086" onclick="openModal('US-086')">
-        <div class="card-top">
-          <span class="badge badge-us">US-086</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Límite en /api/photos y endpoint ligero de IDs para slideshow</div>
-        <div class="card-summary">Añadir Math.min(limit, 1000) en /api/photos. Nuevo endpoint GET /api/photos/ids que devuelve solo IDs para el slideshow sin cargar tags.</div>
-        <div class="card-footer"><span>Tech Debt 🟡</span></div>
-      </div>
 
       <div class="card" tabindex="0" data-id="US-087" onclick="openModal('US-087')">
         <div class="card-top">
@@ -911,6 +862,51 @@
           <span class="date-badge">2026-06-11</span>
         </div>
         <div class="card-title">Reestructura de navegación y filtros</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-086" onclick="openModal('US-086')">
+        <div class="card-top">
+          <span class="badge badge-us">US-086</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Límite en /api/photos y endpoint ligero de IDs para slideshow</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-085" onclick="openModal('US-085')">
+        <div class="card-top">
+          <span class="badge badge-us">US-085</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Logging en catch vacíos y checkPassword</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-084" onclick="openModal('US-084')">
+        <div class="card-top">
+          <span class="badge badge-us">US-084</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Centralizar MIME_TYPES, OLLAMA_URL y eliminar dead code</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-083" onclick="openModal('US-083')">
+        <div class="card-top">
+          <span class="badge badge-us">US-083</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Tests: backup, folderWatcher, integrityScanner y deleteCatalog</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-082" onclick="openModal('US-082')">
+        <div class="card-top">
+          <span class="badge badge-us">US-082</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-11</span>
+        </div>
+        <div class="card-title">Hardening transaccional — deleteCatalog y guard de scan</div>
       </div>
 
       <div class="card card-done" tabindex="0" data-id="US-081" onclick="openModal('US-081')">
