@@ -42,9 +42,11 @@ export default function InsightsClient({
   const [analyzeError, setAnalyzeError] = useState<string | null>(null);
 
   useHeaderSlotLeft(
-    <button className="icon-btn" onClick={() => setSidebarOpen(true)} aria-label="Menú">
-      <IconMenu />
-    </button>
+    <div className="header-slot-library">
+      <button className="hamburger header-slot-hamburger" onClick={() => setSidebarOpen(true)} aria-label="Menú">
+        <IconMenu />
+      </button>
+    </div>
   );
   useHeaderSlot(null);
 
@@ -89,7 +91,7 @@ export default function InsightsClient({
   const cameraSeries = useMemo(() => {
     const cameraCount = new Map<string, number>();
     for (const c of cameras) cameraCount.set(c.camera, (cameraCount.get(c.camera) ?? 0) + c.count);
-    const topCameras = [...cameraCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(([c]) => c);
+    const topCameras = [...cameraCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([c]) => c);
 
     return topCameras.map((cam, i) => ({
       label: cam,

@@ -189,7 +189,7 @@ export function getCameraEvolution(): CameraByYear[] {
   const result: CameraByYear[] = [];
   for (const [year, yearRows] of byYear) {
     const total = totals.get(year) ?? 1;
-    for (const row of yearRows.slice(0, 4)) {
+    for (const row of yearRows.slice(0, 5)) {
       // Shorten camera names: "OLYMPUS CORPORATION E-M1MarkII" → "E-M1MarkII"
       const shortName = row.camera
         .replace(/^(Canon|Nikon|Sony|Fujifilm|Olympus|Panasonic|Leica|Ricoh|RICOH|Apple|Samsung)\s*/i, '')
