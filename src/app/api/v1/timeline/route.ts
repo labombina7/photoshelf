@@ -37,7 +37,7 @@ export const GET = withAuth(async (req: NextRequest, session) => {
 
   let decodedCursor: string | null = null;
   if (cursor) {
-    try { decodedCursor = Buffer.from(cursor, 'base64url').toString('utf8'); } catch {}
+    try { decodedCursor = Buffer.from(cursor, 'base64url').toString('utf8'); } catch { console.warn('[timeline] Invalid cursor, ignoring:', cursor); }
   }
 
   const db = getDb();

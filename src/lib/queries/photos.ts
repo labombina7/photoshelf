@@ -72,6 +72,37 @@ export function listPhotos(
   return { photos, total, years };
 }
 
+// ── ID-only list (for slideshow) ──────────────────────────────────────────────
+
+export interface PhotoIdsResult {
+  ids: number[];
+  total: number;
+}
+
+export function listPhotoIds(filters: PhotoFilters): PhotoIdsResult {
+  const db = getDb();
+  const { joinSql, whereSql, params: fp } = buildPhotoFilter(filters);
+
+  const rows = db.prepare(`
+    SELECT DISTINCT p.id
+    FROM photos p
+    ${joinSql}
+    WHERE 1=1
+    ${whereSql}
+    ORDER BY p.taken_at ASC, p.filename ASC
+  `).all(...fp) as { id: number }[];
+
+  const total = (db.prepare(`
+    SELECT COUNT(DISTINCT p.id) as c
+    FROM photos p
+    ${joinSql}
+    WHERE 1=1
+    ${whereSql}
+  `).get(...fp) as { c: number }).c;
+
+  return { ids: rows.map(r => r.id), total };
+}
+
 // ── Single photo ──────────────────────────────────────────────────────────────
 
 export function getPhotoById(id: number): PhotoDetail | null {

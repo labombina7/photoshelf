@@ -110,10 +110,9 @@ export default function LibraryClient({
     if (activeFilters.favorite) params.set('favorite', activeFilters.favorite);
     if (activeFilters.untagged) params.set('untagged', activeFilters.untagged);
     if (activeFilters.q) params.set('q', activeFilters.q);
-    params.set('limit', '5000');
-    const res = await fetch(`/api/photos?${params.toString()}`);
-    const data = await res.json() as { photos: { id: number }[] };
-    const ids = data.photos.map(p => p.id);
+    const res = await fetch(`/api/photos/ids?${params.toString()}`);
+    const data = await res.json() as { ids: number[] };
+    const ids = data.ids;
     if (ids.length > 0) setSlideshowIds(ids);
   }
 

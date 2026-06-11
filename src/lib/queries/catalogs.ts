@@ -125,7 +125,9 @@ export function deleteCatalog(id: number): void {
   const catalog = getCatalogById(id);
   if (!catalog) throw new Error(`Catálogo ${id} no encontrado`);
 
-  // Delete photos in this catalog (cascade handles tags/themes)
-  db.prepare('DELETE FROM photos WHERE catalog_id = ?').run(id);
-  db.prepare('DELETE FROM catalogs WHERE id = ?').run(id);
+  const deleteTx = db.transaction(() => {
+    db.prepare('DELETE FROM photos WHERE catalog_id = ?').run(id);
+    db.prepare('DELETE FROM catalogs WHERE id = ?').run(id);
+  });
+  deleteTx();
 }
