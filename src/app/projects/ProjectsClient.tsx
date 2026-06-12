@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useJobPolling } from '@/hooks/useJobPolling';
 import { useRouter } from 'next/navigation';
 import { useModal } from '@/components/ModalProvider';
@@ -59,10 +59,12 @@ export default function ProjectsClient({ projects: initial, themes, years, event
   const [generating, setGenerating] = useState(false);
   const [generatingJobId, setGeneratingJobId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const generateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useJobPolling(generatingJobId, {
     onComplete: (job) => {
+      if (generateTimeoutRef.current) clearTimeout(generateTimeoutRef.current);
       if (!job.result) return;
       setGenerating(false);
       setShowNew(false);
@@ -71,11 +73,29 @@ export default function ProjectsClient({ projects: initial, themes, years, event
       router.push(`/projects/${result.id}`);
     },
     onFail: (job) => {
+      if (generateTimeoutRef.current) clearTimeout(generateTimeoutRef.current);
       setGenerating(false);
       setGeneratingJobId(null);
       setError(job.error_last ?? 'Error generando proyecto');
     },
   });
+
+  async function cancelGeneration() {
+    if (!generatingJobId) return;
+    if (generateTimeoutRef.current) clearTimeout(generateTimeoutRef.current);
+    await fetch(`/api/jobs/${generatingJobId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'cancelled' }),
+    });
+    setGenerating(false);
+    setGeneratingJobId(null);
+    setError('Generación cancelada.');
+  }
+
+  useEffect(() => {
+    return () => { if (generateTimeoutRef.current) clearTimeout(generateTimeoutRef.current); };
+  }, []);
 
   // Filters
   const [tone, setTone] = useState<'all' | 'b&w' | 'color'>('all');
@@ -125,7 +145,11 @@ export default function ProjectsClient({ projects: initial, themes, years, event
       if (!data.jobId) { setError('Respuesta inesperada del servidor'); setGenerating(false); return; }
 
       setGeneratingJobId(data.jobId);
-      // generating stays true — hook will clear it
+      generateTimeoutRef.current = setTimeout(() => {
+        setGenerating(false);
+        setGeneratingJobId(null);
+        setError('La generación está tardando demasiado. Puedes revisar el estado en Cola de trabajos.');
+      }, 3 * 60 * 1000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
       setError(msg || 'Error de conexión. Comprueba que Ollama está activo en el Mac.');
@@ -319,7 +343,7 @@ export default function ProjectsClient({ projects: initial, themes, years, event
                 )}
               </div>
 
-              {error && <p style={{ fontSize: 13, color: '#c0392b' }}>{error}</p>}
+              {error && <p style={{ fontSize: 13, color: 'var(--danger)' }}>{error}</p>}
               <button
                 className="btn-primary"
                 onClick={generate}
@@ -330,6 +354,15 @@ export default function ProjectsClient({ projects: initial, themes, years, event
                   ? <><span className="spinner" />Generando…</>
                   : <><IconSparkle size={14} />Generar</>}
               </button>
+              {generating && generatingJobId && (
+                <button
+                  className="btn-ghost"
+                  onClick={cancelGeneration}
+                  style={{ fontSize: 12, marginTop: 4 }}
+                >
+                  Cancelar
+                </button>
+              )}
               {generating && (
                 <p style={{ fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center' }}>
                   Ollama está seleccionando las fotos y redactando el statement. Puede tardar 30-60 segundos.

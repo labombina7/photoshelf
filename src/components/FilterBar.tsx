@@ -160,6 +160,8 @@ export default function FilterBar({
     router.push(`/library?${params.toString()}`);
   }
 
+  const [viewSheetOpen, setViewSheetOpen] = useState(false);
+
   if (years.length === 0 && cameras.length === 0) return null;
 
   return (
@@ -197,7 +199,7 @@ export default function FilterBar({
       {activeCount > 0 && (
         <button className="filter-bar-clear" onClick={clearAll}
           aria-label={`Limpiar ${activeCount} filtro${activeCount !== 1 ? 's' : ''} activo${activeCount !== 1 ? 's' : ''}`}>
-          ✕ {activeCount} {activeCount !== 1 ? 'activos' : 'activo'}
+          Limpiar ({activeCount})
         </button>
       )}
 
@@ -212,10 +214,10 @@ export default function FilterBar({
         </Link>
       )}
 
-      {/* Acciones de vista */}
+      {/* Acciones de vista — desktop */}
       <div className="filter-bar-actions">
         {filteredTotal > 0 && onSlideshow && (
-          <button className="btn-slideshow" onClick={onSlideshow} title="Presentación (P)">
+          <button className="btn-slideshow" onClick={onSlideshow} title="Presentación (P)" aria-label="Iniciar presentación">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3" /></svg>
             <span className="btn-slideshow-label">Presentación</span>
           </button>
@@ -223,11 +225,11 @@ export default function FilterBar({
         {canToggleView && onViewModeChange && (
           <div className="view-toggle">
             <button className={`view-toggle-btn${viewMode === 'list' ? ' active' : ''}`}
-              onClick={() => onViewModeChange('list')} title="Vista lista">
+              onClick={() => onViewModeChange('list')} title="Vista lista" aria-label="Vista lista">
               <IconList />
             </button>
             <button className={`view-toggle-btn${viewMode === 'folders' ? ' active' : ''}`}
-              onClick={() => onViewModeChange('folders')} title="Vista carpetas">
+              onClick={() => onViewModeChange('folders')} title="Vista carpetas" aria-label="Vista carpetas">
               <IconGrid />
             </button>
           </div>
@@ -237,11 +239,52 @@ export default function FilterBar({
             className={`view-toggle-btn${selectionMode ? ' active' : ''}`}
             onClick={onToggleSelection}
             title={selectionMode ? 'Cancelar selección' : 'Seleccionar fotos para compartir'}
+            aria-label={selectionMode ? 'Cancelar selección' : 'Seleccionar fotos para compartir'}
           >
             <IconShare size={13} />
           </button>
         )}
       </div>
+
+      {/* Acciones de vista — mobile (botón ··· que abre bottom sheet) */}
+      {(canToggleView || onSlideshow || onToggleSelection) && (
+        <button
+          className="filter-bar-view-mobile-btn"
+          onClick={() => setViewSheetOpen(true)}
+          aria-label="Opciones de vista"
+          title="Vista"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
+            <circle cx="5" cy="12" r="2" /><circle cx="12" cy="12" r="2" /><circle cx="19" cy="12" r="2" />
+          </svg>
+        </button>
+      )}
+      <BottomSheet open={viewSheetOpen} title="Vista" onClose={() => setViewSheetOpen(false)}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {filteredTotal > 0 && onSlideshow && (
+            <button className="filter-sheet-action-btn" onClick={() => { setViewSheetOpen(false); onSlideshow(); }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3" /></svg>
+              Presentación
+            </button>
+          )}
+          {canToggleView && onViewModeChange && (
+            <>
+              <button className={`filter-sheet-action-btn${viewMode === 'list' ? ' active' : ''}`} onClick={() => { onViewModeChange('list'); setViewSheetOpen(false); }}>
+                <IconList /> Vista lista
+              </button>
+              <button className={`filter-sheet-action-btn${viewMode === 'folders' ? ' active' : ''}`} onClick={() => { onViewModeChange('folders'); setViewSheetOpen(false); }}>
+                <IconGrid /> Vista carpetas
+              </button>
+            </>
+          )}
+          {viewMode === 'list' && onToggleSelection && (
+            <button className={`filter-sheet-action-btn${selectionMode ? ' active' : ''}`} onClick={() => { onToggleSelection(); setViewSheetOpen(false); }}>
+              <IconShare size={14} />
+              {selectionMode ? 'Cancelar selección' : 'Seleccionar fotos'}
+            </button>
+          )}
+        </div>
+      </BottomSheet>
     </div>
   );
 }

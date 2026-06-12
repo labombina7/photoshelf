@@ -91,7 +91,7 @@ function ReviewModal({ review, error, onClose }: {
 export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   const router = useRouter();
   const { track } = useAnalytics();
-  const { tags, newTag, setNewTag, addTag, removeTag, mergeAiTags, errorToast } = useTagEditor(photo);
+  const { tags, newTag, setNewTag, addTag, removeTag, mergeAiTags, errorToast, showErrorToast } = useTagEditor(photo);
   const {
     classifying, classifyError,
     reviewing, review, setReview,
@@ -129,14 +129,22 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
   }
 
   async function toggleFavorite() {
+    const prev = isFavorite;
     const next = !isFavorite;
     setIsFavorite(next);
     track('photo_favorited', { photo_id: photo.id, action: next ? 'add' : 'remove' });
-    await fetch(`/api/photos/${photo.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ is_favorite: next }),
-    });
+    try {
+      const res = await fetch(`/api/photos/${photo.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_favorite: next }),
+      });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
+    } catch (err) {
+      console.error('[DetailPanel] toggleFavorite failed:', err instanceof Error ? err.message : err);
+      setIsFavorite(prev);
+      showErrorToast('No se pudo cambiar el favorito. Inténtalo de nuevo.');
+    }
   }
 
   const takenDate = photo.taken_at
@@ -242,7 +250,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           <div style={{
             marginTop: 6, padding: '6px 8px', borderRadius: 'var(--radius-sm)',
             background: '#fff3f3', border: '1px solid #fca5a5',
-            fontSize: 12, color: '#b91c1c', lineHeight: 1.4,
+            fontSize: 12, color: 'var(--danger)', lineHeight: 1.4,
           }}>
             {classifyError}
           </div>
@@ -298,7 +306,7 @@ export default function DetailPanel({ photo, allThemes }: DetailPanelProps) {
           position: 'sticky', bottom: 8, margin: '8px 8px 0',
           padding: '8px 12px', borderRadius: 'var(--radius-sm)',
           background: '#fff3f3', border: '1px solid #fca5a5',
-          fontSize: 12, color: '#b91c1c', lineHeight: 1.4,
+          fontSize: 12, color: 'var(--danger)', lineHeight: 1.4,
           animation: 'toastIn 0.2s ease',
         }}>
           {errorToast}

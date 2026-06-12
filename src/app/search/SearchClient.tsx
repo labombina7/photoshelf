@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { IconSparkle, IconMenu } from '@/components/Icons';
+import { IconSparkle, IconMenu, IconSmartAlbum, IconFolder } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { DeepSearchPanel } from './DeepSearchPanel';
@@ -89,7 +89,7 @@ function SmartAlbumsSection({ smartAlbums }: { smartAlbums: SmartAlbumMatch[] })
         {smartAlbums.map(album => (
           <li key={album.id} className="search-event-item">
             <Link href={`/smart-albums/${album.id}`}>
-              <span className="search-event-name">📂 {album.name}</span>
+              <span className="search-event-name"><span style={{ verticalAlign: 'middle', marginRight: 4, display: 'inline-flex' }}><IconSmartAlbum size={14} /></span>{album.name}</span>
               <span className="search-event-meta">{album.photo_count} foto{album.photo_count !== 1 ? 's' : ''}</span>
             </Link>
           </li>
@@ -108,7 +108,7 @@ function ProjectsSection({ projects }: { projects: ProjectMatch[] }) {
         {projects.map(project => (
           <li key={project.id} className="search-event-item">
             <Link href={`/projects/${project.id}`}>
-              <span className="search-event-name">🗂️ {project.title}</span>
+              <span className="search-event-name"><span style={{ verticalAlign: 'middle', marginRight: 4, display: 'inline-flex' }}><IconFolder size={14} /></span>{project.title}</span>
               <span className="search-event-meta">{project.photo_count} foto{project.photo_count !== 1 ? 's' : ''}</span>
             </Link>
           </li>

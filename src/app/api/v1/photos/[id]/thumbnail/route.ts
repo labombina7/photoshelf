@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { withAuth, apiError } from '@/lib/api';
 import { getDb } from '@/lib/db';
 import { getThumbnail } from '@/lib/thumbnail';
-import { PHOTOS_PATH } from '@/lib/config';
+import { PHOTOS_PATH, normalizeThumbnailSize } from '@/lib/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +24,7 @@ export function GET(req: NextRequest, { params }: Params) {
     `).get(PHOTOS_PATH, id) as { path: string; catalog_path: string } | undefined;
     if (!photo) return apiError('NOT_FOUND', 'Photo not found', 404);
 
-    const size = parseInt(req.nextUrl.searchParams.get('size') ?? '400', 10);
+    const size = normalizeThumbnailSize(req.nextUrl.searchParams.get('size'));
     const fit  = req.nextUrl.searchParams.get('fit') === 'inside' ? 'inside' : 'cover';
 
     try {

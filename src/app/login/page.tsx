@@ -30,7 +30,7 @@ export default function LoginPage() {
     <div className="login-wrap">
       <div className="login-card">
         <div className="login-logo">
-          <span className="login-logo-name">PhotoShelf</span>
+          <span className="login-logo-name">photoshelf</span>
         </div>
 
         <p className="login-subtitle">Accede a tu biblioteca de fotos personal.</p>
@@ -62,7 +62,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="login-hint">Contraseña configurada en el servidor (.env)</p>
+        <p className="login-hint">La contraseña se define en la configuración del servidor.</p>
       </div>
     </div>
   );

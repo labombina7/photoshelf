@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { IconViewGrid, IconStar, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconChevronDown, IconCheck, IconShield, IconHeartbeat, IconSmartAlbum, IconGear } from './Icons';
+import { IconViewGrid, IconStar, IconRefresh, IconPlus, IconLogout, IconEdit, IconTrash, IconFolder, IconTag, IconTagEmpty, IconTimeline, IconStats, IconMap, IconCalendar, IconClock, IconChevronDown, IconCheck, IconShield, IconHeartbeat, IconSmartAlbum, IconGear } from './Icons';
 import { useScan } from './ScanProvider';
 import { useModal } from './ModalProvider';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -446,10 +446,10 @@ function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
       <div className="sidebar-section-label">Herramientas</div>
       <Link href="/jobs" onClick={onNavClick}
         className={`sidebar-item ${pathname === '/jobs' ? 'active' : ''}`}>
-        <IconCalendar size={14} />
+        <IconClock size={14} />
         Cola de trabajos
         {activeJobCount > 0 && (
-          <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#3b82f6', color: '#fff', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', animation: 'pulse 1.5s ease-in-out infinite' }}>
+          <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: 'var(--accent)', color: '#fff', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', animation: 'pulse 1.5s ease-in-out infinite' }}>
             {activeJobCount}
           </span>
         )}
@@ -464,7 +464,7 @@ function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
         <IconShield size={14} />
         Integridad
         {orphanCount > 0 && (
-          <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: '#e67e22', color: '#fff', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+          <span style={{ marginLeft: 'auto', minWidth: 18, height: 18, borderRadius: 9, background: 'var(--warning)', color: '#fff', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
             {orphanCount}
           </span>
         )}

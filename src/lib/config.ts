@@ -77,6 +77,22 @@ export function mobileCameraExclusionParams(): string[] {
   return MOBILE_CAMERA_PATTERNS.map(p => `%${p}%`);
 }
 
+// ── Thumbnail sizes ───────────────────────────────────────────────────────────
+/** Tamaños de thumbnail permitidos. Valores no listados se redondean al más cercano. */
+export const THUMBNAIL_SIZES = [100, 120, 150, 200, 300, 400, 420, 600, 1920] as const;
+
+export function normalizeThumbnailSize(raw: string | null | undefined, defaultSize = 400): number {
+  const parsed = parseInt(raw ?? '', 10);
+  if (isNaN(parsed) || parsed <= 0) return defaultSize;
+  let closest: number = THUMBNAIL_SIZES[0];
+  let minDiff = Math.abs(parsed - closest);
+  for (const s of THUMBNAIL_SIZES) {
+    const diff = Math.abs(parsed - s);
+    if (diff < minDiff) { minDiff = diff; closest = s; }
+  }
+  return closest;
+}
+
 // ── Folder watcher ────────────────────────────────────────────────────────────
 export const WATCHER_DEBOUNCE_MS = 5_000;
 export const WATCHER_POLL_MS     = 30_000;

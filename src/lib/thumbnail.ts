@@ -8,6 +8,9 @@ export const CACHE_PATH = process.env.CACHE_PATH ?? path.join(process.cwd(), 'da
 const DEFAULT_SIZE = 400;
 const GRID_SIZE = 200;
 
+// Deduplica generaciones concurrentes del mismo thumbnail
+const inFlightMap = new Map<string, Promise<{ buffer: Buffer; contentType: string }>>();
+
 export function getCacheFilePath(photosRoot: string, relativePath: string, size: number, fit: 'cover' | 'inside'): string {
   const key = crypto.createHash('md5').update(`${photosRoot}:${relativePath}:${size}:${fit}`).digest('hex');
   return path.join(CACHE_PATH, `${key}.webp`);
@@ -36,30 +39,15 @@ export async function evictOldThumbnails(maxAgeDays = 30): Promise<void> {
   } catch {}
 }
 
-export async function getThumbnail(
+async function generateThumbnail(
   relativePath: string,
   photosRoot: string,
-  size = DEFAULT_SIZE,
-  fit: 'cover' | 'inside' = 'cover'
+  size: number,
+  fit: 'cover' | 'inside',
+  cachePath: string,
 ): Promise<{ buffer: Buffer; contentType: string }> {
-  // Include photosRoot in the key so two catalogs with an identical relative
-  // path don't collide in the cache (they point to different files).
-  const cacheKey = crypto
-    .createHash('md5')
-    .update(`${photosRoot}:${relativePath}:${size}:${fit}`)
-    .digest('hex');
-  const cachePath = path.join(CACHE_PATH, `${cacheKey}.webp`);
-
-  // Serve from cache if available
-  try {
-    const buffer = await fs.readFile(cachePath);
-    return { buffer, contentType: 'image/webp' };
-  } catch {}
-
-  // Generate thumbnail
   await fs.mkdir(CACHE_PATH, { recursive: true });
 
-  // Validate path is within photosRoot (path traversal protection)
   const absPath = resolvePhotoPath(relativePath, photosRoot);
   const ext = path.extname(relativePath).toLowerCase();
 
@@ -79,16 +67,43 @@ export async function getThumbnail(
     ? { width: size, height: size, fit: 'inside' as const }
     : { width: size, height: size, fit: 'cover' as const, position: 'attention' as const };
 
-  // Smaller thumbnails use lower quality — saves bandwidth with negligible visual loss at grid sizes
   const quality = size <= GRID_SIZE ? 65 : 80;
   const buffer = await sharp(inputBuffer)
-    .rotate() // honour EXIF orientation
+    .rotate()
     .resize(resizeOptions)
     .webp({ quality })
     .toBuffer();
 
   await fs.writeFile(cachePath, buffer);
   return { buffer, contentType: 'image/webp' };
+}
+
+export async function getThumbnail(
+  relativePath: string,
+  photosRoot: string,
+  size = DEFAULT_SIZE,
+  fit: 'cover' | 'inside' = 'cover'
+): Promise<{ buffer: Buffer; contentType: string }> {
+  const cacheKey = crypto
+    .createHash('md5')
+    .update(`${photosRoot}:${relativePath}:${size}:${fit}`)
+    .digest('hex');
+  const cachePath = path.join(CACHE_PATH, `${cacheKey}.webp`);
+
+  // Serve from cache if available
+  try {
+    const buffer = await fs.readFile(cachePath);
+    return { buffer, contentType: 'image/webp' };
+  } catch {}
+
+  // Deduplicate concurrent generations of the same thumbnail
+  const existing = inFlightMap.get(cacheKey);
+  if (existing) return existing;
+
+  const promise = generateThumbnail(relativePath, photosRoot, size, fit, cachePath)
+    .finally(() => inFlightMap.delete(cacheKey));
+  inFlightMap.set(cacheKey, promise);
+  return promise;
 }
 
 // Pre-generates grid thumbnails for all photos in a catalog so the first

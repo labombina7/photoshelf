@@ -48,6 +48,7 @@ export default function AppHeader() {
   const [focusedIndex,     setFocusedIndex]     = useState(-1);
   const [mobileSheetOpen,  setMobileSheetOpen]  = useState(false);
   const [searchShortcut,   setSearchShortcut]   = useState('⌘K');
+  const [selectionActive,  setSelectionActive]  = useState(false);
 
   const { recent, push: pushHistory, clear: clearHistory } = useSearchHistory();
   const { track } = useAnalytics();
@@ -70,6 +71,15 @@ export default function AppHeader() {
     }
     window.addEventListener('photoshelf:search-sync', onSync);
     return () => window.removeEventListener('photoshelf:search-sync', onSync);
+  }, []);
+
+  // Ocultar FAB cuando el modo selección está activo en LibraryClient
+  useEffect(() => {
+    function onSelection(e: Event) {
+      setSelectionActive((e as CustomEvent<boolean>).detail);
+    }
+    window.addEventListener('photoshelf:selection-mode', onSelection);
+    return () => window.removeEventListener('photoshelf:selection-mode', onSelection);
   }, []);
 
   // Close desktop dropdown when clicking outside
@@ -278,7 +288,7 @@ export default function AppHeader() {
 
       {/* ── Mobile: floating search FAB ─────────────────────────────────────── */}
       <button
-        className={`mobile-search-fab${mobileSheetOpen ? ' mobile-search-fab--hidden' : ''}`}
+        className={`mobile-search-fab${mobileSheetOpen || selectionActive ? ' mobile-search-fab--hidden' : ''}`}
         onClick={() => {
           setMobileSheetOpen(true);
           setTimeout(() => mobileInputRef.current?.focus(), 120);

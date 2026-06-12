@@ -69,6 +69,23 @@ export function purgeOldJobs(): void {
   ).run();
 }
 
+export function countPendingAndInProgress(): { pending: number; inProgress: number } {
+  const db = getDb();
+  const pending = (db.prepare(`SELECT COUNT(*) as n FROM job_queue WHERE status = 'pending'`).get() as { n: number }).n;
+  const inProgress = (db.prepare(`SELECT COUNT(*) as n FROM job_queue WHERE status = 'in_progress'`).get() as { n: number }).n;
+  return { pending, inProgress };
+}
+
+export function markStaleJobsFailed(maxAgeHours = 24): number {
+  const info = getDb().prepare(
+    `UPDATE job_queue SET status = 'failed', error_last = 'Stale job tras reinicio'
+     WHERE status = 'in_progress'
+       AND started_at IS NOT NULL
+       AND started_at < datetime('now', ? || ' hours')`
+  ).run(`-${maxAgeHours}`);
+  return info.changes;
+}
+
 export function hasActiveJobForYear(year: number, catalogId: number): boolean {
   const row = getDb().prepare(
     `SELECT 1 FROM job_queue WHERE status IN ('pending','in_progress')

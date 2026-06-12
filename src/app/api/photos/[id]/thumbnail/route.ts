@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { getSession } from '@/lib/session';
 import { getPhotoPathById } from '@/lib/queries/photos';
 import { getThumbnail } from '@/lib/thumbnail';
+import { normalizeThumbnailSize } from '@/lib/config';
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const photo = getPhotoPathById(parseInt(id, 10));
   if (!photo) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const size = parseInt(req.nextUrl.searchParams.get('size') ?? '400', 10);
+  const size = normalizeThumbnailSize(req.nextUrl.searchParams.get('size'));
   const fit = req.nextUrl.searchParams.get('fit') === 'inside' ? 'inside' : 'cover';
 
   try {
