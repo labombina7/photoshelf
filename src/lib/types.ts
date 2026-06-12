@@ -39,12 +39,33 @@ export interface PhotoDetail extends Photo {
   themes: Theme[];
 }
 
+/** Grupo año/evento tal como lo devuelve listGroups y lo consumen los grids. */
 export interface EventGroup {
   year: number;
   event: string;
-  photos: Photo[];
   count: number;
+  /** ID de una foto del grupo — para renderizar la miniatura de carpeta. */
+  thumbnail_id: number;
 }
+
+/** Filtros activos de la URL de biblioteca (todos opcionales, valores en crudo). */
+export interface ActiveFilters {
+  year?: string;
+  event?: string;
+  theme?: string;
+  tag?: string;
+  favorite?: string;
+  untagged?: string;
+  q?: string;
+  iso_max?: string;
+  aperture_max?: string;
+  focal_min?: string;
+  focal_max?: string;
+  camera?: string;
+}
+
+// Re-export para que los componentes no acoplen su firma a la capa de queries
+export type { CatalogRow } from '@/lib/queries/catalogs';
 
 // ── EPIC-004: Análisis de estilo fotográfico ──────────────────────────────────
 

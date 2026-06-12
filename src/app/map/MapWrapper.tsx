@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import type { Theme } from '@/lib/types';
+import type { Theme, CatalogRow } from '@/lib/types';
 
 const MapClient = dynamic(() => import('./MapClient'), { ssr: false });
 
@@ -14,7 +14,7 @@ interface Props {
   untaggedCount: number;
   availableYears: number[];
   initialYear: number | null;
-  catalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  catalogs?: CatalogRow[];
   activeCatalogId?: number;
 }
 

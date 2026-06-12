@@ -13,29 +13,7 @@ import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import { useClassify } from '@/components/ClassifyProvider';
 import { useModal } from '@/components/ModalProvider';
 import { useSlideshow } from '@/hooks/useSlideshow';
-import type { Theme } from '@/lib/types';
-import type { CatalogRow } from '@/lib/queries/catalogs';
-
-interface EventGroup {
-  year: number;
-  event: string;
-  count: number;
-  thumbnail_id: number;
-}
-
-interface ActiveFilters {
-  year?: string;
-  event?: string;
-  theme?: string;
-  favorite?: string;
-  untagged?: string;
-  q?: string;
-  iso_max?: string;
-  aperture_max?: string;
-  focal_min?: string;
-  focal_max?: string;
-  camera?: string;
-}
+import type { Theme, EventGroup, ActiveFilters, CatalogRow } from '@/lib/types';
 
 interface LibraryClientProps {
   groups: EventGroup[];
@@ -70,7 +48,6 @@ export default function LibraryClient({
 }: LibraryClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [toast, setToast] = useState('');
   const [isPending, startTransition] = useTransition();
   // Restore collapsed state from sessionStorage so that navigating back from a photo
   // detail preserves which groups were open. Falls back to all-expanded on first visit.
@@ -112,11 +89,6 @@ export default function LibraryClient({
 
   // If navigated to a specific event, always use list mode
   const effectiveViewMode = activeFilters.event ? 'list' : viewMode;
-
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), 4000);
-  };
 
   async function handleClassifyYear(force = false) {
     if (!activeYear) return;
@@ -315,8 +287,6 @@ export default function LibraryClient({
           </div>
         </div>
         </div>
-        {toast && <div className="toast">{toast}</div>}
-
         {/* Floating selection action bar */}
         {selectionMode && (
           <div className="selection-action-bar">

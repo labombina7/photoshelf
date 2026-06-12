@@ -16,8 +16,8 @@ const NAV_MODULES = [
   { href: '/library',      label: 'Catálogo',     match: (p: string) => p === '/library' || p.startsWith('/library/') || p === '/timeline' || p === '/map' || p === '/memories' || p.startsWith('/tags') || p === '/search' },
   { href: '/projects',     label: 'Proyectos',    match: (p: string) => p === '/projects' || p.startsWith('/projects/') },
   { href: '/smart-albums', label: 'Álbumes',      match: (p: string) => p === '/smart-albums' || p.startsWith('/smart-albums/') },
-  { href: '/insights',     label: 'Tu estilo',    match: (p: string) => p === '/insights' || p.startsWith('/insights/') },
-  { href: '/jobs',         label: 'Herramientas', match: (p: string) => ['/jobs', '/stats', '/health', '/about'].some(r => p === r || p.startsWith(r + '/')) || p.startsWith('/tools') },
+  { href: '/insights',     label: 'Análisis',     match: (p: string) => p === '/insights' || p.startsWith('/insights/') || p === '/stats' || p.startsWith('/stats/') },
+  { href: '/jobs',         label: 'Herramientas', match: (p: string) => ['/jobs', '/health', '/about'].some(r => p === r || p.startsWith(r + '/')) || p.startsWith('/tools') },
 ] as const;
 
 // ─── Hints fetch (lazy, once per mount) ──────────────────────────────────────

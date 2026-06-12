@@ -7,7 +7,9 @@ import EmptyState from '@/components/EmptyState';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import ShareButton from '@/components/ShareButton';
 import ShareDialog from '@/components/ShareDialog';
-import type { Photo, Tag } from '@/lib/types';
+import type { Photo, Tag, EventGroup, ActiveFilters } from '@/lib/types';
+import { useJobPolling } from '@/hooks/useJobPolling';
+import { LONG_PRESS_MS } from '@/lib/gestures';
 import {
   buildEventPageUrl,
   fetchEventPage,
@@ -33,26 +35,6 @@ function IconStar({ filled, className }: { filled: boolean; className?: string }
 
 interface PhotoWithTags extends Photo {
   tags: Tag[];
-}
-
-interface EventGroup {
-  year: number;
-  event: string;
-  count: number;
-}
-
-interface ActiveFilters {
-  year?: string;
-  theme?: string;
-  tag?: string;
-  favorite?: string;
-  untagged?: string;
-  q?: string;
-  iso_max?: string;
-  aperture_max?: string;
-  focal_min?: string;
-  focal_max?: string;
-  camera?: string;
 }
 
 interface PhotoGridProps {
@@ -303,27 +285,25 @@ function EventGroupBlock({
     setFocusedIndex(visibleIdx);
   }
 
-  // Poll job progress when a classify/batch job is queued
-  useEffect(() => {
-    if (!classifyJobId) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/jobs/${classifyJobId}`);
-        if (!res.ok) return;
-        const job = await res.json() as { status: string; processed: number; total: number; error_count: number };
-        setClassifyProgress({ done: job.processed, total: job.total });
-        if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
-          clearInterval(interval);
-          setClassifyJobId(null);
-          setClassifying(false);
-          setClassifyProgress(null);
-          setClassifyResult({ processed: job.processed, total: job.total, errors: job.error_count });
-          setPhotos(null);
-        }
-      } catch { /* ignore */ }
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [classifyJobId]);
+  useJobPolling(classifyJobId, {
+    onProgress: (job) => {
+      setClassifyProgress({ done: job.processed ?? 0, total: job.total ?? 0 });
+    },
+    onComplete: (job) => {
+      setClassifyJobId(null);
+      setClassifying(false);
+      setClassifyProgress(null);
+      setClassifyResult({ processed: job.processed ?? 0, total: job.total ?? 0, errors: job.error_count });
+      setPhotos(null);
+    },
+    onFail: (job) => {
+      setClassifyJobId(null);
+      setClassifying(false);
+      setClassifyProgress(null);
+      setClassifyResult({ processed: job.processed ?? 0, total: job.total ?? 0, errors: job.error_count });
+      setPhotos(null);
+    },
+  });
 
   function retryFetch() {
     setPageError(false);
@@ -455,7 +435,7 @@ function EventGroupBlock({
                     if (selectionMode || !onActivateSelection) return;
                     longPressTimer.current = setTimeout(() => {
                       onActivateSelection(photo.id);
-                    }, 500);
+                    }, LONG_PRESS_MS);
                   }}
                   onTouchEnd={() => {
                     if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }

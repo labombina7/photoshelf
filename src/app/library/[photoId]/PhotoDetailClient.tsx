@@ -9,7 +9,7 @@ import BottomSheet from '@/components/BottomSheet';
 import Slideshow from '@/components/Slideshow';
 import { IconChevronLeft, IconChevronRight, IconMenu, IconX } from '@/components/Icons';
 import { useAnalytics } from '@/hooks/useAnalytics';
-import type { PhotoDetail, Theme } from '@/lib/types';
+import type { PhotoDetail, Theme, CatalogRow } from '@/lib/types';
 
 interface Props {
   photo: PhotoDetail;
@@ -27,7 +27,7 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
-  sidebarCatalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  sidebarCatalogs?: CatalogRow[];
   activeCatalogId?: number;
 }
 

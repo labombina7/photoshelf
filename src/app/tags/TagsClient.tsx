@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar';
 import EmptyState from '@/components/EmptyState';
 import { IconMenu } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
-import type { Theme } from '@/lib/types';
+import type { Theme, CatalogRow } from '@/lib/types';
 
 interface Tag {
   name: string;
@@ -19,7 +19,7 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
-  catalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  catalogs?: CatalogRow[];
   activeCatalogId?: number;
 }
 
