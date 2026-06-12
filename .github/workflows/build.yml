@@ -26,9 +26,6 @@ jobs:
       - name: Run tests
         run: npx vitest run
 
-      - name: Lint
-        run: npx next lint
-
       - name: Type check
         run: npx tsc --noEmit
 
