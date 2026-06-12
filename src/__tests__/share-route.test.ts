@@ -59,12 +59,16 @@ beforeEach(() => {
 });
 
 describe('GET /share/[token] — ventana de reintentos', () => {
-  it('la primera descarga responde 200 con un ZIP', async () => {
+  it('la primera descarga responde 200 con un ZIP válido', async () => {
     const t = createShareToken([1, 2], 'boda');
     const res = await callRoute(t.token);
 
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toBe('application/zip');
+    // Consume el stream y valida la firma ZIP (PK\x03\x04) — detecta archivers mal construidos
+    const body = Buffer.from(await res.arrayBuffer());
+    expect(body.length).toBeGreaterThan(0);
+    expect(body.subarray(0, 4)).toEqual(Buffer.from([0x50, 0x4b, 0x03, 0x04]));
   });
 
   it('un segundo GET dentro de la ventana responde 200 (reintento permitido)', async () => {
