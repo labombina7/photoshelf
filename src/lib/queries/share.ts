@@ -1,6 +1,6 @@
 import { getDb } from '@/lib/db';
 import { randomBytes } from 'crypto';
-import { SHARE_TOKEN_TTL_HOURS } from '@/lib/config';
+import { SHARE_TOKEN_TTL_HOURS, SHARE_RETRY_WINDOW_MINUTES } from '@/lib/config';
 
 export interface ShareToken {
   id: number;
@@ -31,9 +31,21 @@ export function getShareToken(token: string): ShareToken | undefined {
   return db.prepare(`SELECT * FROM share_tokens WHERE token = ?`).get(token) as ShareToken | undefined;
 }
 
+/**
+ * Marca el primer uso del token. Solo escribe si used_at es NULL: los reintentos
+ * dentro de la ventana no deben desplazar el inicio de la ventana de descarga.
+ */
 export function markShareTokenUsed(token: string): void {
   const db = getDb();
-  db.prepare(`UPDATE share_tokens SET used_at = unixepoch() WHERE token = ?`).run(token);
+  db.prepare(`UPDATE share_tokens SET used_at = unixepoch() WHERE token = ? AND used_at IS NULL`).run(token);
+}
+
+/**
+ * Un token está agotado cuando ya fue usado y la ventana de reintentos
+ * (SHARE_RETRY_WINDOW_MINUTES desde el primer uso) ha pasado.
+ */
+export function isShareTokenExhausted(shareToken: ShareToken, now = Math.floor(Date.now() / 1000)): boolean {
+  return shareToken.used_at !== null && now > shareToken.used_at + SHARE_RETRY_WINDOW_MINUTES * 60;
 }
 
 export function revokeShareToken(token: string): boolean {
@@ -46,7 +58,8 @@ export function listActiveShareTokens(): (ShareToken & { photo_count: number })[
   const db = getDb();
   const rows = db.prepare(`
     SELECT * FROM share_tokens
-    WHERE expires_at >= unixepoch() AND used_at IS NULL
+    WHERE expires_at >= unixepoch()
+      AND (used_at IS NULL OR used_at >= unixepoch() - ${SHARE_RETRY_WINDOW_MINUTES * 60})
     ORDER BY created_at DESC
   `).all() as ShareToken[];
 

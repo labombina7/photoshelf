@@ -2,11 +2,28 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { extractJsonObject } from '@/lib/ollama/utils';
 
 // Only fetch and sharp are mocked — all parsing logic runs from the real module.
+// The mock covers the full production chain: resize/jpeg/toBuffer (readPhotoAsJpegBase64)
+// and resize/removeAlpha/raw/toBuffer({ resolveWithObject }) (detectIsBlackAndWhite).
+const sharpState = vi.hoisted(() => {
+  const colored = Buffer.alloc(300); // 10x10 px RGB
+  for (let i = 0; i < colored.length; i += 3) colored[i] = 255; // rojo puro → saturación 1
+  const grey = Buffer.alloc(300, 128); // gris uniforme → saturación 0
+  return { colored, grey, rawPixels: colored };
+});
+
 vi.mock('sharp', () => ({
   default: vi.fn(() => ({
     resize: vi.fn().mockReturnThis(),
+    removeAlpha: vi.fn().mockReturnThis(),
+    raw: vi.fn().mockReturnThis(),
+    rotate: vi.fn().mockReturnThis(),
     jpeg: vi.fn().mockReturnThis(),
-    toBuffer: vi.fn().mockResolvedValue(Buffer.from('fake-jpeg')),
+    webp: vi.fn().mockReturnThis(),
+    toBuffer: vi.fn().mockImplementation((opts?: { resolveWithObject?: boolean }) =>
+      opts?.resolveWithObject
+        ? Promise.resolve({ data: sharpState.rawPixels, info: { width: 10, height: 10 } })
+        : Promise.resolve(Buffer.from('fake-jpeg'))
+    ),
   })),
 }));
 
@@ -22,6 +39,7 @@ function makeFetchResponse(text: string) {
 
 beforeEach(() => {
   mockFetch.mockReset();
+  sharpState.rawPixels = sharpState.colored;
 });
 
 // ── extractJsonObject (real implementation) ─────────────────────────────────
@@ -109,8 +127,8 @@ describe('parseSearchQuery', () => {
 
   it('throws when Ollama returns a non-ok status (timeout/error propagates)', async () => {
     const { parseSearchQuery } = await import('@/lib/ollama/search');
-    mockFetch.mockReturnValueOnce(Promise.resolve({ ok: false, status: 503 }));
-    await expect(parseSearchQuery('query')).rejects.toThrow('Ollama error: 503');
+    mockFetch.mockReturnValueOnce(Promise.resolve({ ok: false, status: 503, text: () => Promise.resolve('') }));
+    await expect(parseSearchQuery('query')).rejects.toThrow('Ollama error 503');
   });
 
   it('coerces missing tags to empty array', async () => {
@@ -124,34 +142,41 @@ describe('parseSearchQuery', () => {
 // ── classifyPhoto — real tag parsing, mocked fetch + sharp ──────────────────
 
 describe('classifyPhoto', () => {
-  it('parses a clean tag list from Ollama response', async () => {
+  it('parses a clean tag list and prepends the color tag', async () => {
     const { classifyPhoto } = await import('@/lib/ollama/classify');
-    mockFetch.mockReturnValueOnce(makeFetchResponse('color, portrait, editorial, work, studio, woman'));
+    mockFetch.mockReturnValueOnce(makeFetchResponse('portrait, editorial, work, studio, woman'));
     const tags = await classifyPhoto('2023/test/photo.jpg', '/photos');
     expect(tags).toEqual(['color', 'portrait', 'editorial', 'work', 'studio', 'woman']);
   });
 
+  it('prepends b&w when the photo has no colored pixels', async () => {
+    const { classifyPhoto } = await import('@/lib/ollama/classify');
+    sharpState.rawPixels = sharpState.grey;
+    mockFetch.mockReturnValueOnce(makeFetchResponse('street, night'));
+    const tags = await classifyPhoto('2023/test/photo.jpg', '/photos');
+    expect(tags).toEqual(['b&w', 'street', 'night']);
+  });
+
   it('strips disallowed characters from tags', async () => {
     const { classifyPhoto } = await import('@/lib/ollama/classify');
-    mockFetch.mockReturnValueOnce(makeFetchResponse('b&w, street, "editorial"'));
+    mockFetch.mockReturnValueOnce(makeFetchResponse('street!, "editorial"'));
     const tags = await classifyPhoto('2023/test/photo.jpg', '/photos');
-    expect(tags[0]).toBe('b&w');
     expect(tags[1]).toBe('street');
     expect(tags[2]).toBe('editorial');
   });
 
-  it('limits output to 6 tags', async () => {
+  it('limits output to 6 tags (color tag + 5 AI tags)', async () => {
     const { classifyPhoto } = await import('@/lib/ollama/classify');
     mockFetch.mockReturnValueOnce(makeFetchResponse('a, b, c, d, e, f, g, h'));
     const tags = await classifyPhoto('2023/test/photo.jpg', '/photos');
     expect(tags).toHaveLength(6);
   });
 
-  it('returns empty array when Ollama returns empty response', async () => {
+  it('returns only the color tag when Ollama returns empty response', async () => {
     const { classifyPhoto } = await import('@/lib/ollama/classify');
     mockFetch.mockReturnValueOnce(makeFetchResponse(''));
     const tags = await classifyPhoto('2023/test/photo.jpg', '/photos');
-    expect(tags).toEqual([]);
+    expect(tags).toEqual(['color']);
   });
 });
 

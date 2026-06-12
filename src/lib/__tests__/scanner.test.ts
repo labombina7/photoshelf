@@ -24,7 +24,8 @@ import { getDb } from '@/lib/db';
 import { scanLibrary } from '@/lib/scanner';
 
 // Typed mocks
-const mockReaddir = vi.mocked(fs.readdir);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockReaddir = vi.mocked(fs.readdir) as any;
 const mockStat = vi.mocked(fs.stat);
 const mockExifrParse = vi.mocked(exifr.parse);
 const mockGetDb = vi.mocked(getDb);

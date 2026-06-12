@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
       { limit, offset },
     );
 
-    return NextResponse.json({ photos, total, years });
+    return NextResponse.json({ photos, total, years, hasMore: offset + photos.length < total });
   } catch (err) {
     console.error('[photos] Error listing photos:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

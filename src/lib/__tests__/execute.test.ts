@@ -62,7 +62,7 @@ describe('SQL generado — sin doble prefijo p.p.', () => {
 
   it('ninguna query tiene p.p. en una búsqueda fulltext', async () => {
     const db = makeDbMock();
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     await executeSearch('algo generico', CATALOG_ID);
 
@@ -75,7 +75,7 @@ describe('SQL generado — sin doble prefijo p.p.', () => {
     mockParseQ.mockResolvedValue({ year: null, concept: 'perros', tags: ['perro'] });
 
     const db = makeDbMock();
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     await executeSearch('fotos de perros', CATALOG_ID, true);
 
@@ -89,7 +89,7 @@ describe('SQL generado — sin doble prefijo p.p.', () => {
     mockParseQ.mockResolvedValue({ year: 2020, concept: '2020', tags: [] });
 
     const db = makeDbMock();
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     await executeSearch('fotos del verano pasado', CATALOG_ID, true);
 
@@ -112,7 +112,7 @@ describe('executeSearch — intent fulltext', () => {
 
   it('devuelve fotos vacías cuando la BD no tiene resultados', async () => {
     const db = makeDbMock([]);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     const result = await executeSearch('algo generico', CATALOG_ID);
 
@@ -126,7 +126,7 @@ describe('executeSearch — intent fulltext', () => {
       { id: 1, filename: 'foto1.jpg', year: 2023, event: 'vacaciones', taken_at: null, is_favorite: 0 },
     ];
     const db = makeDbMock(fakePhotos);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     const result = await executeSearch('vacaciones', CATALOG_ID);
 
@@ -141,7 +141,7 @@ describe('executeSearch — intent year', () => {
 
   it('clasifica "2022" como year', async () => {
     const db = makeDbMock([]);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     const result = await executeSearch('2022', CATALOG_ID);
 
@@ -159,7 +159,7 @@ describe('executeSearch — intent AI con Ollama disponible', () => {
     mockParseQ.mockResolvedValue({ year: null, concept: 'perros', tags: ['perro'] });
 
     const db = makeDbMock([]);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     const result = await executeSearch('fotos de perros corriendo', CATALOG_ID, true);
 
@@ -174,7 +174,7 @@ describe('executeSearch — intent AI con Ollama disponible', () => {
       { id: 5, filename: 'perro.jpg', year: 2021, event: 'jardín', taken_at: null, is_favorite: 0 },
     ];
     const db = makeDbMock(fakePhotos);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     const result = await executeSearch('fotos de perros', CATALOG_ID, true);
 
@@ -186,7 +186,7 @@ describe('executeSearch — intent AI con Ollama disponible', () => {
     mockParseQ.mockResolvedValue({ year: null, concept: 'fotografías de perros', tags: ['perro'] });
 
     const db = makeDbMock([]);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     const result = await executeSearch('perros', CATALOG_ID, true);
 
@@ -198,7 +198,7 @@ describe('executeSearch — intent AI con Ollama disponible', () => {
     mockParseQ.mockResolvedValue({ year: null, concept: 'perros', tags: ['perro'] });
 
     const db = makeDbMock([]);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     const result = await executeSearch('perros', CATALOG_ID, true);
 
@@ -215,7 +215,7 @@ describe('executeSearch — intent AI con Ollama caído', () => {
     mockParseQ.mockRejectedValue(new Error('connect ECONNREFUSED 127.0.0.1:11434'));
 
     const db = makeDbMock([]);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     await expect(
       executeSearch('qué fotos tengo de cumpleaños', CATALOG_ID, true)
@@ -226,7 +226,7 @@ describe('executeSearch — intent AI con Ollama caído', () => {
     mockParseQ.mockRejectedValue(new Error('timeout'));
 
     const db = makeDbMock([]);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     const result = await executeSearch('qué fotos tengo de verano', CATALOG_ID, true);
 
@@ -237,7 +237,7 @@ describe('executeSearch — intent AI con Ollama caído', () => {
     mockParseQ.mockRejectedValue(new Error('model not found'));
 
     const db = makeDbMock([]);
-    mockGetDb.mockReturnValue(db as ReturnType<typeof getDb>);
+    mockGetDb.mockReturnValue(db as unknown as ReturnType<typeof getDb>);
 
     const result = await executeSearch('fotos con niños jugando', CATALOG_ID, true);
 

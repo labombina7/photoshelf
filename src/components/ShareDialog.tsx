@@ -39,7 +39,7 @@ export default function ShareDialog({ url, photoCount, onClose }: ShareDialogPro
         <div className="modal-body" style={{ padding: '1rem 1.25rem' }}>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
             Enlace de descarga para {photoCount} {photoCount === 1 ? 'foto' : 'fotos'}.
-            Válido 72 horas · uso único.
+            Válido 72 horas · ventana de descarga de 1 hora tras el primer uso.
           </p>
           <div style={{ display: 'flex', gap: 8 }}>
             <input

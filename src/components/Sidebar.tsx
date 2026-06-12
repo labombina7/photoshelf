@@ -24,9 +24,9 @@ function shortenPath(p: string): string {
 function activeModule(pathname: string): 'catalog' | 'projects' | 'albums' | 'tools' | 'insights' | 'settings' {
   if (pathname === '/projects' || pathname.startsWith('/projects/')) return 'projects';
   if (pathname === '/smart-albums' || pathname.startsWith('/smart-albums/')) return 'albums';
-  if (pathname === '/insights' || pathname.startsWith('/insights/')) return 'insights';
+  if (pathname === '/insights' || pathname.startsWith('/insights/') || pathname === '/stats' || pathname.startsWith('/stats/')) return 'insights';
   if (pathname.startsWith('/settings') || pathname === '/about' || pathname.startsWith('/about/')) return 'settings';
-  if (['/jobs', '/stats', '/health'].some(r => pathname === r || pathname.startsWith(r + '/')) ||
+  if (['/jobs', '/health'].some(r => pathname === r || pathname.startsWith(r + '/')) ||
       pathname.startsWith('/tools')) return 'tools';
   return 'catalog';
 }
@@ -350,17 +350,22 @@ function AlbumsSection({
 
 // ── Insights sidebar content ──────────────────────────────────────────────────
 
-function InsightsSection({ onNavClick }: { onNavClick: () => void }) {
+function AnalysisSection({ onNavClick }: { onNavClick: () => void }) {
   const pathname = usePathname();
   return (
     <div className="sidebar-section">
-      <div className="sidebar-section-label">Tu estilo</div>
+      <div className="sidebar-section-label">Análisis</div>
       <Link href="/insights" onClick={onNavClick}
         className={`sidebar-item ${pathname === '/insights' ? 'active' : ''}`}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
         </svg>
         Evolución fotográfica
+      </Link>
+      <Link href="/stats" onClick={onNavClick}
+        className={`sidebar-item ${pathname === '/stats' ? 'active' : ''}`}>
+        <IconStats size={14} />
+        Estadísticas
       </Link>
     </div>
   );
@@ -448,11 +453,6 @@ function ToolsSection({ onNavClick }: { onNavClick: () => void }) {
             {activeJobCount}
           </span>
         )}
-      </Link>
-      <Link href="/stats" onClick={onNavClick}
-        className={`sidebar-item ${pathname === '/stats' ? 'active' : ''}`}>
-        <IconStats size={14} />
-        Estadísticas
       </Link>
       <Link href="/health" onClick={onNavClick}
         className={`sidebar-item ${pathname === '/health' ? 'active' : ''}`}>
@@ -588,7 +588,7 @@ function SidebarInner({
           <SettingsSection onNavClick={handleNavClick} />
         )}
         {module === 'insights' && (
-          <InsightsSection onNavClick={handleNavClick} />
+          <AnalysisSection onNavClick={handleNavClick} />
         )}
 
         <div className="sidebar-spacer" />
