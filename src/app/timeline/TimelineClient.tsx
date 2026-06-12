@@ -5,7 +5,8 @@ import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
-import type { Theme } from '@/lib/types';
+import type { Theme, CatalogRow } from '@/lib/types';
+import { DOUBLE_TAP_MS } from '@/lib/gestures';
 
 type Level = 'year' | 'month' | 'day';
 
@@ -31,7 +32,7 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
-  catalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  catalogs?: CatalogRow[];
   activeCatalogId?: number;
 }
 
@@ -260,7 +261,7 @@ export default function TimelineClient({
     let lastTap = 0;
     const handleTouchEnd = () => {
       const now = Date.now();
-      if (now - lastTap < 300) {
+      if (now - lastTap < DOUBLE_TAP_MS) {
         setLevel(prev => prev === 'day' ? 'month' : 'day');
       }
       lastTap = now;

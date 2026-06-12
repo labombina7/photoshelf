@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
+import { useJobPolling } from '@/hooks/useJobPolling';
 import { useRouter } from 'next/navigation';
 import { useModal } from '@/components/ModalProvider';
 import Link from 'next/link';
@@ -56,8 +57,25 @@ export default function ProjectsClient({ projects: initial, themes, years, event
   const [selectedScopeIdx, setSelectedScopeIdx] = useState(0);
   const [count, setCount] = useState(15);
   const [generating, setGenerating] = useState(false);
+  const [generatingJobId, setGeneratingJobId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  useJobPolling(generatingJobId, {
+    onComplete: (job) => {
+      if (!job.result) return;
+      setGenerating(false);
+      setShowNew(false);
+      setGeneratingJobId(null);
+      const result = JSON.parse(job.result) as { id: number };
+      router.push(`/projects/${result.id}`);
+    },
+    onFail: (job) => {
+      setGenerating(false);
+      setGeneratingJobId(null);
+      setError(job.error_last ?? 'Error generando proyecto');
+    },
+  });
 
   // Filters
   const [tone, setTone] = useState<'all' | 'b&w' | 'color'>('all');
@@ -106,26 +124,8 @@ export default function ProjectsClient({ projects: initial, themes, years, event
       if (!res.ok) { setError(data.error ?? 'Error generando proyecto'); setGenerating(false); return; }
       if (!data.jobId) { setError('Respuesta inesperada del servidor'); setGenerating(false); return; }
 
-      // Poll until the job completes
-      const jobId = data.jobId;
-      const poll = setInterval(async () => {
-        try {
-          const jr = await fetch(`/api/jobs/${jobId}`);
-          if (!jr.ok) return;
-          const job = await jr.json() as { status: string; result?: string; error_last?: string };
-          if (job.status === 'completed' && job.result) {
-            clearInterval(poll);
-            setGenerating(false);
-            setShowNew(false);
-            const result = JSON.parse(job.result) as { id: number };
-            router.push(`/projects/${result.id}`);
-          } else if (job.status === 'failed' || job.status === 'cancelled') {
-            clearInterval(poll);
-            setGenerating(false);
-            setError(job.error_last ?? 'Error generando proyecto');
-          }
-        } catch { /* ignore */ }
-      }, 2000);
+      setGeneratingJobId(data.jobId);
+      // generating stays true — hook will clear it
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
       setError(msg || 'Error de conexión. Comprueba que Ollama está activo en el Mac.');

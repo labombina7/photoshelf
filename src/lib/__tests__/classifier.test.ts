@@ -5,6 +5,8 @@ import type { ClassifierHints } from '../search/classifier';
 const hints: ClassifierHints = {
   tags: ['boda', 'naturaleza', 'retrato', 'familia', 'playa', 'montaña'],
   events: ['Boda Sara y Juan', 'Navidad 2022', 'Viaje a Portugal'],
+  smartAlbums: [],
+  projects: [],
 };
 
 describe('normalize', () => {

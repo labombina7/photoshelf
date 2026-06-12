@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useJobPolling } from '@/hooks/useJobPolling';
 
 export type ClassifyStatus = 'idle' | 'pending' | 'in_progress';
 
@@ -52,46 +53,39 @@ export function ClassifyProvider({ children }: { children: React.ReactNode }) {
   });
   const wasActiveRef = useRef(false);
 
-  useEffect(() => {
-    let active = true;
+  // Poll continuo del status global de clasificación: el endpoint nunca devuelve
+  // un estado terminal (vuelve a 'idle'), así que el hook polea mientras esté montado.
+  // El endpoint además mantiene vivo el worker (ensureWorkerRunning) en cada tick.
+  useJobPolling<{
+    status: ClassifyStatus;
+    running: boolean;
+    pending: boolean;
+    year: number | null;
+    done: number;
+    total: number;
+    error: string | null;
+    jobId: string | null;
+  }>('classify-status', {
+    endpoint: '/api/ai/classify/status',
+    onProgress: (data) => {
+      setState({
+        status: data.status ?? 'idle',
+        running: data.running ?? false,
+        pending: data.pending ?? false,
+        year: data.year,
+        done: data.done,
+        total: data.total,
+        error: data.error,
+        jobId: data.jobId,
+      });
 
-    async function poll() {
-      try {
-        const res = await fetch('/api/ai/classify/status');
-        if (!res.ok || !active) return;
-        const data = await res.json() as {
-          status: ClassifyStatus;
-          running: boolean;
-          pending: boolean;
-          year: number | null;
-          done: number;
-          total: number;
-          error: string | null;
-          jobId: string | null;
-        };
-        setState({
-          status: data.status ?? 'idle',
-          running: data.running ?? false,
-          pending: data.pending ?? false,
-          year: data.year,
-          done: data.done,
-          total: data.total,
-          error: data.error,
-          jobId: data.jobId,
-        });
-
-        const isActive = data.running || data.pending;
-        if (wasActiveRef.current && !isActive) {
-          router.refresh();
-        }
-        wasActiveRef.current = isActive;
-      } catch { /* ignore */ }
-    }
-
-    poll();
-    const interval = setInterval(poll, 2000);
-    return () => { active = false; clearInterval(interval); };
-  }, [router]);
+      const isActive = data.running || data.pending;
+      if (wasActiveRef.current && !isActive) {
+        router.refresh();
+      }
+      wasActiveRef.current = isActive;
+    },
+  });
 
   async function startClassify(year: number, force = false): Promise<void> {
     const res = await fetch('/api/ai/classify/year', {

@@ -7,7 +7,16 @@ import EmptyState from '@/components/EmptyState';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import ShareButton from '@/components/ShareButton';
 import ShareDialog from '@/components/ShareDialog';
-import type { Photo, Tag } from '@/lib/types';
+import type { Photo, Tag, EventGroup, ActiveFilters } from '@/lib/types';
+import { useJobPolling } from '@/hooks/useJobPolling';
+import { LONG_PRESS_MS } from '@/lib/gestures';
+import {
+  buildEventPageUrl,
+  fetchEventPage,
+  nextPageNumber,
+  hasMorePhotos,
+  appendPage,
+} from '@/lib/photoPagination';
 
 function IconStar({ filled, className }: { filled: boolean; className?: string }) {
   return (
@@ -26,26 +35,6 @@ function IconStar({ filled, className }: { filled: boolean; className?: string }
 
 interface PhotoWithTags extends Photo {
   tags: Tag[];
-}
-
-interface EventGroup {
-  year: number;
-  event: string;
-  count: number;
-}
-
-interface ActiveFilters {
-  year?: string;
-  theme?: string;
-  tag?: string;
-  favorite?: string;
-  untagged?: string;
-  q?: string;
-  iso_max?: string;
-  aperture_max?: string;
-  focal_min?: string;
-  focal_max?: string;
-  camera?: string;
 }
 
 interface PhotoGridProps {
@@ -83,11 +72,16 @@ function EventGroupBlock({
   onToggleSelect?: (id: number) => void;
   onActivateSelection?: (photoId: number) => void;
 }) {
-  const PAGE_SIZE = 60;
+  const PAGE_SIZE = 60; // incremento de render (el fetch pagina aparte, ver photoPagination)
   const router = useRouter();
   const [photos, setPhotos] = useState<PhotoWithTags[] | null>(null);
+  const [total, setTotal] = useState<number | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(false);
+  const [fetchingMore, setFetchingMore] = useState(false);
+  const [pageError, setPageError] = useState(false);
+  const [retryTick, setRetryTick] = useState(0);
+  const hasMore = photos !== null && hasMorePhotos(photos.length, total);
   const { track } = useAnalytics();
   const [classifying, setClassifying] = useState(false);
   const [classifyJobId, setClassifyJobId] = useState<string | null>(null);
@@ -115,10 +109,32 @@ function EventGroupBlock({
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
 
-  // Infinite scroll: load more photos when sentinel enters viewport
+  // Descarga la siguiente página y la encadena al conjunto cargado
+  const fetchNextPage = useCallback(async () => {
+    if (!photos) return;
+    setFetchingMore(true);
+    setPageError(false);
+    try {
+      const url = buildEventPageUrl(currentParams, group.year, group.event, nextPageNumber(photos.length));
+      const data = await fetchEventPage<PhotoWithTags>(url);
+      setPhotos(prev => (prev ? appendPage(prev, data.photos) : data.photos));
+      setTotal(data.total);
+    } catch {
+      setPageError(true);
+    } finally {
+      setFetchingMore(false);
+    }
+  }, [photos, currentParams, group.year, group.event]);
+
+  // Infinite scroll: revela más fotos al entrar el sentinel en el viewport y,
+  // cuando lo visible se acerca al final de lo descargado, encadena la página siguiente
   const loadMore = useCallback(() => {
-    if (photos && visible < photos.length) setVisible(v => v + PAGE_SIZE);
-  }, [photos, visible]);
+    if (!photos) return;
+    if (visible < photos.length) setVisible(v => v + PAGE_SIZE);
+    if (hasMore && !fetchingMore && !pageError && visible + PAGE_SIZE >= photos.length) {
+      void fetchNextPage();
+    }
+  }, [photos, visible, hasMore, fetchingMore, pageError, fetchNextPage]);
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -141,20 +157,23 @@ function EventGroupBlock({
 
   useEffect(() => {
     if (isCollapsed || photos !== null) return;
+    let cancelled = false;
     setLoading(true);
+    setPageError(false);
     setVisible(PAGE_SIZE);
-    // Use currentParams as base so EXIF and other URL filters are included,
-    // then override with the specific group's year/event and set a high limit.
-    const params = new URLSearchParams(currentParams);
-    params.set('year', String(group.year));
-    params.set('event', group.event);
-    params.set('limit', '2000');
-
-    fetch(`/api/photos?${params.toString()}`)
-      .then(r => r.json())
-      .then(data => { setPhotos(data.photos); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, [isCollapsed, photos, group, currentParams]);
+    // currentParams como base para conservar filtros EXIF y demás; la primera
+    // página llega rápido y el resto se encadena con el scroll (US-105)
+    const url = buildEventPageUrl(currentParams, group.year, group.event, 1);
+    fetchEventPage<PhotoWithTags>(url)
+      .then(data => {
+        if (cancelled) return;
+        setPhotos(data.photos);
+        setTotal(data.total);
+      })
+      .catch(() => { if (!cancelled) setPageError(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [isCollapsed, photos, group, currentParams, retryTick]);
 
   // ── Navegación al detalle ────────────────────────────────────────────────
 
@@ -266,27 +285,31 @@ function EventGroupBlock({
     setFocusedIndex(visibleIdx);
   }
 
-  // Poll job progress when a classify/batch job is queued
-  useEffect(() => {
-    if (!classifyJobId) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`/api/jobs/${classifyJobId}`);
-        if (!res.ok) return;
-        const job = await res.json() as { status: string; processed: number; total: number; error_count: number };
-        setClassifyProgress({ done: job.processed, total: job.total });
-        if (job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
-          clearInterval(interval);
-          setClassifyJobId(null);
-          setClassifying(false);
-          setClassifyProgress(null);
-          setClassifyResult({ processed: job.processed, total: job.total, errors: job.error_count });
-          setPhotos(null);
-        }
-      } catch { /* ignore */ }
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [classifyJobId]);
+  useJobPolling(classifyJobId, {
+    onProgress: (job) => {
+      setClassifyProgress({ done: job.processed ?? 0, total: job.total ?? 0 });
+    },
+    onComplete: (job) => {
+      setClassifyJobId(null);
+      setClassifying(false);
+      setClassifyProgress(null);
+      setClassifyResult({ processed: job.processed ?? 0, total: job.total ?? 0, errors: job.error_count });
+      setPhotos(null);
+    },
+    onFail: (job) => {
+      setClassifyJobId(null);
+      setClassifying(false);
+      setClassifyProgress(null);
+      setClassifyResult({ processed: job.processed ?? 0, total: job.total ?? 0, errors: job.error_count });
+      setPhotos(null);
+    },
+  });
+
+  function retryFetch() {
+    setPageError(false);
+    if (photos === null) setRetryTick(t => t + 1); // reintenta la primera página
+    else void fetchNextPage();
+  }
 
   async function handleClassify(e: React.MouseEvent) {
     e.stopPropagation?.();
@@ -412,7 +435,7 @@ function EventGroupBlock({
                     if (selectionMode || !onActivateSelection) return;
                     longPressTimer.current = setTimeout(() => {
                       onActivateSelection(photo.id);
-                    }, 500);
+                    }, LONG_PRESS_MS);
                   }}
                   onTouchEnd={() => {
                     if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
@@ -471,8 +494,20 @@ function EventGroupBlock({
               );
             })}
           </div>
-          {/* Sentinel: triggers infinite scroll when it enters the viewport */}
-          {photos && visible < photos.length && (
+          {/* Estado de paginación: carga encadenada, error con reintento */}
+          {fetchingMore && !pageError && (
+            <div style={{ padding: '12px 20px', color: 'var(--text-tertiary)', fontSize: 13 }}>
+              Cargando más fotos… ({photos?.length ?? 0} de {total ?? group.count})
+            </div>
+          )}
+          {pageError && (
+            <div style={{ padding: '12px 20px', color: 'var(--text-secondary)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span>No se pudieron cargar {photos === null ? 'las fotos' : 'más fotos'} de este evento.</span>
+              <button className="classify-btn" onClick={retryFetch}>Reintentar</button>
+            </div>
+          )}
+          {/* Sentinel: dispara el scroll infinito (render y fetch encadenado) al entrar en el viewport */}
+          {photos && !pageError && (visible < photos.length || hasMore) && (
             <div ref={sentinelRef} style={{ height: 1 }} />
           )}
         </>

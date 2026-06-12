@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu, IconMap, IconX } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
-import type { Theme } from '@/lib/types';
+import type { Theme, CatalogRow } from '@/lib/types';
 
 interface PhotoPoint {
   id: number;
@@ -25,7 +25,7 @@ interface Props {
   untaggedCount: number;
   availableYears: number[];
   initialYear: number | null;
-  catalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  catalogs?: CatalogRow[];
   activeCatalogId?: number;
 }
 

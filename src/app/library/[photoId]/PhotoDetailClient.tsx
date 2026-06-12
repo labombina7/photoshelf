@@ -9,7 +9,8 @@ import BottomSheet from '@/components/BottomSheet';
 import Slideshow from '@/components/Slideshow';
 import { IconChevronLeft, IconChevronRight, IconMenu, IconX } from '@/components/Icons';
 import { useAnalytics } from '@/hooks/useAnalytics';
-import type { PhotoDetail, Theme } from '@/lib/types';
+import type { PhotoDetail, Theme, CatalogRow } from '@/lib/types';
+import { SWIPE_THRESHOLD_PX, SWIPE_VELOCITY_PX_MS, TAP_SLOP_PX, TAP_MAX_MS } from '@/lib/gestures';
 
 interface Props {
   photo: PhotoDetail;
@@ -27,7 +28,7 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
-  sidebarCatalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  sidebarCatalogs?: CatalogRow[];
   activeCatalogId?: number;
 }
 
@@ -128,12 +129,12 @@ export default function PhotoDetailClient({
 
     const isHorizontalSwipe =
       Math.abs(deltaX) > Math.abs(deltaY) &&
-      (Math.abs(deltaX) > 50 || velocityX > 0.3);
+      (Math.abs(deltaX) > SWIPE_THRESHOLD_PX || velocityX > SWIPE_VELOCITY_PX_MS);
 
     const isTap =
-      Math.abs(deltaX) < 15 &&
-      Math.abs(deltaY) < 15 &&
-      elapsed < 400;
+      Math.abs(deltaX) < TAP_SLOP_PX &&
+      Math.abs(deltaY) < TAP_SLOP_PX &&
+      elapsed < TAP_MAX_MS;
 
     if (isHorizontalSwipe) {
       if (deltaX < 0 && nextId) {

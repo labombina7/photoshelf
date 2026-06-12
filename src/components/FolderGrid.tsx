@@ -2,15 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import type { EventGroup } from '@/lib/types';
 
 const PAGE_SIZE = 48;
-
-interface EventGroup {
-  year: number;
-  event: string;
-  count: number;
-  thumbnail_id: number;
-}
 
 interface FolderGridProps {
   groups: EventGroup[];

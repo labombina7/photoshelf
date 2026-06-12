@@ -17,7 +17,7 @@ const mockScanState = { running: false, done: 0, total: 0, currentEvent: '', err
 const mockUpdateScanState = vi.fn((patch: Partial<typeof mockScanState>) => Object.assign(mockScanState, patch));
 vi.mock('@/lib/scanState', () => ({
   getScanState: vi.fn(() => ({ ...mockScanState })),
-  updateScanState: (...args: unknown[]) => mockUpdateScanState(...args),
+  updateScanState: (patch: Partial<typeof mockScanState>) => mockUpdateScanState(patch),
 }));
 
 // ── Mock catalog context ──────────────────────────────────────────────────────

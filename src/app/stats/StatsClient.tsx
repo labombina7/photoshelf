@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu } from '@/components/Icons';
 import { useHeaderSlot } from '@/components/HeaderSlot';
-import type { Theme } from '@/lib/types';
+import type { Theme, CatalogRow } from '@/lib/types';
 import type { StatsData } from './page';
 
 const MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
@@ -162,7 +162,7 @@ interface Props {
   totalPhotos: number;
   favoriteCount: number;
   untaggedCount: number;
-  catalogs?: import('@/lib/queries/catalogs').CatalogRow[];
+  catalogs?: CatalogRow[];
   activeCatalogId?: number;
 }
 

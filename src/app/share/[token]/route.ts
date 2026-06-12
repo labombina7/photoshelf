@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getShareToken, markShareTokenUsed, cleanExpiredShareTokens } from '@/lib/queries/share';
+import { getShareToken, markShareTokenUsed, isShareTokenExhausted, cleanExpiredShareTokens } from '@/lib/queries/share';
 import { getPhotoPathById } from '@/lib/queries/photos';
 import { resolvePhotoPath } from '@/lib/config';
 import fs from 'fs';
 import path from 'path';
-import type { Archiver } from 'archiver';
+import { ZipArchive } from 'archiver';
 import { PassThrough, Readable } from 'stream';
 
 export async function GET(
@@ -33,8 +33,10 @@ export async function GET(
     });
   }
 
-  if (shareToken.used_at !== null) {
-    return new NextResponse(errorPage('Este enlace ya fue utilizado.'), {
+  // Tras el primer uso, el token admite reintentos durante una ventana corta
+  // (descargas grandes cortadas a la mitad); pasada la ventana queda agotado.
+  if (isShareTokenExhausted(shareToken, now)) {
+    return new NextResponse(errorPage('La ventana de descarga de este enlace ya terminó. Pide al propietario que genere uno nuevo.'), {
       status: 410,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
@@ -63,7 +65,8 @@ export async function GET(
     });
   }
 
-  // Mark as used before streaming so concurrent requests get rejected
+  // Marca el primer uso antes del streaming: abre la ventana de reintentos
+  // sin desplazarla en descargas posteriores (no-op si used_at ya está fijado)
   markShareTokenUsed(token);
 
   const label = shareToken.label ?? 'photoshelf-share';
@@ -72,8 +75,7 @@ export async function GET(
   // Build ZIP in memory via PassThrough, convert Node stream → Web ReadableStream
   const passThrough = new PassThrough();
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any
-  const archive = new (require('archiver') as any).Archiver('zip', { zlib: { level: 0 } }) as Archiver;
+  const archive = new ZipArchive({ zlib: { level: 0 } });
   archive.pipe(passThrough);
 
   for (const { absPath, filename } of photos) {

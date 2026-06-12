@@ -582,7 +582,7 @@
           <span class="effort effort-l">L</span>
         </div>
         <div class="card-title">Photo Stories — publicar proyectos como páginas web</div>
-        <div class="card-summary">Editor de draft con bloques de texto y fotos del proyecto. Genera una página pública (o enlace secreto) servida por photoshelf — sin CMS externo. Por refinar.</div>
+        <div class="card-summary">Editor de draft con bloques de texto y fotos del proyecto. Genera una página pública (o enlace secreto) servida por photoshelf — sin CMS externo.</div>
       </div>
 
     </div>
@@ -593,11 +593,11 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">8</span>
+      <span class="col-count">36</span>
     </div>
     <div class="col-body">
 
-      <!-- ── Photo Stories (EPIC-006) 2026-06-11 ── -->
+      <!-- ── Photo Stories (EPIC-006) 2026-06-12 ── -->
 
       <div class="card" tabindex="0" data-id="US-115" onclick="openModal('US-115')">
         <div class="card-top">
@@ -637,6 +637,143 @@
         <div class="card-title">Página pública de la story</div>
         <div class="card-summary">Ruta /story/[slug] sin auth. Layout con bloques en orden: Hero, textos, masonry. Lightbox en fotos. Responsive. og:image desde el Hero.</div>
         <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-117</span></div>
+      </div>
+
+      <!-- ── Insights 2026-06-12 (UX + Tech Debt audits) + features ── -->
+
+      <div class="card" tabindex="0" data-id="US-096" onclick="openModal('US-096')">
+        <div class="card-top">
+          <span class="badge badge-us">US-096</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Variables CSS fantasma y paleta de estados</div>
+        <div class="card-summary">Definir --text-primary/--text-muted/--surface-raised (usadas pero inexistentes — el botón activo del timeline renderiza roto) y unificar 5 colores de estado hardcodeados en tokens --danger/--warning/--info.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-097" onclick="openModal('US-097')">
+        <div class="card-top">
+          <span class="badge badge-us">US-097</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Acciones de vista accesibles en mobile</div>
+        <div class="card-summary">Recuperar presentación, toggle lista/carpetas y modo selección en ≤640px (hoy display:none), hint de long-press, ocultar FAB en modo selección y arreglar el doble-tap del timeline sobre fotos.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-098" onclick="openModal('US-098')">
+        <div class="card-top">
+          <span class="badge badge-us">US-098</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Accesibilidad: contraste, reduced motion y lector de pantalla</div>
+        <div class="card-summary">Subir el contraste de --text-tertiary (hoy 2.4:1, WCAG pide 4.5:1), bloque global prefers-reduced-motion, aria-labels restantes y roving tabindex en el grid de fotos.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-099" onclick="openModal('US-099')">
+        <div class="card-top">
+          <span class="badge badge-us">US-099</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Feedback de errores y navegación honesta</div>
+        <div class="card-summary">CTA del estado vacío que escanea de verdad, favorito con revert, error real de clasificación (no siempre 'Ollama no disponible'), cancelación/timeout en generación de proyectos y enlaces granulares del timeline.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-101" onclick="openModal('US-101')">
+        <div class="card-top">
+          <span class="badge badge-us">US-101</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Worker al arranque y reanudación de jobs</div>
+        <div class="card-summary">ensureWorkerRunning() solo se llama desde rutas de usuario: tras un reinicio, los jobs in_progress y el auto-backup vencido quedan congelados hasta que alguien visita la app. Arrancarlo desde instrumentation.ts.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-102" onclick="openModal('US-102')">
+        <div class="card-top">
+          <span class="badge badge-us">US-102</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Watcher compatible con multi-catálogo</div>
+        <div class="card-summary">El watcher escanea siempre PHOTOS_PATH (env) hacia catálogo 1 aunque su ruta cambiara en BD, y el auto-classify selecciona fotos de TODOS los catálogos resolviendo paths contra la ruta equivocada (fallos silenciosos en cada ciclo).</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-104" onclick="openModal('US-104')">
+        <div class="card-top">
+          <span class="badge badge-us">US-104</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Validación de size en thumbnails + dedupe</div>
+        <div class="card-summary">El parámetro size va sin validar a sharp (size=20000 → CPU/disco; NaN posible) y las generaciones concurrentes del mismo thumbnail se duplican. Whitelist de tamaños + mapa de promesas in-flight.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-106" onclick="openModal('US-106')">
+        <div class="card-top">
+          <span class="badge badge-us">US-106</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Hardening de despliegue Docker</div>
+        <div class="card-summary">USER node en el Dockerfile (hoy corre como root, contradiciendo .env.example), npm update next (vulnerabilidad postcss moderada) y docker-compose sin rutas/IPs personales hardcodeadas.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-107" onclick="openModal('US-107')">
+        <div class="card-top">
+          <span class="badge badge-us">US-107</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Consolidación de la API v1</div>
+        <div class="card-summary">La capa /api/v1 (10 routes, patrón withAuth superior) no tiene NINGÚN consumidor — el frontend usa solo las rutas legacy y ambas ya divergen. Decidir y ejecutar: migrar el frontend a v1 o retirarla.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-109" onclick="openModal('US-109')">
+        <div class="card-top">
+          <span class="badge badge-us">US-109</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Quick wins de copy e iconografía v2</div>
+        <div class="card-summary">Marca unificada (PhotoShelf→photoshelf), copy sin asumir NAS, botón limpiar con verbo, emojis funcionales→SVG (📂🗂️🖼···), iconos inline a Icons.tsx (IconPlay ×4) y icono propio para la cola de trabajos.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-110" onclick="openModal('US-110')">
+        <div class="card-top">
+          <span class="badge badge-us">US-110</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Gestión de tags en lote</div>
+        <div class="card-summary">Renombrar, fusionar y eliminar tags desde la vista /tags con operaciones transaccionales y confirmación con conteo de fotos afectadas. Complemento global de US-059.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-111" onclick="openModal('US-111')">
+        <div class="card-top">
+          <span class="badge badge-us">US-111</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Galería pública de proyecto</div>
+        <div class="card-summary">Publicar un proyecto como galería web navegable (/p/[token]): título, statement y fotos en orden con lightbox. Token revocable, solo thumbnails sin EXIF. La experiencia de portfolio que el ZIP de US-092 no da.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-112" onclick="openModal('US-112')">
+        <div class="card-top">
+          <span class="badge badge-us">US-112</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Modo marco digital (kiosk)</div>
+        <div class="card-summary">URL /frame?token=… para TV o tablet 24/7: reproducción infinita de favoritos/temática/álbum/aleatorio con crossfade, reloj opcional, wake-lock y recuperación ante fallos de red. Tokens de dispositivo gestionados en ajustes.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-113" onclick="openModal('US-113')">
+        <div class="card-top">
+          <span class="badge badge-us">US-113</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Notas y pies de foto con búsqueda</div>
+        <div class="card-summary">Campo de nota libre por foto (autosave en el DetailPanel), integrado en la búsqueda fulltext y como caption opcional del slideshow. Columna caption en photos + inclusión en el backup JSON.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-114" onclick="openModal('US-114')">
+        <div class="card-top">
+          <span class="badge badge-us">US-114</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Modo invitado de solo lectura</div>
+        <div class="card-summary">GUEST_PASSWORD opcional que crea sesiones rol guest: explora y busca todo, pero las mutaciones devuelven 403 (helper requireAdmin único) y la UI oculta las acciones. La familia mira, no rompe.</div>
       </div>
 
       <!-- ── Backup & resiliencia 2026-06-05 ── -->
@@ -832,9 +969,49 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">75</span>
+      <span class="col-count">79</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="US-100" onclick="openModal('US-100')">
+        <div class="card-top">
+          <span class="badge badge-us">US-100</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+        </div>
+        <div class="card-title">Suite de tests en verde y gate de CI</div>
+        <div class="card-summary">Suite arreglada (mock de sharp completo, fixtures del clasificador, exclusión de worktrees) y job test (vitest+lint+tsc) como gate del build Docker, también en PRs. Tag sha-&lt;commit&gt; para rollback.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-103" onclick="openModal('US-103')">
+        <div class="card-top">
+          <span class="badge badge-us">US-103</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+        </div>
+        <div class="card-title">Robustez de enlaces compartidos</div>
+        <div class="card-summary">Ventana de reintentos de 1h tras el primer uso: una descarga cortada ya no quema el enlace. Páginas de error diferenciadas y ZIP construido con ZipArchive (archiver v8).</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-105" onclick="openModal('US-105')">
+        <div class="card-top">
+          <span class="badge badge-us">US-105</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+        </div>
+        <div class="card-title">Paginación real de eventos grandes</div>
+        <div class="card-summary">PhotoGrid encadena páginas de 200 al scroll (fin del truncado silencioso en eventos &gt;1000 fotos), con reintento ante errores de página y dedupe por id.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-108" onclick="openModal('US-108')">
+        <div class="card-top">
+          <span class="badge badge-us">US-108</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+        </div>
+        <div class="card-title">Limpieza y consolidación de código</div>
+        <div class="card-summary">Hook useJobPolling compartido (PhotoGrid, ProjectsClient, ClassifyProvider), tipos consolidados en types.ts, Inter self-hosted con next/font, constantes de gestos y dead code eliminado.</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-095" onclick="openModal('US-095')">
         <div class="card-top">
@@ -980,6 +1157,14 @@
           <span class="date-badge">2026-06-11</span>
         </div>
         <div class="card-title">Filter bar horizontal (año + EXIF)</div>
+      </div>
+
+      <div class="card card-done" tabindex="0">
+        <div class="card-top">
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+        </div>
+        <div class="card-title">Header nav: "Tu estilo" → "Análisis" (agrupa Insights + Stats)</div>
       </div>
 
       <div class="card card-done" tabindex="0" data-id="US-079" onclick="openModal('US-079')">
@@ -3918,6 +4103,405 @@ const CARDS = {
       'Coverage del 100%',
     ]
   },
+  'US-096': {
+    id: 'US-096', type: 'US', column: 'todo', effort: 'S',
+    title: 'Variables CSS fantasma y paleta de estados',
+    story: 'Como usuario de photoshelf,\nquiero que todos los elementos rendericen con los colores que el diseño pretende,\npara que ningún control aparezca roto o ilegible.',
+    description: [
+      'Tres variables CSS se usan sin definirse en :root; el navegador descarta las propiedades. Detectado en UX audit 2026-06-12.',
+      'Además la paleta de peligro/aviso/info está fragmentada en 5 hardcodes.',
+    ],
+    criteria: [
+      {
+        group: 'Correcciones',
+        items: [
+          'Definir las 3 variables en :root',
+          'Botón de nivel activo del timeline visible',
+          'Tokens --danger/--warning/--info y migración de hardcodes',
+          'Grep sin var(--…) huérfanos',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'Quick-win'],
+  },
+  'US-097': {
+    id: 'US-097', type: 'US', column: 'todo', effort: 'M',
+    title: 'Acciones de vista accesibles en mobile',
+    story: 'Como usuario móvil,\nquiero lanzar presentación, cambiar de vista y seleccionar fotos,\npara tener las mismas capacidades que en desktop.',
+    description: [
+      'filter-bar-actions está oculto en mobile: presentación/vista/selección sin punto de entrada visible. El long-press existe pero nada lo anuncia.',
+      'El FAB de búsqueda colisiona con la barra de selección y el doble-tap del timeline navega y hace zoom a la vez.',
+    ],
+    criteria: [
+      {
+        group: 'Mobile',
+        items: [
+          'Punto de entrada visible para las 3 acciones',
+          'Hint de long-press primera vez',
+          'FAB oculto en modo selección',
+          'Doble-tap ignora .photo-item',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'Mobile'],
+  },
+  'US-098': {
+    id: 'US-098', type: 'US', column: 'todo', effort: 'M',
+    title: 'Accesibilidad: contraste, reduced motion y lector de pantalla',
+    story: 'Como usuario con baja visión o sensibilidad al movimiento,\nquiero texto legible y animaciones que respeten mis preferencias,\npara usar photoshelf cómodamente.',
+    description: [
+      'Tercera pasada tras US-010 y US-042, derivada del UX audit 2026-06-12.',
+      '--text-tertiary se usa para datos reales (contadores, fechas) con contraste insuficiente; no hay soporte de reduced motion.',
+    ],
+    criteria: [
+      {
+        group: 'Accesibilidad',
+        items: [
+          '--text-tertiary ≥3:1',
+          '@media prefers-reduced-motion global',
+          'aria-labels en prev/next, ···, view toggle',
+          'Roving tabindex en photo-item',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'A11y'],
+  },
+  'US-099': {
+    id: 'US-099', type: 'US', column: 'todo', effort: 'M',
+    title: 'Feedback de errores y navegación honesta',
+    story: 'Como usuario,\nquiero que los botones hagan lo que prometen y los errores se muestren,\npara confiar en lo que veo en pantalla.',
+    description: [
+      'Agrupa 6 hallazgos del UX audit 2026-06-12 donde la UI miente u oculta información.',
+    ],
+    criteria: [
+      {
+        group: 'Correcciones',
+        items: [
+          'CTA vacío lanza startScan()',
+          'toggleFavorite con revert + toast',
+          'Mensaje de error real del job',
+          'Cancelar + timeout en proyectos',
+          'Ver-en-biblioteca conserva el periodo',
+          'Ctrl+wheel limitado al timeline',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'Bugs'],
+  },
+  'US-100': {
+    id: 'US-100', type: 'US', column: 'todo', effort: 'M',
+    title: 'Suite de tests en verde y gate de CI',
+    story: 'Como desarrollador,\nquiero que la suite pase y el CI bloquee imágenes rotas,\npara que main sea siempre desplegable.',
+    description: [
+      'vitest run: 223/244 passed. El workflow build.yml publica a ghcr.io:latest sin tests ni lint.',
+      'Hallazgo crítico del tech debt audit 2026-06-12.',
+    ],
+    criteria: [
+      {
+        group: 'Tests y CI',
+        items: [
+          'Mock de sharp completo',
+          'Asserts de classifyQuery actualizados',
+          'vitest run con 0 fallos',
+          'Job test como needs: del build',
+          'Workflow corre en PRs',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Crítico'],
+  },
+  'US-101': {
+    id: 'US-101', type: 'US', column: 'todo', effort: 'S',
+    title: 'Worker al arranque y reanudación de jobs',
+    story: 'Como operador,\nquiero que los jobs se reanuden tras un reinicio,\npara que no queden congelados días enteros.',
+    description: [
+      'getNextJob() ya prioriza in_progress — falta que el loop arranque con el servidor.',
+      'Incluye marcado de jobs stale (>24h) para evitar zombies.',
+    ],
+    criteria: [
+      {
+        group: 'Arranque',
+        items: [
+          'ensureWorkerRunning() en instrumentation.ts',
+          'Jobs in_progress continúan tras reinicio',
+          'Auto-backup vencido se encola al arrancar',
+          'Jobs stale >24h → failed',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Resiliencia'],
+  },
+  'US-102': {
+    id: 'US-102', type: 'US', column: 'todo', effort: 'M',
+    title: 'Watcher compatible con multi-catálogo',
+    story: 'Como usuario con varios catálogos,\nquiero que la vigilancia use la ruta correcta y clasifique solo sus fotos,\npara que el auto-escaneo no indexe rutas erróneas.',
+    description: [
+      'folderWatcher.ts quedó anclado al modelo pre-EPIC-001. worker.ts ya hace lo correcto (ruta desde BD) — aplicar el mismo patrón.',
+    ],
+    criteria: [
+      {
+        group: 'Watcher',
+        items: [
+          'Ruta desde getCatalogById(1)',
+          'Filtro catalog_id en auto-classify',
+          'Errores con contador y log resumen',
+          'Test multi-catálogo',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Watcher'],
+  },
+  'US-103': {
+    id: 'US-103', type: 'US', column: 'todo', effort: 'S',
+    title: 'Robustez de enlaces compartidos',
+    story: 'Como destinatario de un enlace,\nquiero reintentar si la descarga se corta,\npara no pedir un enlace nuevo.',
+    description: [
+      'markShareTokenUsed se ejecuta antes de stream; en red móvil los cortes son habituales.',
+      'La ventana mantiene la protección frente a abuso sin penalizar reintentos legítimos.',
+    ],
+    criteria: [
+      {
+        group: 'Ventana',
+        items: [
+          'Reintentos durante ~60 min tras primer uso',
+          'Página de error distingue caducado/agotado',
+          'Copy del ShareDialog actualizado',
+          'Tests de la nueva semántica',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Share'],
+  },
+  'US-104': {
+    id: 'US-104', type: 'US', column: 'todo', effort: 'S',
+    title: 'Validación de size en thumbnails + dedupe',
+    story: 'Como operador,\nquiero que el endpoint de miniaturas solo acepte tamaños conocidos,\npara proteger CPU y disco.',
+    description: [
+      'Whitelist con redondeo al más cercano mantiene compatibles los size ya emitidos.',
+      'El dedupe comparte una sola generación entre peticiones concurrentes.',
+    ],
+    criteria: [
+      {
+        group: 'Hardening',
+        items: [
+          'Whitelist/redondeo de tamaños',
+          'NaN nunca llega a sharp',
+          'Validación compartida con la ruta v1',
+          'Dedupe in-flight con limpieza',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Seguridad'],
+  },
+  'US-105': {
+    id: 'US-105', type: 'US', column: 'todo', effort: 'M',
+    title: 'Paginación real de eventos grandes',
+    story: 'Como fotógrafo con eventos grandes,\nquiero ver todas las fotos de un evento,\npara no perder fotos sin aviso.',
+    description: [
+      'El render ya es incremental; falta que el fetch también lo sea.',
+      'Mantener PHOTOS_MAX_LIMIT=1000 — el bug es del cliente.',
+    ],
+    criteria: [
+      {
+        group: 'Paginación',
+        items: [
+          'Carga por páginas (~200) al scroll',
+          'Eventos >1000 muestran todo',
+          'Error de página con reintento',
+          'Payload inicial menor',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Rendimiento'],
+  },
+  'US-106': {
+    id: 'US-106', type: 'US', column: 'todo', effort: 'M',
+    title: 'Hardening de despliegue Docker',
+    story: 'Como operador,\nquiero un contenedor sin root, sin vulnerabilidades conocidas y un compose portable,\npara reducir riesgo.',
+    description: [
+      'Complementa a US-089 (healthcheck, actualizada con los hallazgos del 06-12).',
+      'El compose comiteado expone topología doméstica (IP de Ollama, rutas de usuario).',
+    ],
+    criteria: [
+      {
+        group: 'Despliegue',
+        items: [
+          'USER node + permisos /data verificados',
+          'npm audit sin moderadas+',
+          'Compose parametrizado con ${VAR}',
+          '@types/archiver a devDeps + import tipado',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Docker'],
+  },
+  'US-107': {
+    id: 'US-107', type: 'US', column: 'todo', effort: 'L',
+    title: 'Consolidación de la API v1',
+    story: 'Como desarrollador,\nquiero una sola implementación por endpoint,\npara que no diverjan silenciosamente.',
+    description: [
+      'Recomendación del audit: migrar a v1 (paginación por cursor que US-105 necesita; withAuth elimina boilerplate en ~70 handlers).',
+      'Incluye el fix del bug de validación post-query en v1/photos.',
+    ],
+    criteria: [
+      {
+        group: 'Consolidación',
+        items: [
+          'Decisión documentada en EPIC-002',
+          'Migración por dominios o retirada limpia',
+          'Cero fetch() sin handler',
+          'Tests de integración en verde',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Arquitectura'],
+  },
+  'US-108': {
+    id: 'US-108', type: 'US', column: 'todo', effort: 'M',
+    title: 'Limpieza y consolidación de código',
+    story: 'Como desarrollador,\nquiero eliminar duplicaciones y código muerto,\npara que los bugs no se arreglen en un sitio y persistan en otro.',
+    description: [
+      'Cajón de hallazgos 🟢 del tech debt audit 2026-06-12 que en conjunto suman fricción.',
+    ],
+    criteria: [
+      {
+        group: 'Limpieza',
+        items: [
+          'useJobPolling adoptado en 3 componentes',
+          'Tipos en lib/types.ts',
+          'next/font (sin Google CDN en runtime)',
+          '.db huérfanos fuera + .gitignore',
+          'Constantes de gestos nombradas',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Refactor'],
+  },
+  'US-109': {
+    id: 'US-109', type: 'US', column: 'todo', effort: 'S',
+    title: 'Quick wins de copy e iconografía v2',
+    story: 'Como usuario,\nquiero textos coherentes y un set de iconos uniforme,\npara percibir un producto cuidado.',
+    description: [
+      'Segunda tanda tras US-039, derivada del UX audit 2026-06-12. Cambios puramente presentacionales — PR único revisable visualmente.',
+    ],
+    criteria: [
+      {
+        group: 'Copy e iconos',
+        items: [
+          'Marca en minúsculas en login',
+          'Cero emojis funcionales',
+          'IconPlay/IconDots/IconLogout/IconInfo en Icons.tsx',
+          'Jobs con icono distinto a IconCalendar',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'Quick-win'],
+  },
+  'US-110': {
+    id: 'US-110', type: 'US', column: 'todo', effort: 'M',
+    title: 'Gestión de tags en lote',
+    story: 'Como fotógrafo con miles de fotos etiquetadas,\nquiero corregir la taxonomía en lote,\npara no editar foto a foto.',
+    description: [
+      'La IA genera variantes y los tags manuales acumulan typos; hoy /tags es solo lectura.',
+      'La PK compuesta de photo_tags hace el de-dupe de la fusión gratis.',
+    ],
+    criteria: [
+      {
+        group: 'Gestión',
+        items: [
+          'Renombrar con detección de colisión',
+          'Fusionar N tags con confirmación',
+          'Eliminar global con conteo',
+          'Transacción única por operación',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Tags'],
+  },
+  'US-111': {
+    id: 'US-111', type: 'US', column: 'todo', effort: 'L',
+    title: 'Galería pública de proyecto',
+    story: 'Como fotógrafo que cura proyectos,\nquiero publicar un portfolio con enlace,\npara enseñarlo sin dar acceso a la app.',
+    description: [
+      'Reutiliza share_tokens (tipo gallery, sin TTL de 72h) y el patrón de página pública del share existente.',
+      'El endpoint de imagen solo sirve fotos del proyecto publicado.',
+    ],
+    criteria: [
+      {
+        group: 'Galería',
+        items: [
+          'Publicar/despublicar desde el detalle',
+          '/p/[token] sin sesión con lightbox',
+          'Solo thumbnails 1920, nunca originales',
+          'noindex + exclusión acotada del middleware',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Share'],
+  },
+  'US-112': {
+    id: 'US-112', type: 'US', column: 'todo', effort: 'L',
+    title: 'Modo marco digital (kiosk)',
+    story: 'Como usuario con la app 24/7 en casa,\nquiero un marco digital en una TV o tablet vieja,\npara dar vida a mi archivo sin nube.',
+    description: [
+      'Reutiliza el motor de crossfade del Slideshow con una fuente de datos infinita por lotes.',
+      'El token solo da acceso a thumbnails.',
+    ],
+    criteria: [
+      {
+        group: 'Kiosk',
+        items: [
+          'Tokens de marco en ajustes',
+          'Fuente seleccionable + rebarajado',
+          'Wake Lock + reintentos con backoff',
+          'Overlay reloj/fecha configurable',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Slideshow'],
+  },
+  'US-113': {
+    id: 'US-113', type: 'US', column: 'todo', effort: 'M',
+    title: 'Notas y pies de foto con búsqueda',
+    story: 'Como fotógrafo que documenta su archivo,\nquiero añadir contexto narrativo a cada foto,\npara reencontrarlo buscando.',
+    description: [
+      'El contexto que los tags no capturan (quién, qué pasó) hoy no tiene dónde vivir.',
+      'Migración mínima e idempotente; FTS5 como mejora futura si LIKE se queda corto.',
+    ],
+    criteria: [
+      {
+        group: 'Notas',
+        items: [
+          'Textarea con autosave y límite 2000',
+          'Búsqueda fulltext sobre caption con snippet',
+          'Caption opcional en slideshow',
+          'Incluido en backup JSON',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Metadata'],
+  },
+  'US-114': {
+    id: 'US-114', type: 'US', column: 'todo', effort: 'L',
+    title: 'Modo invitado de solo lectura',
+    story: 'Como propietario,\nquiero un PIN de invitado de solo lectura,\npara que mi familia explore sin poder borrar ni reconfigurar.',
+    description: [
+      'El login actual es todo-o-nada. La sesión iron-session gana role; el servidor bloquea y la UI oculta.',
+      'Hace más seguro exponer la app fuera de la LAN.',
+    ],
+    criteria: [
+      {
+        group: 'Roles',
+        items: [
+          'Login transparente con dos contraseñas (timing-safe)',
+          '403 en mutaciones para guest',
+          'UI sin acciones de edición en guest',
+          'Indicador Invitado + tests',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Seguridad'],
+  },
   'US-049': {
     id: 'US-049',
     type: 'US',
@@ -5583,47 +6167,28 @@ const CARDS = {
     ]
   },
 
-  'US-119': {
-    id: 'US-119', type: 'US', column: 'ideas', effort: 'M',
-    title: 'Exponer photoshelf a internet desde el NAS',
-    story: 'Como fotógrafo que quiere compartir stories públicamente,\nquiero que las páginas /story/[slug] sean accesibles desde internet,\npara que cualquiera pueda ver mis stories sin estar en mi red local.',
+  'EPIC-006': {
+    id: 'EPIC-006', type: 'EPIC', column: 'ideas', effort: 'L',
+    title: 'Photo Stories — publicar proyectos como páginas web',
+    story: 'Como fotógrafo que quiere compartir su trabajo,\nquiero un editor de stories con bloques de texto y fotos de mi biblioteca,\npara publicar páginas web accesibles desde internet directamente desde photoshelf.',
     description: [
-      'Prerequisito de EPIC-006. photoshelf corre en un NAS en red privada — sin exposición externa las stories publicadas solo son accesibles en local.',
-      'Hay varias opciones a evaluar según el NAS y el nivel de control deseado. Por refinar: elegir la opción más adecuada y documentar el setup.',
+      'Una Story es una entidad independiente (no atada a un proyecto) que combina bloques reordenables: Hero, Título/Subtítulo, Texto, Cita e Imágenes (grid masonry con fotos de la biblioteca).',
+      'El editor permite crear y editar el draft, previsualizar con enlace secreto, y publicar para hacerlo accesible públicamente. Se puede editar en cualquier momento sin necesidad de despublicar.',
+      'La página se sirve desde el propio NAS expuesto a internet. La foto del bloque Hero actúa como og:image automáticamente al compartir.',
+      'Scope inicial: un único usuario. Arquitectura orientada a soportar multi-usuario en el futuro.',
     ],
     criteria: [
-      {
-        group: 'Opciones a evaluar (por refinar)',
-        items: [
-          'DDNS del fabricante del NAS (Synology QuickConnect, QNAP myQNAPcloud…) — más simple, depende del proveedor',
-          'Cloudflare Tunnel — sin abrir puertos en el router, gratuito, muy seguro',
-          'Reverse proxy propio (Nginx Proxy Manager) con DDNS genérico — más control, requiere abrir puerto 443',
-          'Evaluar cuál aplica según el hardware del usuario',
-        ]
-      },
-      {
-        group: 'Resultado esperado',
-        items: [
-          'URL pública estable (ej. photoshelf.midominio.com) que resuelve al NAS',
-          'Solo /story/[slug] expuesto públicamente — el resto de photoshelf sigue tras autenticación',
-          'HTTPS funcionando (certificado Let\'s Encrypt o Cloudflare)',
-          'Documentación del setup en el README del proyecto',
-        ]
-      }
+      { group: 'Bloques disponibles', items: ['Hero (foto grande a pantalla completa)', 'Título / Subtítulo', 'Texto libre', 'Cita (blockquote)', 'Imágenes (grid masonry, selección múltiple de la biblioteca)'] },
+      { group: 'Publicación', items: ['Draft → enlace secreto → pública', 'Editable en cualquier estado sin despublicar', 'og:image automático desde el bloque Hero'] },
+      { group: 'Prerequisito externo', items: ['NAS expuesto a internet (US-119) — no incluido en esta épica'] },
     ],
     dependencies: [],
     components: [],
     tech: [
-      'Opción A: Cloudflare Tunnel (cloudflared) — túnel seguro sin abrir puertos',
-      'Opción B: Nginx reverse proxy + Certbot + DDNS (Duck DNS, No-IP…)',
-      'Opción C: DDNS nativo del fabricante del NAS',
-      'En cualquier caso: middleware de Next.js para restringir rutas públicas solo a /story/*',
+      'Scope inicial: un usuario. Arquitectura orientada a multi-usuario futuro.',
+      'Bloques como array JSON en BD. Visibilidad: draft | secret | public.',
     ],
-    outOfScope: [
-      'Dominio personalizado de pago (opcional, no requerido)',
-      'CDN para las fotos',
-      'Múltiples instancias / alta disponibilidad',
-    ]
+    outOfScope: ['Dominio personalizado', 'Múltiples stories por entidad', 'Analíticas de visitas', 'Comentarios', 'Export PDF']
   },
 
   'US-115': {
@@ -5635,46 +6200,24 @@ const CARDS = {
       'Una Story tiene título propio, slug y estado de visibilidad. El editor permite añadir bloques de tipo Título, Subtítulo, Texto y Cita en cualquier posición y reordenarlos con drag-and-drop.',
     ],
     criteria: [
-      {
-        group: 'Gestión de stories',
-        items: [
-          'Crear nueva story desde una sección "Stories" en el sidebar o menú principal',
-          'Listar stories propias con título, estado (draft/secreto/público) y fecha de modificación',
-          'Eliminar story (con confirmación)',
-        ]
-      },
-      {
-        group: 'Editor de bloques de texto',
-        items: [
-          'Tipos de bloque disponibles: Título, Subtítulo, Texto libre, Cita',
-          'Botón "+" entre bloques para insertar un bloque nuevo del tipo elegido',
-          'Reordenar bloques con drag-and-drop',
-          'Eliminar bloque individual',
-          'Guardar draft con Cmd/Ctrl+S o botón explícito — sin publicar',
-          'Autosave cada 30 segundos mientras se edita',
-        ]
-      }
+      { group: 'Gestión de stories', items: ['Crear nueva story desde sección "Stories" en el sidebar', 'Listar stories con título, estado y fecha de modificación', 'Eliminar story con confirmación'] },
+      { group: 'Editor de bloques', items: ['Tipos: Título, Subtítulo, Texto libre, Cita', 'Botón "+" entre bloques para insertar nuevo', 'Reordenar con drag-and-drop', 'Eliminar bloque individual', 'Guardar draft con Cmd/Ctrl+S o botón explícito', 'Autosave cada 30 segundos'] },
     ],
     dependencies: [],
     components: [
-      { path: 'src/app/stories/page.tsx', desc: 'Listado de stories del usuario', isNew: true },
+      { path: 'src/app/stories/page.tsx', desc: 'Listado de stories', isNew: true },
       { path: 'src/app/stories/[id]/edit/page.tsx', desc: 'Editor de story', isNew: true },
       { path: 'src/app/stories/[id]/edit/StoryEditor.tsx', desc: 'Editor de bloques con drag-and-drop', isNew: true },
-      { path: 'src/app/api/stories/route.ts', desc: 'POST crear story · GET listar', isNew: true },
-      { path: 'src/app/api/stories/[id]/route.ts', desc: 'GET · PUT · DELETE story', isNew: true },
-      { path: 'src/lib/queries/stories.ts', desc: 'CRUD tabla stories + tabla story_blocks', isNew: true },
+      { path: 'src/app/api/stories/route.ts', desc: 'POST crear · GET listar', isNew: true },
+      { path: 'src/app/api/stories/[id]/route.ts', desc: 'GET · PUT · DELETE', isNew: true },
+      { path: 'src/lib/queries/stories.ts', desc: 'CRUD tabla stories + story_blocks', isNew: true },
     ],
     tech: [
       'Tabla stories: id, slug, title, visibility (draft|secret|public), created_at, updated_at',
       'Tabla story_blocks: id, story_id, position, type (title|subtitle|text|quote|images|hero), content (JSON)',
       'Drag-and-drop: @dnd-kit/core',
-      'Slug: generado desde el título, único en BD',
     ],
-    outOfScope: [
-      'Bloques de imágenes (US-116)',
-      'Publicación y visibilidad (US-117)',
-      'Página pública (US-118)',
-    ]
+    outOfScope: ['Bloques de imágenes (US-116)', 'Publicación (US-117)', 'Página pública (US-118)']
   },
 
   'US-116': {
@@ -5683,42 +6226,19 @@ const CARDS = {
     story: 'Como fotógrafo editando una story,\nquiero añadir bloques de imágenes con fotos de mi biblioteca y un bloque Hero de apertura,\npara construir el relato visual con el layout que imagino.',
     description: [
       'Añade dos tipos de bloque visuales al editor de US-115: Hero (foto grande de apertura) y Imágenes (galería masonry con selección múltiple).',
-      'Las fotos se seleccionan desde la biblioteca de photoshelf mediante un selector modal. Dentro del bloque se pueden reordenar.',
+      'Las fotos se seleccionan desde la biblioteca de photoshelf mediante un selector modal.',
     ],
     criteria: [
-      {
-        group: 'Bloque Hero',
-        items: [
-          'Tipo de bloque "Hero" disponible en el editor',
-          'Selector de una foto de la biblioteca para el Hero',
-          'Preview del Hero en el editor a altura reducida (no pantalla completa en edición)',
-          'Solo puede haber un bloque Hero por story (se deshabilita si ya existe)',
-        ]
-      },
-      {
-        group: 'Bloque Imágenes (masonry)',
-        items: [
-          'Selector modal de fotos de la biblioteca — selección múltiple',
-          'Las fotos seleccionadas se muestran en grid masonry dentro del bloque',
-          'Reordenación de fotos dentro del bloque con drag-and-drop',
-          'Añadir o quitar fotos de un bloque ya existente',
-        ]
-      }
+      { group: 'Bloque Hero', items: ['Selector de una foto de la biblioteca', 'Preview en el editor a altura reducida', 'Solo puede haber un bloque Hero por story'] },
+      { group: 'Bloque Imágenes (masonry)', items: ['Selector modal con selección múltiple', 'Grid masonry dentro del bloque', 'Reordenación de fotos dentro del bloque con drag-and-drop', 'Añadir o quitar fotos de un bloque existente'] },
     ],
     dependencies: ['US-115'],
     components: [
       { path: 'src/app/stories/[id]/edit/StoryEditor.tsx', desc: 'Añadir tipos Hero e Imágenes', isNew: false },
-      { path: 'src/components/PhotoPickerModal.tsx', desc: 'Selector modal de fotos de la biblioteca', isNew: true },
+      { path: 'src/components/PhotoPickerModal.tsx', desc: 'Selector modal de fotos', isNew: true },
     ],
-    tech: [
-      'Bloque Hero: content = { photoId: string }',
-      'Bloque Imágenes: content = { photoIds: string[], columns: number }',
-      'Masonry en el editor: CSS columns o librería ligera (react-masonry-css)',
-    ],
-    outOfScope: [
-      'Lightbox en el editor (solo en la página pública, US-118)',
-      'Subir fotos nuevas desde el editor (solo fotos ya en la biblioteca)',
-    ]
+    tech: ['Hero: content = { photoId }', 'Imágenes: content = { photoIds: string[] }', 'Masonry: CSS columns o react-masonry-css'],
+    outOfScope: ['Lightbox en el editor (solo en página pública, US-118)', 'Subir fotos nuevas desde el editor']
   },
 
   'US-117': {
@@ -5729,41 +6249,16 @@ const CARDS = {
       'Añade el flujo de publicación al editor: draft → enlace secreto → pública. La story se puede editar en cualquier estado sin necesidad de despublicar.',
     ],
     criteria: [
-      {
-        group: 'Flujo de visibilidad',
-        items: [
-          'Estado inicial: draft (no accesible desde fuera)',
-          '"Publicar con enlace secreto": genera slug largo aleatorio — accesible solo con URL exacta',
-          '"Hacer pública": cambia a slug corto legible — accesible para cualquiera',
-          'Botón "Volver a secreto" y "Despublicar" disponibles según estado actual',
-          'Indicador de estado visible en el editor (chip: Borrador / Secreto / Pública)',
-        ]
-      },
-      {
-        group: 'Edición en caliente',
-        items: [
-          'Guardar cambios en una story publicada actualiza la página pública inmediatamente',
-          'No es necesario despublicar para editar',
-        ]
-      }
+      { group: 'Flujo de visibilidad', items: ['Draft: no accesible desde fuera', '"Publicar con enlace secreto": slug largo aleatorio', '"Hacer pública": slug corto legible', 'Botones "Volver a secreto" y "Despublicar" según estado', 'Chip de estado en el editor: Borrador / Secreto / Pública'] },
+      { group: 'Edición en caliente', items: ['Guardar cambios actualiza la página publicada inmediatamente', 'No es necesario despublicar para editar'] },
     ],
     dependencies: ['US-116'],
     components: [
       { path: 'src/app/api/stories/[id]/publish/route.ts', desc: 'POST cambiar visibilidad', isNew: true },
       { path: 'src/app/stories/[id]/edit/StoryEditor.tsx', desc: 'Añadir controles de visibilidad', isNew: false },
-      { path: 'src/lib/queries/stories.ts', desc: 'updateVisibility + generación de slugs', isNew: false },
     ],
-    tech: [
-      'Slug secreto: UUID aleatorio de 32 chars',
-      'Slug público: generado desde el título, único, max 60 chars',
-      'visibility enum: draft | secret | public',
-      'Al hacer pública se conserva el slug secreto para no romper enlaces ya compartidos — redirige al slug público',
-    ],
-    outOfScope: [
-      'Proteger con contraseña',
-      'Expiración automática del enlace secreto',
-      'Notificación cuando alguien visita la story',
-    ]
+    tech: ['Slug secreto: UUID 32 chars', 'Slug público: desde título, único, max 60 chars', 'Al hacer pública se conserva el slug secreto — redirige al público'],
+    outOfScope: ['Proteger con contraseña', 'Expiración del enlace secreto', 'Notificación de visitas']
   },
 
   'US-118': {
@@ -5771,114 +6266,39 @@ const CARDS = {
     title: 'Página pública de la story',
     story: 'Como persona que recibe un enlace a una story,\nquiero ver una página limpia con las fotos y el texto del fotógrafo,\npara disfrutar el relato visual sin necesitar cuenta en photoshelf.',
     description: [
-      'Ruta pública /story/[slug] que renderiza la story sin autenticación. Muestra los bloques en orden: Hero, Título, Subtítulo, Texto, Cita e Imágenes masonry.',
+      'Ruta pública /story/[slug] que renderiza la story sin autenticación. Muestra los bloques en orden con layout limpio.',
       'La foto del bloque Hero se usa como og:image para previews en WhatsApp, iMessage y redes sociales.',
     ],
     criteria: [
-      {
-        group: 'Renderizado',
-        items: [
-          'Ruta /story/[slug] — accesible sin sesión',
-          'Bloques renderizados en orden de edición',
-          'Hero: foto a ancho completo con título de la story superpuesto',
-          'Masonry: grid responsivo de fotos',
-          'Texto y Cita con tipografía optimizada para lectura',
-          'Story no pública (draft o secret con slug incorrecto): 404',
-        ]
-      },
-      {
-        group: 'Interacción y sharing',
-        items: [
-          'Clic en foto abre lightbox con navegación entre fotos del bloque',
-          'Responsive — legible en móvil',
-          'og:title, og:description y og:image (foto del Hero) para preview al compartir',
-        ]
-      }
+      { group: 'Renderizado', items: ['Ruta /story/[slug] sin sesión', 'Bloques en orden: Hero a ancho completo, Título, Texto, Cita, Masonry', 'Story no pública o slug incorrecto: 404'] },
+      { group: 'Interacción y sharing', items: ['Clic en foto abre lightbox con navegación entre fotos del bloque', 'Responsive — legible en móvil', 'og:title, og:description y og:image (foto del Hero)'] },
     ],
     dependencies: ['US-117'],
     components: [
       { path: 'src/app/story/[slug]/page.tsx', desc: 'Página pública — Server Component sin auth', isNew: true },
       { path: 'src/app/story/[slug]/StoryPage.tsx', desc: 'Renderizado de bloques', isNew: true },
-      { path: 'src/components/StoryLightbox.tsx', desc: 'Lightbox de fotos en la página pública', isNew: true },
+      { path: 'src/components/StoryLightbox.tsx', desc: 'Lightbox de fotos', isNew: true },
     ],
-    tech: [
-      'Server Component con revalidación por tag (revalidateTag al guardar story)',
-      'og:image: URL de la foto del Hero servida por /api/photos/[id]/original',
-      'Lightbox: Radix Dialog o solución ligera sin dependencias pesadas',
-      '404 si story.visibility === draft, o si slug no coincide con el estado actual',
-    ],
-    outOfScope: [
-      'Comentarios o reacciones',
-      'Analíticas de visitas',
-      'Export a PDF',
-      'Dominio personalizado',
-    ]
+    tech: ['Server Component con revalidateTag al guardar story', 'og:image: URL del Hero vía /api/photos/[id]/original', '404 si visibility === draft o slug no coincide'],
+    outOfScope: ['Comentarios', 'Analíticas', 'Export PDF', 'Dominio personalizado']
   },
 
-  'EPIC-006': {
-    id: 'EPIC-006', type: 'EPIC', column: 'ideas', effort: 'L',
-    title: 'Photo Stories — publicar proyectos como páginas web',
-    story: 'Como fotógrafo que quiere compartir su trabajo,\nquiero un editor de stories con bloques de texto y fotos de mi biblioteca,\npara publicar páginas web accesibles desde internet directamente desde photoshelf.',
+  'US-119': {
+    id: 'US-119', type: 'US', column: 'ideas', effort: 'M',
+    title: 'Exponer photoshelf a internet desde el NAS',
+    story: 'Como fotógrafo que quiere compartir stories públicamente,\nquiero que las páginas /story/[slug] sean accesibles desde internet,\npara que cualquiera pueda ver mis stories sin estar en mi red local.',
     description: [
-      'Una Story es una entidad independiente (no atada a un proyecto) que combina bloques reordenables: Hero, Título/Subtítulo, Texto, Cita e Imágenes (grid masonry con fotos de la biblioteca).',
-      'El editor permite crear y editar el draft, previsualizar con enlace secreto, y publicar para hacerlo accesible públicamente. Se puede editar en cualquier momento sin necesidad de despublicar.',
-      'La página se sirve desde el propio NAS expuesto a internet. La foto del bloque Hero actúa como og:image automáticamente al compartir.',
-      'Scope inicial: un único usuario. Arquitectura orientada a soportar multi-usuario en el futuro (módulo de proyectos compartidos).',
+      'Prerequisito de EPIC-006. photoshelf corre en un NAS en red privada — sin exposición externa las stories publicadas solo son accesibles en local.',
+      'Hay varias opciones a evaluar según el NAS y el nivel de control deseado. Por refinar.',
     ],
     criteria: [
-      {
-        group: 'Editor de bloques',
-        items: [
-          'Tipos de bloque: Hero (foto grande), Título/Subtítulo, Texto, Cita, Imágenes (masonry)',
-          'Añadir bloques de cualquier tipo en cualquier posición',
-          'Reordenar bloques con drag-and-drop',
-          'Bloque Imágenes: selección múltiple de fotos de la biblioteca + reordenación dentro del bloque',
-          'Guardar draft sin publicar en cualquier momento',
-        ]
-      },
-      {
-        group: 'Publicación y visibilidad',
-        items: [
-          'Flujo en dos pasos: primero "Publicar con enlace secreto" (URL no adivinable), luego "Hacer pública"',
-          'La story editada se refleja en la página publicada sin necesidad de despublicar',
-          'Opción de volver a enlace secreto o despublicar desde el editor',
-          'La foto del bloque Hero se usa como og:image al compartir por WhatsApp / redes',
-        ]
-      },
-      {
-        group: 'Página pública',
-        items: [
-          'URL accesible sin autenticación: /story/[slug]',
-          'Layout limpio con bloques renderizados en orden: Hero, texto, masonry, citas',
-          'Responsive y optimizado para lectura en móvil',
-          'Fotos con clic para ampliar (lightbox)',
-        ]
-      },
-      {
-        group: 'Infraestructura (prerequisito externo)',
-        items: [
-          'El NAS debe estar expuesto a internet (DDNS, reverse proxy o Cloudflare Tunnel)',
-          'Esta épica no incluye la configuración de red — es una dependencia a resolver por separado',
-        ]
-      }
+      { group: 'Opciones a evaluar', items: ['DDNS del fabricante (Synology QuickConnect, QNAP myQNAPcloud…)', 'Cloudflare Tunnel — sin abrir puertos, gratuito, muy seguro', 'Reverse proxy propio (Nginx) con DDNS genérico — más control'] },
+      { group: 'Resultado esperado', items: ['URL pública estable que resuelve al NAS', 'Solo /story/[slug] expuesto públicamente — el resto sigue tras auth', 'HTTPS funcionando (Let\'s Encrypt o Cloudflare)', 'Setup documentado en el README'] },
     ],
     dependencies: [],
     components: [],
-    tech: [
-      'Story como entidad propia en BD — no ligada a un proyecto concreto',
-      'Bloques como array JSON: [{type:"hero",photoId:""},{type:"text",content:""},{type:"images",ids:[...]},...]',
-      'Visibilidad: enum (draft | secret | public) + slug corto para public, slug largo aleatorio para secret',
-      'og:image: URL de la foto del bloque Hero de la story',
-      'Página pública renderizada como Server Component (ISR o SSR según frecuencia de edición)',
-    ],
-    outOfScope: [
-      'Dominio personalizado',
-      'Múltiples stories por entidad',
-      'Analíticas de visitas',
-      'Comentarios o reacciones',
-      'Export a PDF o newsletter',
-      'Configuración de red / exposición del NAS a internet',
-    ]
+    tech: ['Opción A: Cloudflare Tunnel (cloudflared)', 'Opción B: Nginx + Certbot + DDNS', 'Middleware Next.js para restringir rutas públicas a /story/*'],
+    outOfScope: ['Dominio personalizado de pago', 'CDN para las fotos', 'Alta disponibilidad']
   }
 
 };
