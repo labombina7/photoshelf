@@ -7,11 +7,11 @@ services:
     environment:
       APP_PASSWORD: ${APP_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
-      PHOTOS_PATH: /volume1/homes/javi/Photos
+      PHOTOS_PATH: ${PHOTOS_PATH:-/photos}
       CACHE_PATH: /data/.cache
       DB_PATH: /data/photoshelf.db
-      OLLAMA_URL: ${OLLAMA_URL:-http://192.168.1.135:11434}
-      BACKUP_PATH: ${BACKUP_PATH:-/data/backups}
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      BACKUP_PATH: /data/backups
       AMPLITUDE_API_KEY: ${AMPLITUDE_API_KEY}
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
@@ -20,5 +20,5 @@ services:
       retries: 3
       start_period: 15s
     volumes:
-      - /volume1:/volume1:ro          # NAS completo en solo lectura — permite múltiples catálogos sin re-configurar
-      - ${DATA_PATH:-/volume1/homes/javi/photoshelf-data}:/data
+      - ${PHOTOS_MOUNT:-/photos}:${PHOTOS_PATH:-/photos}:ro
+      - ${DATA_PATH:-/data}:/data

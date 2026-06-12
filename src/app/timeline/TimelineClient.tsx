@@ -236,8 +236,12 @@ export default function TimelineClient({
         return LEVELS[Math.min(LEVELS.length - 1, idx + 1)];
       });
     };
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    return () => window.removeEventListener('wheel', handleWheel);
+    const container = contentRef.current;
+    if (container) {
+      container.addEventListener('wheel', handleWheel, { passive: false });
+      return () => container.removeEventListener('wheel', handleWheel);
+    }
+    // Fallback: si el contenedor aún no existe, no registrar el listener global
   }, []);
 
   // +/- keys to change temporal level
@@ -259,7 +263,8 @@ export default function TimelineClient({
   // Double-tap on mobile to toggle between month and day
   useEffect(() => {
     let lastTap = 0;
-    const handleTouchEnd = () => {
+    const handleTouchEnd = (e: TouchEvent) => {
+      if ((e.target as Element)?.closest?.('.photo-item')) return;
       const now = Date.now();
       if (now - lastTap < DOUBLE_TAP_MS) {
         setLevel(prev => prev === 'day' ? 'month' : 'day');
@@ -372,7 +377,7 @@ export default function TimelineClient({
                           img.style.display = 'none';
                           const broken = document.createElement('div');
                           broken.className = 'photo-broken';
-                          broken.textContent = '🖼';
+                          broken.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5-4 4-2-2-5 5"/><line x1="2" y1="2" x2="22" y2="22"/></svg>';
                           img.parentElement?.appendChild(broken);
                         }}
                       />

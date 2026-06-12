@@ -164,7 +164,7 @@ export function ScanProvider({ children }: { children: React.ReactNode }) {
             <div className="scan-toast-event">Asignando tags con IA…</div>
           )}
           {state.error && (
-            <div className="scan-toast-event" style={{ color: '#c0392b' }}>{state.error}</div>
+            <div className="scan-toast-event" style={{ color: 'var(--danger)' }}>{state.error}</div>
           )}
 
           {state.running && state.total > 0 && (

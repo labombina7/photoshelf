@@ -80,12 +80,31 @@ export default function LibraryClient({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [showLongPressHint, setShowLongPressHint] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const key = 'photoshelf:longpress-hint-seen';
+    if (!localStorage.getItem(key)) {
+      const timer = setTimeout(() => {
+        setShowLongPressHint(true);
+        localStorage.setItem(key, '1');
+        setTimeout(() => setShowLongPressHint(false), 4000);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
   const { slideshowIds, setSlideshowIds, openSlideshow } = useSlideshow(activeFilters);
 
   // Keep localClassifying in sync: clear it when server confirms this year's job is done
   useEffect(() => {
     if (localClassifying && !isThisYearActive) setLocalClassifying(false);
   }, [isThisYearActive, localClassifying]);
+
+  // Notify AppHeader when selectionMode changes (to hide the FAB)
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('photoshelf:selection-mode', { detail: selectionMode }));
+  }, [selectionMode]);
 
   // If navigated to a specific event, always use list mode
   const effectiveViewMode = activeFilters.event ? 'list' : viewMode;
@@ -287,6 +306,12 @@ export default function LibraryClient({
           </div>
         </div>
         </div>
+        {/* Hint efímero de long-press — solo mobile, primera visita */}
+        {showLongPressHint && !selectionMode && (
+          <div className="longpress-hint" role="status" aria-live="polite">
+            Mantén pulsada una foto para seleccionar
+          </div>
+        )}
         {/* Floating selection action bar */}
         {selectionMode && (
           <div className="selection-action-bar">

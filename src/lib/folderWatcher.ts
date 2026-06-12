@@ -7,6 +7,7 @@ import { getWatcherState, updateWatcherState } from './watcherState';
 import { getDb } from './db';
 import { PHOTOS_PATH, WATCHER_DEBOUNCE_MS, WATCHER_POLL_MS } from './config';
 import { upsertAiTags } from './db-helpers';
+import { getCatalogById } from './queries/catalogs';
 const DEBOUNCE_MS = WATCHER_DEBOUNCE_MS;
 const POLL_MS = WATCHER_POLL_MS;
 
@@ -48,10 +49,19 @@ function scheduleAutoScan(reason: string) {
   debounceTimer = setTimeout(() => runAutoScan(reason), DEBOUNCE_MS);
 }
 
+function getCatalogPath(): string {
+  const catalog = getCatalogById(1);
+  if (catalog && catalog.path !== PHOTOS_PATH) {
+    console.log(`[watcher] Usando ruta de catálogo 1 desde BD: ${catalog.path}`);
+  }
+  return catalog?.path ?? PHOTOS_PATH;
+}
+
 async function runAutoScan(reason: string) {
   if (!getWatcherState().enabled) return;
   if (getScanState().running) return;
 
+  const catalogPath = getCatalogPath();
   console.log(`[watcher] Auto-scan triggered: ${reason}`);
   updateWatcherState({ lastScanAt: Date.now(), reason });
 
@@ -65,7 +75,7 @@ async function runAutoScan(reason: string) {
   });
 
   try {
-    await scanLibrary(PHOTOS_PATH, (event, done, total) => {
+    await scanLibrary(catalogPath, (event, done, total) => {
       updateScanState({ currentEvent: event, done, total });
     });
     updateScanState({ running: false, completedAt: Date.now() });
@@ -77,7 +87,7 @@ async function runAutoScan(reason: string) {
   }
 
   // Refresh snapshot after scan
-  knownDirs = await buildDirSnapshot(PHOTOS_PATH);
+  knownDirs = await buildDirSnapshot(catalogPath);
 
   // Auto-classify only if Ollama is configured
   if (!process.env.OLLAMA_URL) return;
@@ -88,11 +98,14 @@ async function runAutoScan(reason: string) {
 
 async function runAutoClassify() {
   const db = getDb();
+  const catalogPath = getCatalogPath();
+
   const photos = db.prepare(`
     SELECT p.id, p.path FROM photos p
-    WHERE NOT EXISTS (
-      SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id AND pt.source = 'ai'
-    )
+    WHERE p.catalog_id = 1
+      AND NOT EXISTS (
+        SELECT 1 FROM photo_tags pt WHERE pt.photo_id = p.id AND pt.source = 'ai'
+      )
     ORDER BY p.id DESC
     LIMIT 200
   `).all() as { id: number; path: string }[];
@@ -108,11 +121,14 @@ async function runAutoClassify() {
   });
 
   let done = 0;
+  let errors = 0;
   for (const photo of photos) {
     try {
-      const tags = await classifyPhoto(photo.path, PHOTOS_PATH);
+      const tags = await classifyPhoto(photo.path, catalogPath);
       upsertAiTags(db, photo.id, tags);
-    } catch { /* skip failed photo */ }
+    } catch (err) {
+      errors++;
+    }
     done++;
     updateWatcherState({ classifyDone: done });
     updateClassifyState({ done, currentEvent: photo.path });
@@ -120,12 +136,12 @@ async function runAutoClassify() {
 
   updateClassifyState({ running: false, completedAt: Date.now(), done, currentEvent: '' });
   updateWatcherState({ classifying: false, classifyDone: 0, classifyTotal: 0 });
-  console.log(`[watcher] Auto-classify done: ${done} photos`);
+  console.log(`[watcher] Auto-classify done: ${done - errors}/${done} fotos (${errors} errores)`);
 }
 
 async function pollForChanges() {
   if (!getWatcherState().enabled) return;
-  const current = await buildDirSnapshot(PHOTOS_PATH);
+  const current = await buildDirSnapshot(getCatalogPath());
   const newDirs = findNewDirs(knownDirs, current);
   if (newDirs.length > 0) {
     const label = newDirs.length === 1 ? newDirs[0] : `${newDirs.length} nuevas carpetas`;
@@ -139,22 +155,24 @@ export async function startWatcher(): Promise<void> {
   if (started) return;
   started = true;
 
+  const watchPath = getCatalogPath();
+
   // Ensure photos path exists before watching
   try {
-    await fs.promises.access(PHOTOS_PATH);
+    await fs.promises.access(watchPath);
   } catch {
-    console.log(`[watcher] PHOTOS_PATH not accessible (${PHOTOS_PATH}), watcher idle`);
+    console.log(`[watcher] Ruta no accesible (${watchPath}), watcher idle`);
     updateWatcherState({ watching: false });
     return;
   }
 
-  knownDirs = await buildDirSnapshot(PHOTOS_PATH);
+  knownDirs = await buildDirSnapshot(watchPath);
   updateWatcherState({ watching: true });
-  console.log(`[watcher] Started watching ${PHOTOS_PATH} (${knownDirs.size} dirs known)`);
+  console.log(`[watcher] Started watching ${watchPath} (${knownDirs.size} dirs known)`);
 
   // Try fs.watch with recursive (macOS + Windows). Falls back to poll-only on Linux.
   try {
-    fsWatcher = fs.watch(PHOTOS_PATH, { recursive: true }, async (_evt, filename) => {
+    fsWatcher = fs.watch(watchPath, { recursive: true }, async (_evt, filename) => {
       if (!filename) return;
       // Only care about directory-level additions
       const parts = filename.split(path.sep);

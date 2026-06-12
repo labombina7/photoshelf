@@ -318,20 +318,20 @@ export default function PhotoDetailClient({
             </button>
             <span className="detail-counter">{photoIndex} / {photoTotal}</span>
             {prevId ? (
-              <Link href={`/library/${prevId}${navSearch}`} className="btn-icon">
+              <Link href={`/library/${prevId}${navSearch}`} className="btn-icon" aria-label="Foto anterior">
                 <IconChevronLeft />
               </Link>
             ) : (
-              <button className="btn-icon" disabled style={{ opacity: 0.3 }}>
+              <button className="btn-icon" disabled style={{ opacity: 0.3 }} aria-label="Foto anterior">
                 <IconChevronLeft />
               </button>
             )}
             {nextId ? (
-              <Link href={`/library/${nextId}${navSearch}`} className="btn-icon">
+              <Link href={`/library/${nextId}${navSearch}`} className="btn-icon" aria-label="Foto siguiente">
                 <IconChevronRight />
               </Link>
             ) : (
-              <button className="btn-icon" disabled style={{ opacity: 0.3 }}>
+              <button className="btn-icon" disabled style={{ opacity: 0.3 }} aria-label="Foto siguiente">
                 <IconChevronRight />
               </button>
             )}

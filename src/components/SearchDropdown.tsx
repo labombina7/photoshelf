@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { IconSmartAlbum, IconFolder } from '@/components/Icons';
 import type { HistoryEntry } from '@/hooks/useSearchHistory';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -207,7 +208,7 @@ export default function SearchDropdown({
                 onMouseEnter={() => setFocusedIndex(idx)}
                 onMouseDown={e => { e.preventDefault(); router.push(`/smart-albums/${a.id}`); }}
               >
-                <span className="search-dropdown-icon search-dropdown-icon--album">📂</span>
+                <span className="search-dropdown-icon search-dropdown-icon--album"><IconSmartAlbum size={14} /></span>
                 <span className="search-dropdown-label">{a.name}</span>
               </li>
             );
@@ -230,7 +231,7 @@ export default function SearchDropdown({
                 onMouseEnter={() => setFocusedIndex(idx)}
                 onMouseDown={e => { e.preventDefault(); router.push(`/projects/${p.id}`); }}
               >
-                <span className="search-dropdown-icon search-dropdown-icon--project">🗂️</span>
+                <span className="search-dropdown-icon search-dropdown-icon--project"><IconFolder size={14} /></span>
                 <span className="search-dropdown-label">{p.title}</span>
               </li>
             );

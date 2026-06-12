@@ -41,9 +41,9 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_COLOR: Record<string, string> = {
   pending:     '#ca8a04',
-  in_progress: '#3b82f6',
+  in_progress: 'var(--info)',
   completed:   '#16a34a',
-  failed:      '#dc2626',
+  failed:      'var(--danger)',
   cancelled:   'var(--text-tertiary)',
 };
 
@@ -291,9 +291,9 @@ function JobCard({ job, onCancel, cancelling }: { job: JobRow; onCancel: (id: st
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ flex: 1, height: 4, borderRadius: 2, background: 'var(--border)', overflow: 'hidden' }}>
             {job.status === 'in_progress' && job.processed > 0 ? (
-              <div style={{ height: '100%', width: `${pct}%`, background: '#3b82f6', borderRadius: 2, transition: 'width 0.4s ease' }} />
+              <div style={{ height: '100%', width: `${pct}%`, background: 'var(--info)', borderRadius: 2, transition: 'width 0.4s ease' }} />
             ) : (
-              <div className="classify-inline-pulse" style={{ height: '100%', width: '30%', background: '#3b82f6', borderRadius: 2 }} />
+              <div className="classify-inline-pulse" style={{ height: '100%', width: '30%', background: 'var(--info)', borderRadius: 2 }} />
             )}
           </div>
           <span style={{ fontSize: 12, color: 'var(--text-tertiary)', flexShrink: 0 }}>
@@ -308,12 +308,12 @@ function JobCard({ job, onCancel, cancelling }: { job: JobRow; onCancel: (id: st
           <span>{job.processed} procesadas</span>
         )}
         {job.error_count > 0 && (
-          <span style={{ color: '#dc2626' }}>{job.error_count} errores</span>
+          <span style={{ color: 'var(--danger)' }}>{job.error_count} errores</span>
         )}
       </div>
 
       {job.error_last && job.status === 'failed' && (
-        <p style={{ fontSize: 12, color: '#dc2626', margin: 0 }}>{job.error_last}</p>
+        <p style={{ fontSize: 12, color: 'var(--danger)', margin: 0 }}>{job.error_last}</p>
       )}
     </div>
   );

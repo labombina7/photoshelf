@@ -149,7 +149,7 @@ function ReportSection({
                 {item.path}
               </span>
               {item.error_msg && (
-                <span style={{ fontSize: 11, color: '#c0392b', marginLeft: 8, flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: 'var(--danger)', marginLeft: 8, flexShrink: 0 }}>
                   {item.error_msg}
                 </span>
               )}
@@ -386,9 +386,9 @@ export default function IntegrityClient({
           {/* Summary cards */}
           {meta.lastRun && !isRunning && (
             <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
-              <StatusBadge count={meta.orphans} label="Huérfanos" color="#e67e22" />
+              <StatusBadge count={meta.orphans} label="Huérfanos" color="var(--warning)" />
               <StatusBadge count={meta.unindexed} label="No indexados" color="#3498db" />
-              <StatusBadge count={meta.corrupt} label="Corruptos" color="#c0392b" />
+              <StatusBadge count={meta.corrupt} label="Corruptos" color="var(--danger)" />
               <StatusBadge count={meta.orphanThumbnails} label="Thumbs huérfanos" color="#8e44ad" />
             </div>
           )}
@@ -413,7 +413,7 @@ export default function IntegrityClient({
                 title="Archivos huérfanos (en DB, sin fichero en disco)"
                 items={orphanItems}
                 actionLabel="Eliminar de la base de datos"
-                actionColor="#e67e22"
+                actionColor="var(--warning)"
                 onAction={ids => handleAction('remove_orphans', ids)}
                 actionLoading={actionLoading === 'remove_orphans'}
               />
@@ -429,7 +429,7 @@ export default function IntegrityClient({
                 title="Archivos corruptos (cabecera inválida)"
                 items={corruptItems}
                 actionLabel="Mover a cuarentena"
-                actionColor="#c0392b"
+                actionColor="var(--danger)"
                 onAction={ids => handleAction('quarantine_corrupt', ids)}
                 actionLoading={actionLoading === 'quarantine_corrupt'}
               />

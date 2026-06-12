@@ -4,7 +4,7 @@ import { getPhotoPathById } from '@/lib/queries/photos';
 import { resolvePhotoPath } from '@/lib/config';
 import fs from 'fs';
 import path from 'path';
-import { ZipArchive } from 'archiver';
+import archiver from 'archiver';
 import { PassThrough, Readable } from 'stream';
 
 export async function GET(
@@ -75,7 +75,7 @@ export async function GET(
   // Build ZIP in memory via PassThrough, convert Node stream → Web ReadableStream
   const passThrough = new PassThrough();
 
-  const archive = new ZipArchive({ zlib: { level: 0 } });
+  const archive = archiver('zip', { zlib: { level: 0 } });
   archive.pipe(passThrough);
 
   for (const { absPath, filename } of photos) {

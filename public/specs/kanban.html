@@ -639,99 +639,14 @@
         <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-117</span></div>
       </div>
 
-      <!-- ── Insights 2026-06-12 (UX + Tech Debt audits) + features ── -->
-
-      <div class="card" tabindex="0" data-id="US-096" onclick="openModal('US-096')">
-        <div class="card-top">
-          <span class="badge badge-us">US-096</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Variables CSS fantasma y paleta de estados</div>
-        <div class="card-summary">Definir --text-primary/--text-muted/--surface-raised (usadas pero inexistentes — el botón activo del timeline renderiza roto) y unificar 5 colores de estado hardcodeados en tokens --danger/--warning/--info.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-097" onclick="openModal('US-097')">
-        <div class="card-top">
-          <span class="badge badge-us">US-097</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Acciones de vista accesibles en mobile</div>
-        <div class="card-summary">Recuperar presentación, toggle lista/carpetas y modo selección en ≤640px (hoy display:none), hint de long-press, ocultar FAB en modo selección y arreglar el doble-tap del timeline sobre fotos.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-098" onclick="openModal('US-098')">
-        <div class="card-top">
-          <span class="badge badge-us">US-098</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Accesibilidad: contraste, reduced motion y lector de pantalla</div>
-        <div class="card-summary">Subir el contraste de --text-tertiary (hoy 2.4:1, WCAG pide 4.5:1), bloque global prefers-reduced-motion, aria-labels restantes y roving tabindex en el grid de fotos.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-099" onclick="openModal('US-099')">
-        <div class="card-top">
-          <span class="badge badge-us">US-099</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Feedback de errores y navegación honesta</div>
-        <div class="card-summary">CTA del estado vacío que escanea de verdad, favorito con revert, error real de clasificación (no siempre 'Ollama no disponible'), cancelación/timeout en generación de proyectos y enlaces granulares del timeline.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-101" onclick="openModal('US-101')">
-        <div class="card-top">
-          <span class="badge badge-us">US-101</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Worker al arranque y reanudación de jobs</div>
-        <div class="card-summary">ensureWorkerRunning() solo se llama desde rutas de usuario: tras un reinicio, los jobs in_progress y el auto-backup vencido quedan congelados hasta que alguien visita la app. Arrancarlo desde instrumentation.ts.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-102" onclick="openModal('US-102')">
-        <div class="card-top">
-          <span class="badge badge-us">US-102</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Watcher compatible con multi-catálogo</div>
-        <div class="card-summary">El watcher escanea siempre PHOTOS_PATH (env) hacia catálogo 1 aunque su ruta cambiara en BD, y el auto-classify selecciona fotos de TODOS los catálogos resolviendo paths contra la ruta equivocada (fallos silenciosos en cada ciclo).</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-104" onclick="openModal('US-104')">
-        <div class="card-top">
-          <span class="badge badge-us">US-104</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Validación de size en thumbnails + dedupe</div>
-        <div class="card-summary">El parámetro size va sin validar a sharp (size=20000 → CPU/disco; NaN posible) y las generaciones concurrentes del mismo thumbnail se duplican. Whitelist de tamaños + mapa de promesas in-flight.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-106" onclick="openModal('US-106')">
-        <div class="card-top">
-          <span class="badge badge-us">US-106</span>
-          <span class="effort effort-m">M</span>
-        </div>
-        <div class="card-title">Hardening de despliegue Docker</div>
-        <div class="card-summary">USER node en el Dockerfile (hoy corre como root, contradiciendo .env.example), npm update next (vulnerabilidad postcss moderada) y docker-compose sin rutas/IPs personales hardcodeadas.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-107" onclick="openModal('US-107')">
+      <!-- ── Insights 2026-06-12 (UX + Tech Debt audits) + features ── -->      <div class="card" tabindex="0" data-id="US-107" onclick="openModal('US-107')">
         <div class="card-top">
           <span class="badge badge-us">US-107</span>
           <span class="effort effort-l">L</span>
         </div>
         <div class="card-title">Consolidación de la API v1</div>
         <div class="card-summary">La capa /api/v1 (10 routes, patrón withAuth superior) no tiene NINGÚN consumidor — el frontend usa solo las rutas legacy y ambas ya divergen. Decidir y ejecutar: migrar el frontend a v1 o retirarla.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-109" onclick="openModal('US-109')">
-        <div class="card-top">
-          <span class="badge badge-us">US-109</span>
-          <span class="effort effort-s">S</span>
-        </div>
-        <div class="card-title">Quick wins de copy e iconografía v2</div>
-        <div class="card-summary">Marca unificada (PhotoShelf→photoshelf), copy sin asumir NAS, botón limpiar con verbo, emojis funcionales→SVG (📂🗂️🖼···), iconos inline a Icons.tsx (IconPlay ×4) y icono propio para la cola de trabajos.</div>
-      </div>
-
-      <div class="card" tabindex="0" data-id="US-110" onclick="openModal('US-110')">
+      </div>      <div class="card" tabindex="0" data-id="US-110" onclick="openModal('US-110')">
         <div class="card-top">
           <span class="badge badge-us">US-110</span>
           <span class="effort effort-m">M</span>
@@ -969,9 +884,112 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">79</span>
+      <span class="col-count">88</span>
     </div>
     <div class="col-body">
+
+      
+
+      <div class="card card-done" tabindex="0" data-id="US-096" onclick="openModal('US-096')">
+        <div class="card-top">
+          <span class="badge badge-us">US-096</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Variables CSS fantasma y paleta de estados</div>
+        <div class="card-summary">Definir --text-primary/--text-muted/--surface-raised (usadas pero inexistentes — el botón activo del timeline renderiza roto) y unificar 5 colores de estado hardcodeados en tokens --danger/--warning/--info.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-097" onclick="openModal('US-097')">
+        <div class="card-top">
+          <span class="badge badge-us">US-097</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Acciones de vista accesibles en mobile</div>
+        <div class="card-summary">Recuperar presentación, toggle lista/carpetas y modo selección en ≤640px (hoy display:none), hint de long-press, ocultar FAB en modo selección y arreglar el doble-tap del timeline sobre fotos.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-098" onclick="openModal('US-098')">
+        <div class="card-top">
+          <span class="badge badge-us">US-098</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Accesibilidad: contraste, reduced motion y lector de pantalla</div>
+        <div class="card-summary">Subir el contraste de --text-tertiary (hoy 2.4:1, WCAG pide 4.5:1), bloque global prefers-reduced-motion, aria-labels restantes y roving tabindex en el grid de fotos.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-099" onclick="openModal('US-099')">
+        <div class="card-top">
+          <span class="badge badge-us">US-099</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Feedback de errores y navegación honesta</div>
+        <div class="card-summary">CTA del estado vacío que escanea de verdad, favorito con revert, error real de clasificación (no siempre 'Ollama no disponible'), cancelación/timeout en generación de proyectos y enlaces granulares del timeline.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-101" onclick="openModal('US-101')">
+        <div class="card-top">
+          <span class="badge badge-us">US-101</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Worker al arranque y reanudación de jobs</div>
+        <div class="card-summary">ensureWorkerRunning() solo se llama desde rutas de usuario: tras un reinicio, los jobs in_progress y el auto-backup vencido quedan congelados hasta que alguien visita la app. Arrancarlo desde instrumentation.ts.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-102" onclick="openModal('US-102')">
+        <div class="card-top">
+          <span class="badge badge-us">US-102</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Watcher compatible con multi-catálogo</div>
+        <div class="card-summary">El watcher escanea siempre PHOTOS_PATH (env) hacia catálogo 1 aunque su ruta cambiara en BD, y el auto-classify selecciona fotos de TODOS los catálogos resolviendo paths contra la ruta equivocada (fallos silenciosos en cada ciclo).</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-104" onclick="openModal('US-104')">
+        <div class="card-top">
+          <span class="badge badge-us">US-104</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Validación de size en thumbnails + dedupe</div>
+        <div class="card-summary">El parámetro size va sin validar a sharp (size=20000 → CPU/disco; NaN posible) y las generaciones concurrentes del mismo thumbnail se duplican. Whitelist de tamaños + mapa de promesas in-flight.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-106" onclick="openModal('US-106')">
+        <div class="card-top">
+          <span class="badge badge-us">US-106</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Hardening de despliegue Docker</div>
+        <div class="card-summary">USER node en el Dockerfile (hoy corre como root, contradiciendo .env.example), npm update next (vulnerabilidad postcss moderada) y docker-compose sin rutas/IPs personales hardcodeadas.</div>
+      </div>
+
+
+
+      <div class="card card-done" tabindex="0" data-id="US-109" onclick="openModal('US-109')">
+        <div class="card-top">
+          <span class="badge badge-us">US-109</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Quick wins de copy e iconografía v2</div>
+        <div class="card-summary">Marca unificada (PhotoShelf→photoshelf), copy sin asumir NAS, botón limpiar con verbo, emojis funcionales→SVG (📂🗂️🖼···), iconos inline a Icons.tsx (IconPlay ×4) y icono propio para la cola de trabajos.</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-100" onclick="openModal('US-100')">
         <div class="card-top">
@@ -4104,7 +4122,7 @@ const CARDS = {
     ]
   },
   'US-096': {
-    id: 'US-096', type: 'US', column: 'todo', effort: 'S',
+    id: 'US-096', type: 'US', column: 'done', effort: 'S',
     title: 'Variables CSS fantasma y paleta de estados',
     story: 'Como usuario de photoshelf,\nquiero que todos los elementos rendericen con los colores que el diseño pretende,\npara que ningún control aparezca roto o ilegible.',
     description: [
@@ -4125,7 +4143,7 @@ const CARDS = {
     tags: ['UX Audit', 'Quick-win'],
   },
   'US-097': {
-    id: 'US-097', type: 'US', column: 'todo', effort: 'M',
+    id: 'US-097', type: 'US', column: 'done', effort: 'M',
     title: 'Acciones de vista accesibles en mobile',
     story: 'Como usuario móvil,\nquiero lanzar presentación, cambiar de vista y seleccionar fotos,\npara tener las mismas capacidades que en desktop.',
     description: [
@@ -4146,7 +4164,7 @@ const CARDS = {
     tags: ['UX Audit', 'Mobile'],
   },
   'US-098': {
-    id: 'US-098', type: 'US', column: 'todo', effort: 'M',
+    id: 'US-098', type: 'US', column: 'done', effort: 'M',
     title: 'Accesibilidad: contraste, reduced motion y lector de pantalla',
     story: 'Como usuario con baja visión o sensibilidad al movimiento,\nquiero texto legible y animaciones que respeten mis preferencias,\npara usar photoshelf cómodamente.',
     description: [
@@ -4167,7 +4185,7 @@ const CARDS = {
     tags: ['UX Audit', 'A11y'],
   },
   'US-099': {
-    id: 'US-099', type: 'US', column: 'todo', effort: 'M',
+    id: 'US-099', type: 'US', column: 'done', effort: 'M',
     title: 'Feedback de errores y navegación honesta',
     story: 'Como usuario,\nquiero que los botones hagan lo que prometen y los errores se muestren,\npara confiar en lo que veo en pantalla.',
     description: [
@@ -4211,7 +4229,7 @@ const CARDS = {
     tags: ['Tech Debt', 'Crítico'],
   },
   'US-101': {
-    id: 'US-101', type: 'US', column: 'todo', effort: 'S',
+    id: 'US-101', type: 'US', column: 'done', effort: 'S',
     title: 'Worker al arranque y reanudación de jobs',
     story: 'Como operador,\nquiero que los jobs se reanuden tras un reinicio,\npara que no queden congelados días enteros.',
     description: [
@@ -4232,7 +4250,7 @@ const CARDS = {
     tags: ['Tech Debt', 'Resiliencia'],
   },
   'US-102': {
-    id: 'US-102', type: 'US', column: 'todo', effort: 'M',
+    id: 'US-102', type: 'US', column: 'done', effort: 'M',
     title: 'Watcher compatible con multi-catálogo',
     story: 'Como usuario con varios catálogos,\nquiero que la vigilancia use la ruta correcta y clasifique solo sus fotos,\npara que el auto-escaneo no indexe rutas erróneas.',
     description: [
@@ -4273,7 +4291,7 @@ const CARDS = {
     tags: ['Tech Debt', 'Share'],
   },
   'US-104': {
-    id: 'US-104', type: 'US', column: 'todo', effort: 'S',
+    id: 'US-104', type: 'US', column: 'done', effort: 'S',
     title: 'Validación de size en thumbnails + dedupe',
     story: 'Como operador,\nquiero que el endpoint de miniaturas solo acepte tamaños conocidos,\npara proteger CPU y disco.',
     description: [
@@ -4315,7 +4333,7 @@ const CARDS = {
     tags: ['Tech Debt', 'Rendimiento'],
   },
   'US-106': {
-    id: 'US-106', type: 'US', column: 'todo', effort: 'M',
+    id: 'US-106', type: 'US', column: 'done', effort: 'M',
     title: 'Hardening de despliegue Docker',
     story: 'Como operador,\nquiero un contenedor sin root, sin vulnerabilidades conocidas y un compose portable,\npara reducir riesgo.',
     description: [
@@ -4378,7 +4396,7 @@ const CARDS = {
     tags: ['Tech Debt', 'Refactor'],
   },
   'US-109': {
-    id: 'US-109', type: 'US', column: 'todo', effort: 'S',
+    id: 'US-109', type: 'US', column: 'done', effort: 'S',
     title: 'Quick wins de copy e iconografía v2',
     story: 'Como usuario,\nquiero textos coherentes y un set de iconos uniforme,\npara percibir un producto cuidado.',
     description: [

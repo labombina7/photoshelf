@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { IconChevronDown, IconChevronUp, IconSparkle, IconShare } from '@/components/Icons';
+import { IconChevronDown, IconChevronUp, IconSparkle, IconShare, IconDots } from '@/components/Icons';
 import EmptyState from '@/components/EmptyState';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import ShareButton from '@/components/ShareButton';
@@ -86,7 +86,7 @@ function EventGroupBlock({
   const [classifying, setClassifying] = useState(false);
   const [classifyJobId, setClassifyJobId] = useState<string | null>(null);
   const [classifyProgress, setClassifyProgress] = useState<{ done: number; total: number } | null>(null);
-  const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number; errors?: number } | null>(null);
+  const [classifyResult, setClassifyResult] = useState<{ processed: number; total: number; errors?: number; errorMsg?: string | null } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -293,14 +293,14 @@ function EventGroupBlock({
       setClassifyJobId(null);
       setClassifying(false);
       setClassifyProgress(null);
-      setClassifyResult({ processed: job.processed ?? 0, total: job.total ?? 0, errors: job.error_count });
+      setClassifyResult({ processed: job.processed ?? 0, total: job.total ?? 0, errors: job.error_count, errorMsg: job.error_last });
       setPhotos(null);
     },
     onFail: (job) => {
       setClassifyJobId(null);
       setClassifying(false);
       setClassifyProgress(null);
-      setClassifyResult({ processed: job.processed ?? 0, total: job.total ?? 0, errors: job.error_count });
+      setClassifyResult({ processed: job.processed ?? 0, total: job.total ?? 0, errors: job.error_count, errorMsg: job.error_last });
       setPhotos(null);
     },
   });
@@ -344,9 +344,9 @@ function EventGroupBlock({
         <span className="event-name">{group.event}</span>
         <span className="event-count">· {group.count} fotos</span>
         {classifyResult && (
-          <span style={{ fontSize: 11, color: classifyResult.errors && classifyResult.errors > 0 ? '#b91c1c' : 'var(--text-tertiary)', marginLeft: 4 }}>
+          <span style={{ fontSize: 11, color: classifyResult.errors && classifyResult.errors > 0 ? 'var(--danger)' : 'var(--text-tertiary)', marginLeft: 4 }}>
             {classifyResult.errors && classifyResult.errors > 0
-              ? `⚠ ${classifyResult.processed}/${classifyResult.total} — Ollama no disponible`
+              ? `⚠ ${classifyResult.processed}/${classifyResult.total} — ${classifyResult.errorMsg ?? 'Error de clasificación'}`
               : `✓ ${classifyResult.processed} clasificadas`}
           </span>
         )}
@@ -378,9 +378,10 @@ function EventGroupBlock({
             <button
               className="event-menu-btn"
               title="Más opciones"
+              aria-label="Más opciones"
               onClick={(e) => { e.stopPropagation(); setMenuOpen(o => !o); }}
             >
-              ···
+              <IconDots size={16} />
             </button>
             {menuOpen && (
               <div className="event-menu-dropdown">
@@ -429,7 +430,8 @@ function EventGroupBlock({
                   key={photo.id}
                   className={`photo-item${isFocused ? ' photo-item--focused' : ''}${isSelected ? ' photo-item--selected' : ''}`}
                   role="button"
-                  tabIndex={-1}
+                  tabIndex={isFocused ? 0 : -1}
+                  aria-label={photo.tags.length > 0 ? `${photo.tags.slice(0, 3).join(', ')}` : photo.path.split('/').pop() ?? 'foto'}
                   onMouseEnter={() => { if (isPointerFine.current) setFocusedIndex(idx); }}
                   onTouchStart={() => {
                     if (selectionMode || !onActivateSelection) return;
@@ -589,7 +591,7 @@ export default function PhotoGrid({
           </svg>
         }
         title="Tu biblioteca está vacía"
-        subtitle="Ejecuta el escáner para indexar las fotos de tu NAS y empezar a explorarlas."
+        subtitle="Ejecuta el escáner para indexar las fotos de tu carpeta de biblioteca y empezar a explorarlas."
         action={{ label: 'Reescanear biblioteca', href: '/library' }}
       />
     );

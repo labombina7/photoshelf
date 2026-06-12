@@ -3,7 +3,7 @@ import { classifyPhoto } from './ollama';
 import { generateProject } from './ollama';
 import { upsertAiTags } from './db-helpers';
 import { CLASSIFY_BATCH_SIZE, PHOTOS_PATH } from './config';
-import { getNextJob, updateJob, purgeOldJobs, createJob, type JobRow } from './queries/jobs';
+import { getNextJob, updateJob, purgeOldJobs, createJob, countPendingAndInProgress, markStaleJobsFailed, type JobRow } from './queries/jobs';
 import { getProjectCandidates, createProject, setProjectPhotos } from './queries/projects';
 import { getCatalogById } from './queries/catalogs';
 import { isAutoBackupDue } from './queries/backup';
@@ -46,6 +46,15 @@ const g = globalThis as typeof globalThis & { __photoshelf_worker_running?: bool
 export function ensureWorkerRunning(): void {
   if (g.__photoshelf_worker_running) return;
   g.__photoshelf_worker_running = true;
+
+  // Mark jobs stuck as in_progress for >24h as failed, then log pending/in_progress count
+  const stale = markStaleJobsFailed(24);
+  if (stale > 0) console.log(`[worker] ${stale} jobs stale marcados como failed al arrancar`);
+  const { pending, inProgress } = countPendingAndInProgress();
+  if (pending > 0 || inProgress > 0) {
+    console.log(`[worker] Arranque: ${inProgress} in_progress, ${pending} pending`);
+  }
+
   scheduleAutoBackupIfDue();
   scheduleStyleAnalysis();
   workerLoop().catch((err) => {

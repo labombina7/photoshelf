@@ -63,5 +63,5 @@ export function useTagEditor(photo: PhotoDetail) {
     });
   }
 
-  return { tags, newTag, setNewTag, addTag, removeTag, mergeAiTags, errorToast };
+  return { tags, newTag, setNewTag, addTag, removeTag, mergeAiTags, errorToast, showErrorToast };
 }
