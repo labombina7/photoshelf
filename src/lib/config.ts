@@ -84,6 +84,9 @@ export const WATCHER_POLL_MS     = 30_000;
 // ── Share tokens ─────────────────────────────────────────────────────────────
 export const SHARE_TOKEN_TTL_HOURS = 72;
 export const SHARE_MAX_PHOTOS      = 300;
+// Tras el primer uso, el token admite reintentos de descarga durante esta ventana
+// (las descargas grandes se cortan en redes móviles; sin esto el enlace se quema a la primera).
+export const SHARE_RETRY_WINDOW_MINUTES = 60;
 
 // ── Auth rate limiting ────────────────────────────────────────────────────────
 export const AUTH_RATE_LIMIT_ATTEMPTS  = 10;
