@@ -86,4 +86,6 @@ npm run build     # build de producción
 npm test          # tests
 ```
 
+**`npm test` debe pasar antes de mergear.** El CI ejecuta tests, lint y type-check en cada pull request, y la imagen Docker solo se publica si el job de tests pasa (`needs: test`).
+
 La base de datos en desarrollo se crea en `photoshelf.db` en la raíz del proyecto.
