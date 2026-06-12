@@ -562,13 +562,29 @@
     <div class="col-header">
       <div class="col-dot" style="background:#ca8a04"></div>
       <h2>Ideas to Refine</h2>
-      <span class="col-count">0</span>
+      <span class="col-count">2</span>
     </div>
     <div class="col-body">
-      <div class="empty-col">
-        <div class="empty-icon">💡</div>
-        <span>Las ideas llegan aquí via Claude Dispatch</span>
+
+      <div class="card" tabindex="0" data-id="US-119" onclick="openModal('US-119')">
+        <div class="card-top">
+          <span class="badge badge-us">US-119</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Exponer photoshelf a internet desde el NAS</div>
+        <div class="card-summary">Configurar el NAS para que /story/[slug] sea accesible desde fuera de la red local. Prerequisito de EPIC-006. Opciones: DDNS del fabricante, Cloudflare Tunnel o reverse proxy propio.</div>
+        <div class="card-footer"><span>Épica:</span><span class="dep-badge">EPIC-006</span></div>
       </div>
+
+      <div class="card" tabindex="0" data-id="EPIC-006" onclick="openModal('EPIC-006')">
+        <div class="card-top">
+          <span class="badge badge-epic">EPIC-006</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Photo Stories — publicar proyectos como páginas web</div>
+        <div class="card-summary">Editor de draft con bloques de texto y fotos del proyecto. Genera una página pública (o enlace secreto) servida por photoshelf — sin CMS externo.</div>
+      </div>
+
     </div>
   </div>
 
@@ -577,10 +593,51 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">32</span>
+      <span class="col-count">36</span>
     </div>
     <div class="col-body">
 
+      <!-- ── Photo Stories (EPIC-006) 2026-06-12 ── -->
+
+      <div class="card" tabindex="0" data-id="US-115" onclick="openModal('US-115')">
+        <div class="card-top">
+          <span class="badge badge-us">US-115</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Editor de story — estructura y bloques de texto</div>
+        <div class="card-summary">Crear/editar story con bloques Título, Subtítulo, Texto y Cita. Añadir bloques en cualquier posición, reordenar con drag-and-drop, guardar draft.</div>
+        <div class="card-footer"><span>Épica:</span><span class="dep-badge">EPIC-006</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-116" onclick="openModal('US-116')">
+        <div class="card-top">
+          <span class="badge badge-us">US-116</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Bloques de imágenes — Hero y galería masonry</div>
+        <div class="card-summary">Selector de fotos de la biblioteca para bloques de imágenes. Grid masonry reordenable. Bloque Hero con foto grande a pantalla completa.</div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-115</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-117" onclick="openModal('US-117')">
+        <div class="card-top">
+          <span class="badge badge-us">US-117</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Publicación y gestión de visibilidad</div>
+        <div class="card-summary">Flujo draft → enlace secreto → pública. Editar story sin despublicar. Volver a secreto o despublicar desde el editor.</div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-116</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-118" onclick="openModal('US-118')">
+        <div class="card-top">
+          <span class="badge badge-us">US-118</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Página pública de la story</div>
+        <div class="card-summary">Ruta /story/[slug] sin auth. Layout con bloques en orden: Hero, textos, masonry. Lightbox en fotos. Responsive. og:image desde el Hero.</div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-117</span></div>
+      </div>
 
       <!-- ── Insights 2026-06-12 (UX + Tech Debt audits) + features ── -->
 
@@ -6108,6 +6165,140 @@ const CARDS = {
       'Preview de fotos en la página del link (descarga directa, sin intermedio)',
       'Compartir fotos individuales como imagen para preview en WhatsApp',
     ]
+  },
+
+  'EPIC-006': {
+    id: 'EPIC-006', type: 'EPIC', column: 'ideas', effort: 'L',
+    title: 'Photo Stories — publicar proyectos como páginas web',
+    story: 'Como fotógrafo que quiere compartir su trabajo,\nquiero un editor de stories con bloques de texto y fotos de mi biblioteca,\npara publicar páginas web accesibles desde internet directamente desde photoshelf.',
+    description: [
+      'Una Story es una entidad independiente (no atada a un proyecto) que combina bloques reordenables: Hero, Título/Subtítulo, Texto, Cita e Imágenes (grid masonry con fotos de la biblioteca).',
+      'El editor permite crear y editar el draft, previsualizar con enlace secreto, y publicar para hacerlo accesible públicamente. Se puede editar en cualquier momento sin necesidad de despublicar.',
+      'La página se sirve desde el propio NAS expuesto a internet. La foto del bloque Hero actúa como og:image automáticamente al compartir.',
+      'Scope inicial: un único usuario. Arquitectura orientada a soportar multi-usuario en el futuro.',
+    ],
+    criteria: [
+      { group: 'Bloques disponibles', items: ['Hero (foto grande a pantalla completa)', 'Título / Subtítulo', 'Texto libre', 'Cita (blockquote)', 'Imágenes (grid masonry, selección múltiple de la biblioteca)'] },
+      { group: 'Publicación', items: ['Draft → enlace secreto → pública', 'Editable en cualquier estado sin despublicar', 'og:image automático desde el bloque Hero'] },
+      { group: 'Prerequisito externo', items: ['NAS expuesto a internet (US-119) — no incluido en esta épica'] },
+    ],
+    dependencies: [],
+    components: [],
+    tech: [
+      'Scope inicial: un usuario. Arquitectura orientada a multi-usuario futuro.',
+      'Bloques como array JSON en BD. Visibilidad: draft | secret | public.',
+    ],
+    outOfScope: ['Dominio personalizado', 'Múltiples stories por entidad', 'Analíticas de visitas', 'Comentarios', 'Export PDF']
+  },
+
+  'US-115': {
+    id: 'US-115', type: 'US', column: 'todo', effort: 'M',
+    title: 'Editor de story — estructura y bloques de texto',
+    story: 'Como fotógrafo que quiere contar una historia con mis fotos,\nquiero un editor donde pueda crear una story con bloques de texto reordenables,\npara estructurar el relato antes de añadir las imágenes.',
+    description: [
+      'Primera US de EPIC-006. Establece la entidad Story en BD y el editor básico con bloques de texto.',
+      'Una Story tiene título propio, slug y estado de visibilidad. El editor permite añadir bloques de tipo Título, Subtítulo, Texto y Cita en cualquier posición y reordenarlos con drag-and-drop.',
+    ],
+    criteria: [
+      { group: 'Gestión de stories', items: ['Crear nueva story desde sección "Stories" en el sidebar', 'Listar stories con título, estado y fecha de modificación', 'Eliminar story con confirmación'] },
+      { group: 'Editor de bloques', items: ['Tipos: Título, Subtítulo, Texto libre, Cita', 'Botón "+" entre bloques para insertar nuevo', 'Reordenar con drag-and-drop', 'Eliminar bloque individual', 'Guardar draft con Cmd/Ctrl+S o botón explícito', 'Autosave cada 30 segundos'] },
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/app/stories/page.tsx', desc: 'Listado de stories', isNew: true },
+      { path: 'src/app/stories/[id]/edit/page.tsx', desc: 'Editor de story', isNew: true },
+      { path: 'src/app/stories/[id]/edit/StoryEditor.tsx', desc: 'Editor de bloques con drag-and-drop', isNew: true },
+      { path: 'src/app/api/stories/route.ts', desc: 'POST crear · GET listar', isNew: true },
+      { path: 'src/app/api/stories/[id]/route.ts', desc: 'GET · PUT · DELETE', isNew: true },
+      { path: 'src/lib/queries/stories.ts', desc: 'CRUD tabla stories + story_blocks', isNew: true },
+    ],
+    tech: [
+      'Tabla stories: id, slug, title, visibility (draft|secret|public), created_at, updated_at',
+      'Tabla story_blocks: id, story_id, position, type (title|subtitle|text|quote|images|hero), content (JSON)',
+      'Drag-and-drop: @dnd-kit/core',
+    ],
+    outOfScope: ['Bloques de imágenes (US-116)', 'Publicación (US-117)', 'Página pública (US-118)']
+  },
+
+  'US-116': {
+    id: 'US-116', type: 'US', column: 'todo', effort: 'M',
+    title: 'Bloques de imágenes — Hero y galería masonry',
+    story: 'Como fotógrafo editando una story,\nquiero añadir bloques de imágenes con fotos de mi biblioteca y un bloque Hero de apertura,\npara construir el relato visual con el layout que imagino.',
+    description: [
+      'Añade dos tipos de bloque visuales al editor de US-115: Hero (foto grande de apertura) y Imágenes (galería masonry con selección múltiple).',
+      'Las fotos se seleccionan desde la biblioteca de photoshelf mediante un selector modal.',
+    ],
+    criteria: [
+      { group: 'Bloque Hero', items: ['Selector de una foto de la biblioteca', 'Preview en el editor a altura reducida', 'Solo puede haber un bloque Hero por story'] },
+      { group: 'Bloque Imágenes (masonry)', items: ['Selector modal con selección múltiple', 'Grid masonry dentro del bloque', 'Reordenación de fotos dentro del bloque con drag-and-drop', 'Añadir o quitar fotos de un bloque existente'] },
+    ],
+    dependencies: ['US-115'],
+    components: [
+      { path: 'src/app/stories/[id]/edit/StoryEditor.tsx', desc: 'Añadir tipos Hero e Imágenes', isNew: false },
+      { path: 'src/components/PhotoPickerModal.tsx', desc: 'Selector modal de fotos', isNew: true },
+    ],
+    tech: ['Hero: content = { photoId }', 'Imágenes: content = { photoIds: string[] }', 'Masonry: CSS columns o react-masonry-css'],
+    outOfScope: ['Lightbox en el editor (solo en página pública, US-118)', 'Subir fotos nuevas desde el editor']
+  },
+
+  'US-117': {
+    id: 'US-117', type: 'US', column: 'todo', effort: 'S',
+    title: 'Publicación y gestión de visibilidad',
+    story: 'Como fotógrafo que ha terminado de editar una story,\nquiero controlar su visibilidad con un flujo en dos pasos,\npara revisar la página antes de abrirla al público.',
+    description: [
+      'Añade el flujo de publicación al editor: draft → enlace secreto → pública. La story se puede editar en cualquier estado sin necesidad de despublicar.',
+    ],
+    criteria: [
+      { group: 'Flujo de visibilidad', items: ['Draft: no accesible desde fuera', '"Publicar con enlace secreto": slug largo aleatorio', '"Hacer pública": slug corto legible', 'Botones "Volver a secreto" y "Despublicar" según estado', 'Chip de estado en el editor: Borrador / Secreto / Pública'] },
+      { group: 'Edición en caliente', items: ['Guardar cambios actualiza la página publicada inmediatamente', 'No es necesario despublicar para editar'] },
+    ],
+    dependencies: ['US-116'],
+    components: [
+      { path: 'src/app/api/stories/[id]/publish/route.ts', desc: 'POST cambiar visibilidad', isNew: true },
+      { path: 'src/app/stories/[id]/edit/StoryEditor.tsx', desc: 'Añadir controles de visibilidad', isNew: false },
+    ],
+    tech: ['Slug secreto: UUID 32 chars', 'Slug público: desde título, único, max 60 chars', 'Al hacer pública se conserva el slug secreto — redirige al público'],
+    outOfScope: ['Proteger con contraseña', 'Expiración del enlace secreto', 'Notificación de visitas']
+  },
+
+  'US-118': {
+    id: 'US-118', type: 'US', column: 'todo', effort: 'M',
+    title: 'Página pública de la story',
+    story: 'Como persona que recibe un enlace a una story,\nquiero ver una página limpia con las fotos y el texto del fotógrafo,\npara disfrutar el relato visual sin necesitar cuenta en photoshelf.',
+    description: [
+      'Ruta pública /story/[slug] que renderiza la story sin autenticación. Muestra los bloques en orden con layout limpio.',
+      'La foto del bloque Hero se usa como og:image para previews en WhatsApp, iMessage y redes sociales.',
+    ],
+    criteria: [
+      { group: 'Renderizado', items: ['Ruta /story/[slug] sin sesión', 'Bloques en orden: Hero a ancho completo, Título, Texto, Cita, Masonry', 'Story no pública o slug incorrecto: 404'] },
+      { group: 'Interacción y sharing', items: ['Clic en foto abre lightbox con navegación entre fotos del bloque', 'Responsive — legible en móvil', 'og:title, og:description y og:image (foto del Hero)'] },
+    ],
+    dependencies: ['US-117'],
+    components: [
+      { path: 'src/app/story/[slug]/page.tsx', desc: 'Página pública — Server Component sin auth', isNew: true },
+      { path: 'src/app/story/[slug]/StoryPage.tsx', desc: 'Renderizado de bloques', isNew: true },
+      { path: 'src/components/StoryLightbox.tsx', desc: 'Lightbox de fotos', isNew: true },
+    ],
+    tech: ['Server Component con revalidateTag al guardar story', 'og:image: URL del Hero vía /api/photos/[id]/original', '404 si visibility === draft o slug no coincide'],
+    outOfScope: ['Comentarios', 'Analíticas', 'Export PDF', 'Dominio personalizado']
+  },
+
+  'US-119': {
+    id: 'US-119', type: 'US', column: 'ideas', effort: 'M',
+    title: 'Exponer photoshelf a internet desde el NAS',
+    story: 'Como fotógrafo que quiere compartir stories públicamente,\nquiero que las páginas /story/[slug] sean accesibles desde internet,\npara que cualquiera pueda ver mis stories sin estar en mi red local.',
+    description: [
+      'Prerequisito de EPIC-006. photoshelf corre en un NAS en red privada — sin exposición externa las stories publicadas solo son accesibles en local.',
+      'Hay varias opciones a evaluar según el NAS y el nivel de control deseado. Por refinar.',
+    ],
+    criteria: [
+      { group: 'Opciones a evaluar', items: ['DDNS del fabricante (Synology QuickConnect, QNAP myQNAPcloud…)', 'Cloudflare Tunnel — sin abrir puertos, gratuito, muy seguro', 'Reverse proxy propio (Nginx) con DDNS genérico — más control'] },
+      { group: 'Resultado esperado', items: ['URL pública estable que resuelve al NAS', 'Solo /story/[slug] expuesto públicamente — el resto sigue tras auth', 'HTTPS funcionando (Let\'s Encrypt o Cloudflare)', 'Setup documentado en el README'] },
+    ],
+    dependencies: [],
+    components: [],
+    tech: ['Opción A: Cloudflare Tunnel (cloudflared)', 'Opción B: Nginx + Certbot + DDNS', 'Middleware Next.js para restringir rutas públicas a /story/*'],
+    outOfScope: ['Dominio personalizado de pago', 'CDN para las fotos', 'Alta disponibilidad']
   }
 
 };
