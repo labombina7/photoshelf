@@ -84,7 +84,7 @@ export const THUMBNAIL_SIZES = [100, 120, 150, 200, 300, 400, 420, 600, 1920] as
 export function normalizeThumbnailSize(raw: string | null | undefined, defaultSize = 400): number {
   const parsed = parseInt(raw ?? '', 10);
   if (isNaN(parsed) || parsed <= 0) return defaultSize;
-  let closest = THUMBNAIL_SIZES[0];
+  let closest: number = THUMBNAIL_SIZES[0];
   let minDiff = Math.abs(parsed - closest);
   for (const s of THUMBNAIL_SIZES) {
     const diff = Math.abs(parsed - s);
