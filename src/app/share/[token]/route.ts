@@ -4,7 +4,7 @@ import { getPhotoPathById } from '@/lib/queries/photos';
 import { resolvePhotoPath } from '@/lib/config';
 import fs from 'fs';
 import path from 'path';
-import archiver from 'archiver';
+import * as archiver from 'archiver';
 import { PassThrough, Readable } from 'stream';
 
 export async function GET(
