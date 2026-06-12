@@ -41,7 +41,12 @@ vi.mock('@/lib/scanner', () => ({
 
 // ── Mock db ───────────────────────────────────────────────────────────────────
 vi.mock('@/lib/db', () => ({
-  getDb: vi.fn(() => ({ prepare: vi.fn().mockReturnValue({ all: vi.fn().mockReturnValue([]) }) })),
+  getDb: vi.fn(() => ({
+    prepare: vi.fn().mockReturnValue({
+      all: vi.fn().mockReturnValue([]),
+      get: vi.fn().mockReturnValue(null),
+    }),
+  })),
 }));
 
 // ── Mock config ───────────────────────────────────────────────────────────────
