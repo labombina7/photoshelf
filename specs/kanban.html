@@ -577,9 +577,147 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">4</span>
+      <span class="col-count">32</span>
     </div>
     <div class="col-body">
+
+
+      <!-- ── Insights 2026-06-12 (UX + Tech Debt audits) + features ── -->
+
+      <div class="card" tabindex="0" data-id="US-096" onclick="openModal('US-096')">
+        <div class="card-top">
+          <span class="badge badge-us">US-096</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Variables CSS fantasma y paleta de estados</div>
+        <div class="card-summary">Definir --text-primary/--text-muted/--surface-raised (usadas pero inexistentes — el botón activo del timeline renderiza roto) y unificar 5 colores de estado hardcodeados en tokens --danger/--warning/--info.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-097" onclick="openModal('US-097')">
+        <div class="card-top">
+          <span class="badge badge-us">US-097</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Acciones de vista accesibles en mobile</div>
+        <div class="card-summary">Recuperar presentación, toggle lista/carpetas y modo selección en ≤640px (hoy display:none), hint de long-press, ocultar FAB en modo selección y arreglar el doble-tap del timeline sobre fotos.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-098" onclick="openModal('US-098')">
+        <div class="card-top">
+          <span class="badge badge-us">US-098</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Accesibilidad: contraste, reduced motion y lector de pantalla</div>
+        <div class="card-summary">Subir el contraste de --text-tertiary (hoy 2.4:1, WCAG pide 4.5:1), bloque global prefers-reduced-motion, aria-labels restantes y roving tabindex en el grid de fotos.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-099" onclick="openModal('US-099')">
+        <div class="card-top">
+          <span class="badge badge-us">US-099</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Feedback de errores y navegación honesta</div>
+        <div class="card-summary">CTA del estado vacío que escanea de verdad, favorito con revert, error real de clasificación (no siempre 'Ollama no disponible'), cancelación/timeout en generación de proyectos y enlaces granulares del timeline.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-101" onclick="openModal('US-101')">
+        <div class="card-top">
+          <span class="badge badge-us">US-101</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Worker al arranque y reanudación de jobs</div>
+        <div class="card-summary">ensureWorkerRunning() solo se llama desde rutas de usuario: tras un reinicio, los jobs in_progress y el auto-backup vencido quedan congelados hasta que alguien visita la app. Arrancarlo desde instrumentation.ts.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-102" onclick="openModal('US-102')">
+        <div class="card-top">
+          <span class="badge badge-us">US-102</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Watcher compatible con multi-catálogo</div>
+        <div class="card-summary">El watcher escanea siempre PHOTOS_PATH (env) hacia catálogo 1 aunque su ruta cambiara en BD, y el auto-classify selecciona fotos de TODOS los catálogos resolviendo paths contra la ruta equivocada (fallos silenciosos en cada ciclo).</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-104" onclick="openModal('US-104')">
+        <div class="card-top">
+          <span class="badge badge-us">US-104</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Validación de size en thumbnails + dedupe</div>
+        <div class="card-summary">El parámetro size va sin validar a sharp (size=20000 → CPU/disco; NaN posible) y las generaciones concurrentes del mismo thumbnail se duplican. Whitelist de tamaños + mapa de promesas in-flight.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-106" onclick="openModal('US-106')">
+        <div class="card-top">
+          <span class="badge badge-us">US-106</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Hardening de despliegue Docker</div>
+        <div class="card-summary">USER node en el Dockerfile (hoy corre como root, contradiciendo .env.example), npm update next (vulnerabilidad postcss moderada) y docker-compose sin rutas/IPs personales hardcodeadas.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-107" onclick="openModal('US-107')">
+        <div class="card-top">
+          <span class="badge badge-us">US-107</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Consolidación de la API v1</div>
+        <div class="card-summary">La capa /api/v1 (10 routes, patrón withAuth superior) no tiene NINGÚN consumidor — el frontend usa solo las rutas legacy y ambas ya divergen. Decidir y ejecutar: migrar el frontend a v1 o retirarla.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-109" onclick="openModal('US-109')">
+        <div class="card-top">
+          <span class="badge badge-us">US-109</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Quick wins de copy e iconografía v2</div>
+        <div class="card-summary">Marca unificada (PhotoShelf→photoshelf), copy sin asumir NAS, botón limpiar con verbo, emojis funcionales→SVG (📂🗂️🖼···), iconos inline a Icons.tsx (IconPlay ×4) y icono propio para la cola de trabajos.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-110" onclick="openModal('US-110')">
+        <div class="card-top">
+          <span class="badge badge-us">US-110</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Gestión de tags en lote</div>
+        <div class="card-summary">Renombrar, fusionar y eliminar tags desde la vista /tags con operaciones transaccionales y confirmación con conteo de fotos afectadas. Complemento global de US-059.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-111" onclick="openModal('US-111')">
+        <div class="card-top">
+          <span class="badge badge-us">US-111</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Galería pública de proyecto</div>
+        <div class="card-summary">Publicar un proyecto como galería web navegable (/p/[token]): título, statement y fotos en orden con lightbox. Token revocable, solo thumbnails sin EXIF. La experiencia de portfolio que el ZIP de US-092 no da.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-112" onclick="openModal('US-112')">
+        <div class="card-top">
+          <span class="badge badge-us">US-112</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Modo marco digital (kiosk)</div>
+        <div class="card-summary">URL /frame?token=… para TV o tablet 24/7: reproducción infinita de favoritos/temática/álbum/aleatorio con crossfade, reloj opcional, wake-lock y recuperación ante fallos de red. Tokens de dispositivo gestionados en ajustes.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-113" onclick="openModal('US-113')">
+        <div class="card-top">
+          <span class="badge badge-us">US-113</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Notas y pies de foto con búsqueda</div>
+        <div class="card-summary">Campo de nota libre por foto (autosave en el DetailPanel), integrado en la búsqueda fulltext y como caption opcional del slideshow. Columna caption en photos + inclusión en el backup JSON.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-114" onclick="openModal('US-114')">
+        <div class="card-top">
+          <span class="badge badge-us">US-114</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Modo invitado de solo lectura</div>
+        <div class="card-summary">GUEST_PASSWORD opcional que crea sesiones rol guest: explora y busca todo, pero las mutaciones devuelven 403 (helper requireAdmin único) y la UI oculta las acciones. La familia mira, no rompe.</div>
+      </div>
 
       <!-- ── Backup & resiliencia 2026-06-05 ── -->
 
@@ -774,9 +912,49 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">75</span>
+      <span class="col-count">79</span>
     </div>
     <div class="col-body">
+
+      <div class="card card-done" tabindex="0" data-id="US-100" onclick="openModal('US-100')">
+        <div class="card-top">
+          <span class="badge badge-us">US-100</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+        </div>
+        <div class="card-title">Suite de tests en verde y gate de CI</div>
+        <div class="card-summary">Suite arreglada (mock de sharp completo, fixtures del clasificador, exclusión de worktrees) y job test (vitest+lint+tsc) como gate del build Docker, también en PRs. Tag sha-&lt;commit&gt; para rollback.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-103" onclick="openModal('US-103')">
+        <div class="card-top">
+          <span class="badge badge-us">US-103</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+        </div>
+        <div class="card-title">Robustez de enlaces compartidos</div>
+        <div class="card-summary">Ventana de reintentos de 1h tras el primer uso: una descarga cortada ya no quema el enlace. Páginas de error diferenciadas y ZIP construido con ZipArchive (archiver v8).</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-105" onclick="openModal('US-105')">
+        <div class="card-top">
+          <span class="badge badge-us">US-105</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+        </div>
+        <div class="card-title">Paginación real de eventos grandes</div>
+        <div class="card-summary">PhotoGrid encadena páginas de 200 al scroll (fin del truncado silencioso en eventos &gt;1000 fotos), con reintento ante errores de página y dedupe por id.</div>
+      </div>
+
+      <div class="card card-done" tabindex="0" data-id="US-108" onclick="openModal('US-108')">
+        <div class="card-top">
+          <span class="badge badge-us">US-108</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+        </div>
+        <div class="card-title">Limpieza y consolidación de código</div>
+        <div class="card-summary">Hook useJobPolling compartido (PhotoGrid, ProjectsClient, ClassifyProvider), tipos consolidados en types.ts, Inter self-hosted con next/font, constantes de gestos y dead code eliminado.</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-095" onclick="openModal('US-095')">
         <div class="card-top">
@@ -3859,6 +4037,405 @@ const CARDS = {
       'Tests de componentes React',
       'Coverage del 100%',
     ]
+  },
+  'US-096': {
+    id: 'US-096', type: 'US', column: 'todo', effort: 'S',
+    title: 'Variables CSS fantasma y paleta de estados',
+    story: 'Como usuario de photoshelf,\nquiero que todos los elementos rendericen con los colores que el diseño pretende,\npara que ningún control aparezca roto o ilegible.',
+    description: [
+      'Tres variables CSS se usan sin definirse en :root; el navegador descarta las propiedades. Detectado en UX audit 2026-06-12.',
+      'Además la paleta de peligro/aviso/info está fragmentada en 5 hardcodes.',
+    ],
+    criteria: [
+      {
+        group: 'Correcciones',
+        items: [
+          'Definir las 3 variables en :root',
+          'Botón de nivel activo del timeline visible',
+          'Tokens --danger/--warning/--info y migración de hardcodes',
+          'Grep sin var(--…) huérfanos',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'Quick-win'],
+  },
+  'US-097': {
+    id: 'US-097', type: 'US', column: 'todo', effort: 'M',
+    title: 'Acciones de vista accesibles en mobile',
+    story: 'Como usuario móvil,\nquiero lanzar presentación, cambiar de vista y seleccionar fotos,\npara tener las mismas capacidades que en desktop.',
+    description: [
+      'filter-bar-actions está oculto en mobile: presentación/vista/selección sin punto de entrada visible. El long-press existe pero nada lo anuncia.',
+      'El FAB de búsqueda colisiona con la barra de selección y el doble-tap del timeline navega y hace zoom a la vez.',
+    ],
+    criteria: [
+      {
+        group: 'Mobile',
+        items: [
+          'Punto de entrada visible para las 3 acciones',
+          'Hint de long-press primera vez',
+          'FAB oculto en modo selección',
+          'Doble-tap ignora .photo-item',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'Mobile'],
+  },
+  'US-098': {
+    id: 'US-098', type: 'US', column: 'todo', effort: 'M',
+    title: 'Accesibilidad: contraste, reduced motion y lector de pantalla',
+    story: 'Como usuario con baja visión o sensibilidad al movimiento,\nquiero texto legible y animaciones que respeten mis preferencias,\npara usar photoshelf cómodamente.',
+    description: [
+      'Tercera pasada tras US-010 y US-042, derivada del UX audit 2026-06-12.',
+      '--text-tertiary se usa para datos reales (contadores, fechas) con contraste insuficiente; no hay soporte de reduced motion.',
+    ],
+    criteria: [
+      {
+        group: 'Accesibilidad',
+        items: [
+          '--text-tertiary ≥3:1',
+          '@media prefers-reduced-motion global',
+          'aria-labels en prev/next, ···, view toggle',
+          'Roving tabindex en photo-item',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'A11y'],
+  },
+  'US-099': {
+    id: 'US-099', type: 'US', column: 'todo', effort: 'M',
+    title: 'Feedback de errores y navegación honesta',
+    story: 'Como usuario,\nquiero que los botones hagan lo que prometen y los errores se muestren,\npara confiar en lo que veo en pantalla.',
+    description: [
+      'Agrupa 6 hallazgos del UX audit 2026-06-12 donde la UI miente u oculta información.',
+    ],
+    criteria: [
+      {
+        group: 'Correcciones',
+        items: [
+          'CTA vacío lanza startScan()',
+          'toggleFavorite con revert + toast',
+          'Mensaje de error real del job',
+          'Cancelar + timeout en proyectos',
+          'Ver-en-biblioteca conserva el periodo',
+          'Ctrl+wheel limitado al timeline',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'Bugs'],
+  },
+  'US-100': {
+    id: 'US-100', type: 'US', column: 'todo', effort: 'M',
+    title: 'Suite de tests en verde y gate de CI',
+    story: 'Como desarrollador,\nquiero que la suite pase y el CI bloquee imágenes rotas,\npara que main sea siempre desplegable.',
+    description: [
+      'vitest run: 223/244 passed. El workflow build.yml publica a ghcr.io:latest sin tests ni lint.',
+      'Hallazgo crítico del tech debt audit 2026-06-12.',
+    ],
+    criteria: [
+      {
+        group: 'Tests y CI',
+        items: [
+          'Mock de sharp completo',
+          'Asserts de classifyQuery actualizados',
+          'vitest run con 0 fallos',
+          'Job test como needs: del build',
+          'Workflow corre en PRs',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Crítico'],
+  },
+  'US-101': {
+    id: 'US-101', type: 'US', column: 'todo', effort: 'S',
+    title: 'Worker al arranque y reanudación de jobs',
+    story: 'Como operador,\nquiero que los jobs se reanuden tras un reinicio,\npara que no queden congelados días enteros.',
+    description: [
+      'getNextJob() ya prioriza in_progress — falta que el loop arranque con el servidor.',
+      'Incluye marcado de jobs stale (>24h) para evitar zombies.',
+    ],
+    criteria: [
+      {
+        group: 'Arranque',
+        items: [
+          'ensureWorkerRunning() en instrumentation.ts',
+          'Jobs in_progress continúan tras reinicio',
+          'Auto-backup vencido se encola al arrancar',
+          'Jobs stale >24h → failed',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Resiliencia'],
+  },
+  'US-102': {
+    id: 'US-102', type: 'US', column: 'todo', effort: 'M',
+    title: 'Watcher compatible con multi-catálogo',
+    story: 'Como usuario con varios catálogos,\nquiero que la vigilancia use la ruta correcta y clasifique solo sus fotos,\npara que el auto-escaneo no indexe rutas erróneas.',
+    description: [
+      'folderWatcher.ts quedó anclado al modelo pre-EPIC-001. worker.ts ya hace lo correcto (ruta desde BD) — aplicar el mismo patrón.',
+    ],
+    criteria: [
+      {
+        group: 'Watcher',
+        items: [
+          'Ruta desde getCatalogById(1)',
+          'Filtro catalog_id en auto-classify',
+          'Errores con contador y log resumen',
+          'Test multi-catálogo',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Watcher'],
+  },
+  'US-103': {
+    id: 'US-103', type: 'US', column: 'todo', effort: 'S',
+    title: 'Robustez de enlaces compartidos',
+    story: 'Como destinatario de un enlace,\nquiero reintentar si la descarga se corta,\npara no pedir un enlace nuevo.',
+    description: [
+      'markShareTokenUsed se ejecuta antes de stream; en red móvil los cortes son habituales.',
+      'La ventana mantiene la protección frente a abuso sin penalizar reintentos legítimos.',
+    ],
+    criteria: [
+      {
+        group: 'Ventana',
+        items: [
+          'Reintentos durante ~60 min tras primer uso',
+          'Página de error distingue caducado/agotado',
+          'Copy del ShareDialog actualizado',
+          'Tests de la nueva semántica',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Share'],
+  },
+  'US-104': {
+    id: 'US-104', type: 'US', column: 'todo', effort: 'S',
+    title: 'Validación de size en thumbnails + dedupe',
+    story: 'Como operador,\nquiero que el endpoint de miniaturas solo acepte tamaños conocidos,\npara proteger CPU y disco.',
+    description: [
+      'Whitelist con redondeo al más cercano mantiene compatibles los size ya emitidos.',
+      'El dedupe comparte una sola generación entre peticiones concurrentes.',
+    ],
+    criteria: [
+      {
+        group: 'Hardening',
+        items: [
+          'Whitelist/redondeo de tamaños',
+          'NaN nunca llega a sharp',
+          'Validación compartida con la ruta v1',
+          'Dedupe in-flight con limpieza',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Seguridad'],
+  },
+  'US-105': {
+    id: 'US-105', type: 'US', column: 'todo', effort: 'M',
+    title: 'Paginación real de eventos grandes',
+    story: 'Como fotógrafo con eventos grandes,\nquiero ver todas las fotos de un evento,\npara no perder fotos sin aviso.',
+    description: [
+      'El render ya es incremental; falta que el fetch también lo sea.',
+      'Mantener PHOTOS_MAX_LIMIT=1000 — el bug es del cliente.',
+    ],
+    criteria: [
+      {
+        group: 'Paginación',
+        items: [
+          'Carga por páginas (~200) al scroll',
+          'Eventos >1000 muestran todo',
+          'Error de página con reintento',
+          'Payload inicial menor',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Rendimiento'],
+  },
+  'US-106': {
+    id: 'US-106', type: 'US', column: 'todo', effort: 'M',
+    title: 'Hardening de despliegue Docker',
+    story: 'Como operador,\nquiero un contenedor sin root, sin vulnerabilidades conocidas y un compose portable,\npara reducir riesgo.',
+    description: [
+      'Complementa a US-089 (healthcheck, actualizada con los hallazgos del 06-12).',
+      'El compose comiteado expone topología doméstica (IP de Ollama, rutas de usuario).',
+    ],
+    criteria: [
+      {
+        group: 'Despliegue',
+        items: [
+          'USER node + permisos /data verificados',
+          'npm audit sin moderadas+',
+          'Compose parametrizado con ${VAR}',
+          '@types/archiver a devDeps + import tipado',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Docker'],
+  },
+  'US-107': {
+    id: 'US-107', type: 'US', column: 'todo', effort: 'L',
+    title: 'Consolidación de la API v1',
+    story: 'Como desarrollador,\nquiero una sola implementación por endpoint,\npara que no diverjan silenciosamente.',
+    description: [
+      'Recomendación del audit: migrar a v1 (paginación por cursor que US-105 necesita; withAuth elimina boilerplate en ~70 handlers).',
+      'Incluye el fix del bug de validación post-query en v1/photos.',
+    ],
+    criteria: [
+      {
+        group: 'Consolidación',
+        items: [
+          'Decisión documentada en EPIC-002',
+          'Migración por dominios o retirada limpia',
+          'Cero fetch() sin handler',
+          'Tests de integración en verde',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Arquitectura'],
+  },
+  'US-108': {
+    id: 'US-108', type: 'US', column: 'todo', effort: 'M',
+    title: 'Limpieza y consolidación de código',
+    story: 'Como desarrollador,\nquiero eliminar duplicaciones y código muerto,\npara que los bugs no se arreglen en un sitio y persistan en otro.',
+    description: [
+      'Cajón de hallazgos 🟢 del tech debt audit 2026-06-12 que en conjunto suman fricción.',
+    ],
+    criteria: [
+      {
+        group: 'Limpieza',
+        items: [
+          'useJobPolling adoptado en 3 componentes',
+          'Tipos en lib/types.ts',
+          'next/font (sin Google CDN en runtime)',
+          '.db huérfanos fuera + .gitignore',
+          'Constantes de gestos nombradas',
+        ]
+      },
+    ],
+    tags: ['Tech Debt', 'Refactor'],
+  },
+  'US-109': {
+    id: 'US-109', type: 'US', column: 'todo', effort: 'S',
+    title: 'Quick wins de copy e iconografía v2',
+    story: 'Como usuario,\nquiero textos coherentes y un set de iconos uniforme,\npara percibir un producto cuidado.',
+    description: [
+      'Segunda tanda tras US-039, derivada del UX audit 2026-06-12. Cambios puramente presentacionales — PR único revisable visualmente.',
+    ],
+    criteria: [
+      {
+        group: 'Copy e iconos',
+        items: [
+          'Marca en minúsculas en login',
+          'Cero emojis funcionales',
+          'IconPlay/IconDots/IconLogout/IconInfo en Icons.tsx',
+          'Jobs con icono distinto a IconCalendar',
+        ]
+      },
+    ],
+    tags: ['UX Audit', 'Quick-win'],
+  },
+  'US-110': {
+    id: 'US-110', type: 'US', column: 'todo', effort: 'M',
+    title: 'Gestión de tags en lote',
+    story: 'Como fotógrafo con miles de fotos etiquetadas,\nquiero corregir la taxonomía en lote,\npara no editar foto a foto.',
+    description: [
+      'La IA genera variantes y los tags manuales acumulan typos; hoy /tags es solo lectura.',
+      'La PK compuesta de photo_tags hace el de-dupe de la fusión gratis.',
+    ],
+    criteria: [
+      {
+        group: 'Gestión',
+        items: [
+          'Renombrar con detección de colisión',
+          'Fusionar N tags con confirmación',
+          'Eliminar global con conteo',
+          'Transacción única por operación',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Tags'],
+  },
+  'US-111': {
+    id: 'US-111', type: 'US', column: 'todo', effort: 'L',
+    title: 'Galería pública de proyecto',
+    story: 'Como fotógrafo que cura proyectos,\nquiero publicar un portfolio con enlace,\npara enseñarlo sin dar acceso a la app.',
+    description: [
+      'Reutiliza share_tokens (tipo gallery, sin TTL de 72h) y el patrón de página pública del share existente.',
+      'El endpoint de imagen solo sirve fotos del proyecto publicado.',
+    ],
+    criteria: [
+      {
+        group: 'Galería',
+        items: [
+          'Publicar/despublicar desde el detalle',
+          '/p/[token] sin sesión con lightbox',
+          'Solo thumbnails 1920, nunca originales',
+          'noindex + exclusión acotada del middleware',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Share'],
+  },
+  'US-112': {
+    id: 'US-112', type: 'US', column: 'todo', effort: 'L',
+    title: 'Modo marco digital (kiosk)',
+    story: 'Como usuario con la app 24/7 en casa,\nquiero un marco digital en una TV o tablet vieja,\npara dar vida a mi archivo sin nube.',
+    description: [
+      'Reutiliza el motor de crossfade del Slideshow con una fuente de datos infinita por lotes.',
+      'El token solo da acceso a thumbnails.',
+    ],
+    criteria: [
+      {
+        group: 'Kiosk',
+        items: [
+          'Tokens de marco en ajustes',
+          'Fuente seleccionable + rebarajado',
+          'Wake Lock + reintentos con backoff',
+          'Overlay reloj/fecha configurable',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Slideshow'],
+  },
+  'US-113': {
+    id: 'US-113', type: 'US', column: 'todo', effort: 'M',
+    title: 'Notas y pies de foto con búsqueda',
+    story: 'Como fotógrafo que documenta su archivo,\nquiero añadir contexto narrativo a cada foto,\npara reencontrarlo buscando.',
+    description: [
+      'El contexto que los tags no capturan (quién, qué pasó) hoy no tiene dónde vivir.',
+      'Migración mínima e idempotente; FTS5 como mejora futura si LIKE se queda corto.',
+    ],
+    criteria: [
+      {
+        group: 'Notas',
+        items: [
+          'Textarea con autosave y límite 2000',
+          'Búsqueda fulltext sobre caption con snippet',
+          'Caption opcional en slideshow',
+          'Incluido en backup JSON',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Metadata'],
+  },
+  'US-114': {
+    id: 'US-114', type: 'US', column: 'todo', effort: 'L',
+    title: 'Modo invitado de solo lectura',
+    story: 'Como propietario,\nquiero un PIN de invitado de solo lectura,\npara que mi familia explore sin poder borrar ni reconfigurar.',
+    description: [
+      'El login actual es todo-o-nada. La sesión iron-session gana role; el servidor bloquea y la UI oculta.',
+      'Hace más seguro exponer la app fuera de la LAN.',
+    ],
+    criteria: [
+      {
+        group: 'Roles',
+        items: [
+          'Login transparente con dos contraseñas (timing-safe)',
+          '403 en mutaciones para guest',
+          'UI sin acciones de edición en guest',
+          'Indicador Invitado + tests',
+        ]
+      },
+    ],
+    tags: ['Feature ✨', 'Seguridad'],
   },
   'US-049': {
     id: 'US-049',
