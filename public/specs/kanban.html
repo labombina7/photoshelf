@@ -566,9 +566,9 @@
     </div>
     <div class="col-body">
 
-      <div class="card" tabindex="0" data-id="US-100" onclick="openModal('US-100')">
+      <div class="card" tabindex="0" data-id="US-119" onclick="openModal('US-119')">
         <div class="card-top">
-          <span class="badge badge-us">US-100</span>
+          <span class="badge badge-us">US-119</span>
           <span class="effort effort-m">M</span>
         </div>
         <div class="card-title">Exponer photoshelf a internet desde el NAS</div>
@@ -599,9 +599,9 @@
 
       <!-- ── Photo Stories (EPIC-006) 2026-06-11 ── -->
 
-      <div class="card" tabindex="0" data-id="US-096" onclick="openModal('US-096')">
+      <div class="card" tabindex="0" data-id="US-115" onclick="openModal('US-115')">
         <div class="card-top">
-          <span class="badge badge-us">US-096</span>
+          <span class="badge badge-us">US-115</span>
           <span class="effort effort-m">M</span>
         </div>
         <div class="card-title">Editor de story — estructura y bloques de texto</div>
@@ -609,34 +609,34 @@
         <div class="card-footer"><span>Épica:</span><span class="dep-badge">EPIC-006</span></div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-097" onclick="openModal('US-097')">
+      <div class="card" tabindex="0" data-id="US-116" onclick="openModal('US-116')">
         <div class="card-top">
-          <span class="badge badge-us">US-097</span>
+          <span class="badge badge-us">US-116</span>
           <span class="effort effort-m">M</span>
         </div>
         <div class="card-title">Bloques de imágenes — Hero y galería masonry</div>
         <div class="card-summary">Selector de fotos de la biblioteca para bloques de imágenes. Grid masonry reordenable. Bloque Hero con foto grande a pantalla completa.</div>
-        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-096</span></div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-115</span></div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-098" onclick="openModal('US-098')">
+      <div class="card" tabindex="0" data-id="US-117" onclick="openModal('US-117')">
         <div class="card-top">
-          <span class="badge badge-us">US-098</span>
+          <span class="badge badge-us">US-117</span>
           <span class="effort effort-s">S</span>
         </div>
         <div class="card-title">Publicación y gestión de visibilidad</div>
         <div class="card-summary">Flujo draft → enlace secreto → pública. Editar story sin despublicar. Volver a secreto o despublicar desde el editor.</div>
-        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-097</span></div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-116</span></div>
       </div>
 
-      <div class="card" tabindex="0" data-id="US-099" onclick="openModal('US-099')">
+      <div class="card" tabindex="0" data-id="US-118" onclick="openModal('US-118')">
         <div class="card-top">
-          <span class="badge badge-us">US-099</span>
+          <span class="badge badge-us">US-118</span>
           <span class="effort effort-m">M</span>
         </div>
         <div class="card-title">Página pública de la story</div>
         <div class="card-summary">Ruta /story/[slug] sin auth. Layout con bloques en orden: Hero, textos, masonry. Lightbox en fotos. Responsive. og:image desde el Hero.</div>
-        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-098</span></div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-117</span></div>
       </div>
 
       <!-- ── Backup & resiliencia 2026-06-05 ── -->
@@ -5583,8 +5583,8 @@ const CARDS = {
     ]
   },
 
-  'US-100': {
-    id: 'US-100', type: 'US', column: 'ideas', effort: 'M',
+  'US-119': {
+    id: 'US-119', type: 'US', column: 'ideas', effort: 'M',
     title: 'Exponer photoshelf a internet desde el NAS',
     story: 'Como fotógrafo que quiere compartir stories públicamente,\nquiero que las páginas /story/[slug] sean accesibles desde internet,\npara que cualquiera pueda ver mis stories sin estar en mi red local.',
     description: [
@@ -5626,8 +5626,8 @@ const CARDS = {
     ]
   },
 
-  'US-096': {
-    id: 'US-096', type: 'US', column: 'todo', effort: 'M',
+  'US-115': {
+    id: 'US-115', type: 'US', column: 'todo', effort: 'M',
     title: 'Editor de story — estructura y bloques de texto',
     story: 'Como fotógrafo que quiere contar una historia con mis fotos,\nquiero un editor donde pueda crear una story con bloques de texto reordenables,\npara estructurar el relato antes de añadir las imágenes.',
     description: [
@@ -5671,18 +5671,18 @@ const CARDS = {
       'Slug: generado desde el título, único en BD',
     ],
     outOfScope: [
-      'Bloques de imágenes (US-097)',
-      'Publicación y visibilidad (US-098)',
-      'Página pública (US-099)',
+      'Bloques de imágenes (US-116)',
+      'Publicación y visibilidad (US-117)',
+      'Página pública (US-118)',
     ]
   },
 
-  'US-097': {
-    id: 'US-097', type: 'US', column: 'todo', effort: 'M',
+  'US-116': {
+    id: 'US-116', type: 'US', column: 'todo', effort: 'M',
     title: 'Bloques de imágenes — Hero y galería masonry',
     story: 'Como fotógrafo editando una story,\nquiero añadir bloques de imágenes con fotos de mi biblioteca y un bloque Hero de apertura,\npara construir el relato visual con el layout que imagino.',
     description: [
-      'Añade dos tipos de bloque visuales al editor de US-096: Hero (foto grande de apertura) y Imágenes (galería masonry con selección múltiple).',
+      'Añade dos tipos de bloque visuales al editor de US-115: Hero (foto grande de apertura) y Imágenes (galería masonry con selección múltiple).',
       'Las fotos se seleccionan desde la biblioteca de photoshelf mediante un selector modal. Dentro del bloque se pueden reordenar.',
     ],
     criteria: [
@@ -5705,7 +5705,7 @@ const CARDS = {
         ]
       }
     ],
-    dependencies: ['US-096'],
+    dependencies: ['US-115'],
     components: [
       { path: 'src/app/stories/[id]/edit/StoryEditor.tsx', desc: 'Añadir tipos Hero e Imágenes', isNew: false },
       { path: 'src/components/PhotoPickerModal.tsx', desc: 'Selector modal de fotos de la biblioteca', isNew: true },
@@ -5716,13 +5716,13 @@ const CARDS = {
       'Masonry en el editor: CSS columns o librería ligera (react-masonry-css)',
     ],
     outOfScope: [
-      'Lightbox en el editor (solo en la página pública, US-099)',
+      'Lightbox en el editor (solo en la página pública, US-118)',
       'Subir fotos nuevas desde el editor (solo fotos ya en la biblioteca)',
     ]
   },
 
-  'US-098': {
-    id: 'US-098', type: 'US', column: 'todo', effort: 'S',
+  'US-117': {
+    id: 'US-117', type: 'US', column: 'todo', effort: 'S',
     title: 'Publicación y gestión de visibilidad',
     story: 'Como fotógrafo que ha terminado de editar una story,\nquiero controlar su visibilidad con un flujo en dos pasos,\npara revisar la página antes de abrirla al público.',
     description: [
@@ -5747,7 +5747,7 @@ const CARDS = {
         ]
       }
     ],
-    dependencies: ['US-097'],
+    dependencies: ['US-116'],
     components: [
       { path: 'src/app/api/stories/[id]/publish/route.ts', desc: 'POST cambiar visibilidad', isNew: true },
       { path: 'src/app/stories/[id]/edit/StoryEditor.tsx', desc: 'Añadir controles de visibilidad', isNew: false },
@@ -5766,8 +5766,8 @@ const CARDS = {
     ]
   },
 
-  'US-099': {
-    id: 'US-099', type: 'US', column: 'todo', effort: 'M',
+  'US-118': {
+    id: 'US-118', type: 'US', column: 'todo', effort: 'M',
     title: 'Página pública de la story',
     story: 'Como persona que recibe un enlace a una story,\nquiero ver una página limpia con las fotos y el texto del fotógrafo,\npara disfrutar el relato visual sin necesitar cuenta en photoshelf.',
     description: [
@@ -5795,7 +5795,7 @@ const CARDS = {
         ]
       }
     ],
-    dependencies: ['US-098'],
+    dependencies: ['US-117'],
     components: [
       { path: 'src/app/story/[slug]/page.tsx', desc: 'Página pública — Server Component sin auth', isNew: true },
       { path: 'src/app/story/[slug]/StoryPage.tsx', desc: 'Renderizado de bloques', isNew: true },
