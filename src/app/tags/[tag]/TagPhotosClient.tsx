@@ -120,8 +120,9 @@ export default function TagPhotosClient({ tagName, total, themes, totalPhotos, f
                     src={`/api/photos/${photo.id}/thumbnail?size=300`}
                     alt={photo.filename}
                     decoding="async"
-                    onLoad={e => (e.target as HTMLImageElement).classList.add('loaded')}
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    ref={el => { if (el?.complete) el.classList.add('loaded'); }}
+                    onLoad={e => (e.currentTarget as HTMLImageElement).classList.add('loaded')}
+                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                   />
                   {previewTags.length > 0 && (
                     <div className="photo-overlay">

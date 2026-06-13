@@ -26,8 +26,9 @@ function DeepPhotoGrid({ photos }: { photos: DeepResult[] }) {
           <img
             src={`/api/photos/${photo.id}/thumbnail?size=300`}
             alt={photo.filename}
-            onLoad={e => (e.target as HTMLImageElement).classList.add('loaded')}
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            ref={el => { if (el?.complete) el.classList.add('loaded'); }}
+            onLoad={e => (e.currentTarget as HTMLImageElement).classList.add('loaded')}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
           />
         </Link>
       ))}
