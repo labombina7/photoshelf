@@ -552,7 +552,7 @@
   <div class="logo">📷</div>
   <h1>photoshelf — Kanban</h1>
   <span class="kbd-hint">Haz clic en una tarjeta para ver el detalle</span>
-  <span class="subtitle">2026-06-11</span>
+  <span class="subtitle">2026-06-13</span>
 </header>
 
 <div class="board">
@@ -593,7 +593,7 @@
     <div class="col-header">
       <div class="col-dot" style="background:#3b82f6"></div>
       <h2>To Do</h2>
-      <span class="col-count">36</span>
+      <span class="col-count">42</span>
     </div>
     <div class="col-body">
 
@@ -839,14 +839,36 @@
         <div class="card-footer"><span>Tech Debt 🟡</span></div>
       </div>
 
-      <div class="card card-done" tabindex="0" data-id="US-092" onclick="openModal('US-092')">
+      <!-- ── Autenticación ── -->
+
+      <div class="card" tabindex="0" data-id="US-120" onclick="openModal('US-120')">
         <div class="card-top">
-          <span class="badge badge-us">US-092</span>
+          <span class="badge badge-us">US-120</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Autenticación con better-auth + Google OAuth</div>
+        <div class="card-summary">Reemplazar la password en .env por Google OAuth via better-auth. Sesiones en SQLite. Solo el email autorizado puede acceder — sin registro público. Preparado para múltiples providers futuros.</div>
+      </div>
+
+      <!-- ── EPIC-007: Configuración de IA ── -->
+
+      <div class="card" tabindex="0" data-id="EPIC-007" onclick="openModal('EPIC-007')">
+        <div class="card-top">
+          <span class="badge badge-epic">EPIC-007</span>
           <span class="effort effort-l">L</span>
         </div>
-        <div class="card-title">Compartir fotos mediante enlace de descarga</div>
-        <div class="card-summary">Seleccionar fotos o álbumes, generar un share token temporal de uso único, compartir la URL via Web Share API (WhatsApp, etc.). El destinatario descarga el ZIP directamente sin necesitar cuenta.</div>
-        <div class="card-footer"><span>Feature ✨</span><span class="card-done-label">✅ Desplegada</span></div>
+        <div class="card-title">Configuración de modelos de IA</div>
+        <div class="card-summary">La IA pasa de ser una dependencia implícita de Ollama a ser una feature opcional y configurable. El usuario elige proveedor (Ollama o Anthropic), lo valida y lo activa desde ajustes.</div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-121" onclick="openModal('US-121')">
+        <div class="card-top">
+          <span class="badge badge-us">US-121</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Tabla ai_config en BD y API de lectura/escritura</div>
+        <div class="card-summary">Prerequisito de EPIC-007. Tabla singleton ai_config en SQLite con migración automática. GET/PATCH /api/settings/ai. La api_key se enmascara en la respuesta.</div>
+        <div class="card-footer"><span>Épica:</span><span class="dep-badge">EPIC-007</span></div>
       </div>
 
       <div class="card" tabindex="0" data-id="US-021" onclick="openModal('US-021')">
@@ -854,8 +876,49 @@
           <span class="badge badge-us">US-021</span>
           <span class="effort effort-l">L</span>
         </div>
-        <div class="card-title">Proveedores LLM cloud</div>
-        <div class="card-summary">OpenAI Vision y Anthropic Claude como alternativas a Ollama. Activa IA sin Ollama local.</div>
+        <div class="card-title">Proveedores LLM cloud — interfaz AIProvider y adaptadores</div>
+        <div class="card-summary">Interfaz AIProvider con adaptadores Ollama (refactorizado) y Anthropic. Factory getAIProvider(). OpenAI también soportado.</div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-121</span><span>Épica:</span><span class="dep-badge">EPIC-007</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-122" onclick="openModal('US-122')">
+        <div class="card-top">
+          <span class="badge badge-us">US-122</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">UI de configuración de IA en settings</div>
+        <div class="card-summary">Reemplaza el placeholder "Próximamente" en /settings/ai con el formulario real: toggle global, selector Ollama/Anthropic, campos de configuración y botón de verificar conexión con badge de estado.</div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-121</span><span>Épica:</span><span class="dep-badge">EPIC-007</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-123" onclick="openModal('US-123')">
+        <div class="card-top">
+          <span class="badge badge-us">US-123</span>
+          <span class="effort effort-m">M</span>
+        </div>
+        <div class="card-title">Integrar getAIProvider() en todas las funciones de IA</div>
+        <div class="card-summary">Migrar classify, search, reviewPhoto, matchConcept y generateProject para usar getAIProvider() en lugar de llamar a Ollama directamente. Comportamiento sin cambios con Ollama activo.</div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-021</span><span>Épica:</span><span class="dep-badge">EPIC-007</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-124" onclick="openModal('US-124')">
+        <div class="card-top">
+          <span class="badge badge-us">US-124</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Búsqueda degradada sin IA</div>
+        <div class="card-summary">Con IA desactivada, la búsqueda cae a fulltext sobre tags/eventos/carpetas sin mostrar error. El badge IA desaparece. Hint sutil para queries semánticas: "activa la IA en ajustes".</div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-123</span><span>Épica:</span><span class="dep-badge">EPIC-007</span></div>
+      </div>
+
+      <div class="card" tabindex="0" data-id="US-125" onclick="openModal('US-125')">
+        <div class="card-top">
+          <span class="badge badge-us">US-125</span>
+          <span class="effort effort-s">S</span>
+        </div>
+        <div class="card-title">Aviso de coste en Tu Estilo con proveedor cloud</div>
+        <div class="card-summary">Modal de confirmación con estimación de coste antes de lanzar el análisis de estilo con Anthropic. Con Ollama el botón lanza directamente sin modal.</div>
+        <div class="card-footer"><span>Depende de:</span><span class="dep-badge">US-122</span><span class="dep-badge">US-123</span><span>Épica:</span><span class="dep-badge">EPIC-007</span></div>
       </div>
 
       <div class="card" tabindex="0" data-id="US-004" onclick="openModal('US-004')">
@@ -884,11 +947,20 @@
     <div class="col-header">
       <div class="col-dot" style="background:#22c55e"></div>
       <h2>Done</h2>
-      <span class="col-count">88</span>
+      <span class="col-count">89</span>
     </div>
     <div class="col-body">
 
-      
+      <div class="card card-done" tabindex="0" data-id="US-092" onclick="openModal('US-092')">
+        <div class="card-top">
+          <span class="badge badge-us">US-092</span>
+          <span class="badge badge-done">✓ done</span>
+          <span class="date-badge">2026-06-12</span>
+          <span class="effort effort-l">L</span>
+        </div>
+        <div class="card-title">Compartir fotos mediante enlace de descarga</div>
+        <div class="card-summary">Share token temporal, descarga ZIP via Web Share API sin necesitar cuenta.</div>
+      </div>
 
       <div class="card card-done" tabindex="0" data-id="US-096" onclick="openModal('US-096')">
         <div class="card-top">
@@ -3201,6 +3273,316 @@ const CARDS = {
       'Logs estructurados (JSON logging)',
       'Respuestas de error con códigos de error tipados (enum)',
     ]
+  },
+
+  'US-120': {
+    id: 'US-120',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Autenticación con better-auth + Google OAuth',
+    story: 'Como usuario de photoshelf,\nquiero autenticarme con mi cuenta de Google,\npara acceder a la app sin depender de una contraseña definida en el servidor ni del sistema de archivos del NAS.',
+    description: [
+      'El sistema de autenticación actual almacena una única contraseña en <code>.env</code> via iron-session. Se reemplaza por <strong>better-auth</strong> con el provider de Google OAuth. La sesión pasa a estar respaldada por SQLite.',
+      'Solo el email autorizado (<code>ALLOWED_EMAIL</code> en <code>.env</code>) puede acceder. No hay registro público. La arquitectura queda preparada para añadir más providers sin cambios estructurales.',
+    ],
+    criteria: [
+      {
+        group: 'Autenticación',
+        items: [
+          'El usuario puede iniciar sesión con su cuenta de Google desde la página de login',
+          'Tras el login, la sesión persiste en SQLite (tablas gestionadas por better-auth)',
+          'El logout invalida la sesión en BD y redirige al login',
+          'Las rutas protegidas siguen requiriendo sesión válida — comportamiento idéntico al actual',
+        ]
+      },
+      {
+        group: 'Seguridad',
+        items: [
+          'Solo el email de <code>ALLOWED_EMAIL</code> puede acceder — el resto recibe 403',
+          'No hay endpoint de registro público',
+          'Las credenciales de Google OAuth se leen de <code>.env</code>, nunca hardcodeadas',
+        ]
+      },
+      {
+        group: 'Limpieza',
+        items: [
+          '<code>iron-session</code> eliminado de dependencias',
+          '<code>AUTH_PASSWORD</code> eliminada del <code>.env</code>',
+          '<code>src/lib/session.ts</code> reemplazado por helpers de better-auth',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/auth.ts', desc: 'Configuración central de better-auth (Google provider, SQLite adapter)', isNew: true },
+      { path: 'src/lib/auth-client.ts', desc: 'Cliente de better-auth para componentes React', isNew: true },
+      { path: 'src/lib/session.ts', desc: 'Eliminado — reemplazado por helpers de auth.ts' },
+      { path: 'src/app/api/auth/[...all]/route.ts', desc: 'Handler catch-all de better-auth', isNew: true },
+      { path: 'src/app/login/page.tsx', desc: 'Botón «Continuar con Google» en lugar del formulario de password' },
+      { path: 'src/middleware.ts', desc: 'Actualizar comprobación de sesión al nuevo sistema' },
+    ],
+    tech: [
+      'better-auth crea automáticamente las tablas <code>user</code>, <code>session</code>, <code>account</code> en SQLite al arrancar — sin migración manual.',
+      '<code>BETTER_AUTH_SECRET</code> reemplaza a <code>SECRET_COOKIE_PASSWORD</code> de iron-session.',
+      'La restricción de email se implementa con el hook <code>user.create</code> de better-auth.',
+      'Prerequisito manual: crear proyecto en Google Cloud Console y obtener client ID + secret.',
+    ],
+    outOfScope: [
+      'Múltiples usuarios con roles/permisos distintos',
+      'Otros providers (GitHub, Apple, magic link…)',
+      'Admin panel de gestión de usuarios',
+    ]
+  },
+
+  'EPIC-007': {
+    id: 'EPIC-007',
+    type: 'EPIC',
+    column: 'todo',
+    effort: 'L',
+    title: 'Configuración de modelos de IA',
+    story: 'Como usuario de photoshelf,\nquiero que la IA sea una feature opcional y configurable,\npara usar la app sin Ollama y elegir entre un LLM local o un proveedor cloud desde los ajustes.',
+    description: [
+      'Actualmente photoshelf asume que Ollama está en <code>localhost</code>. Si no lo está, la clasificación, búsqueda semántica y Tu Estilo fallan sin buena explicación.',
+      'Con esta épica: la IA es <strong>opcional</strong> (photoshelf funciona sin ella), el usuario elige su proveedor y lo valida antes de activar, y la config se persiste en SQLite.',
+    ],
+    criteria: [
+      {
+        group: 'Historias hijas',
+        items: [
+          'US-121 — Tabla ai_config en BD + API',
+          'US-021 — Interfaz AIProvider + adaptadores Ollama y Anthropic',
+          'US-122 — UI: toggle + selector de proveedor + validación',
+          'US-123 — Integrar getAIProvider() en todas las funciones de IA',
+          'US-124 — Búsqueda degradada cuando la IA está desactivada',
+          'US-125 — Aviso de coste en Tu Estilo con proveedor cloud',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [],
+    tech: [],
+    outOfScope: [
+      'Fallback automático entre proveedores',
+      'Soporte de OpenAI, Google Gemini u otros (la arquitectura lo permite)',
+      'Tracking de costes por foto procesada',
+      'Configuración de IA por catálogo',
+    ]
+  },
+
+  'US-121': {
+    id: 'US-121',
+    type: 'US',
+    column: 'todo',
+    effort: 'S',
+    title: 'Tabla ai_config en BD y API de lectura/escritura',
+    story: 'Como administrador de photoshelf,\nquiero que la configuración de IA se persista en la base de datos,\npara que los ajustes sobrevivan a reinicios sin depender de variables de entorno.',
+    description: [
+      'Prerequisito de EPIC-007. Crea la tabla <code>ai_config</code> en SQLite (singleton, fila única) y los endpoints API para leer y actualizar la configuración.',
+    ],
+    criteria: [
+      {
+        group: 'Base de datos',
+        items: [
+          'Tabla <code>ai_config</code> con migración automática al arrancar (idempotente)',
+          'Campos: <code>enabled</code>, <code>provider</code>, <code>ollama_url</code>, <code>ollama_vision_model</code>, <code>ollama_text_model</code>, <code>api_key</code>, <code>cloud_model</code>, <code>updated_at</code>',
+          'Acceso solo via <code>src/lib/queries/ai-config.ts</code> — nunca SQL inline en routes',
+        ]
+      },
+      {
+        group: 'API',
+        items: [
+          '<code>GET /api/settings/ai</code> — devuelve config actual, <code>api_key</code> enmascarada (<code>sk-ant-••••••••</code>)',
+          '<code>PATCH /api/settings/ai</code> — actualiza campos; requiere sesión',
+        ]
+      }
+    ],
+    dependencies: [],
+    components: [
+      { path: 'src/lib/queries/ai-config.ts', desc: 'getAiConfig(), updateAiConfig()', isNew: true },
+      { path: 'src/app/api/settings/ai/route.ts', desc: 'GET y PATCH', isNew: true },
+      { path: 'src/lib/db.ts', desc: 'Migración de tabla ai_config' },
+    ],
+    tech: [
+      'La <code>api_key</code> se almacena en claro — instalación personal, riesgo aceptable y documentado.',
+      'Ver esquema SQL completo en EPIC-007.',
+    ],
+    outOfScope: ['Cifrado de la API key en BD', 'Configuración por catálogo']
+  },
+
+  'US-122': {
+    id: 'US-122',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'UI de configuración de IA en settings',
+    story: 'Como usuario de photoshelf,\nquiero configurar el proveedor de IA desde los ajustes,\npara elegir entre Ollama local o Anthropic, introducir mi API key y verificar la conexión sin tocar ficheros del servidor.',
+    description: [
+      'Implementa la sección <code>/settings/ai</code> que hoy muestra un placeholder "Próximamente". Sustituye <code>AiSettingsClient.tsx</code> con el formulario completo.',
+      'Flujo: toggle global → selector de proveedor → campos específicos → botón Verificar → badge de estado → Guardar.',
+    ],
+    criteria: [
+      {
+        group: 'Toggle y selector',
+        items: [
+          'Toggle "Activar funcionalidades de IA" persiste via PATCH /api/settings/ai',
+          'Selector de proveedor: Ollama / Anthropic',
+          'Al desactivar, el formulario se oculta sin borrar la config',
+        ]
+      },
+      {
+        group: 'Ollama',
+        items: [
+          'Campos: URL, modelo visión, modelo texto',
+          'Botón "Verificar conexión" → badge verde "Conectado · modelo X disponible" o error descriptivo',
+        ]
+      },
+      {
+        group: 'Anthropic',
+        items: [
+          'Campo API key con toggle mostrar/ocultar',
+          'Selector de modelo: claude-haiku-4-5 (recomendado) / claude-sonnet-4-6',
+          'Botón "Validar API key" → badge verde o error descriptivo',
+        ]
+      },
+      {
+        group: 'Guardar',
+        items: [
+          'Botón "Guardar" habilitado solo tras validar conexión/key',
+          'Feedback de guardado exitoso (toast o inline)',
+        ]
+      }
+    ],
+    dependencies: ['US-121'],
+    components: [
+      { path: 'src/app/settings/ai/AiSettingsClient.tsx', desc: 'Reemplazar placeholder con formulario completo' },
+      { path: 'src/app/api/settings/ai/test/route.ts', desc: 'POST — verifica conexión del proveedor activo', isNew: true },
+    ],
+    tech: [
+      'Endpoint de test: <code>GET {url}/api/tags</code> para Ollama; llamada mínima a messages.create para Anthropic.',
+      'Devuelve <code>{ ok: boolean, error?: string, model?: string }</code>.',
+    ],
+    outOfScope: ['Otros providers (OpenAI, Gemini…)', 'Historial de configuraciones']
+  },
+
+  'US-123': {
+    id: 'US-123',
+    type: 'US',
+    column: 'todo',
+    effort: 'M',
+    title: 'Integrar getAIProvider() en todas las funciones de IA',
+    story: 'Como usuario de photoshelf,\nquiero que clasificación, búsqueda semántica, valoración y análisis de estilo usen el proveedor configurado en ajustes,\npara que al cambiar de Ollama a Anthropic todas las funciones respeten esa elección.',
+    description: [
+      'Conecta la factory <code>getAIProvider()</code> con todas las funciones consumidoras. Hoy todas llaman directamente a Ollama via fetch. Después de esta US, cambiar el proveedor en <code>/settings/ai</code> afecta a toda la IA.',
+      'También implementa el comportamiento cuando la IA está desactivada (<code>enabled = false</code>): las funciones devuelven early y la UI reacciona apropiadamente.',
+    ],
+    criteria: [
+      {
+        group: 'Funciones migradas',
+        items: [
+          '<code>classifyPhoto()</code>, <code>parseSearchQuery()</code>, <code>reviewPhoto()</code>, <code>photoMatchesConcept()</code>, <code>generateProject()</code>, <code>analyzeStyleSample()</code> usan <code>getAIProvider()</code>',
+          'Con <code>enabled = false</code>, <code>getAIProvider()</code> devuelve null y las funciones retornan early',
+          'UI: botón clasificar deshabilitado con tooltip, sección valoración oculta, Tu Estilo oculto',
+        ]
+      },
+      {
+        group: 'Sin regresión',
+        items: [
+          'Con Ollama activo y configurado, el comportamiento es idéntico al actual',
+          'Los tests existentes de clasificación siguen en verde',
+        ]
+      }
+    ],
+    dependencies: ['US-021', 'US-121'],
+    components: [
+      { path: 'src/lib/ai/index.ts', desc: 'getAIProvider(): AIProvider | null — lee ai_config de BD', isNew: true },
+      { path: 'src/lib/ollama/classify.ts', desc: 'Migrar a getAIProvider()' },
+      { path: 'src/lib/ollama/search.ts', desc: 'Migrar a getAIProvider()' },
+      { path: 'src/lib/style-analysis/', desc: 'Migrar llamadas a getAIProvider()' },
+    ],
+    tech: [
+      '<code>getAIProvider()</code> lee <code>ai_config</code> de BD en cada llamada — no requiere reiniciar el servidor al cambiar config.',
+      'El adaptador Ollama se inicializa con la URL y modelos de BD, no desde .env.',
+    ],
+    outOfScope: ['Fallback automático si el proveedor activo falla', 'Cache de resultados entre proveedores']
+  },
+
+  'US-124': {
+    id: 'US-124',
+    type: 'US',
+    column: 'todo',
+    effort: 'S',
+    title: 'Búsqueda degradada sin IA',
+    story: 'Como usuario de photoshelf sin IA configurada,\nquiero que la búsqueda siga funcionando con mis tags, eventos y metadatos,\npara que la app sea completamente usable aunque no tenga Ollama ni proveedor cloud.',
+    description: [
+      'Con IA desactivada, el clasificador de intención no activa el path semántico. Las queries que habrían ido a Ollama se redirigen a búsqueda fulltext (tags + eventos + carpeta). No se muestra error — la búsqueda funciona con menor capacidad.',
+    ],
+    criteria: [
+      {
+        group: 'Comportamiento degradado',
+        items: [
+          'Con IA desactivada, el clasificador no activa intent semántico',
+          'Queries semánticas van a búsqueda fulltext sobre tags/eventos/carpeta',
+          'El badge "✦ IA" no aparece con IA desactivada',
+          'No se muestra ningún error — la búsqueda funciona',
+          'Hint sutil para queries semánticas: "Búsqueda por texto — activa la IA en ajustes"',
+        ]
+      },
+      {
+        group: 'Sin regresión',
+        items: ['Con IA activada, el comportamiento de búsqueda semántica no cambia']
+      }
+    ],
+    dependencies: ['US-123'],
+    components: [
+      { path: 'src/lib/search/classifier.ts', desc: 'No activar intent semántico si enabled = false' },
+      { path: 'src/app/api/search/route.ts', desc: 'Devolver hint de degradación cuando aplica' },
+      { path: 'src/app/search/SearchClient.tsx', desc: 'Mostrar hint de modo degradado' },
+    ],
+    tech: [],
+    outOfScope: ['Búsqueda por embeddings/vectores sin IA', 'Persistencia del hint de degradación']
+  },
+
+  'US-125': {
+    id: 'US-125',
+    type: 'US',
+    column: 'todo',
+    effort: 'S',
+    title: 'Aviso de coste en Tu Estilo con proveedor cloud',
+    story: 'Como usuario de photoshelf con Anthropic configurado,\nquiero ver cuánto podría costarme lanzar el análisis de Tu Estilo antes de ejecutarlo,\npara decidir conscientemente si quiero proceder.',
+    description: [
+      'Con Ollama el botón lanza directamente. Con un proveedor cloud, aparece un modal de confirmación con estimación de coste antes de proceder.',
+    ],
+    criteria: [
+      {
+        group: 'Modal de confirmación (solo con proveedor cloud)',
+        items: [
+          'Al pulsar "Analizar estilo" con proveedor cloud, aparece modal antes de proceder',
+          'El modal muestra: nº de fotos a analizar, coste estimado en USD, enlace a precios del proveedor',
+          'Botones: "Cancelar" y "Proceder de todas formas"',
+          'Con Ollama: el modal NO aparece, el botón lanza directamente',
+        ]
+      },
+      {
+        group: 'Estimación de coste',
+        items: [
+          'Coste calculado como: nFotos × costePorImagenInput + costePorTokensOutput',
+          'Precios definidos como constantes actualizables en <code>src/lib/config.ts</code>',
+          'Estimación mostrada como rango ("~$0.05 – $0.15") para ser conservadora',
+        ]
+      }
+    ],
+    dependencies: ['US-122', 'US-123'],
+    components: [
+      { path: 'src/app/insights/TuEstiloClient.tsx', desc: 'Interceptar botón con modal de confirmación' },
+      { path: 'src/components/CostWarningModal.tsx', desc: 'Modal reutilizable de aviso de coste', isNew: true },
+      { path: 'src/lib/config.ts', desc: 'Constantes de precio por modelo (ANTHROPIC_PRICE_PER_IMAGE)' },
+    ],
+    tech: [
+      'claude-haiku-4-5: ~$0.80/MTok input vision. Una imagen a 1024px ≈ 1.500 tokens → ~$0.0012/imagen.',
+      'Los precios deben tener un comment con la fecha de última revisión.',
+    ],
+    outOfScope: ['Tracking real de costes consumidos', 'Aviso en clasificación de fotos']
   },
 
   'US-021': {
@@ -6116,7 +6498,7 @@ const CARDS = {
     tags: ['Feature ✨', 'Analytics'],
   },
   'US-092': {
-    id: 'US-092', type: 'US', column: 'todo', effort: 'L',
+    id: 'US-092', type: 'US', column: 'done', effort: 'L',
     title: 'Compartir fotos mediante enlace de descarga',
     story: 'Como fotógrafo que usa photoshelf desde móvil,\nquiero seleccionar fotos o álbumes completos y generar un enlace de descarga directo,\npara compartirlos con familia o clientes (por WhatsApp u otras apps) sin que el destinatario necesite tener cuenta en photoshelf.',
     description: [
