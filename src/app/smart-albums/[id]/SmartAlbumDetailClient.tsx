@@ -183,7 +183,6 @@ export default function SmartAlbumDetailClient({
                   <img
                     src={`/api/photos/${photo.id}/thumbnail?size=${THUMB_SIZE}`}
                     alt={photo.filename}
-                    loading="lazy"
                     onLoad={e => (e.target as HTMLImageElement).classList.add('loaded')}
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}

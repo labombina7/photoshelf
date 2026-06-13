@@ -119,7 +119,6 @@ export default function TagPhotosClient({ tagName, total, themes, totalPhotos, f
                   <img
                     src={`/api/photos/${photo.id}/thumbnail?size=300`}
                     alt={photo.filename}
-                    loading="lazy"
                     decoding="async"
                     onLoad={e => (e.target as HTMLImageElement).classList.add('loaded')}
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}

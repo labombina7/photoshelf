@@ -2446,7 +2446,6 @@ body { padding-top: var(--header-h); }
 
 /* ── Search results page ── */
 .search-results-container {
-  padding: 28px 32px;
   max-width: 1200px;
 }
 

@@ -50,7 +50,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           <span className="topbar-sub">{q}</span>
         </div>
 
-        <div className="search-results-container">
+        <div className="content">
           <SearchClient result={result} />
         </div>
       </main>
