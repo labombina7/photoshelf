@@ -1787,6 +1787,15 @@ body { padding-top: var(--header-h); }
   z-index: 30; backdrop-filter: blur(1px);
 }
 
+/* ── Content toolbar (title + actions row inside content area) ── */
+.content-toolbar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+}
+.content-toolbar-left {
+  display: flex; align-items: baseline; gap: 8px; flex: 1;
+}
+
 /* ── Load more button ── */
 /* ── Tag cloud ── */
 .tag-cloud {
@@ -1856,6 +1865,8 @@ body { padding-top: var(--header-h); }
   .search-box { width: 36px; overflow: hidden; transition: width 0.2s ease; border-radius: 20px; }
   .search-box:focus-within { width: 160px; }
   .search-box input { min-width: 0; }
+  /* In content toolbar the search box is always visible */
+  .content-toolbar .search-box { width: 160px; overflow: visible; }
 
   /* ── Content padding ── */
   .content { padding: 12px; }

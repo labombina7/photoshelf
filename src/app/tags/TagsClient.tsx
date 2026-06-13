@@ -47,21 +47,9 @@ export default function TagsClient({ tags, themes, totalPhotos, favoriteCount, u
         <IconMenu size={20} />
       </button>
       <span className="header-slot-title">Tags</span>
-      <span className="header-slot-sub">{tags.length} tags</span>
-      <div className="topbar-spacer" />
-      <div className="search-box">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
-        </svg>
-        <input
-          placeholder="Filtrar tags…"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-      </div>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [tags.length, search]));
+  ), []));
 
   return (
     <div className="app-shell">
@@ -78,6 +66,22 @@ export default function TagsClient({ tags, themes, totalPhotos, favoriteCount, u
 
       <div className="main">
         <div className="content">
+          <div className="content-toolbar">
+            <div className="content-toolbar-left">
+              <span className="header-slot-title">Tags</span>
+              <span className="header-slot-sub">{tags.length} tags</span>
+            </div>
+            <div className="search-box">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
+              </svg>
+              <input
+                placeholder="Filtrar tags…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
           {filtered.length === 0 ? (
             tags.length === 0 ? (
               <EmptyState
