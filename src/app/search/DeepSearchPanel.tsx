@@ -23,7 +23,13 @@ function DeepPhotoGrid({ photos }: { photos: DeepResult[] }) {
           onClick={() => track('search_result_clicked', { photo_id: photo.id })}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={`/api/photos/${photo.id}/thumbnail?size=300`} alt={photo.filename} loading="lazy" />
+          <img
+            src={`/api/photos/${photo.id}/thumbnail?size=300`}
+            alt={photo.filename}
+            loading="lazy"
+            onLoad={e => (e.target as HTMLImageElement).classList.add('loaded')}
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
         </Link>
       ))}
     </div>
