@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu } from '@/components/Icons';
-import { useHeaderSlot } from '@/components/HeaderSlot';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 
@@ -65,7 +65,7 @@ export default function GeneralClient({
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useHeaderSlot(useMemo(() => (
+  useHeaderSlotLeft(useMemo(() => (
     <div className="header-slot-library">
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />

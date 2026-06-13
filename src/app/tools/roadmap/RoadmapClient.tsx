@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
-import { useHeaderSlot } from '@/components/HeaderSlot';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import { IconMenu, IconCalendar } from '@/components/Icons';
 import type { ThemeWithCount } from '@/lib/queries/themes';
 import type { CatalogRow } from '@/lib/queries/catalogs';
@@ -21,7 +21,7 @@ export default function RoadmapClient({
 }: Props) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  useHeaderSlot(useMemo(() => (
+  useHeaderSlotLeft(useMemo(() => (
     <div className="header-slot-library">
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />

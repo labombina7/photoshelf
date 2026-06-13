@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { IconMenu, IconTrash, IconEdit } from '@/components/Icons';
 import { useModal } from '@/components/ModalProvider';
-import { useHeaderSlot } from '@/components/HeaderSlot';
+import { useHeaderSlotLeft } from '@/components/HeaderSlot';
 import type { Theme } from '@/lib/types';
 import type { CatalogRow } from '@/lib/queries/catalogs';
 
@@ -226,7 +226,7 @@ export default function CatalogsClient({
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useHeaderSlot(useMemo(() => (
+  useHeaderSlotLeft(useMemo(() => (
     <div className="header-slot-library">
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
