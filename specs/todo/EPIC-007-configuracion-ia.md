@@ -74,12 +74,12 @@ Con esta épica:
 
 | ID | Título | Esfuerzo | Prerequisitos |
 |----|--------|----------|--------------|
-| US-F | Modelo de datos: tabla `ai_config` en BD + API de lectura/escritura | S | — |
-| US-G | Capa de abstracción de proveedor: interfaz `AIProvider` + adaptadores Ollama y Anthropic | M | US-F |
-| US-H | UI: toggle de IA + selector de proveedor + validación | M | US-F, EPIC-006 |
-| US-I | Integrar `getAIProvider()` en todas las funciones que usan Ollama directamente | M | US-G |
-| US-J | Búsqueda semántica degrada a búsqueda por texto/tags cuando la IA está desactivada | S | US-I |
-| US-K | Aviso de coste estimado en Tu Estilo cuando el proveedor es cloud | S | US-H, US-I |
+| [US-121](US-121-ai-config-bd-api.md) | Modelo de datos: tabla `ai_config` en BD + API de lectura/escritura | S | — |
+| [US-021](US-021-proveedores-llm-cloud.md) | Capa de abstracción de proveedor: interfaz `AIProvider` + adaptadores Ollama y Anthropic | M | US-121 |
+| [US-122](US-122-ui-configuracion-proveedor-ia.md) | UI: toggle de IA + selector de proveedor + validación | M | US-121, EPIC-006 ✅ |
+| [US-123](US-123-integrar-get-ai-provider.md) | Integrar `getAIProvider()` en todas las funciones que usan Ollama directamente | M | US-021 |
+| [US-124](US-124-busqueda-degradada-sin-ia.md) | Búsqueda semántica degrada a búsqueda por texto/tags cuando la IA está desactivada | S | US-123 |
+| [US-125](US-125-aviso-coste-cloud-tu-estilo.md) | Aviso de coste estimado en Tu Estilo cuando el proveedor es cloud | S | US-122, US-123 |
 
 ---
 
