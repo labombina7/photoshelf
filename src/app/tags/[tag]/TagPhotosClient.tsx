@@ -76,12 +76,9 @@ export default function TagPhotosClient({ tagName, total, themes, totalPhotos, f
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú">
         <IconMenu size={20} />
       </button>
-      <button className="back-btn" onClick={() => router.push('/tags')} title="Volver a tags">←</button>
-      <span className="header-slot-title">{tagName}</span>
-      <span className="header-slot-sub">{total.toLocaleString('es')} fotos</span>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [tagName, total]));
+  ), []));
 
   return (
     <div className="app-shell">
@@ -98,6 +95,13 @@ export default function TagPhotosClient({ tagName, total, themes, totalPhotos, f
 
       <div className="main">
         <div className="content">
+          <div className="content-toolbar">
+            <div className="content-toolbar-left">
+              <button className="back-btn" onClick={() => router.push('/tags')} title="Volver a tags">←</button>
+              <span className="header-slot-title">{tagName}</span>
+              <span className="header-slot-sub">{total.toLocaleString('es')} fotos</span>
+            </div>
+          </div>
           {photos.length === 0 && loading && (
             <div style={{ padding: 24, color: 'var(--text-tertiary)', fontSize: 13 }}>Cargando fotos…</div>
           )}

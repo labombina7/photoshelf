@@ -46,7 +46,6 @@ export default function TagsClient({ tags, themes, totalPhotos, favoriteCount, u
       <button className="hamburger header-slot-hamburger" onClick={() => setMobileSidebarOpen(true)} title="Menú" aria-label="Abrir menú de navegación">
         <IconMenu size={20} />
       </button>
-      <span className="header-slot-title">Tags</span>
     </div>
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ), []));
