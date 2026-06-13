@@ -58,14 +58,20 @@ export async function GET(req: NextRequest) {
 | Error externo (Ollama) | 500 | `{ error: err.message }` |
 | Error inesperado interno | 500 | `{ error: 'Internal server error' }` |
 
-### MIME types
+### Constantes de configuración
 
-No definir MIME types localmente en los route handlers. Importar siempre desde `src/lib/config.ts`:
+No definir constantes localmente en route handlers ni en otros módulos. Importar siempre desde `src/lib/config.ts`, que es la fuente única de verdad para:
+
+- MIME types: `MIME_TYPES`, `FALLBACK_MIME`
+- Paths: `PHOTOS_PATH`, `BACKUP_PATH`
+- Ollama: `OLLAMA_URL`, `OLLAMA_TIMEOUT_TEXT_MS`, `OLLAMA_TIMEOUT_VISION_MS`, `OLLAMA_IMAGE_SIZE`
+- Límites: `PHOTOS_MAX_LIMIT`, `CLASSIFY_BATCH_SIZE`, `BACKUP_MAX_KEEP`, `THUMBNAIL_SIZES`
+- Sharing: `SHARE_TOKEN_TTL_HOURS`, `SHARE_MAX_PHOTOS`, `SHARE_RETRY_WINDOW_MINUTES`
+- Auth: `AUTH_RATE_LIMIT_ATTEMPTS`, `AUTH_RATE_LIMIT_WINDOW_MS`
+- Watcher: `WATCHER_DEBOUNCE_MS`, `WATCHER_POLL_MS`
 
 ```typescript
-import { MIME_TYPES, FALLBACK_MIME } from '@/lib/config';
-
-const mime = MIME_TYPES[ext] ?? FALLBACK_MIME; // FALLBACK_MIME = 'application/octet-stream'
+import { MIME_TYPES, FALLBACK_MIME, PHOTOS_MAX_LIMIT } from '@/lib/config';
 ```
 
 ### Tipos TypeScript
@@ -94,17 +100,23 @@ const mime = MIME_TYPES[ext] ?? FALLBACK_MIME; // FALLBACK_MIME = 'application/o
 ```
 src/
   app/
-    api/           # Route handlers — todos con try/catch
-    (vistas)/      # Pages — Server Components, sin SQL inline
-  components/      # Componentes React reutilizables
+    api/              # Route handlers — todos con try/catch
+    (vistas)/         # Pages — Server Components, sin SQL inline
+  components/         # Componentes React reutilizables
   lib/
-    config.ts      # PHOTOS_PATH, MIME_TYPES, FALLBACK_MIME
-    db.ts          # getDb() — solo para usar en queries/
-    db-helpers.ts  # upsertAiTags, buildPhotoFilter
-    queries/       # Capa de repositorio — única fuente de SQL
-    ollama.ts      # Integración con Ollama
-    session.ts     # Gestión de sesión
-    types.ts       # Tipos compartidos
+    config.ts         # Fuente única de todas las constantes y variables de entorno
+    db.ts             # getDb() — solo para usar en queries/
+    db-helpers.ts     # upsertAiTags, buildPhotoFilter
+    queries/          # Capa de repositorio — única fuente de SQL
+    ollama/           # Módulos de integración con Ollama (client, classify, search…)
+    search/           # Lógica de búsqueda unificada
+    style-analysis/   # Motor de análisis de estilo fotográfico (EPIC-004)
+    worker.ts         # Worker de jobs en background (clasificación, backup, proyectos)
+    session.ts        # Gestión de sesión
+    types.ts          # Tipos compartidos
+    analytics.ts      # Amplitude (cliente)
+    amplitude.ts      # Amplitude (server-side sync)
+  instrumentation.ts  # Arranque del worker con el servidor (Next.js instrumentation hook)
 ```
 
 ---

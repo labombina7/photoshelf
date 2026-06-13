@@ -42,8 +42,15 @@ photoshelf espera que las fotos estén organizadas en el siguiente formato de ca
 | Estadísticas | Dashboard con métricas de la colección |
 | Tags | Sistema de etiquetas manual y automático (IA) |
 | Temáticas | Colecciones personalizadas con color |
+| Álbumes inteligentes | Álbumes dinámicos basados en reglas (tag, cámara, fecha, etc.) |
 | Portfolio | Proyectos fotográficos curados con IA |
-| Búsqueda | Barra de búsqueda en el header con clasificación de intención y búsqueda visual IA |
+| Búsqueda | Barra de búsqueda con clasificación de intención y búsqueda visual IA |
+| Análisis de estilo | Perfil fotográfico generado por IA: historia de largo plazo y evolución reciente |
+| Memorias | "On this day" — fotos de hoy en años anteriores |
+| Salud de biblioteca | Dashboard de integridad: archivos rotos, thumbnails huérfanos, duplicados |
+| Compartir | Genera un enlace temporal para compartir fotos sin requerir login |
+| Backup | Copia de seguridad automática de la base de datos con historial |
+| Catálogos | Gestión de múltiples bibliotecas con cambio de catálogo activo |
 | Vigilancia | Escaneo automático al detectar carpetas nuevas |
 
 ## Acceso

@@ -98,11 +98,17 @@ Centraliza las operaciones de escritura reutilizadas en múltiples rutas:
 - **`scanner.ts`**: recorre el filesystem del catálogo activo, extrae EXIF y sincroniza la BD
 - **`thumbnail.ts`**: genera y cachea miniaturas WebP con sharp
 - **`folderWatcher.ts`**: monitorización de carpetas, debounce, auto-scan y auto-classify
-- **`ollama.ts`**: cliente para classify, review, search y generación de proyectos
+- **`worker.ts`**: worker de jobs en background (cola SQLite, priorización, reintentos)
+- **`backup.ts`**: backup automático de la BD y gestión del historial de copias
+- **`integrityScanner.ts`**: escaneo de integridad (archivos rotos, thumbnails huérfanos)
+- **`ollama/`**: módulos de integración con Ollama (client, classify, search, review, projects)
+- **`style-analysis/`**: motor de análisis de estilo fotográfico (EPIC-004)
 - **`session.ts`**: autenticación con iron-session
 - **`catalog-context.ts`**: resuelve el catálogo activo por request (desde cookie de sesión)
 - **`search/classifier.ts`**: clasifica la intención de una consulta sin llamada al servidor
 - **`search/execute.ts`**: ejecuta la búsqueda según intención (tag, evento, texto, IA)
+- **`analytics.ts`**: cliente Amplitude para eventos de uso (no-op si no hay API key)
+- **`shareUtils.ts`**: generación y validación de tokens de enlace compartido
 
 ### 5. Datos
 
@@ -262,4 +268,7 @@ El cliente hace polling cada 2 segundos a `/api/scan/status` y `/api/watcher/sta
 
 ## Startup
 
-`src/instrumentation.ts` (hook de Next.js) inicia el `folderWatcher` al arrancar el servidor Node.js, antes de servir cualquier petición.
+`src/instrumentation.ts` (hook de Next.js) se ejecuta al arrancar el servidor Node.js, antes de servir cualquier petición. Inicia:
+
+1. **`folderWatcher`** — monitorización de cambios en disco
+2. **`ensureWorkerRunning()`** — arranca el worker de jobs en background (clasificación, backup automático, generación de proyectos). También reanuda cualquier job `in_progress` que quedó interrumpido por un reinicio del contenedor.

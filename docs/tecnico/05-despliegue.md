@@ -49,6 +49,12 @@ services:
     volumes:
       - /ruta/local/a/fotos:/photos:ro
       - photoshelf_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
 volumes:
   photoshelf_data:
@@ -140,7 +146,8 @@ Variables de entorno para desarrollo local: crear un `.env.local` en la raíz de
 ## CI/CD
 
 El repositorio usa GitHub Actions para:
-1. Build de la imagen Docker en cada push a `main`
-2. Push automático a `ghcr.io/labombina7/photoshelf:latest`
+1. **Tests** (`npm test`, lint y type-check) — la imagen Docker solo se publica si este job pasa
+2. **Build** de la imagen Docker en cada push a `main`
+3. **Push** automático a `ghcr.io/labombina7/photoshelf:latest`
 
-Las features se desarrollan en ramas y se mergean a `main` vía Pull Request tras pasar el build de CI.
+Las features se desarrollan en ramas y se mergean a `main` vía Pull Request tras pasar el build de CI. `npm test` debe estar en verde antes de mergear cualquier PR.

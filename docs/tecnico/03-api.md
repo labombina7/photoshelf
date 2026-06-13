@@ -31,6 +31,7 @@ Todas las rutas de fotos operan sobre el catálogo activo (resuelto desde la ses
 | `GET` | `/api/photos/[id]/thumbnail` | Miniatura WebP (`?size=N`, default 200) |
 | `GET` | `/api/photos/[id]/original` | Archivo original (stream) |
 | `GET` | `/api/photos/groups` | Grupos de eventos (`year`, `event`, `count`, `cover_id`) |
+| `GET` | `/api/photos/ids` | Lista de IDs de fotos (para selección masiva) |
 | `GET` | `/api/photos/map` | Fotos con GPS para el mapa (`?year=N` filtro opcional) |
 
 ## Tags
@@ -113,6 +114,93 @@ El parámetro `mode` controla el tipo de búsqueda ejecutada:
 | `GET` | `/api/ai/review/[photoId]` | Obtener review de IA (composición, luz, puntuación) |
 | `POST` | `/api/ai/search` | Búsqueda visual profunda `{ query, mode: 'quick'\|'deep', year? }` |
 | `GET` | `/api/ollama/status` | Estado de conexión con Ollama |
+
+## Análisis de estilo (Insights)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/insights` | Narrativa del perfil fotográfico actual |
+| `GET` | `/api/insights/years` | Lista de años con síntesis disponible |
+| `GET` | `/api/insights/evolution` | Datos de evolución (últimos 24 meses) |
+| `POST` | `/api/insights/evolution/analyze` | Forzar re-análisis de la evolución reciente |
+
+## Álbumes inteligentes
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/smart-albums` | Lista de álbumes inteligentes del catálogo activo |
+| `POST` | `/api/smart-albums` | Crear álbum `{ name, rules[] }` |
+| `GET` | `/api/smart-albums/[id]` | Detalle de un álbum |
+| `PATCH` | `/api/smart-albums/[id]` | Actualizar nombre o reglas |
+| `DELETE` | `/api/smart-albums/[id]` | Eliminar álbum |
+| `GET` | `/api/smart-albums/[id]/photos` | Fotos del álbum (evaluación de reglas en tiempo real) |
+| `POST` | `/api/smart-albums/preview` | Vista previa de resultados con reglas sin guardar |
+
+## Memorias
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/memories` | Fotos de "on this day" en años anteriores |
+| `GET` | `/api/memories/narrative` | Narrativa generada por IA para las memorias del día |
+
+## Compartir
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/share` | Crear enlace compartido `{ photoIds[], expiresInHours? }` |
+| `GET` | `/api/share/[token]` | Acceder a fotos compartidas sin login (token público) |
+
+## Backup
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/backup` | Crear backup manual de la base de datos |
+| `GET` | `/api/backup` | Lista de backups disponibles |
+| `GET` | `/api/backup/status` | Estado del último backup y próxima ejecución |
+| `GET` | `/api/backup/config` | Configuración del backup automático |
+
+## Integridad
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/integrity/scan` | Iniciar escaneo de integridad de la biblioteca |
+| `GET` | `/api/integrity/status` | Estado del escaneo en curso |
+| `GET` | `/api/integrity/report` | Informe de problemas detectados |
+| `POST` | `/api/integrity/resolve` | Resolver un problema de integridad `{ action, photoId }` |
+
+## Salud
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/health` | Estado del sistema (BD, Ollama, disco) |
+| `GET` | `/api/health/history` | Historial de métricas de salud |
+
+## Jobs (worker en background)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/jobs` | Lista de jobs activos y recientes |
+| `GET` | `/api/jobs/[id]` | Detalle y progreso de un job específico |
+
+## Estadísticas técnicas
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/stats/technical` | Métricas técnicas: tamaño de BD, número de thumbnails, etc. |
+
+## Catálogos — organización IA
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `GET` | `/api/catalogs/[id]/analyze-structure` | Análisis de la estructura de carpetas del catálogo |
+| `GET` | `/api/catalogs/[id]/suggest-albums` | Sugerencias de álbumes inteligentes basadas en el catálogo |
+| `POST` | `/api/catalogs/[id]/auto-organize` | Aplicar una organización automática sugerida |
+
+## Amplitude (analytics)
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| `POST` | `/api/amplitude/sync` | Sincronizar metadatos EXIF del catálogo a Amplitude |
 
 ---
 

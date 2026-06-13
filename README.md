@@ -64,6 +64,9 @@ docker volume rm photoshelf_photoshelf_data
 | `SESSION_SECRET` | Secreto de sesión (≥32 chars) | `openssl rand -hex 32` |
 | `OLLAMA_URL` | URL de la instancia Ollama | `http://192.168.1.135:11434` |
 | `DATA_PATH` | Ruta host para DB y caché | `/volume1/homes/javi/photoshelf-data` |
+| `OLLAMA_TEXT_MODEL` | Modelo de texto para síntesis de insights | `llama3.2:3b` (opcional) |
+| `NEXT_PUBLIC_AMPLITUDE_API_KEY` | API key de Amplitude para analytics (cliente) | — (opcional) |
+| `AMPLITUDE_API_KEY` | API key de Amplitude para sync server-side | — (opcional) |
 
 ### Concurrencia Ollama (clasificación paralela)
 
